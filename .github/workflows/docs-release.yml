@@ -1,0 +1,76 @@
+name: Deploy Release Docs
+
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: 'Git ref to deploy (commit hash, tag, or branch)'
+        required: true
+        type: string
+      environment:
+        description: 'Target environment for documentation'
+        required: true
+        type: choice
+        options:
+          - test
+          - production
+
+permissions:
+  contents: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Validate ref exists
+        run: |
+          REF="${{ github.event.inputs.ref }}"
+          if ! git rev-parse "$REF" >/dev/null 2>&1; then
+            echo "::error::Ref '$REF' not found"
+            exit 1
+          fi
+          echo "Deploying '${{ github.event.inputs.environment }}' from: $REF ($(git rev-parse $REF))"
+
+      - name: Configure Git credentials
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - run: echo "cache_id=$(date --utc '+%V')" >> $GITHUB_ENV
+
+      - uses: actions/cache@v4
+        with:
+          key: mkdocs-material-${{ env.cache_id }}
+          path: .cache
+          restore-keys: |
+            mkdocs-material-
+
+      - run: pip install mkdocs-material mike
+
+      - name: Checkout ref
+        run: git checkout ${{ github.event.inputs.ref }}
+
+      - name: Deploy to ${{ github.event.inputs.environment }}
+        run: |
+          mike deploy --push --update-aliases ${{ github.event.inputs.environment }}
+          if [[ "${{ github.event.inputs.environment }}" == "production" ]]; then
+            mike set-default --push production
+          fi
+
+      - name: Tag commit as ${{ github.event.inputs.environment }}
+        run: |
+          git tag -f ${{ github.event.inputs.environment }} ${{ github.event.inputs.ref }}
+          git push -f origin ${{ github.event.inputs.environment }}
+
+      - name: List deployed versions
+        run: |
+          git fetch origin gh-pages
+          mike list
