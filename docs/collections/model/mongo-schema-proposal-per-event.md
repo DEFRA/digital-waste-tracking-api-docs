@@ -215,6 +215,7 @@ and one or more `TRANSIT` events, each with a distinct `sequence`.
   ],
   carrier: Object,
   receivedFromCarrier: Object, // required when collectionType is TRANSIT (D-029)
+  brokerOrDealer: Object,      // optional (D-008)
 
   validation: {
     warnings: [Object]

@@ -612,6 +612,12 @@ components:
             <li>Must not be provided when `collectionType` is `STATIC` (mirrors the `registrationNumber`/`reasonForNoRegistrationNumber` mutual-exclusivity pattern).</li>
             <li>Captured for the record only — it is not cross-checked against the preceding event's `carrier`; any discrepancy is left for regulators to detect (D-029).</li>
             </ul>
+        brokerOrDealer:
+          allOf:
+            - $ref: '#/components/schemas/brokerOrDealer'
+          description: |
+            Broker or dealer details, when relevant to confirm or re-confirm at
+            collection. Optional; same shared shape as Creation and Receipt (D-008).
         collection:
           $ref: '#/components/schemas/collectionSite'
         isDeleted:

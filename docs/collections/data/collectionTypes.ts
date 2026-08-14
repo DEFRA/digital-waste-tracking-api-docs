@@ -19,12 +19,14 @@ export type {
   OtherReferenceForMovement,
   BusinessAddress,
   CarrierDetails,
+  BrokerDetails,
   ValidationResult
 } from './sharedTypes.js'
 
 import type {
   OtherReferenceForMovement,
   CarrierDetails,
+  BrokerDetails,
   ValidationResult
 } from './sharedTypes.js'
 
@@ -87,6 +89,9 @@ export type RecordCollection = {
    * preceding event's carrier — captured for the record only.
    */
   receivedFromCarrier?: CarrierDetails
+
+  /** Optional broker/dealer details, matching the Creation and Receipt shape (D-008). */
+  brokerOrDealer?: BrokerDetails
 
   /** Collection site details. */
   collection: Collection

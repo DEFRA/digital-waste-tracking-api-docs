@@ -254,7 +254,8 @@ Appended by `POST /movements/{movementId}/collection`.
     yourUniqueReference:     String,  // optional
     otherReferencesForMovement: [{ label: String, reference: String }],
     carrier:             Object,
-    receivedFromCarrier: Object       // required when collectionType is 'TRANSIT'
+    receivedFromCarrier: Object,      // required when collectionType is 'TRANSIT'
+    brokerOrDealer:      Object       // optional (D-008)
   }
 }
 ```
@@ -275,7 +276,8 @@ aggregate applies this during rehydration.
     // amended fields when isDeleted is false:
     collectionType:          String,   // optional
     actualDateTimeCollected: Date,     // optional
-    carrier:                 Object    // optional
+    carrier:                 Object,   // optional
+    brokerOrDealer:          Object    // optional (D-008)
   }
 }
 ```
