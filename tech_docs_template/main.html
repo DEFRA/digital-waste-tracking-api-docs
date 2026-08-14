@@ -16,9 +16,12 @@
    out of the main menu/tabs Software Providers see), so mkdocs never
    builds them a primary sidebar. This gives them their own hand-built
    one, scoped to collections/* pages only — the public pages' sidebar
-   (driven by the real nav config) is untouched. #}
+   (driven by the real nav config) is untouched. The API docs live at
+   the root (docs/api/) rather than under docs/collections/, but they're
+   still part of the Collections workstream, so api/* pages get the
+   same hand-built sidebar. #}
 {% block site_nav %}
-  {% if page and page.url and page.url.startswith("collections/") %}
+  {% if page and page.url and (page.url.startswith("collections/") or page.url.startswith("api/")) %}
     {% set collections_nav = [
       ("collections/", "Overview", none),
       ("collections/decisions/", "Decisions", none),
@@ -26,8 +29,8 @@
       ("collections/plan/", "Plan", none),
       ("collections/registration/", "Registration", none),
       ("collections/docs/", "Notes", none),
-      ("collections/api/", "Overview", "API"),
-      ("collections/api/swagger/", "Swagger UI", "API"),
+      ("api/", "Overview", "API"),
+      ("api/swagger/", "Swagger UI", "API"),
       ("collections/model/", "Overview", "Data model"),
       ("collections/model/phase1-waste-inputs/", "Phase 1: current waste-inputs model", "Data model"),
       ("collections/model/mongo-schema-proposal/", "Mongo schema proposal (Option A)", "Data model"),

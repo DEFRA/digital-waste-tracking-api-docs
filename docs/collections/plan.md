@@ -16,7 +16,7 @@ data.
 
 For background on what is being designed, start with the
 [collections overview](index.md). For the API surface and the decisions behind
-it, see the [API workstream](api/README.md) and the
+it, see the [API workstream](../api/README.md) and the
 [decisions register](decisions.md).
 
 ---
@@ -122,7 +122,7 @@ business events:
 ### Team C — `waste-movement-external-api` + `waste-movement-backend`
 
 1. Implement `POST /movements` — validates payload per the
-   [API spec](api/README.md) (carrier required per
+   [API spec](../api/README.md) (carrier required per
    [D-008](decisions.md#d-008); broker optional; waste items with EWC
    codes; disposal codes optional per [D-031](decisions.md#d-031)); mints a
    Movement ID via `waste-tracking-id-backend`; persists via

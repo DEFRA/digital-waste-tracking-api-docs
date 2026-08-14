@@ -10,7 +10,7 @@ robots: noindex, nofollow
 # API
 
 The OpenAPI specification for the extended Digital Waste Tracking API.
-It will eventually feed the [data model](../model/README.md).
+It will eventually feed the [data model](../collections/model/README.md).
 
 ## What is here
 
@@ -38,7 +38,7 @@ in the API contract: Movement ID and Transfer ID. The Movement is the
 unit of waste being moved (1:1 with its Collection event); the Transfer
 is the drop-off event at a receiver site (1:1 with its Receipt, but can
 aggregate multiple Movements). See the
-[resource hierarchy section in the glossary](../glossary.md#resource-hierarchy)
+[resource hierarchy section in the glossary](../collections/glossary.md#resource-hierarchy)
 for more.
 
 Phase 1 endpoints are kept exactly as published. The single change in
@@ -48,18 +48,18 @@ has recorded one. The Phase 1 receipt endpoints (`POST /movements/receive`,
 `PUT /movements/{id}/receive`) are marked `deprecated: true` in the
 spec — new integrations should use the Transfer-scoped endpoints
 above. A removal timeline is yet to be agreed (see the
-[decisions register](../decisions.md)).
+[decisions register](../collections/decisions.md)).
 
 ## Status
 
 The spec is in alpha and being iterated alongside data-model work. Several schemas (waste classification, hazardous codes, POPs codes,
 party details) are deliberately permissive placeholders pending domain
 detail from the BA. A number of design points are still open and tracked
-in the [decisions register](../decisions.md).
+in the [decisions register](../collections/decisions.md).
 
 The vocabulary used across the spec — Movement ID, Transfer ID, the
 per-event IDs, what counts as a broker — is documented in the
-[glossary](../glossary.md).
+[glossary](../collections/glossary.md).
 
 ## Previewing the spec
 
