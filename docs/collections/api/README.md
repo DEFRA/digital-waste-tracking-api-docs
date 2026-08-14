@@ -70,5 +70,5 @@ The YAML can be previewed in any standard OpenAPI tool. Two options:
 - **VS Code** — the OpenAPI (Swagger) Editor extension by 42Crunch adds
   a preview pane that updates live as the YAML is edited.
 
-When the spec stabilises, an inline rendering on the docs site will
-follow.
+An inline viewer is also available on this site:
+[open the Swagger UI viewer](swagger/).
