@@ -19,7 +19,7 @@ This is a working skeleton for a guidance document to help software providers in
 - [5. Authentication and security](#5-authentication-and-security)
 - [6. API reference](#6-api-reference)
   - [6.1 Create movement (BWM)](#61-create-movement-bwm)
-  - [6.2 Record collection (WWC / WWT)](#62-record-collection-wwc--wwt)
+  - [6.2 Record collection (WWC)](#62-record-collection-wwc)
   - [6.3 Record drop-off (WWR)](#63-record-drop-off-wwr)
   - [6.4 Record receipt (WWR / AWR)](#64-record-receipt-wwr--awr)
   - [6.5 General conventions](#65-general-conventions)
@@ -57,13 +57,12 @@ This is a working skeleton for a guidance document to help software providers in
 - **Waste Transfer** – the record created at drop-off, identified by a **Waste Transfer ID**; a single Transfer can bundle one or more Movement IDs together
 
 ### 2.3 Lifecycle stages
-The API is organised around five stages, matching the Mural board:
+The API is organised around four stages:
 
 | Stage | Code | What happens |
 |---|---|---|
 | Before the waste moves | BWM | Movement is created; estimated details are declared |
 | When the waste is collected | WWC | Carrier/driver records each collection against a Movement ID |
-| When the waste is in transit | WWT | Waste is in transit between collection and drop-off |
 | When the waste is being dropped off / received | WWR | Driver records drop-off (generates a Transfer ID); receiver inspects and records receipt |
 | After the waste has been received | AWR | Any deferred or retrospective records are completed; producer can check the fate of their waste |
 
@@ -80,7 +79,7 @@ Most software providers will fall into one or more of these personas, which map 
 | Carrier/driver system | Field/mobile logistics app | Record collection, record drop-off |
 | Receiver system | Site/gate management system | Record receipt |
 
-A single product may cover more than one persona – for example, a waste management company that both carries and receives.
+A single product may cover more than one persona e.g. a waste management company that both carries and receives.
 
 ## 4. Becoming an integrated software provider
 
@@ -92,13 +91,13 @@ A single product may cover more than one persona – for example, a waste manage
 ## 5. Authentication and security
 
 - Identity model: organisation-level authentication with user/role delegation – *TBC exact mechanism*
-- Credential type: likely OAuth2/OIDC or API key-based, consistent with other Defra digital services – *TBC*
+- Credential type: likely OAuth2/OIDC or API key-based, consistent with other Defra digital services? – *TBC*
 - Required scopes per persona – *TBC*
 - Transport security (TLS) and data protection requirements
 
 ## 6. API reference
 
-Structured by lifecycle stage rather than by resource, so it reads in the same order a movement actually happens.
+Structured by lifecycle stage rather than by resource, so it reads in the same order a movement actually happens?
 
 ### 6.1 Create movement (BWM)
 
@@ -108,7 +107,7 @@ Structured by lifecycle stage rather than by resource, so it reads in the same o
 | **Input** | Waste classification, hazardous details, POPs details, producer details, estimated collection details, estimated receiver details, estimated carrier details, broker details |
 | **Output** | Validation result, Waste Movement ID |
 
-### 6.2 Record collection (WWC / WWT)
+### 6.2 Record collection (WWC)
 
 | | |
 |---|---|
@@ -191,13 +190,13 @@ Many Movement IDs can be linked to a single Transfer ID at drop-off; a Transfer 
 | DWT | Digital Waste Tracking – the digital service this API supports |
 | EWC | European Waste Catalogue – the code list used to classify waste type |
 | HWCN | Hazardous Waste Consignment Note – the paper record DWT replaces for hazardous waste |
-| POPs | Persistent organic pollutants – chemicals subject to additional handling and reporting rules |
+| POPs | Persistent organic pollutants – chemicals subject to additional handling and reporting rules e.g. old sofas with chemical flame retardants, legacy electrical equipment, historical pesticide products |
 | Waste Movement ID | Identifier issued when a movement is created, before waste moves |
 | Waste Transfer ID | Identifier issued at drop-off; can link multiple Movement IDs together |
 | WTN | Waste Transfer Note – the paper record DWT replaces for non-hazardous waste |
 | WWC | When the waste is collected – lifecycle stage |
 | WWR | When the waste is being dropped off / received – lifecycle stage |
-| WWT | When the waste is in transit – lifecycle stage |
+
 
 ## Appendix B: endpoint quick reference
 
@@ -206,8 +205,8 @@ Many Movement IDs can be linked to a single Transfer ID at drop-off; a Transfer 
 | BWM | POST | `/movements/create` |
 | BWM | PUT | `/movements/{id}/create` |
 | BWM | DELETE | `/movements/create` |
-| WWC/WWT | POST/PUT/GET | `/movements/static-collection` |
-| WWC/WWT | POST/PUT/GET | `/movements/transit-collection` |
+| WWC | POST/PUT/GET | `/movements/static-collection` |
+| WWC | POST/PUT/GET | `/movements/transit-collection` |
 | WWR | POST | `/movements/drop-off` |
 | WWR | POST | `/movements/{id}/drop-off` |
 | WWR/AWR | POST | `/movements/receive` |
