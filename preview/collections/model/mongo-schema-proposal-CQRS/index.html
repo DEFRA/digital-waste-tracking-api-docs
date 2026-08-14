@@ -1,0 +1,1617 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+        <link rel="canonical" href="https://defra.github.io/digital-waste-tracking-api-docs/preview/collections/model/mongo-schema-proposal-CQRS/">
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../../favicons/moj.ico">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>mongo schema proposal CQRS - Digital Waste Tracking - API Docs</title>
+      
+    
+    
+  
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+  
+  
+    
+      
+      
+    
+  
+  
+  <style>:root{--md-admonition-icon--quote:url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2016%2016%22%3E%3Cpath%20d%3D%22M1.75%202.5h10.5a.75.75%200%200%201%200%201.5H1.75a.75.75%200%200%201%200-1.5m4%205h8.5a.75.75%200%200%201%200%201.5h-8.5a.75.75%200%200%201%200-1.5m0%205h8.5a.75.75%200%200%201%200%201.5h-8.5a.75.75%200%200%201%200-1.5M2.5%207.75v6a.75.75%200%200%201-1.5%200v-6a.75.75%200%200%201%201.5%200%22/%3E%3C/svg%3E');}</style>
+
+
+
+  
+  
+    
+      
+      
+        
+      
+      
+    
+  
+    
+      
+      
+        
+      
+      
+    
+  
+    
+      
+      
+        
+      
+      
+    
+  
+    
+      
+      
+        
+      
+      
+    
+  
+    
+      
+      
+        
+      
+      
+    
+  
+    
+      
+      
+        
+      
+      
+    
+  
+  
+  <style>:root{.md-tag.md-tag--draft{--md-tag-icon:url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cpath%20d%3D%22M5.5%202C3.6%202%202%203.6%202%205.5v13C2%2020.4%203.6%2022%205.5%2022H16l6-6V5.5C22%203.6%2020.4%202%2018.5%202zm.3%202h12.5c1%200%201.8.8%201.8%201.8V15h-1.5c-1.9%200-3.5%201.6-3.5%203.5V20H5.8c-1%200-1.8-.8-1.8-1.8V5.8C4%204.8%204.8%204%205.8%204%22/%3E%3C/svg%3E');}.md-tag.md-tag--accepted{--md-tag-icon:url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cpath%20d%3D%22M18.5%202h-13C3.6%202%202%203.6%202%205.5v13C2%2020.4%203.6%2022%205.5%2022H16l6-6V5.5C22%203.6%2020.4%202%2018.5%202M20%2015h-1.5c-1.9%200-3.5%201.6-3.5%203.5V20H5.8c-1%200-1.8-.8-1.8-1.8V5.8C4%204.8%204.8%204%205.8%204h12.5c1%200%201.8.8%201.8%201.8V15m-4.9-6.8%201.5%201.5-6%206-3.5-3.5%201.5-1.5%202%202z%22/%3E%3C/svg%3E');}.md-tag.md-tag--proposed{--md-tag-icon:url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cpath%20d%3D%22M13%2011h3v2h-3v3h-2v-3H8v-2h3V8h2zm9-5.5V16l-6%206H5.5C3.6%2022%202%2020.4%202%2018.5v-13C2%203.6%203.6%202%205.5%202h13C20.4%202%2022%203.6%2022%205.5m-2%20.3c0-1-.8-1.8-1.8-1.8H5.8C4.8%204%204%204.8%204%205.8v12.5c0%201%20.8%201.8%201.8%201.8H15v-1.5c0-1.9%201.6-3.5%203.5-3.5H20z%22/%3E%3C/svg%3E');}.md-tag.md-tag--deprecated{--md-tag-icon:url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cpath%20d%3D%22M8%2011h8v2H8zm14-5.5V16l-6%206H5.5C3.6%2022%202%2020.4%202%2018.5v-13C2%203.6%203.6%202%205.5%202h13C20.4%202%2022%203.6%2022%205.5m-2%20.3c0-1-.8-1.8-1.8-1.8H5.8C4.8%204%204%204.8%204%205.8v12.5c0%201%20.8%201.8%201.8%201.8H15v-1.5c0-1.9%201.6-3.5%203.5-3.5H20z%22/%3E%3C/svg%3E');}.md-tag.md-tag--superseded{--md-tag-icon:url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cpath%20d%3D%22M11%2015h2v2h-2zm0-2h2V7h-2zm11-7.5V16l-6%206H5.5C3.6%2022%202%2020.4%202%2018.5v-13C2%203.6%203.6%202%205.5%202h13C20.4%202%2022%203.6%2022%205.5m-2%20.3c0-1-.8-1.8-1.8-1.8H5.8C4.8%204%204%204.8%204%205.8v12.5c0%201%20.8%201.8%201.8%201.8H15v-1.5c0-1.9%201.6-3.5%203.5-3.5H20z%22/%3E%3C/svg%3E');}.md-tag.md-tag--rejected{--md-tag-icon:url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cpath%20d%3D%22M16%209.4%2013.4%2012l2.6%202.6-1.4%201.4-2.6-2.6L9.4%2016%208%2014.6l2.6-2.6L8%209.4%209.4%208l2.6%202.6L14.6%208zm6-3.9V16l-6%206H5.5C3.6%2022%202%2020.4%202%2018.5v-13C2%203.6%203.6%202%205.5%202h13C20.4%202%2022%203.6%2022%205.5m-2%20.3c0-1-.8-1.8-1.8-1.8H5.8C4.8%204%204%204.8%204%205.8v12.5c0%201%20.8%201.8%201.8%201.8H15v-1.5c0-1.9%201.6-3.5%203.5-3.5H20z%22/%3E%3C/svg%3E');}}</style>
+
+    
+<link rel="stylesheet" href="../../../assets/stylesheets/extra.css" />
+
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../../stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  
+  
+    <meta name="robots" content="noindex, nofollow">
+  
+
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#mongo-schema-proposal-cqrs-event-sourcing" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <div data-md-color-scheme="default" data-md-component="outdated" hidden>
+        
+      </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../.." title="Digital Waste Tracking - API Docs" class="md-header__button md-logo" aria-label="Digital Waste Tracking - API Docs" data-md-component="logo">
+      
+  <img src="../../../logos/moj.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Digital Waste Tracking - API Docs
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              mongo schema proposal CQRS
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Share" aria-label="Share" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/DEFRA/digital-waste-tracking-api-docs" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+    
+      
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../.." class="md-tabs__link">
+          
+  
+  
+    
+  
+  Digital Waste Tracking
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+    
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+  
+    
+    <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation">
+      <div class="md-sidebar__scrollwrap">
+        <div class="md-sidebar__inner">
+          <nav class="md-nav md-nav--primary" aria-label="Collections navigation" data-md-level="0">
+            <label class="md-nav__title" for="__drawer">
+              <span class="md-nav__icon md-icon"></span>
+              Collections
+            </label>
+            <ul class="md-nav__list" data-md-scrollfix>
+              
+              
+                
+                <li class="md-nav__item">
+                  <a href="../../" class="md-nav__link">Overview</a>
+                </li>
+              
+                
+                <li class="md-nav__item">
+                  <a href="../../decisions/" class="md-nav__link">Decisions</a>
+                </li>
+              
+                
+                <li class="md-nav__item">
+                  <a href="../../glossary/" class="md-nav__link">Glossary</a>
+                </li>
+              
+                
+                <li class="md-nav__item">
+                  <a href="../../plan/" class="md-nav__link">Plan</a>
+                </li>
+              
+                
+                <li class="md-nav__item">
+                  <a href="../../registration/" class="md-nav__link">Registration</a>
+                </li>
+              
+                
+                <li class="md-nav__item">
+                  <a href="../../docs/" class="md-nav__link">Notes</a>
+                </li>
+              
+                
+                  
+                    <li class="md-nav__item"><span class="md-nav__link md-nav__link--group-title">API</span></li>
+                  
+                  
+                
+                <li class="md-nav__item md-nav__item--nested">
+                  <a href="../../api/" class="md-nav__link">Overview</a>
+                </li>
+              
+                
+                  
+                    <li class="md-nav__item"><span class="md-nav__link md-nav__link--group-title">Data model</span></li>
+                  
+                  
+                
+                <li class="md-nav__item md-nav__item--nested">
+                  <a href="../" class="md-nav__link">Overview</a>
+                </li>
+              
+                
+                <li class="md-nav__item md-nav__item--nested">
+                  <a href="../phase1-waste-inputs/" class="md-nav__link">Phase 1: current waste-inputs model</a>
+                </li>
+              
+                
+                <li class="md-nav__item md-nav__item--nested">
+                  <a href="../mongo-schema-proposal/" class="md-nav__link">Mongo schema proposal (Option A)</a>
+                </li>
+              
+                
+                <li class="md-nav__item md-nav__item--nested">
+                  <a href="../mongo-schema-proposal-per-event/" class="md-nav__link">Mongo schema proposal — per event (Option B)</a>
+                </li>
+              
+                
+                <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+                  <a href="./" class="md-nav__link md-nav__link--active">Mongo schema proposal — CQRS (Option C)</a>
+                </li>
+              
+                
+                  
+                    <li class="md-nav__item"><span class="md-nav__link md-nav__link--group-title">Phase 1 reference</span></li>
+                  
+                  
+                
+                <li class="md-nav__item md-nav__item--nested">
+                  <a href="../../phase1/receipt-api-implemented-data-model/" class="md-nav__link">Receipt API implemented data model</a>
+                </li>
+              
+                
+                <li class="md-nav__item md-nav__item--nested">
+                  <a href="../../phase1/receipt-data-definitions/" class="md-nav__link">Receipt data definitions</a>
+                </li>
+              
+                
+                  
+                    <li class="md-nav__item"><span class="md-nav__link md-nav__link--group-title">Phase 2</span></li>
+                  
+                  
+                
+                <li class="md-nav__item md-nav__item--nested">
+                  <a href="../../phase2/assessment-feedback/" class="md-nav__link">GDS Alpha assessment feedback</a>
+                </li>
+              
+            </ul>
+          </nav>
+        </div>
+      </div>
+    </div>
+  
+  
+
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+    
+      
+    
+    <a href="https://github.com/DEFRA/digital-waste-tracking-api-docs/raw/main/docs/collections/model/mongo-schema-proposal-CQRS.md" title="View source of this page" class="md-content__button md-icon">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17 18c.56 0 1 .44 1 1s-.44 1-1 1-1-.44-1-1 .44-1 1-1m0-3c-2.73 0-5.06 1.66-6 4 .94 2.34 3.27 4 6 4s5.06-1.66 6-4c-.94-2.34-3.27-4-6-4m0 6.5a2.5 2.5 0 0 1-2.5-2.5 2.5 2.5 0 0 1 2.5-2.5 2.5 2.5 0 0 1 2.5 2.5 2.5 2.5 0 0 1-2.5 2.5M9.27 20H6V4h7v5h5v4.07c.7.08 1.36.25 2 .49V8l-6-6H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h4.5a8.2 8.2 0 0 1-1.23-2"/></svg>
+    </a>
+  
+
+
+<div class="admonition warning">
+<p class="admonition-title">Internal documentation</p>
+<p>This page is internal design/planning material for the delivery team, not published guidance for Software Providers integrating with the Digital Waste Tracking API. Content here may be incomplete, in-progress, or superseded.</p>
+</div>
+<h1 id="mongo-schema-proposal-cqrs-event-sourcing">Mongo schema proposal — CQRS / Event Sourcing</h1>
+<p>This document describes an alternative Phase 2 storage model based on
+Command Query Responsibility Segregation (CQRS) with event sourcing.
+It was evaluated during Phase 2 design and <strong>not adopted</strong>. It is
+retained here as a record of what was considered and why it was set
+aside, alongside the aggregate-based proposal in
+<a href="../mongo-schema-proposal/">mongo-schema-proposal.md</a>.</p>
+<p>Before reading this document, it is worth understanding how the aggregate
+model differs from the Phase 1 model — see
+<a href="../phase1-waste-inputs/">Phase 1 movement store</a> for that baseline.</p>
+<h2 id="decision-context">Decision context</h2>
+<p>The aggregate model was decided in
+<a href="../../decisions/#d-037">D-037</a>. This proposal represents a third model
+that was not compared in D-037; it addresses all five of D-037's reasons
+against per-event-type collections but does not yet supersede it. If the
+team adopts this approach after a spike, D-037 and
+<a href="../../decisions/#d-034">D-034</a> (the history/revision pattern) will need
+to be superseded by a new decision.</p>
+<p>A full evaluation of this approach against every decision in the register
+and against the live Phase 1 implementation is available as an
+<a href="https://claude.ai/code/artifact/f52d0e9b-f90d-44d0-b956-0dafbe9a5fb0">interactive evaluation report</a>.</p>
+<p>An annotated code sketch of the four Phase 2 write paths is available as
+an <a href="https://claude.ai/code/artifact/65564a71-55db-4329-9910-b7b5e07b3133">interactive architecture sketch</a>.</p>
+<hr />
+<h2 id="why-this-approach-was-not-adopted">Why this approach was not adopted</h2>
+<p>The evaluation (linked above) confirmed the following, which together
+make CQRS the wrong fit at Phase 2 scope.</p>
+<h3 id="the-read-model-is-not-richer-than-the-write-model">The read model is not richer than the write model</h3>
+<p>CQRS earns its overhead when the read side needs a materially different
+shape from what the write side naturally produces — different projections
+for different consumers, denormalised aggregations that would be
+expensive on the write model, or query patterns the aggregate document
+cannot serve efficiently.</p>
+<p>That is not the case here. The <code>movements</code> and <code>transfers</code> projection
+documents produced by this model are structurally identical to the
+aggregate documents in <code>mongo-schema-proposal.md</code>. The projections are
+not richer; they are a slightly cut-down version of the aggregates with
+some fields shifted into the event store. No concrete Phase 2 <code>GET</code>
+was identified that the aggregate documents could not serve.</p>
+<p>The reporting and regulatory read models that would genuinely benefit
+from a shaped read side are already handled by the CDP Audit pipeline.
+CQRS would add complexity without adding capability for the reads this
+service owns.</p>
+<h3 id="cqrs-fixes-a-problem-it-creates">CQRS fixes a problem it creates</h3>
+<p>The projection rebuild capability — often cited as the main CQRS
+advantage — only has value because CQRS introduced a projection that
+can fall behind the event store. The aggregate model has no separate
+projection and therefore no sync risk. The <code>movements-history</code> and
+<code>transfers-history</code> snapshot collections in the aggregate model already
+provide the amendment audit trail at a fraction of the complexity.</p>
+<h3 id="governance-overhead">Governance overhead</h3>
+<p>An append-only store of personal data (carrier names, addresses,
+registration numbers) creates tension with the GDPR right to erasure.
+The standard mitigation — crypto-shredding (encrypt events per person,
+delete the key on erasure) — adds meaningful implementation complexity.
+Adopting this model would require a fresh DPIA and a more complex ADR
+for Defra Assurance, neither of which is warranted by a capability gain
+that does not yet exist.</p>
+<h3 id="build-overhead">Build overhead</h3>
+<p>Aggregate root rehydration on every write request, command handlers,
+projection handlers, and upcasters (required once event shapes are in
+production and cannot be changed) represent a significant build and
+maintenance overhead. The PUT command handlers (<code>CollectionAmended</code>,
+<code>MovementDeleted</code>, <code>ReceiptAmended</code>, <code>TransferDeleted</code>) were not
+designed in this proposal, and their interaction with the D-009
+lifecycle rules and D-036 authorisation checks would add further
+complexity.</p>
+<h3 id="what-would-change-the-calculus">What would change the calculus</h3>
+<p>If a concrete Phase 2 read requirement emerges that the aggregate
+documents cannot serve, or if a replay need arises that the snapshot
+history cannot answer, CQRS should be revisited. The technical sketch
+and evaluation linked above remain the starting point for that
+conversation.</p>
+<hr />
+<h2 id="core-concept">Core concept</h2>
+<p>In the aggregate model, the <code>movements</code> and <code>transfers</code> documents are the
+source of truth — they are written directly and mutated in place.</p>
+<p>In the CQRS / event-sourcing model:</p>
+<ul>
+<li>An immutable <strong>event store</strong> (<code>events</code> collection) is the only source
+  of truth. Nothing is ever updated or deleted from it.</li>
+<li><strong>Projections</strong> (<code>movements</code> and <code>transfers</code> collections) are derived
+  from the event store and rebuilt at any time by replaying events. They
+  are read models — their document shapes are identical to the ones in
+  <code>mongo-schema-proposal.md</code>, but they are derived rather than primary.</li>
+<li><strong>Aggregate roots</strong> are in-memory objects rehydrated by replaying a
+  stream for a single request. They enforce domain invariants before each
+  write. They are never persisted.</li>
+</ul>
+<p>The write path for every Phase 2 endpoint follows the same pattern:</p>
+<ol>
+<li>Load the event stream for the aggregate (where the aggregate already
+   exists).</li>
+<li>Rehydrate the aggregate root from the stream and enforce invariants.</li>
+<li>Build the event.</li>
+<li>Append the event to the stream (concurrency guard via unique index).</li>
+<li>Update the projection synchronously in the same request.</li>
+</ol>
+<hr />
+<h2 id="collections">Collections</h2>
+<h3 id="overview">Overview</h3>
+<table>
+<thead>
+<tr>
+<th>Collection</th>
+<th>Role</th>
+<th>Source of truth</th>
+<th>Phase</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>events</code></td>
+<td>Event store</td>
+<td>Yes</td>
+<td>2</td>
+</tr>
+<tr>
+<td><code>movements</code></td>
+<td>Projection</td>
+<td>No — derived</td>
+<td>2</td>
+</tr>
+<tr>
+<td><code>transfers</code></td>
+<td>Projection</td>
+<td>No — derived</td>
+<td>2</td>
+</tr>
+<tr>
+<td><code>invalid-submissions</code></td>
+<td>Operational</td>
+<td>Partial</td>
+<td>1 + 2</td>
+</tr>
+<tr>
+<td><code>waste-inputs</code></td>
+<td>Aggregate (Phase 1)</td>
+<td>Yes</td>
+<td>1 only</td>
+</tr>
+<tr>
+<td><code>waste-inputs-history</code></td>
+<td>Snapshots (Phase 1)</td>
+<td>Yes</td>
+<td>1 only</td>
+</tr>
+</tbody>
+</table>
+<p>The Phase 1 collections (<code>waste-inputs</code>, <code>waste-inputs-history</code>) are
+unchanged. Phase 2 does not read from or write to them. The two models
+coexist in the same MongoDB database without collision.</p>
+<hr />
+<h2 id="the-event-store-events">The event store (<code>events</code>)</h2>
+<h3 id="purpose">Purpose</h3>
+<p>Append-only log of all business facts across both Movement and Transfer
+aggregates. The only write operation is <code>insertOne</code>. Documents are never
+updated or deleted.</p>
+<h3 id="stream-naming">Stream naming</h3>
+<p>Every event belongs to a named stream. The stream ID encodes both the
+aggregate type and its public identifier:</p>
+<table>
+<thead>
+<tr>
+<th>Aggregate</th>
+<th>Stream ID format</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Movement</td>
+<td><code>movement-{movementId}</code></td>
+<td><code>movement-25ABC123</code></td>
+</tr>
+<tr>
+<td>Transfer</td>
+<td><code>transfer-{transferId}</code></td>
+<td><code>transfer-25XYZ456</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="document-shape">Document shape</h3>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nx">_id</span><span class="o">:</span><span class="w">            </span><span class="nx">ObjectId</span><span class="p">,</span><span class="w">          </span><span class="c1">// MongoDB-assigned; not exposed in the public API</span>
+<span class="w">  </span><span class="nx">streamId</span><span class="o">:</span><span class="w">       </span><span class="nb">String</span><span class="p">,</span><span class="w">            </span><span class="c1">// e.g. &quot;movement-25ABC123&quot;</span>
+<span class="w">  </span><span class="nx">sequenceNumber</span><span class="o">:</span><span class="w"> </span><span class="nb">Number</span><span class="p">,</span><span class="w">            </span><span class="c1">// 1-based, monotonically increasing per stream</span>
+<span class="w">  </span><span class="nx">eventType</span><span class="o">:</span><span class="w">      </span><span class="nb">String</span><span class="p">,</span><span class="w">            </span><span class="c1">// see event types below</span>
+<span class="w">  </span><span class="nx">payload</span><span class="o">:</span><span class="w">        </span><span class="nb">Object</span><span class="p">,</span><span class="w">            </span><span class="c1">// event-specific business data</span>
+<span class="w">  </span><span class="nx">metadata</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">submittingOrganisation</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nx">defraCustomerOrganisationId</span><span class="o">:</span><span class="w"> </span><span class="nb">String</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nx">apiCode</span><span class="o">:</span><span class="w">  </span><span class="nb">String</span><span class="p">,</span><span class="w">                </span><span class="c1">// optional: which API key was used</span>
+<span class="w">    </span><span class="nx">traceId</span><span class="o">:</span><span class="w">  </span><span class="nb">String</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nx">recordedAt</span><span class="o">:</span><span class="w">     </span><span class="nb">Date</span><span class="w">               </span><span class="c1">// server timestamp at append time</span>
+<span class="p">}</span>
+</code></pre></div>
+<h3 id="concurrency-guard">Concurrency guard</h3>
+<p>A unique compound index on <code>{ streamId: 1, sequenceNumber: 1 }</code> is the
+only concurrency control. Two writers trying to append at position <code>n+1</code>
+on the same stream produce a duplicate-key error (MongoDB code <code>11000</code>),
+which the application layer surfaces as a <code>ConcurrencyError</code>. No
+application-level <code>revision</code> field or session lock is needed.</p>
+<p>This replaces the <code>{ _id, revision }</code> filter used in the Phase 1
+<code>updateWasteInput</code> service.</p>
+<hr />
+<h2 id="event-types">Event types</h2>
+<p>All events for Phase 2 are listed below. <code>MovementCreated</code> and
+<code>TransferCreated</code> each start a new stream (<code>sequenceNumber: 1</code>). All
+others append to an existing stream.</p>
+<h3 id="movement-stream-movement-movementid">Movement stream (<code>movement-{movementId}</code>)</h3>
+<h4 id="movementcreated"><code>MovementCreated</code></h4>
+<p>Appended by <code>POST /movements</code>. Starts the movement stream.</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nx">eventType</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;MovementCreated&#39;</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">payload</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">movementId</span><span class="o">:</span><span class="w">                 </span><span class="nb">String</span><span class="p">,</span><span class="w">  </span><span class="c1">// sqid — e.g. &quot;25ABC123&quot;</span>
+<span class="w">    </span><span class="nx">estimatedDateTimeCollected</span><span class="o">:</span><span class="w"> </span><span class="nb">Date</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">hazardousWasteConsignmentCode</span><span class="o">:</span><span class="w"> </span><span class="nb">String</span><span class="p">,</span><span class="w">   </span><span class="c1">// optional</span>
+<span class="w">    </span><span class="nx">yourUniqueReference</span><span class="o">:</span><span class="w">        </span><span class="nb">String</span><span class="p">,</span><span class="w">      </span><span class="c1">// optional</span>
+<span class="w">    </span><span class="nx">otherReferencesForMovement</span><span class="o">:</span><span class="w"> </span><span class="p">[{</span><span class="w"> </span><span class="nx">label</span><span class="o">:</span><span class="w"> </span><span class="nb">String</span><span class="p">,</span><span class="w"> </span><span class="nx">reference</span><span class="o">:</span><span class="w"> </span><span class="nb">String</span><span class="w"> </span><span class="p">}],</span>
+<span class="w">    </span><span class="nx">specialHandlingRequirements</span><span class="o">:</span><span class="w"> </span><span class="nb">String</span><span class="p">,</span><span class="w">     </span><span class="c1">// optional</span>
+<span class="w">    </span><span class="nx">carrier</span><span class="o">:</span><span class="w">       </span><span class="nb">Object</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">brokerOrDealer</span><span class="o">:</span><span class="w"> </span><span class="nb">Object</span><span class="p">,</span><span class="w">                  </span><span class="c1">// optional</span>
+<span class="w">    </span><span class="nx">producer</span><span class="o">:</span><span class="w">      </span><span class="nb">Object</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">receiver</span><span class="o">:</span><span class="w">      </span><span class="nb">Object</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">wasteItems</span><span class="o">:</span><span class="w">    </span><span class="p">[</span><span class="nb">Object</span><span class="p">],</span><span class="w">                 </span><span class="c1">// EWC codes, weights (estimated), haz/POPs</span>
+<span class="w">    </span><span class="nx">validation</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nx">warnings</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="nb">Object</span><span class="p">]</span><span class="w">                     </span><span class="c1">// cross-check results at creation time</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<h4 id="collectionrecorded"><code>CollectionRecorded</code></h4>
+<p>Appended by <code>POST /movements/{movementId}/collection</code>.</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nx">eventType</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;CollectionRecorded&#39;</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">payload</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">movementId</span><span class="o">:</span><span class="w">              </span><span class="nb">String</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">sequence</span><span class="o">:</span><span class="w">                </span><span class="nb">Number</span><span class="p">,</span><span class="w">  </span><span class="c1">// 1-based; derived from aggregate at append time</span>
+<span class="w">    </span><span class="nx">collectionType</span><span class="o">:</span><span class="w">          </span><span class="nb">String</span><span class="p">,</span><span class="w">  </span><span class="c1">// &#39;STATIC&#39; | &#39;TRANSIT&#39;</span>
+<span class="w">    </span><span class="nx">actualDateTimeCollected</span><span class="o">:</span><span class="w"> </span><span class="nb">Date</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">yourUniqueReference</span><span class="o">:</span><span class="w">     </span><span class="nb">String</span><span class="p">,</span><span class="w">  </span><span class="c1">// optional</span>
+<span class="w">    </span><span class="nx">otherReferencesForMovement</span><span class="o">:</span><span class="w"> </span><span class="p">[{</span><span class="w"> </span><span class="nx">label</span><span class="o">:</span><span class="w"> </span><span class="nb">String</span><span class="p">,</span><span class="w"> </span><span class="nx">reference</span><span class="o">:</span><span class="w"> </span><span class="nb">String</span><span class="w"> </span><span class="p">}],</span>
+<span class="w">    </span><span class="nx">carrier</span><span class="o">:</span><span class="w">             </span><span class="nb">Object</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">receivedFromCarrier</span><span class="o">:</span><span class="w"> </span><span class="nb">Object</span><span class="w">       </span><span class="c1">// required when collectionType is &#39;TRANSIT&#39;</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<h4 id="collectionamended"><code>CollectionAmended</code></h4>
+<p>Appended by <code>PUT /movements/{movementId}/collection</code>. Represents a
+correction or soft-delete of the latest active collection event. The
+aggregate applies this during rehydration.</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nx">eventType</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;CollectionAmended&#39;</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">payload</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">movementId</span><span class="o">:</span><span class="w"> </span><span class="nb">String</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">sequence</span><span class="o">:</span><span class="w">   </span><span class="nb">Number</span><span class="p">,</span><span class="w">    </span><span class="c1">// which collection event is being amended</span>
+<span class="w">    </span><span class="nx">isDeleted</span><span class="o">:</span><span class="w">  </span><span class="nb">Boolean</span><span class="p">,</span>
+<span class="w">    </span><span class="c1">// amended fields when isDeleted is false:</span>
+<span class="w">    </span><span class="nx">collectionType</span><span class="o">:</span><span class="w">          </span><span class="nb">String</span><span class="p">,</span><span class="w">   </span><span class="c1">// optional</span>
+<span class="w">    </span><span class="nx">actualDateTimeCollected</span><span class="o">:</span><span class="w"> </span><span class="nb">Date</span><span class="p">,</span><span class="w">     </span><span class="c1">// optional</span>
+<span class="w">    </span><span class="nx">carrier</span><span class="o">:</span><span class="w">                 </span><span class="nb">Object</span><span class="w">    </span><span class="c1">// optional</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<h4 id="movementdeleted"><code>MovementDeleted</code></h4>
+<p>Appended by <code>PUT /movements/{movementId}</code> when <code>isDeleted: true</code>. The
+aggregate enforces that no <code>CollectionRecorded</code> event exists in the
+stream before allowing this.</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nx">eventType</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;MovementDeleted&#39;</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">payload</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">movementId</span><span class="o">:</span><span class="w"> </span><span class="nb">String</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<h4 id="movementundeleted"><code>MovementUndeleted</code></h4>
+<p>Appended by <code>PUT /movements/{movementId}</code> when <code>isDeleted: false</code>.</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nx">eventType</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;MovementUndeleted&#39;</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">payload</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">movementId</span><span class="o">:</span><span class="w"> </span><span class="nb">String</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<hr />
+<h3 id="transfer-stream-transfer-transferid">Transfer stream (<code>transfer-{transferId}</code>)</h3>
+<h4 id="transfercreated"><code>TransferCreated</code></h4>
+<p>Appended by <code>POST /transfers</code>. Starts the transfer stream.</p>
+<p>For a hazardous drop-off, <code>transferId</code> is not freshly minted: it is the sole
+<code>movementId</code> referenced in the request (<a href="../../decisions/#d-010">D-010</a>
+guarantees there is exactly one). For a non-hazardous drop-off, <code>transferId</code>
+is minted independently as before.</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nx">eventType</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;TransferCreated&#39;</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">payload</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">transferId</span><span class="o">:</span><span class="w">            </span><span class="nb">String</span><span class="p">,</span><span class="w">    </span><span class="c1">// sqid — e.g. &quot;25XYZ456&quot;; for a</span>
+<span class="w">                                       </span><span class="c1">// hazardous drop-off, equals the</span>
+<span class="w">                                       </span><span class="c1">// sole movementId below</span>
+<span class="w">    </span><span class="nx">movementIds</span><span class="o">:</span><span class="w">           </span><span class="p">[</span><span class="nb">String</span><span class="p">],</span><span class="w">  </span><span class="c1">// one or more movementIds linked at this drop-off</span>
+<span class="w">    </span><span class="nx">actualDateTimeDropOff</span><span class="o">:</span><span class="w"> </span><span class="nb">Date</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">yourUniqueReference</span><span class="o">:</span><span class="w">   </span><span class="nb">String</span><span class="p">,</span><span class="w">    </span><span class="c1">// optional</span>
+<span class="w">    </span><span class="nx">otherReferencesForMovement</span><span class="o">:</span><span class="w"> </span><span class="p">[{</span><span class="w"> </span><span class="nx">label</span><span class="o">:</span><span class="w"> </span><span class="nb">String</span><span class="p">,</span><span class="w"> </span><span class="nx">reference</span><span class="o">:</span><span class="w"> </span><span class="nb">String</span><span class="w"> </span><span class="p">}],</span>
+<span class="w">    </span><span class="nx">carrier</span><span class="o">:</span><span class="w"> </span><span class="nb">Object</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">dropOff</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nx">siteName</span><span class="o">:</span><span class="w">        </span><span class="nb">String</span><span class="p">,</span>
+<span class="w">      </span><span class="nx">exemptionNumber</span><span class="o">:</span><span class="w"> </span><span class="nb">String</span><span class="p">,</span><span class="w">        </span><span class="c1">// optional</span>
+<span class="w">      </span><span class="nx">address</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">fullAddress</span><span class="o">:</span><span class="w"> </span><span class="nb">String</span><span class="p">,</span>
+<span class="w">        </span><span class="nx">postcode</span><span class="o">:</span><span class="w">    </span><span class="nb">String</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<h4 id="wastereceived"><code>WasteReceived</code></h4>
+<p>Appended by <code>POST /transfers/{transferId}/receipt</code>.</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nx">eventType</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;WasteReceived&#39;</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">payload</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">transferId</span><span class="o">:</span><span class="w">       </span><span class="nb">String</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">dateTimeReceived</span><span class="o">:</span><span class="w"> </span><span class="nb">Date</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">hazardousWasteConsignmentCode</span><span class="o">:</span><span class="w">    </span><span class="nb">String</span><span class="p">,</span><span class="w">   </span><span class="c1">// optional</span>
+<span class="w">    </span><span class="nx">reasonForNoConsignmentCode</span><span class="o">:</span><span class="w">       </span><span class="nb">String</span><span class="p">,</span><span class="w">   </span><span class="c1">// optional</span>
+<span class="w">    </span><span class="nx">yourUniqueReference</span><span class="o">:</span><span class="w">              </span><span class="nb">String</span><span class="p">,</span><span class="w">   </span><span class="c1">// optional</span>
+<span class="w">    </span><span class="nx">otherReferencesForMovement</span><span class="o">:</span><span class="w"> </span><span class="p">[{</span><span class="w"> </span><span class="nx">label</span><span class="o">:</span><span class="w"> </span><span class="nb">String</span><span class="p">,</span><span class="w"> </span><span class="nx">reference</span><span class="o">:</span><span class="w"> </span><span class="nb">String</span><span class="w"> </span><span class="p">}],</span>
+<span class="w">    </span><span class="nx">specialHandlingRequirements</span><span class="o">:</span><span class="w"> </span><span class="nb">String</span><span class="p">,</span><span class="w">        </span><span class="c1">// optional</span>
+<span class="w">    </span><span class="nx">carrier</span><span class="o">:</span><span class="w">       </span><span class="nb">Object</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">brokerOrDealer</span><span class="o">:</span><span class="w"> </span><span class="nb">Object</span><span class="p">,</span><span class="w">                     </span><span class="c1">// optional</span>
+<span class="w">    </span><span class="nx">receiver</span><span class="o">:</span><span class="w">      </span><span class="nb">Object</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">receipt</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nx">address</span><span class="o">:</span><span class="w"> </span><span class="nb">Object</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nx">wasteItems</span><span class="o">:</span><span class="w">    </span><span class="p">[</span><span class="nb">Object</span><span class="p">],</span><span class="w">     </span><span class="c1">// EWC codes, actual weights, haz/POPs, disposal codes</span>
+<span class="w">    </span><span class="nx">outcome</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nx">status</span><span class="o">:</span><span class="w"> </span><span class="nb">String</span><span class="p">,</span><span class="w">            </span><span class="c1">// reserved: see D-025</span>
+<span class="w">      </span><span class="nx">reason</span><span class="o">:</span><span class="w"> </span><span class="nb">String</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nx">validation</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nx">warnings</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="nb">Object</span><span class="p">]</span><span class="w">         </span><span class="c1">// includes D-006 carrier mismatch if present</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<h4 id="receiptamended"><code>ReceiptAmended</code></h4>
+<p>Appended by <code>PUT /transfers/{transferId}/receipt</code>. Only the authoring
+organisation may append this (D-036).</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nx">eventType</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;ReceiptAmended&#39;</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">payload</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">transferId</span><span class="o">:</span><span class="w"> </span><span class="nb">String</span><span class="p">,</span>
+<span class="w">    </span><span class="c1">// amended fields:</span>
+<span class="w">    </span><span class="nx">dateTimeReceived</span><span class="o">:</span><span class="w"> </span><span class="nb">Date</span><span class="p">,</span><span class="w">     </span><span class="c1">// optional</span>
+<span class="w">    </span><span class="nx">carrier</span><span class="o">:</span><span class="w">          </span><span class="nb">Object</span><span class="p">,</span><span class="w">   </span><span class="c1">// optional</span>
+<span class="w">    </span><span class="nx">receiver</span><span class="o">:</span><span class="w">         </span><span class="nb">Object</span><span class="p">,</span><span class="w">   </span><span class="c1">// optional</span>
+<span class="w">    </span><span class="nx">wasteItems</span><span class="o">:</span><span class="w">       </span><span class="p">[</span><span class="nb">Object</span><span class="p">],</span><span class="w"> </span><span class="c1">// optional</span>
+<span class="w">    </span><span class="nx">outcome</span><span class="o">:</span><span class="w">          </span><span class="nb">Object</span><span class="p">,</span><span class="w">   </span><span class="c1">// optional</span>
+<span class="w">    </span><span class="nx">validation</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nx">warnings</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="nb">Object</span><span class="p">]</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<h4 id="transferdeleted"><code>TransferDeleted</code></h4>
+<p>Appended by <code>PUT /transfers/{transferId}</code> when <code>isDeleted: true</code>. The
+aggregate enforces that no <code>WasteReceived</code> event exists in the stream.</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nx">eventType</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;TransferDeleted&#39;</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">payload</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">transferId</span><span class="o">:</span><span class="w"> </span><span class="nb">String</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<h4 id="transferundeleted"><code>TransferUndeleted</code></h4>
+<p>Appended by <code>PUT /transfers/{transferId}</code> when <code>isDeleted: false</code>.</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nx">eventType</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;TransferUndeleted&#39;</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">payload</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">transferId</span><span class="o">:</span><span class="w"> </span><span class="nb">String</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<hr />
+<h2 id="projection-collections">Projection collections</h2>
+<h3 id="purpose_1">Purpose</h3>
+<p><code>movements</code> and <code>transfers</code> are read models rebuilt from the event store.
+They exist to serve GET requests without replaying event streams on every
+read. Their document shapes are identical to the shapes in
+<a href="../mongo-schema-proposal/">mongo-schema-proposal.md</a> — the only
+difference is that they are derived, not primary.</p>
+<p>If a projection document is lost or corrupted, it is rebuilt by replaying
+the corresponding stream. If a projection field name needs changing, the
+fix is to update the projection handler and replay. No data is ever lost
+because the event store is the source of truth.</p>
+<h3 id="movements-projection"><code>movements</code> projection</h3>
+<p>One document per <code>movementId</code>. Built by applying <code>MovementCreated</code>,
+<code>CollectionRecorded</code>, <code>CollectionAmended</code>, <code>MovementDeleted</code>, and
+<code>MovementUndeleted</code> events in sequence order.</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nx">_id</span><span class="o">:</span><span class="w">           </span><span class="nb">String</span><span class="p">,</span><span class="w">   </span><span class="c1">// movementId</span>
+<span class="w">  </span><span class="nx">movementId</span><span class="o">:</span><span class="w">    </span><span class="nb">String</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">state</span><span class="o">:</span><span class="w">         </span><span class="nb">String</span><span class="p">,</span><span class="w">   </span><span class="c1">// &#39;PLANNED&#39; | &#39;IN_COLLECTION&#39; | &#39;IN_TRANSIT&#39;</span>
+<span class="w">  </span><span class="nx">revision</span><span class="o">:</span><span class="w">      </span><span class="nb">Number</span><span class="p">,</span><span class="w">   </span><span class="c1">// sequenceNumber of the last applied event</span>
+<span class="w">  </span><span class="nx">isDeleted</span><span class="o">:</span><span class="w">     </span><span class="nb">Boolean</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">createdAt</span><span class="o">:</span><span class="w">     </span><span class="nb">Date</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">lastUpdatedAt</span><span class="o">:</span><span class="w"> </span><span class="nb">Date</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">traceId</span><span class="o">:</span><span class="w">       </span><span class="nb">String</span><span class="p">,</span>
+
+<span class="w">  </span><span class="nx">creation</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">recordedAt</span><span class="o">:</span><span class="w">                   </span><span class="nb">Date</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">submittingOrganisation</span><span class="o">:</span><span class="w">       </span><span class="p">{</span><span class="w"> </span><span class="nx">defraCustomerOrganisationId</span><span class="o">:</span><span class="w"> </span><span class="nb">String</span><span class="w"> </span><span class="p">},</span>
+<span class="w">    </span><span class="nx">estimatedDateTimeCollected</span><span class="o">:</span><span class="w">   </span><span class="nb">Date</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">hazardousWasteConsignmentCode</span><span class="o">:</span><span class="w"> </span><span class="nb">String</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">yourUniqueReference</span><span class="o">:</span><span class="w">          </span><span class="nb">String</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">otherReferencesForMovement</span><span class="o">:</span><span class="w">   </span><span class="p">[{</span><span class="w"> </span><span class="nx">label</span><span class="o">:</span><span class="w"> </span><span class="nb">String</span><span class="p">,</span><span class="w"> </span><span class="nx">reference</span><span class="o">:</span><span class="w"> </span><span class="nb">String</span><span class="w"> </span><span class="p">}],</span>
+<span class="w">    </span><span class="nx">specialHandlingRequirements</span><span class="o">:</span><span class="w">  </span><span class="nb">String</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">carrier</span><span class="o">:</span><span class="w">       </span><span class="nb">Object</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">brokerOrDealer</span><span class="o">:</span><span class="w"> </span><span class="nb">Object</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">producer</span><span class="o">:</span><span class="w">      </span><span class="nb">Object</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">receiver</span><span class="o">:</span><span class="w">      </span><span class="nb">Object</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">wasteItems</span><span class="o">:</span><span class="w">    </span><span class="p">[</span><span class="nb">Object</span><span class="p">],</span>
+<span class="w">    </span><span class="nx">validation</span><span class="o">:</span><span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="nx">warnings</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="nb">Object</span><span class="p">]</span><span class="w"> </span><span class="p">}</span>
+<span class="w">  </span><span class="p">},</span>
+
+<span class="w">  </span><span class="nx">collectionEvents</span><span class="o">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nx">sequence</span><span class="o">:</span><span class="w">                </span><span class="nb">Number</span><span class="p">,</span>
+<span class="w">      </span><span class="nx">recordedAt</span><span class="o">:</span><span class="w">              </span><span class="nb">Date</span><span class="p">,</span>
+<span class="w">      </span><span class="nx">submittingOrganisation</span><span class="o">:</span><span class="w">  </span><span class="p">{</span><span class="w"> </span><span class="nx">defraCustomerOrganisationId</span><span class="o">:</span><span class="w"> </span><span class="nb">String</span><span class="w"> </span><span class="p">},</span>
+<span class="w">      </span><span class="nx">collectionType</span><span class="o">:</span><span class="w">          </span><span class="nb">String</span><span class="p">,</span><span class="w">   </span><span class="c1">// &#39;STATIC&#39; | &#39;TRANSIT&#39;</span>
+<span class="w">      </span><span class="nx">actualDateTimeCollected</span><span class="o">:</span><span class="w"> </span><span class="nb">Date</span><span class="p">,</span>
+<span class="w">      </span><span class="nx">yourUniqueReference</span><span class="o">:</span><span class="w">     </span><span class="nb">String</span><span class="p">,</span>
+<span class="w">      </span><span class="nx">otherReferencesForMovement</span><span class="o">:</span><span class="w"> </span><span class="p">[{</span><span class="w"> </span><span class="nx">label</span><span class="o">:</span><span class="w"> </span><span class="nb">String</span><span class="p">,</span><span class="w"> </span><span class="nx">reference</span><span class="o">:</span><span class="w"> </span><span class="nb">String</span><span class="w"> </span><span class="p">}],</span>
+<span class="w">      </span><span class="nx">carrier</span><span class="o">:</span><span class="w">             </span><span class="nb">Object</span><span class="p">,</span>
+<span class="w">      </span><span class="nx">receivedFromCarrier</span><span class="o">:</span><span class="w"> </span><span class="nb">Object</span><span class="p">,</span>
+<span class="w">      </span><span class="nx">isDeleted</span><span class="o">:</span><span class="w">           </span><span class="nb">Boolean</span><span class="p">,</span>
+<span class="w">      </span><span class="nx">validation</span><span class="o">:</span><span class="w">          </span><span class="p">{</span><span class="w"> </span><span class="nx">warnings</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="nb">Object</span><span class="p">]</span><span class="w"> </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">],</span>
+
+<span class="w">  </span><span class="nx">transferIds</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="nb">String</span><span class="p">]</span><span class="w">   </span><span class="c1">// denormalised convenience field; pushed by applyTransferCreated</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>The <code>revision</code> field on the projection carries the <code>sequenceNumber</code> of
+the last event applied. It is used by consumers that want to know the
+current version of a document. It is <strong>not</strong> used as a concurrency guard
+on writes — that role belongs to the unique index on the <code>events</code>
+collection.</p>
+<h3 id="transfers-projection"><code>transfers</code> projection</h3>
+<p>One document per <code>transferId</code>. Built by applying <code>TransferCreated</code>,
+<code>WasteReceived</code>, <code>ReceiptAmended</code>, <code>TransferDeleted</code>, and
+<code>TransferUndeleted</code> events in sequence order.</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nx">_id</span><span class="o">:</span><span class="w">           </span><span class="nb">String</span><span class="p">,</span><span class="w">   </span><span class="c1">// transferId</span>
+<span class="w">  </span><span class="nx">transferId</span><span class="o">:</span><span class="w">    </span><span class="nb">String</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">movementIds</span><span class="o">:</span><span class="w">   </span><span class="p">[</span><span class="nb">String</span><span class="p">],</span>
+<span class="w">  </span><span class="nx">state</span><span class="o">:</span><span class="w">         </span><span class="nb">String</span><span class="p">,</span><span class="w">   </span><span class="c1">// &#39;DROPPED_OFF&#39; | &#39;RECEIVED&#39;</span>
+<span class="w">  </span><span class="nx">revision</span><span class="o">:</span><span class="w">      </span><span class="nb">Number</span><span class="p">,</span><span class="w">   </span><span class="c1">// sequenceNumber of the last applied event</span>
+<span class="w">  </span><span class="nx">isDeleted</span><span class="o">:</span><span class="w">     </span><span class="nb">Boolean</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">createdAt</span><span class="o">:</span><span class="w">     </span><span class="nb">Date</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">lastUpdatedAt</span><span class="o">:</span><span class="w"> </span><span class="nb">Date</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">traceId</span><span class="o">:</span><span class="w">       </span><span class="nb">String</span><span class="p">,</span>
+
+<span class="w">  </span><span class="nx">dropOff</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">recordedAt</span><span class="o">:</span><span class="w">              </span><span class="nb">Date</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">submittingOrganisation</span><span class="o">:</span><span class="w">  </span><span class="p">{</span><span class="w"> </span><span class="nx">defraCustomerOrganisationId</span><span class="o">:</span><span class="w"> </span><span class="nb">String</span><span class="w"> </span><span class="p">},</span>
+<span class="w">    </span><span class="nx">actualDateTimeDropOff</span><span class="o">:</span><span class="w">   </span><span class="nb">Date</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">yourUniqueReference</span><span class="o">:</span><span class="w">     </span><span class="nb">String</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">otherReferencesForMovement</span><span class="o">:</span><span class="w"> </span><span class="p">[{</span><span class="w"> </span><span class="nx">label</span><span class="o">:</span><span class="w"> </span><span class="nb">String</span><span class="p">,</span><span class="w"> </span><span class="nx">reference</span><span class="o">:</span><span class="w"> </span><span class="nb">String</span><span class="w"> </span><span class="p">}],</span>
+<span class="w">    </span><span class="nx">carrier</span><span class="o">:</span><span class="w">  </span><span class="nb">Object</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">dropOff</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nx">siteName</span><span class="o">:</span><span class="w">        </span><span class="nb">String</span><span class="p">,</span>
+<span class="w">      </span><span class="nx">exemptionNumber</span><span class="o">:</span><span class="w"> </span><span class="nb">String</span><span class="p">,</span>
+<span class="w">      </span><span class="nx">address</span><span class="o">:</span><span class="w">         </span><span class="nb">Object</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nx">isDeleted</span><span class="o">:</span><span class="w">  </span><span class="nb">Boolean</span>
+<span class="w">  </span><span class="p">},</span>
+
+<span class="w">  </span><span class="nx">receipt</span><span class="o">:</span><span class="w"> </span><span class="kc">null</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">recordedAt</span><span class="o">:</span><span class="w">              </span><span class="nb">Date</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">submittingOrganisation</span><span class="o">:</span><span class="w">  </span><span class="p">{</span><span class="w"> </span><span class="nx">defraCustomerOrganisationId</span><span class="o">:</span><span class="w"> </span><span class="nb">String</span><span class="w"> </span><span class="p">},</span>
+<span class="w">    </span><span class="nx">dateTimeReceived</span><span class="o">:</span><span class="w">        </span><span class="nb">Date</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">hazardousWasteConsignmentCode</span><span class="o">:</span><span class="w"> </span><span class="nb">String</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">reasonForNoConsignmentCode</span><span class="o">:</span><span class="w">    </span><span class="nb">String</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">yourUniqueReference</span><span class="o">:</span><span class="w">     </span><span class="nb">String</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">otherReferencesForMovement</span><span class="o">:</span><span class="w"> </span><span class="p">[{</span><span class="w"> </span><span class="nx">label</span><span class="o">:</span><span class="w"> </span><span class="nb">String</span><span class="p">,</span><span class="w"> </span><span class="nx">reference</span><span class="o">:</span><span class="w"> </span><span class="nb">String</span><span class="w"> </span><span class="p">}],</span>
+<span class="w">    </span><span class="nx">specialHandlingRequirements</span><span class="o">:</span><span class="w"> </span><span class="nb">String</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">carrier</span><span class="o">:</span><span class="w">       </span><span class="nb">Object</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">brokerOrDealer</span><span class="o">:</span><span class="w"> </span><span class="nb">Object</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">receiver</span><span class="o">:</span><span class="w">      </span><span class="nb">Object</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">receipt</span><span class="o">:</span><span class="w">       </span><span class="nb">Object</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">wasteItems</span><span class="o">:</span><span class="w">    </span><span class="p">[</span><span class="nb">Object</span><span class="p">],</span>
+<span class="w">    </span><span class="nx">outcome</span><span class="o">:</span><span class="w">       </span><span class="nb">Object</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">validation</span><span class="o">:</span><span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="nx">warnings</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="nb">Object</span><span class="p">]</span><span class="w"> </span><span class="p">}</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<h3 id="notes-on-projections">Notes on projections</h3>
+<ul>
+<li>The document shapes above match <code>mongo-schema-proposal.md</code> except for
+  <code>revision</code>: in the aggregate model <code>revision</code> is the concurrency guard;
+  here it is informational only.</li>
+<li>Neither <code>movements-history</code> nor <code>transfers-history</code> collections are
+  needed. The event store is the history. Corrections appear as
+  <code>CollectionAmended</code> / <code>ReceiptAmended</code> events alongside their originals;
+  the full amendment trail is always recoverable by reading the stream.</li>
+<li><code>movements.transferIds[]</code> is denormalised convenience data, pushed by
+  the <code>applyTransferCreated</code> projection handler when a new transfer is
+  created. It is not the source of truth for the Movement–Transfer
+  relationship; <code>transfers.movementIds[]</code> is.</li>
+</ul>
+<hr />
+<h2 id="aggregate-roots">Aggregate roots</h2>
+<p>Aggregate roots are pure in-memory objects. They are rebuilt by replaying
+a stream on each command request. They are never persisted to MongoDB.</p>
+<h3 id="movementaggregate"><code>MovementAggregate</code></h3>
+<p>Tracks the minimum state needed to enforce invariants on the movement
+stream:</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Set by</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>movementId</code></td>
+<td><code>MovementCreated</code></td>
+<td>Identity</td>
+</tr>
+<tr>
+<td><code>state</code></td>
+<td>each event</td>
+<td>Lifecycle state</td>
+</tr>
+<tr>
+<td><code>isDeleted</code></td>
+<td><code>MovementDeleted/Undeleted</code></td>
+<td>Deletion guard</td>
+</tr>
+<tr>
+<td><code>sequenceNumber</code></td>
+<td>every event</td>
+<td>Expected position for next append</td>
+</tr>
+<tr>
+<td><code>collectionEvents</code></td>
+<td><code>CollectionRecorded/Amended</code></td>
+<td>Ordered summary for D-029 checks</td>
+</tr>
+<tr>
+<td><code>creationAuthor</code></td>
+<td><code>MovementCreated.metadata</code></td>
+<td>D-036 amend-authorisation check</td>
+</tr>
+</tbody>
+</table>
+<p>Key invariants enforced:</p>
+<ul>
+<li><code>assertNotDeleted()</code> — blocks all writes to a deleted movement.</li>
+<li><code>assertCollectionTypeValid(type)</code> — D-029: first active event must be
+  <code>STATIC</code>; subsequent events must be <code>TRANSIT</code>.</li>
+<li><code>assertCollectionSequenceNotClosed(db)</code> — D-029: blocks collection
+  writes once the movement appears in any transfer (cross-projection read
+  on <code>movements.transferIds</code>; see known gap below).</li>
+<li><code>assertLatestCollectionDeletable()</code> — D-009 + D-029: soft-delete is
+  tail-only.</li>
+<li><code>assertDeletionPermitted()</code> — D-009: movement cannot be deleted once a
+  collection event has been recorded.</li>
+<li><code>assertAmendAuthorisedBy(org)</code> — D-036: only the creation author may
+  amend.</li>
+</ul>
+<h3 id="transferaggregate"><code>TransferAggregate</code></h3>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Set by</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>transferId</code></td>
+<td><code>TransferCreated</code></td>
+<td>Identity</td>
+</tr>
+<tr>
+<td><code>state</code></td>
+<td>each event</td>
+<td>Lifecycle state</td>
+</tr>
+<tr>
+<td><code>isDeleted</code></td>
+<td><code>TransferDeleted/Undeleted</code></td>
+<td>Deletion guard</td>
+</tr>
+<tr>
+<td><code>sequenceNumber</code></td>
+<td>every event</td>
+<td>Expected position for next append</td>
+</tr>
+<tr>
+<td><code>movementIds</code></td>
+<td><code>TransferCreated</code></td>
+<td>Referenced movements</td>
+</tr>
+<tr>
+<td><code>hasReceipt</code></td>
+<td><code>WasteReceived</code></td>
+<td>Blocks duplicate receipts</td>
+</tr>
+<tr>
+<td><code>dropOffCarrier</code></td>
+<td><code>TransferCreated</code></td>
+<td>D-006 carrier cross-check at receipt (free — no extra read)</td>
+</tr>
+<tr>
+<td><code>dropOffAuthor</code></td>
+<td><code>TransferCreated.metadata</code></td>
+<td>D-036 drop-off amend-authorisation</td>
+</tr>
+<tr>
+<td><code>receiptAuthor</code></td>
+<td><code>WasteReceived.metadata</code></td>
+<td>D-036 receipt amend-authorisation</td>
+</tr>
+</tbody>
+</table>
+<p>Key invariants enforced:</p>
+<ul>
+<li><code>assertNotDeleted()</code> — blocks all writes to a deleted transfer.</li>
+<li><code>assertReceiptNotYetRecorded()</code> — D-015: only one receipt per transfer.</li>
+<li><code>assertDeletionPermitted()</code> — D-009: transfer cannot be deleted once a
+  receipt exists.</li>
+<li><code>checkCarrierMatch(carrier)</code> — D-006: compares receipt carrier against
+  <code>dropOffCarrier</code>; returns a warning object or <code>null</code>. No DB read needed.</li>
+<li><code>assertDropOffAmendAuthorisedBy(org)</code> / <code>assertReceiptAmendAuthorisedBy(org)</code> — D-036.</li>
+</ul>
+<hr />
+<h2 id="write-path-mapping">Write-path mapping</h2>
+<p>The four Phase 2 POST endpoints and their CQRS write paths:</p>
+<h3 id="post-movements"><code>POST /movements</code></h3>
+<ol>
+<li>Validate Joi schema at route boundary.</li>
+<li>Call <code>handleCreateMovement(db, command)</code>.</li>
+<li>Build <code>MovementCreated</code> event.</li>
+<li><code>appendEvent(db, 'movement-{id}', 0, event)</code> — new stream; <code>seq=0</code>
+   means the unique index rejects any duplicate <code>movementId</code>.</li>
+<li><code>applyMovementCreated(db, storedEvent)</code> — <code>insertOne</code> into
+   <code>movements</code>.</li>
+<li>Return <code>{ movementId }</code>.</li>
+</ol>
+<h3 id="post-movementsmovementidcollection"><code>POST /movements/{movementId}/collection</code></h3>
+<ol>
+<li>Validate Joi schema.</li>
+<li>Call <code>handleRecordCollection(db, command)</code>.</li>
+<li><code>loadStream(db, 'movement-{id}')</code> — throws <code>MOVEMENT_NOT_FOUND</code> if
+   stream does not exist.</li>
+<li><code>MovementAggregate.rehydrate(events)</code>.</li>
+<li><code>agg.assertNotDeleted()</code>.</li>
+<li>Cross-projection check: <code>movements.transferIds.length &gt; 0</code> → throw
+   if the collection sequence is closed (D-029).</li>
+<li><code>agg.assertCollectionTypeValid(payload.collectionType)</code> — D-029.</li>
+<li>Build <code>CollectionRecorded</code> event with <code>sequence:
+   agg.nextCollectionSequence()</code>.</li>
+<li><code>appendEvent(db, 'movement-{id}', agg.sequenceNumber, event)</code> —
+   concurrent write blocked by unique index.</li>
+<li><code>applyCollectionRecorded(db, storedEvent)</code> — <code>$push</code> to
+    <code>collectionEvents[]</code>, update <code>state</code> and <code>revision</code>.</li>
+<li>Return <code>HTTP 201</code>.</li>
+</ol>
+<h3 id="post-transfers"><code>POST /transfers</code></h3>
+<ol>
+<li>Validate Joi schema.</li>
+<li>Call <code>handleCreateTransfer(db, command)</code>.</li>
+<li>Cross-projection check: all <code>movementIds</code> exist in <code>movements</code> with
+   <code>isDeleted: false</code>.</li>
+<li>Cross-projection check (D-010): if any referenced movement carries
+   hazardous waste items, <code>movementIds.length</code> must equal <code>1</code>.</li>
+<li>Determine <code>transferId</code>: if step 4's hazardous check applies, reuse the
+   sole <code>movementId</code> as <code>transferId</code> — no new identifier is minted.
+   Otherwise, mint <code>transferId</code> via <code>waste-tracking-id-backend</code> as today.</li>
+<li>Build <code>TransferCreated</code> event.</li>
+<li><code>appendEvent(db, 'transfer-{id}', 0, event)</code> — new stream.</li>
+<li><code>applyTransferCreated(db, storedEvent)</code> — <code>insertOne</code> into
+   <code>transfers</code>; <code>$push transferId</code> to each referenced <code>movements</code>
+   document.</li>
+<li>Return <code>{ transferId }</code>.</li>
+</ol>
+<h3 id="post-transferstransferidreceipt"><code>POST /transfers/{transferId}/receipt</code></h3>
+<ol>
+<li>Validate Joi schema.</li>
+<li>Call <code>handleRecordReceipt(db, command)</code>.</li>
+<li><code>loadStream(db, 'transfer-{id}')</code> — throws <code>TRANSFER_NOT_FOUND</code> if
+   stream does not exist.</li>
+<li><code>TransferAggregate.rehydrate(events)</code>.</li>
+<li><code>agg.assertNotDeleted()</code>.</li>
+<li><code>agg.assertReceiptNotYetRecorded()</code>.</li>
+<li><code>agg.checkCarrierMatch(payload.carrier)</code> — D-006 warning (no extra
+   DB read; carrier captured during rehydration from <code>TransferCreated</code>).</li>
+<li>Build <code>WasteReceived</code> event; embed warnings in <code>payload.validation</code>.</li>
+<li><code>appendEvent(db, 'transfer-{id}', agg.sequenceNumber, event)</code>.</li>
+<li><code>applyWasteReceived(db, storedEvent)</code> — <code>$set receipt</code> on
+    <code>transfers</code>, update <code>state</code> and <code>revision</code>.</li>
+<li>Return <code>{ warnings }</code>.</li>
+</ol>
+<hr />
+<h2 id="indexes">Indexes</h2>
+<h3 id="events"><code>events</code></h3>
+<p>Required:</p>
+<ul>
+<li><code>{ streamId: 1, sequenceNumber: 1 }</code> <strong>unique</strong> — the concurrency
+  guard; must exist before any Phase 2 write.</li>
+<li><code>{ streamId: 1 }</code> — supports <code>loadStream</code> queries.</li>
+<li><code>{ eventType: 1, recordedAt: -1 }</code> — operational queries by event
+  type.</li>
+<li><code>{ 'metadata.traceId': 1 }</code> — request tracing.</li>
+</ul>
+<h3 id="movements-projection_1"><code>movements</code> (projection)</h3>
+<p>Required:</p>
+<ul>
+<li><code>{ _id: 1 }</code> (implicit on <code>movementId</code>)</li>
+<li><code>{ movementId: 1 }</code> unique</li>
+<li><code>{ traceId: 1 }</code></li>
+<li><code>{ transferIds: 1 }</code></li>
+<li><code>{ state: 1, lastUpdatedAt: -1 }</code></li>
+<li><code>{ 'creation.submittingOrganisation.defraCustomerOrganisationId': 1 }</code></li>
+</ul>
+<p>Conditional / query-driven:</p>
+<ul>
+<li><code>{ 'collectionEvents.submittingOrganisation.defraCustomerOrganisationId': 1 }</code></li>
+<li><code>{ 'creation.estimatedDateTimeCollected': 1 }</code></li>
+</ul>
+<h3 id="transfers-projection_1"><code>transfers</code> (projection)</h3>
+<p>Required:</p>
+<ul>
+<li><code>{ _id: 1 }</code> (implicit on <code>transferId</code>)</li>
+<li><code>{ transferId: 1 }</code> unique</li>
+<li><code>{ movementIds: 1 }</code></li>
+<li><code>{ traceId: 1 }</code></li>
+<li><code>{ state: 1, lastUpdatedAt: -1 }</code></li>
+<li><code>{ 'dropOff.submittingOrganisation.defraCustomerOrganisationId': 1 }</code></li>
+<li><code>{ 'receipt.submittingOrganisation.defraCustomerOrganisationId': 1 }</code></li>
+</ul>
+<p>Conditional / query-driven:</p>
+<ul>
+<li><code>{ 'dropOff.actualDateTimeDropOff': 1 }</code></li>
+<li><code>{ 'receipt.dateTimeReceived': 1 }</code></li>
+<li><code>{ 'receipt.receiver.authorisationNumber': 1 }</code></li>
+</ul>
+<hr />
+<h2 id="projection-rebuild">Projection rebuild</h2>
+<p>Because the event store is the source of truth, any projection document
+can be rebuilt at any time without data loss.</p>
+<div class="highlight"><pre><span></span><code><span class="c1">// Rebuild a single movement projection from its event stream.</span>
+<span class="nx">rebuildMovementProjection</span><span class="p">(</span><span class="nx">db</span><span class="p">,</span><span class="w"> </span><span class="nx">movementId</span><span class="p">)</span>
+
+<span class="c1">// Rebuild a single transfer projection from its event stream.</span>
+<span class="nx">rebuildTransferProjection</span><span class="p">(</span><span class="nx">db</span><span class="p">,</span><span class="w"> </span><span class="nx">transferId</span><span class="p">)</span>
+</code></pre></div>
+<p>A full replay (all movements or all transfers) iterates every distinct
+<code>streamId</code> prefixed <code>movement-</code> or <code>transfer-</code> and calls the
+corresponding rebuild function. This is the recovery path if a projection
+becomes stale due to a failed write step.</p>
+<hr />
+<h2 id="concurrency-model-comparison">Concurrency model comparison</h2>
+<table>
+<thead>
+<tr>
+<th>Concern</th>
+<th>Phase 1 (aggregate)</th>
+<th>Phase 2 CQRS</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Guard mechanism</td>
+<td><code>{ _id, revision }</code> in <code>updateOne</code> filter</td>
+<td>Unique <code>(streamId, sequenceNumber)</code> index</td>
+</tr>
+<tr>
+<td>Concurrent write</td>
+<td>Second writer's <code>updateOne</code> matches 0 docs</td>
+<td>MongoDB <code>11000</code> duplicate-key error</td>
+</tr>
+<tr>
+<td>Application response</td>
+<td>Return mismatch / retry</td>
+<td>Raise <code>ConcurrencyError</code>; caller retries</td>
+</tr>
+<tr>
+<td>Atomic multi-step</td>
+<td><code>mongoClient.startSession()</code> + transaction</td>
+<td>Wrap <code>appendEvent</code> + projection in session (optional; see open points)</td>
+</tr>
+<tr>
+<td>History / audit</td>
+<td>Full-document snapshot in <code>*-history</code></td>
+<td>Event log — every fact is permanent</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="key-differences-from-mongo-schema-proposalmd">Key differences from <code>mongo-schema-proposal.md</code></h2>
+<table>
+<thead>
+<tr>
+<th>Aspect</th>
+<th>Aggregate model</th>
+<th>CQRS / Event Sourcing</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Source of truth</td>
+<td><code>movements</code>, <code>transfers</code> docs</td>
+<td><code>events</code> collection</td>
+</tr>
+<tr>
+<td>Write path</td>
+<td>Direct <code>insertOne</code> / <code>updateOne</code></td>
+<td>Append event → update projection</td>
+</tr>
+<tr>
+<td>History</td>
+<td><code>-history</code> snapshot collections</td>
+<td>Not needed — event log is the history</td>
+</tr>
+<tr>
+<td>Concurrency guard</td>
+<td><code>revision</code> field in update filter</td>
+<td>Unique <code>(streamId, sequenceNumber)</code> index</td>
+</tr>
+<tr>
+<td>Correction / amend</td>
+<td>Mutate in place; snapshot to history</td>
+<td>Append <code>*Amended</code> event; projection replays</td>
+</tr>
+<tr>
+<td>Rebuild after bug</td>
+<td>Not possible without full history</td>
+<td>Replay stream → rebuild projection</td>
+</tr>
+<tr>
+<td>Collections removed</td>
+<td>—</td>
+<td><code>movements-history</code>, <code>transfers-history</code></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="known-gaps-and-open-points">Known gaps and open points</h2>
+<p>These items are not yet resolved in this proposal. A full gap analysis
+against all 37 decisions is in the <a href="https://claude.ai/code/artifact/f52d0e9b-f90d-44d0-b956-0dafbe9a5fb0">evaluation report</a>.</p>
+<ul>
+<li>
+<p><strong>Two-step write atomicity.</strong> <code>appendEvent</code> and the projection update
+  are two separate MongoDB operations. If the projection update fails
+  after a successful append, the projection is behind the event store.
+  Options: wrap both in a MongoDB multi-document transaction (same
+  session, consistent with Phase 1 approach), or accept eventual
+  consistency with a startup reconciliation check and the rebuild
+  functions above. Decision needed before production.</p>
+</li>
+<li>
+<p><strong>Cross-projection check for the closed sequence rule (D-029).</strong> The
+  <code>MovementAggregate</code> cannot know that a Movement has been dropped off
+  from its own stream alone (the <code>TransferCreated</code> event goes to the
+  transfer stream, not the movement stream). The check is implemented as
+  a cross-projection read (<code>movements.transferIds.length &gt; 0</code>) in
+  <code>handleRecordCollection</code>. This is correct and efficient but means the
+  command touches both the event stream and the projection. Needs
+  documenting as an explicit design choice.</p>
+</li>
+<li>
+<p><strong>PUT command handlers not yet designed.</strong> The sketch covers the four
+  Phase 2 POST endpoints only. Amendment and soft-delete handlers
+  (<code>CollectionAmended</code>, <code>MovementDeleted</code>, <code>ReceiptAmended</code>,
+  <code>TransferDeleted</code>, and their <code>*Undeleted</code> counterparts) need designing
+  with the D-009 lifecycle rules and D-036 authorisation checks in place.</p>
+</li>
+<li>
+<p><strong>D-022 (receipt migration) should be closed as Option 1.</strong> Grafting
+  CQRS logic into the existing Phase 1 <code>POST /movements/receive</code> handler
+  would create a handler that switches paradigms on a flag. The new
+  Transfer-scoped endpoint is the clean path.</p>
+</li>
+<li>
+<p><strong><code>invalid-submissions</code> collection.</strong> Phase 2 commands that fail after
+  beginning processing (e.g. <code>movementId</code> not found, org mismatch) should
+  persist to <code>invalid-submissions</code> consistently with Phase 1 behaviour.
+  The shape in <code>mongo-schema-proposal.md</code> applies unchanged.</p>
+</li>
+<li>
+<p><strong>Event schema versioning.</strong> Once <code>MovementCreated</code> or
+  <code>TransferCreated</code> event payloads are in production, their shapes are
+  permanent — or an upcaster function is needed to transform old events
+  before rehydration. Field names should be finalised before the first
+  production write.</p>
+</li>
+</ul>
+
+
+
+
+
+
+
+  
+  
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+  <footer class="md-footer">
+    <div class="md-footer-meta__inner md-grid">
+       <div class="md-copyright">
+       
+<div class="md-social">
+  
+    
+    
+    
+    
+    <a href="mailto:wasteuserresearch@defra.gov.uk" target="_blank" rel="noopener" title="Contact us here" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M536.4-26.3c9.8-3.5 20.6-1 28 6.3s9.8 18.2 6.3 28l-178 496.9c-5 13.9-18.1 23.1-32.8 23.1-14.2 0-27-8.6-32.3-21.7l-64.2-158c-4.5-11-2.5-23.6 5.2-32.6l94.5-112.4c5.1-6.1 4.7-15-.9-20.6s-14.6-6-20.6-.9l-112.4 94.3c-9.1 7.6-21.6 9.6-32.6 5.2L38.1 216.8c-13.1-5.3-21.7-18.1-21.7-32.3 0-14.7 9.2-27.8 23.1-32.8z"/></svg>
+    </a>
+  
+    
+    
+    
+    
+    <a href="https://github.com/defra/waste-tracking-service" target="_blank" rel="noopener" title="Our DWT service is available here" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+</div>  Made with
+      <a
+        href="https://squidfunk.github.io/mkdocs-material/"
+        target="_blank"
+        rel="noopener"
+      >
+        Material for MkDocs
+      </a>
+      <br /><br />
+      <img
+        src="../../../assets/images/ogl.png"
+        alt="Open Government Licence logo"
+      />
+      All content is available under the
+      <a
+        href="https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/"
+        target="_blank"
+        rel="noopener"
+      >
+        Open Government Licence v3.0</a
+      >
+      , except where otherwise stated <br><br><br>
+      <a href="/waste-tracking-service/api-accessibility-statement" target="_blank" rel="noopener">Accessibility Statement</a>
+    </div>
+
+    <div class="md-copyright">
+      <a
+        href="https://www.nationalarchives.gov.uk/information-management/re-using-public-sector-information/uk-government-licensing-framework/crown-copyright/"
+        target="_blank"
+        rel="noopener"
+      >
+        <img
+          src="../../../assets/images/govuk-crest-2x.png"
+          width="125"
+          height="102"
+          alt="Gov UK Crest"
+        />
+        <br />
+        © Crown copyright
+      </a>
+    </div>
+  </div>
+</footer>
+
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["announce.dismiss", "navigation.tabs", "navigation.tabs.sticky", "navigation.indexes", "content.code.copy", "search.suggest", "search.share", "content.action.view", "toc.integrate"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": {"Accepted": "accepted", "Deprecated": "deprecated", "Draft": "draft", "Proposed": "proposed", "Rejected": "rejected", "Superseded": "superseded"}, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": "production", "provider": "mike"}}</script>
+    
+    
+  
+      <script src="../../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  <script>
+    (function () {
+      function fixAccessibility() {
+        // 1. Search dialog accessible name (AXE fix)
+        var dlg = document.querySelector('.md-search[role="dialog"]');
+        if (dlg) {
+          var hasName = dlg.hasAttribute('aria-label') || dlg.hasAttribute('aria-labelledby');
+          if (!hasName) {
+            dlg.setAttribute('aria-label', 'Search this site');
+          }
+        }
+
+        // 2. Empty form labels — add visually-hidden text to icon-only labels
+        function addLabelText(selector, text) {
+          document.querySelectorAll(selector).forEach(function (label) {
+            if (label.querySelector('.visually-hidden')) return;
+            var span = document.createElement('span');
+            span.className = 'visually-hidden';
+            span.textContent = text;
+            label.appendChild(span);
+          });
+        }
+
+        addLabelText('label[for="__drawer"]', 'Toggle navigation');
+        // Not label[for="__search"]: Material's search icon label holds two
+        // <svg> children (magnifier / back-arrow) and toggles which one is
+        // visible via svg:first-child/:last-child CSS depending on
+        // viewport. Appending a span here would become the new last child
+        // and break that selector, leaving both icons visible at once.
+
+        // Palette toggle labels
+        document.querySelectorAll('label[for^="__palette"]').forEach(function (label) {
+          if (label.querySelector('.visually-hidden')) return;
+          var title = label.getAttribute('title') || 'Toggle colour scheme';
+          var span = document.createElement('span');
+          span.className = 'visually-hidden';
+          span.textContent = title;
+          label.appendChild(span);
+        });
+
+        // Navigation section toggle labels
+        document.querySelectorAll('label[for^="__nav"], label[for^="nav-"]').forEach(function (label) {
+          if (label.querySelector('.visually-hidden')) return;
+          var nav = label.closest('.md-nav__item');
+          var link = nav ? nav.querySelector('.md-nav__link') : null;
+          var text = link ? 'Toggle ' + link.textContent.trim() : 'Toggle section';
+          var span = document.createElement('span');
+          span.className = 'visually-hidden';
+          span.textContent = text;
+          label.appendChild(span);
+        });
+
+        // Catch any remaining labels that only contain SVG/icons
+        document.querySelectorAll('label[for]').forEach(function (label) {
+          if (label.getAttribute('for') === '__search') return;
+          if (label.querySelector('.visually-hidden')) return;
+          var clone = label.cloneNode(true);
+          var els = clone.querySelectorAll('svg, img, .md-icon');
+          for (var i = 0; i < els.length; i++) { els[i].parentNode.removeChild(els[i]); }
+          if (!clone.textContent.trim()) {
+            var span = document.createElement('span');
+            span.className = 'visually-hidden';
+            span.textContent = label.getAttribute('title') || 'Toggle';
+            label.appendChild(span);
+          }
+        });
+
+        // Catch any inputs/selects without any label (missing form label)
+        document.querySelectorAll('input, select, textarea').forEach(function (input) {
+          if (input.type === 'hidden') return;
+          if (input.getAttribute('aria-label') || input.getAttribute('aria-labelledby')) return;
+          var id = input.id;
+          if (id && document.querySelector('label[for="' + id + '"]')) return;
+          // No label found — add aria-label
+          var name = input.getAttribute('name') || input.getAttribute('placeholder') || input.type || 'input';
+          input.setAttribute('aria-label', name.charAt(0).toUpperCase() + name.slice(1));
+        });
+
+        // 3. Multiple form labels — replace duplicate labels with spans
+        // Material intentionally ships three <label for="__search"> elements
+        // (mobile toggle button, search overlay, and the input icon) and
+        // shows only one at a time via CSS depending on viewport — that's
+        // not a duplicate-label bug, so leave those alone.
+        var labelsByFor = {};
+        document.querySelectorAll('label[for]').forEach(function (label) {
+          var forId = label.getAttribute('for');
+          if (forId === '__search') return;
+          if (!labelsByFor[forId]) labelsByFor[forId] = [];
+          labelsByFor[forId].push(label);
+        });
+        Object.keys(labelsByFor).forEach(function (forId) {
+          var labels = labelsByFor[forId];
+          if (labels.length > 1) {
+            for (var i = 1; i < labels.length; i++) {
+              var span = document.createElement('span');
+              span.innerHTML = labels[i].innerHTML;
+              span.className = labels[i].className;
+              span.setAttribute('aria-hidden', 'true');
+              labels[i].parentNode.replaceChild(span, labels[i]);
+            }
+          }
+        });
+
+        // 6. Empty links — add aria-label to social icon links
+        document.querySelectorAll('.md-social__link').forEach(function (link) {
+          if (!link.textContent.trim() && !link.getAttribute('aria-label')) {
+            var href = link.getAttribute('href') || '';
+            if (href.indexOf('mailto:') !== -1) {
+              link.setAttribute('aria-label', 'Send email');
+            } else if (href.indexOf('github') !== -1) {
+              link.setAttribute('aria-label', 'GitHub repository');
+            } else {
+              link.setAttribute('aria-label', 'External link');
+            }
+          }
+        });
+
+        // 7. Missing fieldset — wrap palette toggles in a fieldset
+        var palette = document.querySelector('.md-header__option');
+        if (palette && palette.tagName !== 'FIELDSET' && !palette.querySelector('fieldset')) {
+          var fieldset = document.createElement('fieldset');
+          fieldset.className = palette.className;
+          fieldset.style.border = 'none';
+          fieldset.style.padding = '0';
+          fieldset.style.margin = '0';
+          var legend = document.createElement('legend');
+          legend.className = 'visually-hidden';
+          legend.textContent = 'Colour scheme';
+          fieldset.appendChild(legend);
+          while (palette.firstChild) {
+            fieldset.appendChild(palette.firstChild);
+          }
+          palette.parentNode.replaceChild(fieldset, palette);
+        }
+
+        // 8. Palette toggle labels — remove title to avoid redundant title text
+        document.querySelectorAll('.md-header__option label, fieldset label').forEach(function (el) {
+          if (el.getAttribute('title') && el.querySelector('.visually-hidden')) {
+            el.removeAttribute('title');
+          }
+        });
+
+        // 9. Suspicious alt text — fix theme logo if generic
+        document.querySelectorAll('.md-header__button img, .md-logo img').forEach(function (img) {
+          var alt = img.getAttribute('alt') || '';
+          if (!alt || /^(logo|image|img|icon|picture)$/i.test(alt.trim())) {
+            img.setAttribute('alt', 'Defra Digital Waste Tracking home');
+          }
+        });
+      }
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', fixAccessibility);
+      } else {
+        fixAccessibility();
+      }
+      document.addEventListener('navigationend', fixAccessibility);
+    })();
+  </script>
+
+  </body>
+</html>

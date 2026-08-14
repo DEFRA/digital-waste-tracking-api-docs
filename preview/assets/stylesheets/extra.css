@@ -221,6 +221,21 @@
   background-color: white;
 }
 
+/* Non-clickable group heading in the hand-built Collections sidebar nav */
+.md-nav__link--group-title {
+  font-weight: 700;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  opacity: 0.7;
+  cursor: default;
+  margin-top: 0.5em;
+}
+
+.md-nav__item--nested > .md-nav__link {
+  padding-left: 1.2rem;
+}
+
 /* Visually hidden but accessible to screen readers */
 .visually-hidden {
   position: absolute;

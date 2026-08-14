@@ -1,0 +1,1586 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+        <link rel="canonical" href="https://defra.github.io/digital-waste-tracking-api-docs/preview/collections/phase1/receipt-api-implemented-data-model/">
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../../favicons/moj.ico">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>Receipt api implemented data model - Digital Waste Tracking - API Docs</title>
+      
+    
+    
+  
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+  
+  
+    
+      
+      
+    
+  
+  
+  <style>:root{--md-admonition-icon--quote:url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2016%2016%22%3E%3Cpath%20d%3D%22M1.75%202.5h10.5a.75.75%200%200%201%200%201.5H1.75a.75.75%200%200%201%200-1.5m4%205h8.5a.75.75%200%200%201%200%201.5h-8.5a.75.75%200%200%201%200-1.5m0%205h8.5a.75.75%200%200%201%200%201.5h-8.5a.75.75%200%200%201%200-1.5M2.5%207.75v6a.75.75%200%200%201-1.5%200v-6a.75.75%200%200%201%201.5%200%22/%3E%3C/svg%3E');}</style>
+
+
+
+  
+  
+    
+      
+      
+        
+      
+      
+    
+  
+    
+      
+      
+        
+      
+      
+    
+  
+    
+      
+      
+        
+      
+      
+    
+  
+    
+      
+      
+        
+      
+      
+    
+  
+    
+      
+      
+        
+      
+      
+    
+  
+    
+      
+      
+        
+      
+      
+    
+  
+  
+  <style>:root{.md-tag.md-tag--draft{--md-tag-icon:url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cpath%20d%3D%22M5.5%202C3.6%202%202%203.6%202%205.5v13C2%2020.4%203.6%2022%205.5%2022H16l6-6V5.5C22%203.6%2020.4%202%2018.5%202zm.3%202h12.5c1%200%201.8.8%201.8%201.8V15h-1.5c-1.9%200-3.5%201.6-3.5%203.5V20H5.8c-1%200-1.8-.8-1.8-1.8V5.8C4%204.8%204.8%204%205.8%204%22/%3E%3C/svg%3E');}.md-tag.md-tag--accepted{--md-tag-icon:url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cpath%20d%3D%22M18.5%202h-13C3.6%202%202%203.6%202%205.5v13C2%2020.4%203.6%2022%205.5%2022H16l6-6V5.5C22%203.6%2020.4%202%2018.5%202M20%2015h-1.5c-1.9%200-3.5%201.6-3.5%203.5V20H5.8c-1%200-1.8-.8-1.8-1.8V5.8C4%204.8%204.8%204%205.8%204h12.5c1%200%201.8.8%201.8%201.8V15m-4.9-6.8%201.5%201.5-6%206-3.5-3.5%201.5-1.5%202%202z%22/%3E%3C/svg%3E');}.md-tag.md-tag--proposed{--md-tag-icon:url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cpath%20d%3D%22M13%2011h3v2h-3v3h-2v-3H8v-2h3V8h2zm9-5.5V16l-6%206H5.5C3.6%2022%202%2020.4%202%2018.5v-13C2%203.6%203.6%202%205.5%202h13C20.4%202%2022%203.6%2022%205.5m-2%20.3c0-1-.8-1.8-1.8-1.8H5.8C4.8%204%204%204.8%204%205.8v12.5c0%201%20.8%201.8%201.8%201.8H15v-1.5c0-1.9%201.6-3.5%203.5-3.5H20z%22/%3E%3C/svg%3E');}.md-tag.md-tag--deprecated{--md-tag-icon:url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cpath%20d%3D%22M8%2011h8v2H8zm14-5.5V16l-6%206H5.5C3.6%2022%202%2020.4%202%2018.5v-13C2%203.6%203.6%202%205.5%202h13C20.4%202%2022%203.6%2022%205.5m-2%20.3c0-1-.8-1.8-1.8-1.8H5.8C4.8%204%204%204.8%204%205.8v12.5c0%201%20.8%201.8%201.8%201.8H15v-1.5c0-1.9%201.6-3.5%203.5-3.5H20z%22/%3E%3C/svg%3E');}.md-tag.md-tag--superseded{--md-tag-icon:url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cpath%20d%3D%22M11%2015h2v2h-2zm0-2h2V7h-2zm11-7.5V16l-6%206H5.5C3.6%2022%202%2020.4%202%2018.5v-13C2%203.6%203.6%202%205.5%202h13C20.4%202%2022%203.6%2022%205.5m-2%20.3c0-1-.8-1.8-1.8-1.8H5.8C4.8%204%204%204.8%204%205.8v12.5c0%201%20.8%201.8%201.8%201.8H15v-1.5c0-1.9%201.6-3.5%203.5-3.5H20z%22/%3E%3C/svg%3E');}.md-tag.md-tag--rejected{--md-tag-icon:url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cpath%20d%3D%22M16%209.4%2013.4%2012l2.6%202.6-1.4%201.4-2.6-2.6L9.4%2016%208%2014.6l2.6-2.6L8%209.4%209.4%208l2.6%202.6L14.6%208zm6-3.9V16l-6%206H5.5C3.6%2022%202%2020.4%202%2018.5v-13C2%203.6%203.6%202%205.5%202h13C20.4%202%2022%203.6%2022%205.5m-2%20.3c0-1-.8-1.8-1.8-1.8H5.8C4.8%204%204%204.8%204%205.8v12.5c0%201%20.8%201.8%201.8%201.8H15v-1.5c0-1.9%201.6-3.5%203.5-3.5H20z%22/%3E%3C/svg%3E');}}</style>
+
+    
+<link rel="stylesheet" href="../../../assets/stylesheets/extra.css" />
+
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../../stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  
+  
+    <meta name="robots" content="noindex, nofollow">
+  
+
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#current-receipt-api-waste-movement-data-model" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <div data-md-color-scheme="default" data-md-component="outdated" hidden>
+        
+      </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../.." title="Digital Waste Tracking - API Docs" class="md-header__button md-logo" aria-label="Digital Waste Tracking - API Docs" data-md-component="logo">
+      
+  <img src="../../../logos/moj.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Digital Waste Tracking - API Docs
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Receipt api implemented data model
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Share" aria-label="Share" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/DEFRA/digital-waste-tracking-api-docs" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+    
+      
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../.." class="md-tabs__link">
+          
+  
+  
+    
+  
+  Digital Waste Tracking
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+    
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+  
+    
+    <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation">
+      <div class="md-sidebar__scrollwrap">
+        <div class="md-sidebar__inner">
+          <nav class="md-nav md-nav--primary" aria-label="Collections navigation" data-md-level="0">
+            <label class="md-nav__title" for="__drawer">
+              <span class="md-nav__icon md-icon"></span>
+              Collections
+            </label>
+            <ul class="md-nav__list" data-md-scrollfix>
+              
+              
+                
+                <li class="md-nav__item">
+                  <a href="../../" class="md-nav__link">Overview</a>
+                </li>
+              
+                
+                <li class="md-nav__item">
+                  <a href="../../decisions/" class="md-nav__link">Decisions</a>
+                </li>
+              
+                
+                <li class="md-nav__item">
+                  <a href="../../glossary/" class="md-nav__link">Glossary</a>
+                </li>
+              
+                
+                <li class="md-nav__item">
+                  <a href="../../plan/" class="md-nav__link">Plan</a>
+                </li>
+              
+                
+                <li class="md-nav__item">
+                  <a href="../../registration/" class="md-nav__link">Registration</a>
+                </li>
+              
+                
+                <li class="md-nav__item">
+                  <a href="../../docs/" class="md-nav__link">Notes</a>
+                </li>
+              
+                
+                  
+                    <li class="md-nav__item"><span class="md-nav__link md-nav__link--group-title">API</span></li>
+                  
+                  
+                
+                <li class="md-nav__item md-nav__item--nested">
+                  <a href="../../api/" class="md-nav__link">Overview</a>
+                </li>
+              
+                
+                  
+                    <li class="md-nav__item"><span class="md-nav__link md-nav__link--group-title">Data model</span></li>
+                  
+                  
+                
+                <li class="md-nav__item md-nav__item--nested">
+                  <a href="../../model/" class="md-nav__link">Overview</a>
+                </li>
+              
+                
+                <li class="md-nav__item md-nav__item--nested">
+                  <a href="../../model/phase1-waste-inputs/" class="md-nav__link">Phase 1: current waste-inputs model</a>
+                </li>
+              
+                
+                <li class="md-nav__item md-nav__item--nested">
+                  <a href="../../model/mongo-schema-proposal/" class="md-nav__link">Mongo schema proposal (Option A)</a>
+                </li>
+              
+                
+                <li class="md-nav__item md-nav__item--nested">
+                  <a href="../../model/mongo-schema-proposal-per-event/" class="md-nav__link">Mongo schema proposal — per event (Option B)</a>
+                </li>
+              
+                
+                <li class="md-nav__item md-nav__item--nested">
+                  <a href="../../model/mongo-schema-proposal-CQRS/" class="md-nav__link">Mongo schema proposal — CQRS (Option C)</a>
+                </li>
+              
+                
+                  
+                    <li class="md-nav__item"><span class="md-nav__link md-nav__link--group-title">Phase 1 reference</span></li>
+                  
+                  
+                
+                <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+                  <a href="./" class="md-nav__link md-nav__link--active">Receipt API implemented data model</a>
+                </li>
+              
+                
+                <li class="md-nav__item md-nav__item--nested">
+                  <a href="../receipt-data-definitions/" class="md-nav__link">Receipt data definitions</a>
+                </li>
+              
+                
+                  
+                    <li class="md-nav__item"><span class="md-nav__link md-nav__link--group-title">Phase 2</span></li>
+                  
+                  
+                
+                <li class="md-nav__item md-nav__item--nested">
+                  <a href="../../phase2/assessment-feedback/" class="md-nav__link">GDS Alpha assessment feedback</a>
+                </li>
+              
+            </ul>
+          </nav>
+        </div>
+      </div>
+    </div>
+  
+  
+
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+    
+      
+    
+    <a href="https://github.com/DEFRA/digital-waste-tracking-api-docs/raw/main/docs/collections/phase1/receipt-api-implemented-data-model.md" title="View source of this page" class="md-content__button md-icon">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17 18c.56 0 1 .44 1 1s-.44 1-1 1-1-.44-1-1 .44-1 1-1m0-3c-2.73 0-5.06 1.66-6 4 .94 2.34 3.27 4 6 4s5.06-1.66 6-4c-.94-2.34-3.27-4-6-4m0 6.5a2.5 2.5 0 0 1-2.5-2.5 2.5 2.5 0 0 1 2.5-2.5 2.5 2.5 0 0 1 2.5 2.5 2.5 2.5 0 0 1-2.5 2.5M9.27 20H6V4h7v5h5v4.07c.7.08 1.36.25 2 .49V8l-6-6H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h4.5a8.2 8.2 0 0 1-1.23-2"/></svg>
+    </a>
+  
+
+
+<div class="admonition warning">
+<p class="admonition-title">Internal documentation</p>
+<p>This page is internal design/planning material for the delivery team, not published guidance for Software Providers integrating with the Digital Waste Tracking API. Content here may be incomplete, in-progress, or superseded.</p>
+</div>
+<h1 id="current-receipt-api-waste-movement-data-model">Current Receipt API Waste Movement Data Model</h1>
+<h2 id="scope">Scope</h2>
+<p>This document extracts the currently implemented waste movement data model for the Phase 1 receipt-of-waste API.</p>
+<p>It is based on the live Joi schemas and handlers in:</p>
+<ul>
+<li><code>waste-movement-external-api</code></li>
+<li><code>waste-movement-backend</code></li>
+</ul>
+<p>It covers:</p>
+<ul>
+<li><code>POST /movements/receive</code></li>
+<li><code>PUT /movements/{wasteTrackingId}/receive</code></li>
+<li>the public request and response model exposed by the external API</li>
+<li>the mapping from the public model into backend persistence</li>
+</ul>
+<p>It does not treat <code>openapi.yaml</code> as the source of truth for the current model. That file describes a broader future API and does not match the implemented receipt contract.</p>
+<h2 id="source-of-truth">Source Of Truth</h2>
+<p>Public API contract:</p>
+<ul>
+<li><code>waste-movement-external-api/src/routes/create-receipt-movement.js</code></li>
+<li><code>waste-movement-external-api/src/routes/update-receipt-movement.js</code></li>
+<li><code>waste-movement-external-api/src/schemas/receipt.js</code></li>
+<li><code>waste-movement-external-api/src/schemas/waste.js</code></li>
+<li><code>waste-movement-external-api/src/schemas/weight.js</code></li>
+<li><code>waste-movement-external-api/src/schemas/hazardous-waste-consignment.js</code></li>
+</ul>
+<p>Backend mapping and persistence:</p>
+<ul>
+<li><code>waste-movement-backend/src/routes/create-receipt-movement.js</code></li>
+<li><code>waste-movement-backend/src/routes/update-receipt-movement.js</code></li>
+<li><code>waste-movement-backend/src/schemas/movement.js</code></li>
+<li><code>waste-movement-backend/src/schemas/receipt.js</code></li>
+<li><code>waste-movement-backend/src/domain/wasteInput.js</code></li>
+<li><code>waste-movement-backend/src/services/movement-create.js</code></li>
+<li><code>waste-movement-backend/src/services/movement-update.js</code></li>
+</ul>
+<h2 id="endpoint-summary">Endpoint Summary</h2>
+<table>
+<thead>
+<tr>
+<th>Endpoint</th>
+<th>Purpose</th>
+<th>Request model</th>
+<th>Success response</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>POST /movements/receive</code></td>
+<td>Create a receipt movement when the caller does not already hold a waste tracking ID</td>
+<td><code>ReceiveMovementRequest</code></td>
+<td><code>201</code> with <code>wasteTrackingId</code> and optional validation warnings</td>
+</tr>
+<tr>
+<td><code>PUT /movements/{wasteTrackingId}/receive</code></td>
+<td>Update an existing receipt movement using a known waste tracking ID</td>
+<td><code>ReceiveMovementRequest</code></td>
+<td><code>200</code> with optional validation warnings, or <code>{}</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="public-request-model">Public Request Model</h2>
+<p>The public request payload is a single <code>ReceiveMovementRequest</code> object.</p>
+<h3 id="top-level-shape">Top-Level Shape</h3>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;apiCode&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;uuid&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;dateTimeReceived&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2026-01-31T10:15:30.000Z&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;hazardousWasteConsignmentCode&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;optional string&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;reasonForNoConsignmentCode&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;optional enum&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;yourUniqueReference&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;optional string&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;otherReferencesForMovement&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;label&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;reference&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">],</span>
+<span class="w">  </span><span class="nt">&quot;specialHandlingRequirements&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;optional string&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;wasteItems&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;ewcCodes&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;200101&quot;</span><span class="p">],</span>
+<span class="w">      </span><span class="nt">&quot;wasteDescription&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;physicalForm&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Solid&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;numberOfContainers&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;typeOfContainers&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;SKI&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;weight&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;metric&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Tonnes&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;amount&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">1.0</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;isEstimate&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;containsPops&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;pops&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{},</span>
+<span class="w">      </span><span class="nt">&quot;containsHazardous&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;hazardous&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{},</span>
+<span class="w">      </span><span class="nt">&quot;disposalOrRecoveryCodes&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">],</span>
+<span class="w">  </span><span class="nt">&quot;carrier&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{},</span>
+<span class="w">  </span><span class="nt">&quot;brokerOrDealer&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{},</span>
+<span class="w">  </span><span class="nt">&quot;receiver&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{},</span>
+<span class="w">  </span><span class="nt">&quot;receipt&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{}</span>
+<span class="p">}</span>
+</code></pre></div>
+<h3 id="top-level-fields">Top-Level Fields</h3>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Required</th>
+<th>Rules</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>apiCode</code></td>
+<td><code>string (uuid)</code></td>
+<td>Yes in the public API</td>
+<td>Used to identify the submitting organisation. The backend may replace it with <code>submittingOrganisation</code> internally.</td>
+</tr>
+<tr>
+<td><code>dateTimeReceived</code></td>
+<td><code>string (ISO 8601 date-time)</code></td>
+<td>Yes</td>
+<td>Receipt timestamp.</td>
+</tr>
+<tr>
+<td><code>hazardousWasteConsignmentCode</code></td>
+<td><code>string</code></td>
+<td>Conditional</td>
+<td>If provided, must match one of the accepted EA/NRW, SEPA, or NIEA formats.</td>
+</tr>
+<tr>
+<td><code>reasonForNoConsignmentCode</code></td>
+<td><code>string</code></td>
+<td>Conditional</td>
+<td>Allowed values: <code>NON_HAZ_WASTE_TRANSFER</code>, <code>NO_DOC_WITH_WASTE</code>, <code>HWRC_RECEIPT</code>. Required when hazardous EWC codes are present and no consignment code is supplied.</td>
+</tr>
+<tr>
+<td><code>yourUniqueReference</code></td>
+<td><code>string</code></td>
+<td>No</td>
+<td>Caller-defined reference.</td>
+</tr>
+<tr>
+<td><code>otherReferencesForMovement</code></td>
+<td><code>array&lt;object&gt;</code></td>
+<td>No</td>
+<td>Each item requires <code>label</code> and <code>reference</code>, both non-empty strings.</td>
+</tr>
+<tr>
+<td><code>specialHandlingRequirements</code></td>
+<td><code>string</code></td>
+<td>No</td>
+<td>Maximum length <code>5000</code>.</td>
+</tr>
+<tr>
+<td><code>wasteItems</code></td>
+<td><code>array&lt;WasteItem&gt;</code></td>
+<td>Yes</td>
+<td>Minimum <code>1</code> item.</td>
+</tr>
+<tr>
+<td><code>carrier</code></td>
+<td><code>Carrier</code></td>
+<td>No in schema</td>
+<td>Not marked <code>.required()</code> in the Joi schema, but present in the standard request shape and validated when supplied.</td>
+</tr>
+<tr>
+<td><code>brokerOrDealer</code></td>
+<td><code>BrokerOrDealer</code></td>
+<td>No</td>
+<td>Optional.</td>
+</tr>
+<tr>
+<td><code>receiver</code></td>
+<td><code>Receiver</code></td>
+<td>Yes</td>
+<td>Receiving site details.</td>
+</tr>
+<tr>
+<td><code>receipt</code></td>
+<td><code>Receipt</code></td>
+<td>Yes</td>
+<td>Currently contains receipt address only.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="nested-entities">Nested Entities</h2>
+<h3 id="carrier">Carrier</h3>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Required</th>
+<th>Rules</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>registrationNumber</code></td>
+<td><code>string \| null \| ''</code></td>
+<td>Yes</td>
+<td>Must match a valid England, SEPA, NRW, or NI carrier registration format unless omitted by the special reason flow.</td>
+</tr>
+<tr>
+<td><code>reasonForNoRegistrationNumber</code></td>
+<td><code>string \| null \| ''</code></td>
+<td>Conditional</td>
+<td>Allowed values: <code>ON_SITE</code>, <code>HOUSEHOLD</code>, <code>ONE_OFF</code>, <code>MARINE</code>. Required when <code>registrationNumber</code> is <code>null</code> or <code>''</code>. Forbidden otherwise.</td>
+</tr>
+<tr>
+<td><code>organisationName</code></td>
+<td><code>string</code></td>
+<td>Yes</td>
+<td>Carrier organisation name.</td>
+</tr>
+<tr>
+<td><code>address</code></td>
+<td><code>Address</code></td>
+<td>No</td>
+<td>If supplied, postcode may be UK or Ireland format.</td>
+</tr>
+<tr>
+<td><code>emailAddress</code></td>
+<td><code>string (email)</code></td>
+<td>No</td>
+<td>Standard email validation.</td>
+</tr>
+<tr>
+<td><code>phoneNumber</code></td>
+<td><code>string</code></td>
+<td>No</td>
+<td>Free text.</td>
+</tr>
+<tr>
+<td><code>vehicleRegistration</code></td>
+<td><code>string</code></td>
+<td>Conditional</td>
+<td>Required when <code>meansOfTransport</code> is <code>Road</code>. Forbidden for other transport modes.</td>
+</tr>
+<tr>
+<td><code>meansOfTransport</code></td>
+<td><code>string</code></td>
+<td>Yes</td>
+<td>Allowed values: <code>Road</code>, <code>Rail</code>, <code>Air</code>, <code>Sea</code>, <code>Inland Waterway</code>, <code>Piped</code>, <code>Other</code>.</td>
+</tr>
+<tr>
+<td><code>otherMeansOfTransport</code></td>
+<td><code>string</code></td>
+<td>No</td>
+<td>Present in the schema, but not currently made mandatory when <code>meansOfTransport</code> is <code>Other</code>.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="brokerordealer">BrokerOrDealer</h3>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Required</th>
+<th>Rules</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>organisationName</code></td>
+<td><code>string</code></td>
+<td>Yes when object supplied</td>
+<td>Required field inside the object.</td>
+</tr>
+<tr>
+<td><code>address</code></td>
+<td><code>Address</code></td>
+<td>No</td>
+<td>UK or Ireland postcode format if supplied.</td>
+</tr>
+<tr>
+<td><code>registrationNumber</code></td>
+<td><code>string</code></td>
+<td>No</td>
+<td>Uses the same carrier or broker registration validation as <code>carrier.registrationNumber</code>.</td>
+</tr>
+<tr>
+<td><code>phoneNumber</code></td>
+<td><code>string</code></td>
+<td>No</td>
+<td>Free text.</td>
+</tr>
+<tr>
+<td><code>emailAddress</code></td>
+<td><code>string (email)</code></td>
+<td>No</td>
+<td>Standard email validation.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="receiver">Receiver</h3>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Required</th>
+<th>Rules</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>siteName</code></td>
+<td><code>string</code></td>
+<td>Yes</td>
+<td>Receiving site name.</td>
+</tr>
+<tr>
+<td><code>emailAddress</code></td>
+<td><code>string (email)</code></td>
+<td>No</td>
+<td>Standard email validation.</td>
+</tr>
+<tr>
+<td><code>phoneNumber</code></td>
+<td><code>string</code></td>
+<td>No</td>
+<td>Free text.</td>
+</tr>
+<tr>
+<td><code>authorisationNumber</code></td>
+<td><code>string</code></td>
+<td>Yes</td>
+<td>Must match one of the supported site authorisation number regexes.</td>
+</tr>
+<tr>
+<td><code>regulatoryPositionStatements</code></td>
+<td><code>array&lt;number&gt;</code></td>
+<td>No</td>
+<td>Positive integers only.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="receipt">Receipt</h3>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Required</th>
+<th>Rules</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>address</code></td>
+<td><code>ReceiptAddress</code></td>
+<td>Yes</td>
+<td>Receipt address block.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="address">Address</h3>
+<p>Used by <code>carrier.address</code> and <code>brokerOrDealer.address</code>.</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Required</th>
+<th>Rules</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>fullAddress</code></td>
+<td><code>string</code></td>
+<td>No</td>
+<td>Optional in the generic address schema.</td>
+</tr>
+<tr>
+<td><code>postcode</code></td>
+<td><code>string</code></td>
+<td>Yes</td>
+<td>Must match a UK postcode or Irish Eircode.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="receiptaddress">ReceiptAddress</h3>
+<p>Used by <code>receipt.address</code>.</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Required</th>
+<th>Rules</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>fullAddress</code></td>
+<td><code>string</code></td>
+<td>Yes</td>
+<td>Required here, unlike the generic address schema.</td>
+</tr>
+<tr>
+<td><code>postcode</code></td>
+<td><code>string</code></td>
+<td>Yes</td>
+<td>Must match a UK postcode. Ireland format is not accepted here.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="wasteitem">WasteItem</h3>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Required</th>
+<th>Rules</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ewcCodes</code></td>
+<td><code>array&lt;string&gt;</code></td>
+<td>Yes</td>
+<td>Minimum <code>1</code>, maximum <code>5</code>. Each code must be a valid official 6-digit EWC code.</td>
+</tr>
+<tr>
+<td><code>wasteDescription</code></td>
+<td><code>string</code></td>
+<td>Yes</td>
+<td>Free text description.</td>
+</tr>
+<tr>
+<td><code>physicalForm</code></td>
+<td><code>string</code></td>
+<td>Yes</td>
+<td>Allowed values: <code>Gas</code>, <code>Liquid</code>, <code>Solid</code>, <code>Powder</code>, <code>Sludge</code>, <code>Mixed</code>.</td>
+</tr>
+<tr>
+<td><code>numberOfContainers</code></td>
+<td><code>integer</code></td>
+<td>Yes</td>
+<td>Must be greater than or equal to <code>0</code>.</td>
+</tr>
+<tr>
+<td><code>typeOfContainers</code></td>
+<td><code>string</code></td>
+<td>Yes</td>
+<td>Must be a valid reference-data container type.</td>
+</tr>
+<tr>
+<td><code>weight</code></td>
+<td><code>Weight</code></td>
+<td>Yes</td>
+<td>Required weight block.</td>
+</tr>
+<tr>
+<td><code>containsPops</code></td>
+<td><code>boolean</code></td>
+<td>Yes</td>
+<td>Strict boolean.</td>
+</tr>
+<tr>
+<td><code>pops</code></td>
+<td><code>Pops</code></td>
+<td>No</td>
+<td>Nullable object with conditional rules.</td>
+</tr>
+<tr>
+<td><code>containsHazardous</code></td>
+<td><code>boolean</code></td>
+<td>Yes</td>
+<td>Strict boolean.</td>
+</tr>
+<tr>
+<td><code>hazardous</code></td>
+<td><code>Hazardous</code></td>
+<td>No</td>
+<td>Nullable object with conditional rules.</td>
+</tr>
+<tr>
+<td><code>disposalOrRecoveryCodes</code></td>
+<td><code>array&lt;DisposalOrRecoveryCode&gt;</code></td>
+<td>No</td>
+<td>Optional list of treatment codes.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="weight">Weight</h3>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Required</th>
+<th>Rules</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>metric</code></td>
+<td><code>string</code></td>
+<td>Yes</td>
+<td>Allowed values: <code>Grams</code>, <code>Kilograms</code>, <code>Tonnes</code>.</td>
+</tr>
+<tr>
+<td><code>amount</code></td>
+<td><code>number</code></td>
+<td>Yes</td>
+<td>Strict numeric value, must be positive.</td>
+</tr>
+<tr>
+<td><code>isEstimate</code></td>
+<td><code>boolean</code></td>
+<td>Yes</td>
+<td>Strict boolean.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="pops">Pops</h3>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Required</th>
+<th>Rules</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>sourceOfComponents</code></td>
+<td><code>string</code></td>
+<td>Conditional</td>
+<td>Allowed values: <code>PROVIDED_WITH_WASTE</code>, <code>GUIDANCE</code>, <code>OWN_TESTING</code>, <code>NOT_PROVIDED</code>. Required when <code>containsPops</code> is <code>true</code>.</td>
+</tr>
+<tr>
+<td><code>components</code></td>
+<td><code>array&lt;PopComponent&gt; \| null</code></td>
+<td>Conditional</td>
+<td>Not required when <code>sourceOfComponents</code> is <code>PROVIDED_WITH_WASTE</code>. Required when <code>sourceOfComponents</code> is <code>GUIDANCE</code> or <code>OWN_TESTING</code>. Not allowed when <code>containsPops</code> is <code>false</code> or when <code>sourceOfComponents</code> is <code>NOT_PROVIDED</code> and an array with items is supplied.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="popcomponent">PopComponent</h3>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Required</th>
+<th>Rules</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>code</code></td>
+<td><code>string</code></td>
+<td>Yes</td>
+<td>Must be a valid POP code from reference data.</td>
+</tr>
+<tr>
+<td><code>concentration</code></td>
+<td><code>number \| null</code></td>
+<td>No</td>
+<td>If present, must be a positive number.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="hazardous">Hazardous</h3>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Required</th>
+<th>Rules</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>sourceOfComponents</code></td>
+<td><code>string</code></td>
+<td>Conditional</td>
+<td>Allowed values: <code>PROVIDED_WITH_WASTE</code>, <code>GUIDANCE</code>, <code>OWN_TESTING</code>, <code>NOT_PROVIDED</code>. Required when <code>containsHazardous</code> is <code>true</code>.</td>
+</tr>
+<tr>
+<td><code>hazCodes</code></td>
+<td><code>array&lt;string&gt;</code></td>
+<td>Conditional</td>
+<td>Each item must be a valid hazardous property code. The array is automatically deduplicated. Required when <code>containsHazardous</code> is <code>true</code> and <code>sourceOfComponents</code> is supplied.</td>
+</tr>
+<tr>
+<td><code>components</code></td>
+<td><code>array&lt;HazardousComponent&gt; \| null</code></td>
+<td>Conditional</td>
+<td>Same presence rules as POPs components.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="hazardouscomponent">HazardousComponent</h3>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Required</th>
+<th>Rules</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>name</code></td>
+<td><code>string</code></td>
+<td>Yes</td>
+<td>Component name.</td>
+</tr>
+<tr>
+<td><code>concentration</code></td>
+<td><code>number \| null</code></td>
+<td>No</td>
+<td>If present, must be a positive number.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="disposalorrecoverycode">DisposalOrRecoveryCode</h3>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Required</th>
+<th>Rules</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>code</code></td>
+<td><code>string</code></td>
+<td>Yes</td>
+<td>Must be one of the configured disposal or recovery codes.</td>
+</tr>
+<tr>
+<td><code>weight</code></td>
+<td><code>Weight</code></td>
+<td>Yes</td>
+<td>Required weight block for that code.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="cross-field-business-rules">Cross-Field Business Rules</h2>
+<h3 id="hazardous-consignment-logic">Hazardous consignment logic</h3>
+<ul>
+<li>Hazardous EWC codes are derived from the <code>wasteItems[*].ewcCodes</code> values.</li>
+<li>If hazardous EWC codes are present and <code>hazardousWasteConsignmentCode</code> is omitted, <code>reasonForNoConsignmentCode</code> becomes mandatory.</li>
+<li>If <code>hazardousWasteConsignmentCode</code> is explicitly <code>null</code> and no <code>reasonForNoConsignmentCode</code> is supplied, validation fails.</li>
+<li><code>reasonForNoConsignmentCode</code> must be one of:</li>
+<li><code>NON_HAZ_WASTE_TRANSFER</code></li>
+<li><code>NO_DOC_WITH_WASTE</code></li>
+<li><code>HWRC_RECEIPT</code></li>
+</ul>
+<h3 id="carrier-registration-logic">Carrier registration logic</h3>
+<ul>
+<li><code>carrier.registrationNumber</code> is always present in the public schema, but it may be <code>null</code> or <code>''</code>.</li>
+<li>If it is <code>null</code> or <code>''</code>, <code>carrier.reasonForNoRegistrationNumber</code> is required.</li>
+<li>If a real registration number is supplied, <code>carrier.reasonForNoRegistrationNumber</code> is forbidden.</li>
+</ul>
+<h3 id="transport-logic">Transport logic</h3>
+<ul>
+<li><code>carrier.vehicleRegistration</code> is required for <code>meansOfTransport = Road</code>.</li>
+<li><code>carrier.vehicleRegistration</code> is forbidden for any other transport mode.</li>
+</ul>
+<h3 id="pops-and-hazardous-detail-logic">POPs and hazardous detail logic</h3>
+<ul>
+<li><code>containsPops</code> and <code>containsHazardous</code> are both required booleans.</li>
+<li>If either flag is <code>true</code>, the corresponding object must provide <code>sourceOfComponents</code>.</li>
+<li>For <code>GUIDANCE</code> and <code>OWN_TESTING</code>, components are required.</li>
+<li>For <code>PROVIDED_WITH_WASTE</code>, components may be omitted.</li>
+<li>For <code>NOT_PROVIDED</code>, components must not be supplied as a populated array.</li>
+<li>If the corresponding <code>contains...</code> flag is <code>false</code>, populated component arrays are not allowed.</li>
+</ul>
+<h2 id="public-response-model">Public Response Model</h2>
+<h3 id="create-response">Create Response</h3>
+<p>Actual success response from the current handler:</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;wasteTrackingId&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;25ABC123&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;validation&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;warnings&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">      </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;key&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;field.path&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;errorType&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;NotProvided&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;message&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;warning text&quot;</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">    </span><span class="p">]</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>Notes:</p>
+<ul>
+<li><code>wasteTrackingId</code> is always returned on success.</li>
+<li>The implemented <code>wasteTrackingId</code> format is <code>YY[A-Z0-9]{6}</code>, for example <code>25ABC123</code>.</li>
+<li><code>validation</code> is only returned when warnings exist.</li>
+<li>The route Swagger schema also advertises <code>carrierMovementId</code>, but the current handler does not populate it.</li>
+<li>The route Swagger schema declares <code>wasteTrackingId</code> as a UUID, but the implemented ID service generates a year-prefixed alphanumeric token instead.</li>
+</ul>
+<h3 id="update-response">Update Response</h3>
+<p>Current success shape:</p>
+<ul>
+<li><code>{}</code> when there are no warnings</li>
+<li><code>{"validation":{"warnings":[...]}}</code> when warnings exist</li>
+</ul>
+<h3 id="error-response">Error Response</h3>
+<p>Validation failures use this shape:</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;validation&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;errors&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">      </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;key&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;field.path&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;errorType&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;InvalidValue&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;message&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;validation error message&quot;</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">    </span><span class="p">]</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>The supported <code>errorType</code> values are:</p>
+<ul>
+<li><code>NotProvided</code></li>
+<li><code>NotAllowed</code></li>
+<li><code>InvalidType</code></li>
+<li><code>InvalidFormat</code></li>
+<li><code>InvalidValue</code></li>
+<li><code>OutOfRange</code></li>
+<li><code>BusinessRuleViolation</code></li>
+<li><code>UnexpectedError</code></li>
+</ul>
+<p>Update also returns <code>404</code> when the movement does not exist.</p>
+<h2 id="backend-request-wrapper">Backend Request Wrapper</h2>
+<p>The backend does not accept the public payload directly. It accepts:</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;movement&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;...ReceiveMovementRequest or enriched variant...&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>In the backend schema, <code>movement</code> uses a slightly different version of <code>ReceiveMovementRequest</code>:</p>
+<ul>
+<li>it allows either <code>apiCode</code> or <code>submittingOrganisation</code></li>
+<li>it enforces <code>.xor('apiCode', 'submittingOrganisation')</code></li>
+</ul>
+<p>This is because the external API may enrich the request before forwarding it.</p>
+<h2 id="mapping-from-public-api-to-backend-persistence">Mapping From Public API To Backend Persistence</h2>
+<h3 id="external-api-enrichment">External API enrichment</h3>
+<p>Before the external API calls the backend, it attempts to resolve the organisation behind <code>apiCode</code> by calling the waste organisation backend.</p>
+<p>If resolution succeeds:</p>
+<ul>
+<li><code>apiCode</code> is removed from the forwarded request</li>
+<li><code>submittingOrganisation.defraCustomerOrganisationId</code> is added</li>
+</ul>
+<p>If resolution fails:</p>
+<ul>
+<li>the request is forwarded with <code>apiCode</code></li>
+<li>no <code>submittingOrganisation</code> field is added</li>
+</ul>
+<h3 id="backend-create-mapping">Backend create mapping</h3>
+<p>The backend stores receipt data in a <code>WasteInput</code> aggregate.</p>
+<p>Core create mapping:</p>
+<table>
+<thead>
+<tr>
+<th>Public or forwarded field</th>
+<th>Persisted location</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>wasteTrackingId</code></td>
+<td><code>_id</code>, <code>wasteTrackingId</code></td>
+<td><code>_id</code> is set to the same value.</td>
+</tr>
+<tr>
+<td><code>movement.*</code></td>
+<td><code>receipt.movement</code></td>
+<td>Main receipt payload is nested under <code>receipt.movement</code>.</td>
+</tr>
+<tr>
+<td><code>submittingOrganisation.defraCustomerOrganisationId</code></td>
+<td><code>submittingOrganisation.defraCustomerOrganisationId</code></td>
+<td>Used when the external API could resolve the organisation from <code>apiCode</code>.</td>
+</tr>
+<tr>
+<td><code>apiCode</code></td>
+<td><code>receipt.movement.apiCode</code> or omitted</td>
+<td>Persisted only when the request was not enriched to <code>submittingOrganisation</code>.</td>
+</tr>
+<tr>
+<td>derived organisation ID</td>
+<td><code>orgId</code></td>
+<td>Stored only in the non-enriched path.</td>
+</tr>
+<tr>
+<td>request trace ID</td>
+<td><code>traceId</code></td>
+<td>Request metadata.</td>
+</tr>
+<tr>
+<td>system timestamp</td>
+<td><code>createdAt</code>, <code>lastUpdatedAt</code></td>
+<td>Added on create.</td>
+</tr>
+<tr>
+<td>system revision</td>
+<td><code>revision</code></td>
+<td>Initial value is <code>1</code>.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="backend-update-mapping">Backend update mapping</h3>
+<p>On update the backend:</p>
+<ol>
+<li>loads the existing <code>waste-inputs</code> record by <code>_id = wasteTrackingId</code></li>
+<li>validates organisation identity using either <code>submittingOrganisation</code> or <code>apiCode</code></li>
+<li>writes a history entry to <code>waste-inputs-history</code></li>
+<li>updates <code>receipt.movement</code></li>
+<li>updates <code>submittingOrganisation</code> when present</li>
+<li>increments <code>revision</code></li>
+<li>updates <code>lastUpdatedAt</code> and <code>traceId</code></li>
+</ol>
+<h3 id="persisted-wasteinput-shape-used-by-receipt-flows">Persisted WasteInput shape used by receipt flows</h3>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;wasteTrackingId&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;wasteTrackingId&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;wasteTrackingId&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;receipt&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;movement&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;...receipt payload...&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;submittingOrganisation&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;defraCustomerOrganisationId&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;orgId&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;traceId&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;revision&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;createdAt&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;date&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;lastUpdatedAt&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;date&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;bulkId&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;optional string&quot;</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>Notes:</p>
+<ul>
+<li><code>WasteInput</code> also has <code>creation</code> and <code>collection</code> slots in the domain class, but they are not populated by the receipt endpoints described here.</li>
+<li><code>bulkId</code> exists in the domain shape but is not part of the public receipt API contract.</li>
+</ul>
+<h2 id="important-mismatches-and-caveats">Important Mismatches And Caveats</h2>
+<ol>
+<li>The public external API requires <code>apiCode</code>, but the backend route accepts either <code>apiCode</code> or <code>submittingOrganisation</code>.</li>
+<li>The public request is a flat <code>ReceiveMovementRequest</code>, but the backend route accepts <code>{ movement: ReceiveMovementRequest }</code>.</li>
+<li>The backend persists the payload under <code>receipt.movement</code>, not at the document root.</li>
+<li>The organisation identity may be stored either as <code>submittingOrganisation.defraCustomerOrganisationId</code> or as <code>orgId</code>, depending on whether enrichment happened before persistence.</li>
+<li>The create route Swagger schema documents <code>carrierMovementId</code>, but the current external handler does not return it.</li>
+<li>The create route Swagger schema declares <code>wasteTrackingId</code> as a UUID, but the implemented generator returns <code>YY[A-Z0-9]{6}</code>.</li>
+<li><code>carrier</code> is not marked required in the Joi schema even though it is part of the normal receipt payload shape.</li>
+<li><code>otherMeansOfTransport</code> exists but is not currently enforced when <code>meansOfTransport</code> is <code>Other</code>.</li>
+</ol>
+<h2 id="suggested-use-of-this-model">Suggested Use Of This Model</h2>
+<p>Use this document when you need to:</p>
+<ul>
+<li>reason about the live request and response contract</li>
+<li>map public payload fields to stored receipt documents</li>
+<li>assess how validation rules affect client integrations</li>
+<li>explain on-call issues where the external API shape and backend storage shape differ</li>
+</ul>
+
+
+
+
+
+
+
+  
+  
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+  <footer class="md-footer">
+    <div class="md-footer-meta__inner md-grid">
+       <div class="md-copyright">
+       
+<div class="md-social">
+  
+    
+    
+    
+    
+    <a href="mailto:wasteuserresearch@defra.gov.uk" target="_blank" rel="noopener" title="Contact us here" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M536.4-26.3c9.8-3.5 20.6-1 28 6.3s9.8 18.2 6.3 28l-178 496.9c-5 13.9-18.1 23.1-32.8 23.1-14.2 0-27-8.6-32.3-21.7l-64.2-158c-4.5-11-2.5-23.6 5.2-32.6l94.5-112.4c5.1-6.1 4.7-15-.9-20.6s-14.6-6-20.6-.9l-112.4 94.3c-9.1 7.6-21.6 9.6-32.6 5.2L38.1 216.8c-13.1-5.3-21.7-18.1-21.7-32.3 0-14.7 9.2-27.8 23.1-32.8z"/></svg>
+    </a>
+  
+    
+    
+    
+    
+    <a href="https://github.com/defra/waste-tracking-service" target="_blank" rel="noopener" title="Our DWT service is available here" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+</div>  Made with
+      <a
+        href="https://squidfunk.github.io/mkdocs-material/"
+        target="_blank"
+        rel="noopener"
+      >
+        Material for MkDocs
+      </a>
+      <br /><br />
+      <img
+        src="../../../assets/images/ogl.png"
+        alt="Open Government Licence logo"
+      />
+      All content is available under the
+      <a
+        href="https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/"
+        target="_blank"
+        rel="noopener"
+      >
+        Open Government Licence v3.0</a
+      >
+      , except where otherwise stated <br><br><br>
+      <a href="/waste-tracking-service/api-accessibility-statement" target="_blank" rel="noopener">Accessibility Statement</a>
+    </div>
+
+    <div class="md-copyright">
+      <a
+        href="https://www.nationalarchives.gov.uk/information-management/re-using-public-sector-information/uk-government-licensing-framework/crown-copyright/"
+        target="_blank"
+        rel="noopener"
+      >
+        <img
+          src="../../../assets/images/govuk-crest-2x.png"
+          width="125"
+          height="102"
+          alt="Gov UK Crest"
+        />
+        <br />
+        © Crown copyright
+      </a>
+    </div>
+  </div>
+</footer>
+
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["announce.dismiss", "navigation.tabs", "navigation.tabs.sticky", "navigation.indexes", "content.code.copy", "search.suggest", "search.share", "content.action.view", "toc.integrate"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": {"Accepted": "accepted", "Deprecated": "deprecated", "Draft": "draft", "Proposed": "proposed", "Rejected": "rejected", "Superseded": "superseded"}, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": "production", "provider": "mike"}}</script>
+    
+    
+  
+      <script src="../../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  <script>
+    (function () {
+      function fixAccessibility() {
+        // 1. Search dialog accessible name (AXE fix)
+        var dlg = document.querySelector('.md-search[role="dialog"]');
+        if (dlg) {
+          var hasName = dlg.hasAttribute('aria-label') || dlg.hasAttribute('aria-labelledby');
+          if (!hasName) {
+            dlg.setAttribute('aria-label', 'Search this site');
+          }
+        }
+
+        // 2. Empty form labels — add visually-hidden text to icon-only labels
+        function addLabelText(selector, text) {
+          document.querySelectorAll(selector).forEach(function (label) {
+            if (label.querySelector('.visually-hidden')) return;
+            var span = document.createElement('span');
+            span.className = 'visually-hidden';
+            span.textContent = text;
+            label.appendChild(span);
+          });
+        }
+
+        addLabelText('label[for="__drawer"]', 'Toggle navigation');
+        // Not label[for="__search"]: Material's search icon label holds two
+        // <svg> children (magnifier / back-arrow) and toggles which one is
+        // visible via svg:first-child/:last-child CSS depending on
+        // viewport. Appending a span here would become the new last child
+        // and break that selector, leaving both icons visible at once.
+
+        // Palette toggle labels
+        document.querySelectorAll('label[for^="__palette"]').forEach(function (label) {
+          if (label.querySelector('.visually-hidden')) return;
+          var title = label.getAttribute('title') || 'Toggle colour scheme';
+          var span = document.createElement('span');
+          span.className = 'visually-hidden';
+          span.textContent = title;
+          label.appendChild(span);
+        });
+
+        // Navigation section toggle labels
+        document.querySelectorAll('label[for^="__nav"], label[for^="nav-"]').forEach(function (label) {
+          if (label.querySelector('.visually-hidden')) return;
+          var nav = label.closest('.md-nav__item');
+          var link = nav ? nav.querySelector('.md-nav__link') : null;
+          var text = link ? 'Toggle ' + link.textContent.trim() : 'Toggle section';
+          var span = document.createElement('span');
+          span.className = 'visually-hidden';
+          span.textContent = text;
+          label.appendChild(span);
+        });
+
+        // Catch any remaining labels that only contain SVG/icons
+        document.querySelectorAll('label[for]').forEach(function (label) {
+          if (label.getAttribute('for') === '__search') return;
+          if (label.querySelector('.visually-hidden')) return;
+          var clone = label.cloneNode(true);
+          var els = clone.querySelectorAll('svg, img, .md-icon');
+          for (var i = 0; i < els.length; i++) { els[i].parentNode.removeChild(els[i]); }
+          if (!clone.textContent.trim()) {
+            var span = document.createElement('span');
+            span.className = 'visually-hidden';
+            span.textContent = label.getAttribute('title') || 'Toggle';
+            label.appendChild(span);
+          }
+        });
+
+        // Catch any inputs/selects without any label (missing form label)
+        document.querySelectorAll('input, select, textarea').forEach(function (input) {
+          if (input.type === 'hidden') return;
+          if (input.getAttribute('aria-label') || input.getAttribute('aria-labelledby')) return;
+          var id = input.id;
+          if (id && document.querySelector('label[for="' + id + '"]')) return;
+          // No label found — add aria-label
+          var name = input.getAttribute('name') || input.getAttribute('placeholder') || input.type || 'input';
+          input.setAttribute('aria-label', name.charAt(0).toUpperCase() + name.slice(1));
+        });
+
+        // 3. Multiple form labels — replace duplicate labels with spans
+        // Material intentionally ships three <label for="__search"> elements
+        // (mobile toggle button, search overlay, and the input icon) and
+        // shows only one at a time via CSS depending on viewport — that's
+        // not a duplicate-label bug, so leave those alone.
+        var labelsByFor = {};
+        document.querySelectorAll('label[for]').forEach(function (label) {
+          var forId = label.getAttribute('for');
+          if (forId === '__search') return;
+          if (!labelsByFor[forId]) labelsByFor[forId] = [];
+          labelsByFor[forId].push(label);
+        });
+        Object.keys(labelsByFor).forEach(function (forId) {
+          var labels = labelsByFor[forId];
+          if (labels.length > 1) {
+            for (var i = 1; i < labels.length; i++) {
+              var span = document.createElement('span');
+              span.innerHTML = labels[i].innerHTML;
+              span.className = labels[i].className;
+              span.setAttribute('aria-hidden', 'true');
+              labels[i].parentNode.replaceChild(span, labels[i]);
+            }
+          }
+        });
+
+        // 6. Empty links — add aria-label to social icon links
+        document.querySelectorAll('.md-social__link').forEach(function (link) {
+          if (!link.textContent.trim() && !link.getAttribute('aria-label')) {
+            var href = link.getAttribute('href') || '';
+            if (href.indexOf('mailto:') !== -1) {
+              link.setAttribute('aria-label', 'Send email');
+            } else if (href.indexOf('github') !== -1) {
+              link.setAttribute('aria-label', 'GitHub repository');
+            } else {
+              link.setAttribute('aria-label', 'External link');
+            }
+          }
+        });
+
+        // 7. Missing fieldset — wrap palette toggles in a fieldset
+        var palette = document.querySelector('.md-header__option');
+        if (palette && palette.tagName !== 'FIELDSET' && !palette.querySelector('fieldset')) {
+          var fieldset = document.createElement('fieldset');
+          fieldset.className = palette.className;
+          fieldset.style.border = 'none';
+          fieldset.style.padding = '0';
+          fieldset.style.margin = '0';
+          var legend = document.createElement('legend');
+          legend.className = 'visually-hidden';
+          legend.textContent = 'Colour scheme';
+          fieldset.appendChild(legend);
+          while (palette.firstChild) {
+            fieldset.appendChild(palette.firstChild);
+          }
+          palette.parentNode.replaceChild(fieldset, palette);
+        }
+
+        // 8. Palette toggle labels — remove title to avoid redundant title text
+        document.querySelectorAll('.md-header__option label, fieldset label').forEach(function (el) {
+          if (el.getAttribute('title') && el.querySelector('.visually-hidden')) {
+            el.removeAttribute('title');
+          }
+        });
+
+        // 9. Suspicious alt text — fix theme logo if generic
+        document.querySelectorAll('.md-header__button img, .md-logo img').forEach(function (img) {
+          var alt = img.getAttribute('alt') || '';
+          if (!alt || /^(logo|image|img|icon|picture)$/i.test(alt.trim())) {
+            img.setAttribute('alt', 'Defra Digital Waste Tracking home');
+          }
+        });
+      }
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', fixAccessibility);
+      } else {
+        fixAccessibility();
+      }
+      document.addEventListener('navigationend', fixAccessibility);
+    })();
+  </script>
+
+  </body>
+</html>
