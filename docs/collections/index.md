@@ -49,7 +49,7 @@ material.
 transitions that underlie the API. Currently a placeholder; the model
 will be developed once the API spec stabilises.
 
-[**API.**](api/README.md) The OpenAPI specification for the extended
+[**API.**](../api/README.md) The OpenAPI specification for the extended
 service. Covers fourteen paths across creation, collection, drop-off,
 receipt, fate-of-waste, and reference data. Includes Phase 1 receipt
 endpoints preserved verbatim.
@@ -69,7 +69,7 @@ and existing decisions.
 ## Where to start
 
 If you are a software vendor or developer integrating with the API, start
-at the [API workstream](api/README.md). If you are joining the project
+at the [API workstream](../api/README.md). If you are joining the project
 and want to know what has been decided so far, the
 [decisions register](decisions.md) is the fastest way in.
 

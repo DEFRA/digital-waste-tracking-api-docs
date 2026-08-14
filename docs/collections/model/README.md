@@ -17,7 +17,7 @@ API.
 Started at proposal level. This workstream now contains draft notes on the
 current Phase 1 storage model and a proposed MongoDB shape for Phase 2.
 It is still exploratory rather than settled design: the
-[API spec](../api/README.md) and decisions register remain the primary
+[API spec](../../api/README.md) and decisions register remain the primary
 drivers, and the model will continue to evolve as those stabilise.
 
 ## What will be here
