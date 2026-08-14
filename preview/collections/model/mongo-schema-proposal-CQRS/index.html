@@ -689,7 +689,8 @@ others append to an existing stream.</p>
 <span class="w">    </span><span class="nx">yourUniqueReference</span><span class="o">:</span><span class="w">     </span><span class="nb">String</span><span class="p">,</span><span class="w">  </span><span class="c1">// optional</span>
 <span class="w">    </span><span class="nx">otherReferencesForMovement</span><span class="o">:</span><span class="w"> </span><span class="p">[{</span><span class="w"> </span><span class="nx">label</span><span class="o">:</span><span class="w"> </span><span class="nb">String</span><span class="p">,</span><span class="w"> </span><span class="nx">reference</span><span class="o">:</span><span class="w"> </span><span class="nb">String</span><span class="w"> </span><span class="p">}],</span>
 <span class="w">    </span><span class="nx">carrier</span><span class="o">:</span><span class="w">             </span><span class="nb">Object</span><span class="p">,</span>
-<span class="w">    </span><span class="nx">receivedFromCarrier</span><span class="o">:</span><span class="w"> </span><span class="nb">Object</span><span class="w">       </span><span class="c1">// required when collectionType is &#39;TRANSIT&#39;</span>
+<span class="w">    </span><span class="nx">receivedFromCarrier</span><span class="o">:</span><span class="w"> </span><span class="nb">Object</span><span class="p">,</span><span class="w">      </span><span class="c1">// required when collectionType is &#39;TRANSIT&#39;</span>
+<span class="w">    </span><span class="nx">brokerOrDealer</span><span class="o">:</span><span class="w">      </span><span class="nb">Object</span><span class="w">       </span><span class="c1">// optional (D-008)</span>
 <span class="w">  </span><span class="p">}</span>
 <span class="p">}</span>
 </code></pre></div>
@@ -706,7 +707,8 @@ aggregate applies this during rehydration.</p>
 <span class="w">    </span><span class="c1">// amended fields when isDeleted is false:</span>
 <span class="w">    </span><span class="nx">collectionType</span><span class="o">:</span><span class="w">          </span><span class="nb">String</span><span class="p">,</span><span class="w">   </span><span class="c1">// optional</span>
 <span class="w">    </span><span class="nx">actualDateTimeCollected</span><span class="o">:</span><span class="w"> </span><span class="nb">Date</span><span class="p">,</span><span class="w">     </span><span class="c1">// optional</span>
-<span class="w">    </span><span class="nx">carrier</span><span class="o">:</span><span class="w">                 </span><span class="nb">Object</span><span class="w">    </span><span class="c1">// optional</span>
+<span class="w">    </span><span class="nx">carrier</span><span class="o">:</span><span class="w">                 </span><span class="nb">Object</span><span class="p">,</span><span class="w">   </span><span class="c1">// optional</span>
+<span class="w">    </span><span class="nx">brokerOrDealer</span><span class="o">:</span><span class="w">          </span><span class="nb">Object</span><span class="w">    </span><span class="c1">// optional (D-008)</span>
 <span class="w">  </span><span class="p">}</span>
 <span class="p">}</span>
 </code></pre></div>

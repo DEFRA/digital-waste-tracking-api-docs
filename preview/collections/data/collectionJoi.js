@@ -18,7 +18,8 @@ import Joi from 'joi'
 import {
   businessAddressSchema,
   otherReferenceSchema,
-  carrierSchema
+  carrierSchema,
+  brokerSchema
 } from './sharedSchemas.js'
 
 // ---------------------------------------------------------------------------
@@ -107,6 +108,10 @@ export const recordCollectionSchema = Joi.object({
       'Required when collectionType is TRANSIT; must not be provided when collectionType is STATIC. ' +
       'Enforced server-side. Captured for the record only — not cross-checked against the preceding event.'
     ),
+
+  brokerOrDealer: brokerSchema
+    .optional()
+    .description('Optional broker/dealer details, matching the Creation and Receipt shape (D-008).'),
 
   collection: collectionSchema
 }).description(

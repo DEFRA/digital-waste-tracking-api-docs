@@ -546,7 +546,7 @@ low impact.</p>
 </tr>
 <tr>
 <td>D-008</td>
-<td><a href="#carrier-always-required-broker-optional">Carrier always required; broker optional</a></td>
+<td><a href="#carrier-always-required-broker-or-dealer-optional-at-every-stage">Carrier always required; broker or dealer optional, at every stage</a></td>
 <td>✅ Decided</td>
 <td>🟠 Medium</td>
 <td><strong>Actors</strong></td>
@@ -888,23 +888,20 @@ cases produce this directly:</p>
 <p>The shape of the receipt and producer-query downstream both work cleanly
 off this model either way.</p>
 <p><a id="d-008"></a></p>
-<h3 id="carrier-always-required-broker-optional">Carrier always required; broker optional</h3>
+<h3 id="carrier-always-required-broker-or-dealer-optional-at-every-stage">Carrier always required; broker or dealer optional, at every stage</h3>
 <p><strong>D-008</strong> · ✅ Decided · Impact: 🟠 Medium · Area: <strong>Actors</strong> · Related: <a href="#d-030">D-030</a></p>
-<p><strong>Context.</strong> A movement may be initiated by a carrier or by a broker
-(or producer, or receiver — all acting in the broker role here). The
-carrier is always physically involved; the broker is not always
-involved.</p>
-<p><strong>Decision.</strong> <code>carrierDetails</code> is required on movement creation.
-<code>brokerDetails</code> is required only when the movement is broker-initiated.
-The broker-vs-carrier discriminated union proposed earlier is deferred.</p>
-<p><strong>Reaffirmed.</strong> A later BA discussion asked whether the carrier
-requirement could be relaxed for non-hazardous waste. Outcome: no change —
-<code>carrierDetails</code> is always required at creation regardless of hazardous
-status.</p>
-<p><strong>Consequences.</strong> Schema is straightforward. Server-side logic
-validates that <code>brokerDetails</code> is present when needed. Reintroducing
-the discriminated union is possible later without breaking clients
-that already supply both forms.</p>
+<p><strong>Context.</strong> A movement may involve a carrier and, separately, a
+broker or dealer. The carrier is always physically involved; the
+broker or dealer is not always involved, and their details may need
+confirming or re-confirming at more than one stage.</p>
+<p><strong>Decision.</strong> <code>carrier</code> is required on every write event — Creation,
+Collection, and Receipt. <code>brokerOrDealer</code> is optional on all three,
+using the same shared object shape throughout. The broker-vs-carrier
+discriminated union proposed earlier remains deferred (see D-030).</p>
+<p><strong>Consequences.</strong> Schema is consistent across all three request
+bodies. Server-side logic validates <code>brokerOrDealer</code> the same way at
+each stage. Reintroducing the discriminated union is possible later
+without breaking clients that already supply both forms.</p>
 <p><a id="d-009"></a></p>
 <h3 id="soft-delete-via-isdeleted-set-only-on-put">Soft-delete via <code>isDeleted</code>, set only on PUT</h3>
 <p><strong>D-009</strong> · ✅ Decided · Impact: 🟠 Medium · Area: <strong>Lifecycle</strong> · Related: <a href="#d-007">D-007</a>, <a href="#d-014">D-014</a>, <a href="#d-015">D-015</a>, <a href="#d-017">D-017</a>, <a href="#d-029">D-029</a>, <a href="#d-034">D-034</a></p>

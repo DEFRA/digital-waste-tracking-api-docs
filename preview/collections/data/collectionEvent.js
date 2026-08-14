@@ -9,10 +9,10 @@
  * Carrier is required at collection time.
  */
 
-// Re-export carrier fixtures so tests can reuse them.
-export { carrier } from './creationEvent.js'
+// Re-export carrier and broker/dealer fixtures so tests can reuse them.
+export { carrier, brokerOrDealer } from './creationEvent.js'
 
-import { carrier } from './creationEvent.js'
+import { carrier, brokerOrDealer } from './creationEvent.js'
 
 // Carrier that handed the waste to the second driver on a transit leg.
 export const receivedFromCarrier = {
@@ -50,6 +50,7 @@ export const publicPostBody = {
   ],
   isDeleted: false,
   carrier,
+  brokerOrDealer,
   collection
 }
 
