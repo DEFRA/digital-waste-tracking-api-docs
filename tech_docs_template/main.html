@@ -5,6 +5,13 @@
 {# keep default content #}
 {% block content %}{{ super() }}{% endblock %}
 
+{% block extrahead %}
+  {{ super() }}
+  {% if page and page.meta and page.meta.robots %}
+    <meta name="robots" content="{{ page.meta.robots }}">
+  {% endif %}
+{% endblock %}
+
 {# add our patch after all scripts so the DOM is ready #}
 {% block scripts %}
   {{ super() }}
