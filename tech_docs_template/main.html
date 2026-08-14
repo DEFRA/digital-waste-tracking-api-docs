@@ -12,6 +12,84 @@
   {% endif %}
 {% endblock %}
 
+{# Collections pages are deliberately left out of mkdocs.yml's nav (kept
+   out of the main menu/tabs Software Providers see), so mkdocs never
+   builds them a primary sidebar. This gives them their own hand-built
+   one, scoped to collections/* pages only — the public pages' sidebar
+   (driven by the real nav config) is untouched. #}
+{% block site_nav %}
+  {% if page and page.url and page.url.startswith("collections/") %}
+    {% set collections_nav = [
+      ("collections/", "Overview", none),
+      ("collections/decisions/", "Decisions", none),
+      ("collections/glossary/", "Glossary", none),
+      ("collections/plan/", "Plan", none),
+      ("collections/registration/", "Registration", none),
+      ("collections/docs/", "Notes", none),
+      ("collections/api/", "Overview", "API"),
+      ("collections/model/", "Overview", "Data model"),
+      ("collections/model/phase1-waste-inputs/", "Phase 1: current waste-inputs model", "Data model"),
+      ("collections/model/mongo-schema-proposal/", "Mongo schema proposal (Option A)", "Data model"),
+      ("collections/model/mongo-schema-proposal-per-event/", "Mongo schema proposal — per event (Option B)", "Data model"),
+      ("collections/model/mongo-schema-proposal-CQRS/", "Mongo schema proposal — CQRS (Option C)", "Data model"),
+      ("collections/phase1/receipt-api-implemented-data-model/", "Receipt API implemented data model", "Phase 1 reference"),
+      ("collections/phase1/receipt-data-definitions/", "Receipt data definitions", "Phase 1 reference"),
+      ("collections/phase2/assessment-feedback/", "GDS Alpha assessment feedback", "Phase 2"),
+    ] %}
+    <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation">
+      <div class="md-sidebar__scrollwrap">
+        <div class="md-sidebar__inner">
+          <nav class="md-nav md-nav--primary" aria-label="Collections navigation" data-md-level="0">
+            <label class="md-nav__title" for="__drawer">
+              <span class="md-nav__icon md-icon"></span>
+              Collections
+            </label>
+            <ul class="md-nav__list" data-md-scrollfix>
+              {% set ns = namespace(group=none) %}
+              {% for href, label, group in collections_nav %}
+                {% if group != ns.group %}
+                  {% if group %}
+                    <li class="md-nav__item"><span class="md-nav__link md-nav__link--group-title">{{ group }}</span></li>
+                  {% endif %}
+                  {% set ns.group = group %}
+                {% endif %}
+                <li class="md-nav__item{% if page.url == href %} md-nav__item--active{% endif %}{% if group %} md-nav__item--nested{% endif %}">
+                  <a href="{{ href | url }}" class="md-nav__link{% if page.url == href %} md-nav__link--active{% endif %}">{{ label }}</a>
+                </li>
+              {% endfor %}
+            </ul>
+          </nav>
+        </div>
+      </div>
+    </div>
+  {% else %}
+    {% if nav %}
+      {% if page.meta and page.meta.hide %}
+        {% set hidden = "hidden" if "navigation" in page.meta.hide %}
+      {% endif %}
+      <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" {{ hidden }}>
+        <div class="md-sidebar__scrollwrap">
+          <div class="md-sidebar__inner">
+            {% include "partials/nav.html" %}
+          </div>
+        </div>
+      </div>
+    {% endif %}
+  {% endif %}
+  {% if "toc.integrate" not in features %}
+    {% if page.meta and page.meta.hide %}
+      {% set hidden = "hidden" if "toc" in page.meta.hide %}
+    {% endif %}
+    <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" {{ hidden }}>
+      <div class="md-sidebar__scrollwrap">
+        <div class="md-sidebar__inner">
+          {% include "partials/toc.html" %}
+        </div>
+      </div>
+    </div>
+  {% endif %}
+{% endblock %}
+
 {# add our patch after all scripts so the DOM is ready #}
 {% block scripts %}
   {{ super() }}
