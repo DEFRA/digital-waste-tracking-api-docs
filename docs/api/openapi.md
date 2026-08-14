@@ -9,7 +9,7 @@ robots: noindex, nofollow
 
 # OpenAPI viewer
 
-An inline viewer for the [OpenAPI specification](README.md), rendered
+An inline viewer for the [OpenAPI specification](index.md), rendered
 from `openapi.yaml` in this directory.
 
 <swagger-ui src="openapi.yaml"/>

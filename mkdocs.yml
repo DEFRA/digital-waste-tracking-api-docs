@@ -36,8 +36,8 @@ theme:
     scheme: default
 nav:
   - Digital Waste Tracking:
-    - About: README.md
-    - API spec: api-spec.md
+    - About: index.md
+    - API spec: api/openapi.md
 edit_uri: edit/main/docs/
 plugins:
   - material/search
