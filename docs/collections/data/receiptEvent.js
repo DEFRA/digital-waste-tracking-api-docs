@@ -78,6 +78,7 @@ export const wasteItems = [
         }
       ]
     },
+    // Actual Treatment (D-031) — the confirmed, authoritative treatment outcome.
     disposalOrRecoveryCodes: [
       {
         code: 'R1',

@@ -85,6 +85,7 @@ export type WasteItem = {
   numberOfContainers: number
   ewcCodes: string[]
 
+  /** Actual Treatment (D-031). The confirmed, authoritative treatment outcome as determined by the receiver. Optional, unchanged from Phase 1. */
   disposalOrRecoveryCodes?: DisposalOrRecoveryCode[]
 
   containsPops: boolean

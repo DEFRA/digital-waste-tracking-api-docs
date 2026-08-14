@@ -129,9 +129,6 @@ export type BrokerOrDealer = BrokerDetails
  * A waste item declared at movement creation.
  *
  * Creation uses the same waste item structure as Receipt.
- * disposalOrRecoveryCodes are optional at Creation because they represent an
- * intended or planned treatment outcome at most. The treatment outcome is
- * determined at Receipt.
  */
 export type CreateWasteItem = {
   weight: Weight
@@ -140,7 +137,8 @@ export type CreateWasteItem = {
   physicalForm: PhysicalForm
   numberOfContainers: number
   ewcCodes: string[]
-  disposalOrRecoveryCodes?: DisposalOrRecoveryCode[]
+  /** Intended Treatment (D-031). Mandatory at Creation — the receiver confirms the authoritative Actual Treatment at Receipt. */
+  disposalOrRecoveryCodes: DisposalOrRecoveryCode[]
   containsPops: boolean
   pops?: Pops
   containsHazardous: boolean

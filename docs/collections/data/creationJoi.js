@@ -9,7 +9,8 @@
  * - apiCode is required, as per Receipt.
  * - estimatedDateTimeCollected follows the same DateTime naming style as dateTimeReceived.
  * - Root objects are producer, carrier, brokerOrDealer and receiver.
- * - Creation wasteItems use the same structure as Receipt. disposalOrRecoveryCodes are optional at Creation.
+ * - Creation wasteItems use the same structure as Receipt. disposalOrRecoveryCodes are mandatory at
+ *   Creation (Intended Treatment) — the receiver confirms the Actual Treatment at Receipt (D-031).
  * - Municipal is an accepted wasteSource.
  * - receiver is required only when the movement contains hazardous waste.
  * - receiver.authorisationNumber and receiver.address are required when receiver.siteName is populated.
@@ -111,8 +112,8 @@ const disposalOrRecoveryCodeSchema = Joi.object({
 
 /**
  * Creation uses the same waste item structure as Receipt. disposalOrRecoveryCodes
- * are optional at Creation because they represent intended/planned treatment at
- * most; the treatment outcome is determined at Receipt.
+ * is mandatory at Creation — it represents the Intended Treatment, a planning
+ * figure; the receiver confirms the authoritative Actual Treatment at Receipt (D-031).
  */
 const createWasteItemSchema = Joi.object({
   weight: weightSchema
@@ -161,9 +162,11 @@ const createWasteItemSchema = Joi.object({
 
   disposalOrRecoveryCodes: Joi.array()
     .items(disposalOrRecoveryCodeSchema)
-    .optional()
+    .min(1)
+    .required()
     .description(
-      'Optional at Creation. Represents intended or planned treatment information when known. ' +
+      'Intended Treatment (D-031). Mandatory at Creation — the treatment planned for this waste item. ' +
+      'The receiver confirms the authoritative Actual Treatment at Receipt. ' +
       'Each disposal or recovery code entry must include both a valid code and a weight.'
     ),
 
