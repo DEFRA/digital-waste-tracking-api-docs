@@ -3,6 +3,8 @@
 ## Running the docs locally
 
 ```
-brew install mkdocs-material
+python3 -m venv .venv
+source .venv/bin/activate
+pip install mkdocs-material mike mkdocs-swagger-ui-tag
 mkdocs serve
 ```

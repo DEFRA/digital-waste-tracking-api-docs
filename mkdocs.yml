@@ -41,6 +41,7 @@ nav:
 edit_uri: edit/main/docs/
 plugins:
   - material/search
+  - swagger-ui-tag
   #- git-revision-date-localized
 #      type: custom
  #     custom_format: "%d %B %Y"
