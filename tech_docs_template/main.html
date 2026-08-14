@@ -54,7 +54,7 @@
                   {% endif %}
                   {% set ns.group = group %}
                 {% endif %}
-                <li class="md-nav__item{% if page.url == href %} md-nav__item--active{% endif %}{% if group %} md-nav__item--nested{% endif %}">
+                <li class="md-nav__item{% if page.url == href %} md-nav__item--active{% endif %}{% if group %} collections-nav__item--grouped{% endif %}">
                   <a href="{{ href | url }}" class="md-nav__link{% if page.url == href %} md-nav__link--active{% endif %}">{{ label }}</a>
                 </li>
               {% endfor %}
