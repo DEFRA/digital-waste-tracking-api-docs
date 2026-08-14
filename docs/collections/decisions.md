@@ -53,7 +53,7 @@ At-a-glance view of every decision, sorted by status, then by impact (structural
 | D-017 | [Drop-off PUT restricted to soft-delete only](#drop-off-put-restricted-to-soft-delete-only) | ✅ Decided | 🟠 Medium | **Lifecycle** |
 | D-018 | [Drop-off address derivability](#drop-off-address-derivability) | ✅ Decided | 🟠 Medium | **Drop-off** |
 | D-029 | [Transit collection (driver-to-driver) recorded as a sequence of collection events](#transit-collection-driver-to-driver-recorded-as-a-sequence-of-collection-events) | ✅ Decided | 🟠 Medium | **Collection** |
-| D-031 | [Disposal/recovery codes optional at Creation](#disposalrecovery-codes-optional-at-creation) | ✅ Decided | 🟠 Medium | **Collection** |
+| D-031 | [Disposal/recovery codes: mandatory Intended Treatment at Creation, Actual Treatment at Receipt](#disposalrecovery-codes-mandatory-intended-treatment-at-creation-actual-treatment-at-receipt) | ✅ Decided | 🟠 Medium | **Collection** |
 | D-032 | [Waste item weights are not captured at Collection or Drop-off](#waste-item-weights-are-not-captured-at-collection-or-drop-off) | ✅ Decided | 🟠 Medium | **Collection** |
 | D-034 | [PUT operations use history/revision pattern across all events](#put-operations-use-historyrevision-pattern-across-all-events) | ✅ Decided | 🟠 Medium | **Lifecycle** |
 | D-027 | [Per-organisation vs per-actor API credentials](#per-organisation-vs-per-actor-api-credentials) | ✅ Decided | 🟠 Medium | **Onboarding** |
@@ -887,28 +887,28 @@ sequence rather than a discriminated shape on a single call.
   per-event handle and is tracked as [D-035](#d-035).
 
 <a id="d-031"></a>
-### Disposal/recovery codes optional at Creation
+### Disposal/recovery codes: mandatory Intended Treatment at Creation, Actual Treatment at Receipt
 
 **D-031** · ✅ Decided · Impact: 🟠 Medium · Area: **Collection** · Related: [D-006](#d-006), [D-019](#d-019)
 
 **Context.** `wasteItems[].disposalOrRecoveryCodes` is the treatment
 outcome — what the receiver does with the waste (R-codes for recovery,
-D-codes for disposal). An early Creation draft made the array required
-(`min(1)`) per waste item, which is stricter than the live Receipt
-contract, where the same field is optional.
+D-codes for disposal). It's captured at both Creation and Receipt, but
+represents a different thing at each stage.
 
-**Decision.** Optional at Creation. At Creation the codes represent an
-*intended / planned* treatment at most; the authoritative treatment
-outcome is determined by the receiver and recorded at Receipt. This also
-restores parity with the Phase 1 Receipt model (where the field is
-optional) and avoids forcing the planning party to assert a treatment it
-cannot yet know.
+**Decision.** At Creation, the field is the **Intended Treatment** — the
+planned outcome, and is now mandatory (at least one code required). At
+Receipt, the field is the **Actual Treatment** — the confirmed,
+authoritative outcome as determined by the receiver, and stays optional,
+unchanged. Both use the same underlying shape; only the label,
+description, and Creation's requiredness change.
 
-**Consequences.** Creation `wasteItems` may carry `disposalOrRecoveryCodes`
-when an intended treatment is known, but validation does not require it.
-Receipt remains the source of truth for treatment. Feeds the treatment-code
-split question ([D-019](#d-019)): a planned code at Creation is not the
-same as `startTreatmentCode`/`finalTreatmentCode` derived at Receipt.
+**Consequences.** A Movement's intended treatment is now always known
+from Creation onward. Receipt remains the source of truth for the actual
+outcome, which may differ from what was intended. Feeds the
+treatment-code split question ([D-019](#d-019)): Intended Treatment at
+Creation is not the same as `startTreatmentCode`/`finalTreatmentCode`
+derived at Receipt.
 
 <a id="d-032"></a>
 ### Waste item weights are not captured at Collection or Drop-off
