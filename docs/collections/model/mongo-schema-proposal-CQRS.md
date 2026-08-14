@@ -4,6 +4,9 @@ search:
 robots: noindex, nofollow
 ---
 
+!!! warning "Internal documentation"
+    This page is internal design/planning material for the delivery team, not published guidance for Software Providers integrating with the Digital Waste Tracking API. Content here may be incomplete, in-progress, or superseded.
+
 # Mongo schema proposal — CQRS / Event Sourcing
 
 This document describes an alternative Phase 2 storage model based on

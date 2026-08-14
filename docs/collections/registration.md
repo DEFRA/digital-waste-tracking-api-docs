@@ -4,6 +4,9 @@ search:
 robots: noindex, nofollow
 ---
 
+!!! warning "Internal documentation"
+    This page is internal design/planning material for the delivery team, not published guidance for Software Providers integrating with the Digital Waste Tracking API. Content here may be incomplete, in-progress, or superseded.
+
 # Software Provider Registration and `apiCode` Issuance
 
 This document covers how software providers (carrier, broker, producer, and
