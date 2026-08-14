@@ -38,8 +38,6 @@ nav:
   - Digital Waste Tracking:
     - About: README.md
     - API spec: api-spec.md
-extra_css:
-  - stylesheets/extra.css
 edit_uri: edit/main/docs/
 plugins:
   - material/search
