@@ -1,9 +1,10 @@
 # Digital Waste Tracking: software provider integration guidance
 
 **Status:** draft outline, v0.1
+
 **Owner:** Dave Oliver
 
-This is a working skeleton for a guidance document aimed at software providers who want to integrate their systems with the Defra API for recording waste movements. Section headings and structure are stable; most section bodies are placeholders to be filled in as the API design firms up. See [Appendix C](#appendix-c-open-questions-log) for the current list of gaps.
+This is a working skeleton for a guidance document to help software providers integrate their systems with the Defra API for recording waste movements. Section headings and structure are stable; most section bodies are placeholders to be filled in as the API design firms up. [Appendix C](#appendix-c-open-questions-log) includes a list of gaps so far.
 
 ## Contents
 
