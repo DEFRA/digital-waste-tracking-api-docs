@@ -46,7 +46,7 @@ At-a-glance view of every decision, sorted by status, then by impact (structural
 | D-036 | [Write authorisation: open append, amend restricted to the authoring organisation](#write-authorisation-open-append-amend-restricted-to-the-authoring-organisation) | ✅ Decided | 🔴 High | **Authorisation** |
 | D-004 | [Receipt path parameter stays `{wasteTrackingId}`](#receipt-path-parameter-stays-wastetrackingid) | ✅ Decided | 🟠 Medium | **Identifiers** |
 | D-006 | [Cross-check of receipt details against the linked drop-off](#cross-check-of-receipt-details-against-the-linked-drop-off) | ✅ Decided | 🟠 Medium | **Receipt** |
-| D-008 | [Carrier always required; broker optional](#carrier-always-required-broker-optional) | ✅ Decided | 🟠 Medium | **Actors** |
+| D-008 | [Carrier always required; broker or dealer optional, at every stage](#carrier-always-required-broker-or-dealer-optional-at-every-stage) | ✅ Decided | 🟠 Medium | **Actors** |
 | D-009 | [Soft-delete via `isDeleted`, set only on PUT](#soft-delete-via-isdeleted-set-only-on-put) | ✅ Decided | 🟠 Medium | **Lifecycle** |
 | D-010 | [Hazardous waste cannot be merged across Movements at drop-off](#hazardous-waste-cannot-be-merged-across-movements-at-drop-off) | ✅ Decided | 🟠 Medium | **Drop-off** |
 | D-014 | [Sub-resource 404 shape: parent-not-found vs event-not-recorded](#sub-resource-404-shape-parent-not-found-vs-event-not-recorded) | ✅ Decided | 🟠 Medium | **Lifecycle** |
@@ -276,28 +276,24 @@ The shape of the receipt and producer-query downstream both work cleanly
 off this model either way.
 
 <a id="d-008"></a>
-### Carrier always required; broker optional
+### Carrier always required; broker or dealer optional, at every stage
 
 **D-008** · ✅ Decided · Impact: 🟠 Medium · Area: **Actors** · Related: [D-030](#d-030)
 
-**Context.** A movement may be initiated by a carrier or by a broker
-(or producer, or receiver — all acting in the broker role here). The
-carrier is always physically involved; the broker is not always
-involved.
+**Context.** A movement may involve a carrier and, separately, a
+broker or dealer. The carrier is always physically involved; the
+broker or dealer is not always involved, and their details may need
+confirming or re-confirming at more than one stage.
 
-**Decision.** `carrierDetails` is required on movement creation.
-`brokerDetails` is required only when the movement is broker-initiated.
-The broker-vs-carrier discriminated union proposed earlier is deferred.
+**Decision.** `carrier` is required on every write event — Creation,
+Collection, and Receipt. `brokerOrDealer` is optional on all three,
+using the same shared object shape throughout. The broker-vs-carrier
+discriminated union proposed earlier remains deferred (see D-030).
 
-**Reaffirmed.** A later BA discussion asked whether the carrier
-requirement could be relaxed for non-hazardous waste. Outcome: no change —
-`carrierDetails` is always required at creation regardless of hazardous
-status.
-
-**Consequences.** Schema is straightforward. Server-side logic
-validates that `brokerDetails` is present when needed. Reintroducing
-the discriminated union is possible later without breaking clients
-that already supply both forms.
+**Consequences.** Schema is consistent across all three request
+bodies. Server-side logic validates `brokerOrDealer` the same way at
+each stage. Reintroducing the discriminated union is possible later
+without breaking clients that already supply both forms.
 
 <a id="d-009"></a>
 ### Soft-delete via `isDeleted`, set only on PUT

@@ -175,6 +175,7 @@ Owns:
       ],
       carrier: Object,
       receivedFromCarrier: Object,
+      brokerOrDealer: Object,
       collection: Object,
       isDeleted: Boolean,
       validation: {
