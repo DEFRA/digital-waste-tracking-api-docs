@@ -586,6 +586,17 @@ tracked in the <a href="../decisions/">decisions register</a>. How the receipt l
 to the drop-off — and therefore whether the cross-check is unconditional
 or conditional on a supplied Transfer ID — depends on the open
 receipt-migration decision; see the register.</p>
+<h3 id="intended-treatment">Intended Treatment</h3>
+<p>The disposal or recovery treatment planned for a waste item, captured
+in <code>wasteItems[].disposalOrRecoveryCodes</code> at Creation. Mandatory — a
+planning figure, not a guarantee of the eventual outcome. See
+<a href="../decisions/#d-031">D-031</a>.</p>
+<h3 id="actual-treatment">Actual Treatment</h3>
+<p>The confirmed disposal or recovery treatment applied to a waste item,
+captured in the same <code>disposalOrRecoveryCodes</code> field at Receipt.
+Optional, and authoritative — the receiver's Actual Treatment is the
+source of truth, and may differ from what was intended at Creation. See
+<a href="../decisions/#d-031">D-031</a>.</p>
 
 
 

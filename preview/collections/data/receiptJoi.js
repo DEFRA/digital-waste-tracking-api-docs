@@ -361,6 +361,8 @@ const wasteItemSchema = Joi.object({
   disposalOrRecoveryCodes: Joi.array()
     .items(disposalOrRecoveryCodeSchema)
     .description(
+      'Actual Treatment (D-031). The confirmed treatment, as determined by the receiver — ' +
+      'the authoritative treatment outcome. Optional, unchanged from Phase 1. ' +
       'Each disposal or recovery code entry must include both a valid code and a weight.'
     ),
 

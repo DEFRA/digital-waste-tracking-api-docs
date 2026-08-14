@@ -595,7 +595,7 @@ low impact.</p>
 </tr>
 <tr>
 <td>D-031</td>
-<td><a href="#disposalrecovery-codes-optional-at-creation">Disposal/recovery codes optional at Creation</a></td>
+<td><a href="#disposalrecovery-codes-mandatory-intended-treatment-at-creation-actual-treatment-at-receipt">Disposal/recovery codes: mandatory Intended Treatment at Creation, Actual Treatment at Receipt</a></td>
 <td>✅ Decided</td>
 <td>🟠 Medium</td>
 <td><strong>Collection</strong></td>
@@ -1416,24 +1416,24 @@ sequence rather than a discriminated shape on a single call.</p>
   per-event handle and is tracked as <a href="#d-035">D-035</a>.</li>
 </ul>
 <p><a id="d-031"></a></p>
-<h3 id="disposalrecovery-codes-optional-at-creation">Disposal/recovery codes optional at Creation</h3>
+<h3 id="disposalrecovery-codes-mandatory-intended-treatment-at-creation-actual-treatment-at-receipt">Disposal/recovery codes: mandatory Intended Treatment at Creation, Actual Treatment at Receipt</h3>
 <p><strong>D-031</strong> · ✅ Decided · Impact: 🟠 Medium · Area: <strong>Collection</strong> · Related: <a href="#d-006">D-006</a>, <a href="#d-019">D-019</a></p>
 <p><strong>Context.</strong> <code>wasteItems[].disposalOrRecoveryCodes</code> is the treatment
 outcome — what the receiver does with the waste (R-codes for recovery,
-D-codes for disposal). An early Creation draft made the array required
-(<code>min(1)</code>) per waste item, which is stricter than the live Receipt
-contract, where the same field is optional.</p>
-<p><strong>Decision.</strong> Optional at Creation. At Creation the codes represent an
-<em>intended / planned</em> treatment at most; the authoritative treatment
-outcome is determined by the receiver and recorded at Receipt. This also
-restores parity with the Phase 1 Receipt model (where the field is
-optional) and avoids forcing the planning party to assert a treatment it
-cannot yet know.</p>
-<p><strong>Consequences.</strong> Creation <code>wasteItems</code> may carry <code>disposalOrRecoveryCodes</code>
-when an intended treatment is known, but validation does not require it.
-Receipt remains the source of truth for treatment. Feeds the treatment-code
-split question (<a href="#d-019">D-019</a>): a planned code at Creation is not the
-same as <code>startTreatmentCode</code>/<code>finalTreatmentCode</code> derived at Receipt.</p>
+D-codes for disposal). It's captured at both Creation and Receipt, but
+represents a different thing at each stage.</p>
+<p><strong>Decision.</strong> At Creation, the field is the <strong>Intended Treatment</strong> — the
+planned outcome, and is now mandatory (at least one code required). At
+Receipt, the field is the <strong>Actual Treatment</strong> — the confirmed,
+authoritative outcome as determined by the receiver, and stays optional,
+unchanged. Both use the same underlying shape; only the label,
+description, and Creation's requiredness change.</p>
+<p><strong>Consequences.</strong> A Movement's intended treatment is now always known
+from Creation onward. Receipt remains the source of truth for the actual
+outcome, which may differ from what was intended. Feeds the
+treatment-code split question (<a href="#d-019">D-019</a>): Intended Treatment at
+Creation is not the same as <code>startTreatmentCode</code>/<code>finalTreatmentCode</code>
+derived at Receipt.</p>
 <p><a id="d-032"></a></p>
 <h3 id="waste-item-weights-are-not-captured-at-collection-or-drop-off">Waste item weights are not captured at Collection or Drop-off</h3>
 <p><strong>D-032</strong> · ✅ Decided · Impact: 🟠 Medium · Area: <strong>Collection</strong> · Related: <a href="#d-006">D-006</a></p>

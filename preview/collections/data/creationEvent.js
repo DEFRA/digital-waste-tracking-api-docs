@@ -9,7 +9,8 @@
  * - apiCode is present as per Receipt.
  * - estimatedDateTimeCollected follows the Receipt date/time naming style.
  * - Object names are producer, carrier, brokerOrDealer and receiver.
- * - wasteItems use the same structure as Receipt. disposalOrRecoveryCodes are optional at Creation.
+ * - wasteItems use the same structure as Receipt. disposalOrRecoveryCodes is mandatory at Creation
+ *   (Intended Treatment) — the receiver confirms the Actual Treatment at Receipt (D-031).
  * - carrier follows the Receipt carrier structure, but only requires meansOfTransport at Creation.
  *   Optional carrier fields still retain integrity rules when supplied.
  *   This example includes extra carrier details.
@@ -109,8 +110,8 @@ export const wasteItems = [
       amount: 0.5,
       isEstimate: true
     },
-    // Optional at Creation — intended/planned treatment only.
-    // The treatment outcome is determined at Receipt.
+    // Intended Treatment (D-031) — mandatory at Creation.
+    // The receiver confirms the authoritative Actual Treatment at Receipt.
     disposalOrRecoveryCodes: [
       {
         code: 'R1',
@@ -207,7 +208,17 @@ export const nonHazardousWasteItems = [
       amount: 0.2,
       isEstimate: true
     },
-    // disposalOrRecoveryCodes omitted — optional at Creation.
+    // Intended Treatment (D-031) — mandatory at Creation.
+    disposalOrRecoveryCodes: [
+      {
+        code: 'R3',
+        weight: {
+          metric: 'Tonnes',
+          amount: 0.2,
+          isEstimate: true
+        }
+      }
+    ],
     containsPops: false,
     containsHazardous: false
   }
