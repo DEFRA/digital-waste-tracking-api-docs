@@ -53,7 +53,7 @@ jobs:
           restore-keys: |
             mkdocs-material-
 
-      - run: pip install mkdocs-material mike
+      - run: pip install mkdocs-material mike mkdocs-swagger-ui-tag
 
       - name: Checkout ref
         run: git checkout ${{ github.event.inputs.ref }}

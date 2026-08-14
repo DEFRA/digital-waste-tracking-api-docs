@@ -22,15 +22,15 @@ It will eventually feed the [data model](../collections/model/README.md).
 
 The current draft covers fifteen paths:
 
-| Area | Paths |
-|---|---|
-| Movement | `POST /movements`, `GET /movements/{movementId}`, `PUT /movements/{movementId}` |
-| Collection | `POST /movements/{movementId}/collection`, `GET /movements/{movementId}/collection`, `PUT /movements/{movementId}/collection` |
-| Transfer (drop-off) | `POST /transfers`, `GET /transfers/{transferId}`, `PUT /transfers/{transferId}` |
-| Receipt | `POST /transfers/{transferId}/receipt`, `GET /transfers/{transferId}/receipt`, `PUT /transfers/{transferId}/receipt` |
-| Receipt (Phase 1, deprecated) | `POST /movements/receive`, `PUT /movements/{id}/receive` |
-| Producer query | `GET /movements/{movementId}/fate-of-waste` |
-| Reference data (Phase 1) | `GET /reference-data/ewc-codes`, `GET /reference-data/hazardous-property-codes`, `GET /reference-data/disposal-or-recovery-codes`, `GET /reference-data/container-types`, `GET /reference-data/pop-names` |
+| Area                          | Paths                                                                                                                                                                                                     |
+| ----------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Movement                      | `POST /movements`, `GET /movements/{movementId}`, `PUT /movements/{movementId}`                                                                                                                           |
+| Collection                    | `POST /movements/{movementId}/collection`, `GET /movements/{movementId}/collection`, `PUT /movements/{movementId}/collection`                                                                             |
+| Transfer (drop-off)           | `POST /transfers`, `GET /transfers/{transferId}`, `PUT /transfers/{transferId}`                                                                                                                           |
+| Receipt                       | `POST /transfers/{transferId}/receipt`, `GET /transfers/{transferId}/receipt`, `PUT /transfers/{transferId}/receipt`                                                                                      |
+| Receipt (Phase 1, deprecated) | `POST /movements/receive`, `PUT /movements/{id}/receive`                                                                                                                                                  |
+| Producer query                | `GET /movements/{movementId}/fate-of-waste`                                                                                                                                                               |
+| Reference data (Phase 1)      | `GET /reference-data/ewc-codes`, `GET /reference-data/hazardous-property-codes`, `GET /reference-data/disposal-or-recovery-codes`, `GET /reference-data/container-types`, `GET /reference-data/pop-names` |
 
 The spec follows the Richardson Maturity Model Level 2 — URLs name
 resources, HTTP methods carry the verbs. Two public identifiers exist
@@ -71,4 +71,4 @@ The YAML can be previewed in any standard OpenAPI tool. Two options:
   a preview pane that updates live as the YAML is edited.
 
 An inline viewer is also available on this site:
-[open the Swagger UI viewer](swagger/).
+[open the OpenAPI viewer](openapi.md).
