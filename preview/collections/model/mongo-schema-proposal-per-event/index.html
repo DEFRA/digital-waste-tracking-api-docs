@@ -621,7 +621,7 @@ increment for collection-event appends.</p>
 <h3 id="movement-creations"><code>movement-creations</code></h3>
 <p>One document per <code>movementId</code>.</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="nx">_id</span><span class="o">:</span><span class="w"> </span><span class="nb">String</span><span class="p">,</span><span class="w">                 </span><span class="c1">// movementId (sqid — e.g. &quot;26ABC123&quot;)</span>
+<span class="w">  </span><span class="nx">_id</span><span class="o">:</span><span class="w"> </span><span class="nb">String</span><span class="p">,</span><span class="w">                 </span><span class="c1">// movementId (sqid — e.g. "26ABC123")</span>
 <span class="w">  </span><span class="nx">movementId</span><span class="o">:</span><span class="w"> </span><span class="nb">String</span><span class="p">,</span>
 <span class="w">  </span><span class="nx">state</span><span class="o">:</span><span class="w"> </span><span class="nb">String</span><span class="p">,</span><span class="w">               </span><span class="c1">// PLANNED | IN_COLLECTION | DROPPED_OFF (B1: denormalised)</span>
 <span class="w">  </span><span class="nx">revision</span><span class="o">:</span><span class="w"> </span><span class="nb">Number</span><span class="p">,</span><span class="w">            </span><span class="c1">// incremented on PUT /movements amendment</span>
@@ -741,7 +741,7 @@ the sole <code>movementId</code> referenced in the request (see step 4 of the wr
 path below). For a non-hazardous drop-off, <code>transferId</code> is minted
 independently as before.</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="nx">_id</span><span class="o">:</span><span class="w"> </span><span class="nb">String</span><span class="p">,</span><span class="w">                 </span><span class="c1">// transferId (sqid — e.g. &quot;26XYZ456&quot;; for a</span>
+<span class="w">  </span><span class="nx">_id</span><span class="o">:</span><span class="w"> </span><span class="nb">String</span><span class="p">,</span><span class="w">                 </span><span class="c1">// transferId (sqid — e.g. "26XYZ456"; for a</span>
 <span class="w">                                </span><span class="c1">// hazardous drop-off this equals the sole</span>
 <span class="w">                                </span><span class="c1">// referenced movementId)</span>
 <span class="w">  </span><span class="nx">transferId</span><span class="o">:</span><span class="w"> </span><span class="nb">String</span><span class="p">,</span>

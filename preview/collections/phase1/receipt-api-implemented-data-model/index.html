@@ -507,41 +507,41 @@
 <p>The public request payload is a single <code>ReceiveMovementRequest</code> object.</p>
 <h3 id="top-level-shape">Top-Level Shape</h3>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;apiCode&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;uuid&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;dateTimeReceived&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2026-01-31T10:15:30.000Z&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;hazardousWasteConsignmentCode&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;optional string&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;reasonForNoConsignmentCode&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;optional enum&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;yourUniqueReference&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;optional string&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;otherReferencesForMovement&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">  </span><span class="nt">"apiCode"</span><span class="p">:</span><span class="w"> </span><span class="s2">"uuid"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"dateTimeReceived"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2026-01-31T10:15:30.000Z"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"hazardousWasteConsignmentCode"</span><span class="p">:</span><span class="w"> </span><span class="s2">"optional string"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"reasonForNoConsignmentCode"</span><span class="p">:</span><span class="w"> </span><span class="s2">"optional enum"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"yourUniqueReference"</span><span class="p">:</span><span class="w"> </span><span class="s2">"optional string"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"otherReferencesForMovement"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
 <span class="w">    </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">&quot;label&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;reference&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span>
+<span class="w">      </span><span class="nt">"label"</span><span class="p">:</span><span class="w"> </span><span class="s2">"string"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"reference"</span><span class="p">:</span><span class="w"> </span><span class="s2">"string"</span>
 <span class="w">    </span><span class="p">}</span>
 <span class="w">  </span><span class="p">],</span>
-<span class="w">  </span><span class="nt">&quot;specialHandlingRequirements&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;optional string&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;wasteItems&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">  </span><span class="nt">"specialHandlingRequirements"</span><span class="p">:</span><span class="w"> </span><span class="s2">"optional string"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"wasteItems"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
 <span class="w">    </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">&quot;ewcCodes&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;200101&quot;</span><span class="p">],</span>
-<span class="w">      </span><span class="nt">&quot;wasteDescription&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;physicalForm&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Solid&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;numberOfContainers&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;typeOfContainers&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;SKI&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;weight&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="nt">&quot;metric&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Tonnes&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;amount&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">1.0</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;isEstimate&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span>
+<span class="w">      </span><span class="nt">"ewcCodes"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"200101"</span><span class="p">],</span>
+<span class="w">      </span><span class="nt">"wasteDescription"</span><span class="p">:</span><span class="w"> </span><span class="s2">"string"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"physicalForm"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Solid"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"numberOfContainers"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"typeOfContainers"</span><span class="p">:</span><span class="w"> </span><span class="s2">"SKI"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"weight"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">"metric"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Tonnes"</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">"amount"</span><span class="p">:</span><span class="w"> </span><span class="mf">1.0</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">"isEstimate"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span>
 <span class="w">      </span><span class="p">},</span>
-<span class="w">      </span><span class="nt">&quot;containsPops&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;pops&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{},</span>
-<span class="w">      </span><span class="nt">&quot;containsHazardous&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;hazardous&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{},</span>
-<span class="w">      </span><span class="nt">&quot;disposalOrRecoveryCodes&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span>
+<span class="w">      </span><span class="nt">"containsPops"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"pops"</span><span class="p">:</span><span class="w"> </span><span class="p">{},</span>
+<span class="w">      </span><span class="nt">"containsHazardous"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"hazardous"</span><span class="p">:</span><span class="w"> </span><span class="p">{},</span>
+<span class="w">      </span><span class="nt">"disposalOrRecoveryCodes"</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span>
 <span class="w">    </span><span class="p">}</span>
 <span class="w">  </span><span class="p">],</span>
-<span class="w">  </span><span class="nt">&quot;carrier&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{},</span>
-<span class="w">  </span><span class="nt">&quot;brokerOrDealer&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{},</span>
-<span class="w">  </span><span class="nt">&quot;receiver&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{},</span>
-<span class="w">  </span><span class="nt">&quot;receipt&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{}</span>
+<span class="w">  </span><span class="nt">"carrier"</span><span class="p">:</span><span class="w"> </span><span class="p">{},</span>
+<span class="w">  </span><span class="nt">"brokerOrDealer"</span><span class="p">:</span><span class="w"> </span><span class="p">{},</span>
+<span class="w">  </span><span class="nt">"receiver"</span><span class="p">:</span><span class="w"> </span><span class="p">{},</span>
+<span class="w">  </span><span class="nt">"receipt"</span><span class="p">:</span><span class="w"> </span><span class="p">{}</span>
 <span class="p">}</span>
 </code></pre></div>
 <h3 id="top-level-fields">Top-Level Fields</h3>
@@ -1130,13 +1130,13 @@
 <h3 id="create-response">Create Response</h3>
 <p>Actual success response from the current handler:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;wasteTrackingId&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;25ABC123&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;validation&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;warnings&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">  </span><span class="nt">"wasteTrackingId"</span><span class="p">:</span><span class="w"> </span><span class="s2">"25ABC123"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"validation"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">"warnings"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
 <span class="w">      </span><span class="p">{</span>
-<span class="w">        </span><span class="nt">&quot;key&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;field.path&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;errorType&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;NotProvided&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;message&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;warning text&quot;</span>
+<span class="w">        </span><span class="nt">"key"</span><span class="p">:</span><span class="w"> </span><span class="s2">"field.path"</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">"errorType"</span><span class="p">:</span><span class="w"> </span><span class="s2">"NotProvided"</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">"message"</span><span class="p">:</span><span class="w"> </span><span class="s2">"warning text"</span>
 <span class="w">      </span><span class="p">}</span>
 <span class="w">    </span><span class="p">]</span>
 <span class="w">  </span><span class="p">}</span>
@@ -1159,12 +1159,12 @@
 <h3 id="error-response">Error Response</h3>
 <p>Validation failures use this shape:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;validation&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;errors&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">  </span><span class="nt">"validation"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">"errors"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
 <span class="w">      </span><span class="p">{</span>
-<span class="w">        </span><span class="nt">&quot;key&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;field.path&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;errorType&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;InvalidValue&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;message&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;validation error message&quot;</span>
+<span class="w">        </span><span class="nt">"key"</span><span class="p">:</span><span class="w"> </span><span class="s2">"field.path"</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">"errorType"</span><span class="p">:</span><span class="w"> </span><span class="s2">"InvalidValue"</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">"message"</span><span class="p">:</span><span class="w"> </span><span class="s2">"validation error message"</span>
 <span class="w">      </span><span class="p">}</span>
 <span class="w">    </span><span class="p">]</span>
 <span class="w">  </span><span class="p">}</span>
@@ -1185,8 +1185,8 @@
 <h2 id="backend-request-wrapper">Backend Request Wrapper</h2>
 <p>The backend does not accept the public payload directly. It accepts:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;movement&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;...ReceiveMovementRequest or enriched variant...&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span>
+<span class="w">  </span><span class="nt">"movement"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">"...ReceiveMovementRequest or enriched variant..."</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span>
 <span class="w">  </span><span class="p">}</span>
 <span class="p">}</span>
 </code></pre></div>
@@ -1276,22 +1276,22 @@
 </ol>
 <h3 id="persisted-wasteinput-shape-used-by-receipt-flows">Persisted WasteInput shape used by receipt flows</h3>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;wasteTrackingId&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;wasteTrackingId&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;wasteTrackingId&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;receipt&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;movement&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">&quot;...receipt payload...&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span>
+<span class="w">  </span><span class="nt">"_id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"wasteTrackingId"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"wasteTrackingId"</span><span class="p">:</span><span class="w"> </span><span class="s2">"wasteTrackingId"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"receipt"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">"movement"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">"...receipt payload..."</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span>
 <span class="w">    </span><span class="p">}</span>
 <span class="w">  </span><span class="p">},</span>
-<span class="w">  </span><span class="nt">&quot;submittingOrganisation&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;defraCustomerOrganisationId&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span>
+<span class="w">  </span><span class="nt">"submittingOrganisation"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">"defraCustomerOrganisationId"</span><span class="p">:</span><span class="w"> </span><span class="s2">"string"</span>
 <span class="w">  </span><span class="p">},</span>
-<span class="w">  </span><span class="nt">&quot;orgId&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;traceId&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;revision&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;createdAt&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;date&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;lastUpdatedAt&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;date&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;bulkId&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;optional string&quot;</span>
+<span class="w">  </span><span class="nt">"orgId"</span><span class="p">:</span><span class="w"> </span><span class="s2">"string"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"traceId"</span><span class="p">:</span><span class="w"> </span><span class="s2">"string"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"revision"</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"createdAt"</span><span class="p">:</span><span class="w"> </span><span class="s2">"date"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"lastUpdatedAt"</span><span class="p">:</span><span class="w"> </span><span class="s2">"date"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"bulkId"</span><span class="p">:</span><span class="w"> </span><span class="s2">"optional string"</span>
 <span class="p">}</span>
 </code></pre></div>
 <p>Notes:</p>

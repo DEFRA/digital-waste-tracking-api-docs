@@ -2,70 +2,70 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
          <loc>https://defra.github.io/digital-waste-tracking-api-docs/preview/</loc>
-         <lastmod>2026-08-14</lastmod>
+         <lastmod>2026-08-18</lastmod>
     </url>
     <url>
          <loc>https://defra.github.io/digital-waste-tracking-api-docs/preview/api/</loc>
-         <lastmod>2026-08-14</lastmod>
+         <lastmod>2026-08-18</lastmod>
     </url>
     <url>
          <loc>https://defra.github.io/digital-waste-tracking-api-docs/preview/api/openapi/</loc>
-         <lastmod>2026-08-14</lastmod>
+         <lastmod>2026-08-18</lastmod>
     </url>
     <url>
          <loc>https://defra.github.io/digital-waste-tracking-api-docs/preview/collections/</loc>
-         <lastmod>2026-08-14</lastmod>
+         <lastmod>2026-08-18</lastmod>
     </url>
     <url>
          <loc>https://defra.github.io/digital-waste-tracking-api-docs/preview/collections/decisions/</loc>
-         <lastmod>2026-08-14</lastmod>
+         <lastmod>2026-08-18</lastmod>
     </url>
     <url>
          <loc>https://defra.github.io/digital-waste-tracking-api-docs/preview/collections/glossary/</loc>
-         <lastmod>2026-08-14</lastmod>
+         <lastmod>2026-08-18</lastmod>
     </url>
     <url>
          <loc>https://defra.github.io/digital-waste-tracking-api-docs/preview/collections/plan/</loc>
-         <lastmod>2026-08-14</lastmod>
+         <lastmod>2026-08-18</lastmod>
     </url>
     <url>
          <loc>https://defra.github.io/digital-waste-tracking-api-docs/preview/collections/registration/</loc>
-         <lastmod>2026-08-14</lastmod>
+         <lastmod>2026-08-18</lastmod>
     </url>
     <url>
          <loc>https://defra.github.io/digital-waste-tracking-api-docs/preview/collections/docs/</loc>
-         <lastmod>2026-08-14</lastmod>
+         <lastmod>2026-08-18</lastmod>
     </url>
     <url>
          <loc>https://defra.github.io/digital-waste-tracking-api-docs/preview/collections/model/</loc>
-         <lastmod>2026-08-14</lastmod>
+         <lastmod>2026-08-18</lastmod>
     </url>
     <url>
          <loc>https://defra.github.io/digital-waste-tracking-api-docs/preview/collections/model/mongo-schema-proposal-CQRS/</loc>
-         <lastmod>2026-08-14</lastmod>
+         <lastmod>2026-08-18</lastmod>
     </url>
     <url>
          <loc>https://defra.github.io/digital-waste-tracking-api-docs/preview/collections/model/mongo-schema-proposal-per-event/</loc>
-         <lastmod>2026-08-14</lastmod>
+         <lastmod>2026-08-18</lastmod>
     </url>
     <url>
          <loc>https://defra.github.io/digital-waste-tracking-api-docs/preview/collections/model/mongo-schema-proposal/</loc>
-         <lastmod>2026-08-14</lastmod>
+         <lastmod>2026-08-18</lastmod>
     </url>
     <url>
          <loc>https://defra.github.io/digital-waste-tracking-api-docs/preview/collections/model/phase1-waste-inputs/</loc>
-         <lastmod>2026-08-14</lastmod>
+         <lastmod>2026-08-18</lastmod>
     </url>
     <url>
          <loc>https://defra.github.io/digital-waste-tracking-api-docs/preview/collections/phase1/receipt-api-implemented-data-model/</loc>
-         <lastmod>2026-08-14</lastmod>
+         <lastmod>2026-08-18</lastmod>
     </url>
     <url>
          <loc>https://defra.github.io/digital-waste-tracking-api-docs/preview/collections/phase1/receipt-data-definitions/</loc>
-         <lastmod>2026-08-14</lastmod>
+         <lastmod>2026-08-18</lastmod>
     </url>
     <url>
          <loc>https://defra.github.io/digital-waste-tracking-api-docs/preview/collections/phase2/assessment-feedback/</loc>
-         <lastmod>2026-08-14</lastmod>
+         <lastmod>2026-08-18</lastmod>
     </url>
 </urlset>

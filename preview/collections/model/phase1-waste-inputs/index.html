@@ -506,32 +506,32 @@ fields (<a href="C:/Applications/EqualExperts/Defra/WasteTracking/Repos/waste-mo
 <h2 id="example-waste-inputs-document">Example <code>waste-inputs</code> document</h2>
 <p>Illustrative shape based on the current Phase 1 receipt write path:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="nx">_id</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;2578ZCY8&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nx">wasteTrackingId</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;2578ZCY8&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">_id</span><span class="o">:</span><span class="w"> </span><span class="s2">"2578ZCY8"</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">wasteTrackingId</span><span class="o">:</span><span class="w"> </span><span class="s2">"2578ZCY8"</span><span class="p">,</span>
 <span class="w">  </span><span class="nx">revision</span><span class="o">:</span><span class="w"> </span><span class="mf">1</span><span class="p">,</span>
-<span class="w">  </span><span class="nx">createdAt</span><span class="o">:</span><span class="w"> </span><span class="nx">ISODate</span><span class="p">(</span><span class="s2">&quot;2026-07-14T10:00:00Z&quot;</span><span class="p">),</span>
-<span class="w">  </span><span class="nx">lastUpdatedAt</span><span class="o">:</span><span class="w"> </span><span class="nx">ISODate</span><span class="p">(</span><span class="s2">&quot;2026-07-14T10:00:00Z&quot;</span><span class="p">),</span>
-<span class="w">  </span><span class="nx">traceId</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;trace-123&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">createdAt</span><span class="o">:</span><span class="w"> </span><span class="nx">ISODate</span><span class="p">(</span><span class="s2">"2026-07-14T10:00:00Z"</span><span class="p">),</span>
+<span class="w">  </span><span class="nx">lastUpdatedAt</span><span class="o">:</span><span class="w"> </span><span class="nx">ISODate</span><span class="p">(</span><span class="s2">"2026-07-14T10:00:00Z"</span><span class="p">),</span>
+<span class="w">  </span><span class="nx">traceId</span><span class="o">:</span><span class="w"> </span><span class="s2">"trace-123"</span><span class="p">,</span>
 
 <span class="w">  </span><span class="c1">// One of these is present depending on organisation lookup path</span>
-<span class="w">  </span><span class="nx">orgId</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;57aed195-325e-45d5-b1fb-5f201e0324cf&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">orgId</span><span class="o">:</span><span class="w"> </span><span class="s2">"57aed195-325e-45d5-b1fb-5f201e0324cf"</span><span class="p">,</span>
 <span class="w">  </span><span class="c1">// or</span>
 <span class="w">  </span><span class="nx">submittingOrganisation</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="nx">defraCustomerOrganisationId</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;d829f66d-857f-401d-b5e9-5061b7dbb29d&quot;</span>
+<span class="w">    </span><span class="nx">defraCustomerOrganisationId</span><span class="o">:</span><span class="w"> </span><span class="s2">"d829f66d-857f-401d-b5e9-5061b7dbb29d"</span>
 <span class="w">  </span><span class="p">},</span>
 
 <span class="w">  </span><span class="nx">receipt</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="nx">movement</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">      </span><span class="nx">dateTimeReceived</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;2025-08-29T15:24:00Z&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nx">hazardousWasteConsignmentCode</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;CJ123E/A0001&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nx">yourUniqueReference</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;CLIENT-REF-001&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nx">dateTimeReceived</span><span class="o">:</span><span class="w"> </span><span class="s2">"2025-08-29T15:24:00Z"</span><span class="p">,</span>
+<span class="w">      </span><span class="nx">hazardousWasteConsignmentCode</span><span class="o">:</span><span class="w"> </span><span class="s2">"CJ123E/A0001"</span><span class="p">,</span>
+<span class="w">      </span><span class="nx">yourUniqueReference</span><span class="o">:</span><span class="w"> </span><span class="s2">"CLIENT-REF-001"</span><span class="p">,</span>
 <span class="w">      </span><span class="nx">otherReferencesForMovement</span><span class="o">:</span><span class="w"> </span><span class="p">[</span>
 <span class="w">        </span><span class="p">{</span>
-<span class="w">          </span><span class="nx">label</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;transferNoteNumber&quot;</span><span class="p">,</span>
-<span class="w">          </span><span class="nx">reference</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;TN-12345&quot;</span>
+<span class="w">          </span><span class="nx">label</span><span class="o">:</span><span class="w"> </span><span class="s2">"transferNoteNumber"</span><span class="p">,</span>
+<span class="w">          </span><span class="nx">reference</span><span class="o">:</span><span class="w"> </span><span class="s2">"TN-12345"</span>
 <span class="w">        </span><span class="p">}</span>
 <span class="w">      </span><span class="p">],</span>
-<span class="w">      </span><span class="nx">specialHandlingRequirements</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Handle with care and keep upright.&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nx">specialHandlingRequirements</span><span class="o">:</span><span class="w"> </span><span class="s2">"Handle with care and keep upright."</span><span class="p">,</span>
 <span class="w">      </span><span class="nx">wasteItems</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="cm">/* ... */</span><span class="p">],</span>
 <span class="w">      </span><span class="nx">carrier</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="cm">/* ... */</span><span class="p">},</span>
 <span class="w">      </span><span class="nx">brokerOrDealer</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="cm">/* ... */</span><span class="p">},</span>
@@ -558,18 +558,18 @@ adding <code>timestamp</code>, and removing <code>_id</code>
 (<a href="C:/Applications/EqualExperts/Defra/WasteTracking/Repos/waste-movement-backend/src/common/helpers/create-history-entry.js:1">create-history-entry.js</a>).</p>
 <h2 id="example-waste-inputs-history-document">Example <code>waste-inputs-history</code> document</h2>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="nx">wasteTrackingId</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;2578ZCY8&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">wasteTrackingId</span><span class="o">:</span><span class="w"> </span><span class="s2">"2578ZCY8"</span><span class="p">,</span>
 <span class="w">  </span><span class="nx">revision</span><span class="o">:</span><span class="w"> </span><span class="mf">1</span><span class="p">,</span>
-<span class="w">  </span><span class="nx">createdAt</span><span class="o">:</span><span class="w"> </span><span class="nx">ISODate</span><span class="p">(</span><span class="s2">&quot;2026-07-14T10:00:00Z&quot;</span><span class="p">),</span>
-<span class="w">  </span><span class="nx">lastUpdatedAt</span><span class="o">:</span><span class="w"> </span><span class="nx">ISODate</span><span class="p">(</span><span class="s2">&quot;2026-07-14T10:00:00Z&quot;</span><span class="p">),</span>
-<span class="w">  </span><span class="nx">traceId</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;trace-123&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nx">orgId</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;57aed195-325e-45d5-b1fb-5f201e0324cf&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">createdAt</span><span class="o">:</span><span class="w"> </span><span class="nx">ISODate</span><span class="p">(</span><span class="s2">"2026-07-14T10:00:00Z"</span><span class="p">),</span>
+<span class="w">  </span><span class="nx">lastUpdatedAt</span><span class="o">:</span><span class="w"> </span><span class="nx">ISODate</span><span class="p">(</span><span class="s2">"2026-07-14T10:00:00Z"</span><span class="p">),</span>
+<span class="w">  </span><span class="nx">traceId</span><span class="o">:</span><span class="w"> </span><span class="s2">"trace-123"</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">orgId</span><span class="o">:</span><span class="w"> </span><span class="s2">"57aed195-325e-45d5-b1fb-5f201e0324cf"</span><span class="p">,</span>
 <span class="w">  </span><span class="nx">receipt</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="nx">movement</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">      </span><span class="cm">/* previous snapshot */</span>
 <span class="w">    </span><span class="p">}</span>
 <span class="w">  </span><span class="p">},</span>
-<span class="w">  </span><span class="nx">timestamp</span><span class="o">:</span><span class="w"> </span><span class="nx">ISODate</span><span class="p">(</span><span class="s2">&quot;2026-07-14T11:00:00Z&quot;</span><span class="p">)</span>
+<span class="w">  </span><span class="nx">timestamp</span><span class="o">:</span><span class="w"> </span><span class="nx">ISODate</span><span class="p">(</span><span class="s2">"2026-07-14T11:00:00Z"</span><span class="p">)</span>
 <span class="p">}</span>
 </code></pre></div>
 <h2 id="current-indexes">Current indexes</h2>

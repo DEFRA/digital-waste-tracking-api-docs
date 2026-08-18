@@ -627,7 +627,7 @@ aggregate type and its public identifier:</p>
 <h3 id="document-shape">Document shape</h3>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
 <span class="w">  </span><span class="nx">_id</span><span class="o">:</span><span class="w">            </span><span class="nx">ObjectId</span><span class="p">,</span><span class="w">          </span><span class="c1">// MongoDB-assigned; not exposed in the public API</span>
-<span class="w">  </span><span class="nx">streamId</span><span class="o">:</span><span class="w">       </span><span class="nb">String</span><span class="p">,</span><span class="w">            </span><span class="c1">// e.g. &quot;movement-25ABC123&quot;</span>
+<span class="w">  </span><span class="nx">streamId</span><span class="o">:</span><span class="w">       </span><span class="nb">String</span><span class="p">,</span><span class="w">            </span><span class="c1">// e.g. "movement-25ABC123"</span>
 <span class="w">  </span><span class="nx">sequenceNumber</span><span class="o">:</span><span class="w"> </span><span class="nb">Number</span><span class="p">,</span><span class="w">            </span><span class="c1">// 1-based, monotonically increasing per stream</span>
 <span class="w">  </span><span class="nx">eventType</span><span class="o">:</span><span class="w">      </span><span class="nb">String</span><span class="p">,</span><span class="w">            </span><span class="c1">// see event types below</span>
 <span class="w">  </span><span class="nx">payload</span><span class="o">:</span><span class="w">        </span><span class="nb">Object</span><span class="p">,</span><span class="w">            </span><span class="c1">// event-specific business data</span>
@@ -658,9 +658,9 @@ others append to an existing stream.</p>
 <h4 id="movementcreated"><code>MovementCreated</code></h4>
 <p>Appended by <code>POST /movements</code>. Starts the movement stream.</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="nx">eventType</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;MovementCreated&#39;</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">eventType</span><span class="o">:</span><span class="w"> </span><span class="s1">'MovementCreated'</span><span class="p">,</span>
 <span class="w">  </span><span class="nx">payload</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="nx">movementId</span><span class="o">:</span><span class="w">                 </span><span class="nb">String</span><span class="p">,</span><span class="w">  </span><span class="c1">// sqid — e.g. &quot;25ABC123&quot;</span>
+<span class="w">    </span><span class="nx">movementId</span><span class="o">:</span><span class="w">                 </span><span class="nb">String</span><span class="p">,</span><span class="w">  </span><span class="c1">// sqid — e.g. "25ABC123"</span>
 <span class="w">    </span><span class="nx">estimatedDateTimeCollected</span><span class="o">:</span><span class="w"> </span><span class="nb">Date</span><span class="p">,</span>
 <span class="w">    </span><span class="nx">hazardousWasteConsignmentCode</span><span class="o">:</span><span class="w"> </span><span class="nb">String</span><span class="p">,</span><span class="w">   </span><span class="c1">// optional</span>
 <span class="w">    </span><span class="nx">yourUniqueReference</span><span class="o">:</span><span class="w">        </span><span class="nb">String</span><span class="p">,</span><span class="w">      </span><span class="c1">// optional</span>
@@ -680,16 +680,16 @@ others append to an existing stream.</p>
 <h4 id="collectionrecorded"><code>CollectionRecorded</code></h4>
 <p>Appended by <code>POST /movements/{movementId}/collection</code>.</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="nx">eventType</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;CollectionRecorded&#39;</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">eventType</span><span class="o">:</span><span class="w"> </span><span class="s1">'CollectionRecorded'</span><span class="p">,</span>
 <span class="w">  </span><span class="nx">payload</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="nx">movementId</span><span class="o">:</span><span class="w">              </span><span class="nb">String</span><span class="p">,</span>
 <span class="w">    </span><span class="nx">sequence</span><span class="o">:</span><span class="w">                </span><span class="nb">Number</span><span class="p">,</span><span class="w">  </span><span class="c1">// 1-based; derived from aggregate at append time</span>
-<span class="w">    </span><span class="nx">collectionType</span><span class="o">:</span><span class="w">          </span><span class="nb">String</span><span class="p">,</span><span class="w">  </span><span class="c1">// &#39;STATIC&#39; | &#39;TRANSIT&#39;</span>
+<span class="w">    </span><span class="nx">collectionType</span><span class="o">:</span><span class="w">          </span><span class="nb">String</span><span class="p">,</span><span class="w">  </span><span class="c1">// 'STATIC' | 'TRANSIT'</span>
 <span class="w">    </span><span class="nx">actualDateTimeCollected</span><span class="o">:</span><span class="w"> </span><span class="nb">Date</span><span class="p">,</span>
 <span class="w">    </span><span class="nx">yourUniqueReference</span><span class="o">:</span><span class="w">     </span><span class="nb">String</span><span class="p">,</span><span class="w">  </span><span class="c1">// optional</span>
 <span class="w">    </span><span class="nx">otherReferencesForMovement</span><span class="o">:</span><span class="w"> </span><span class="p">[{</span><span class="w"> </span><span class="nx">label</span><span class="o">:</span><span class="w"> </span><span class="nb">String</span><span class="p">,</span><span class="w"> </span><span class="nx">reference</span><span class="o">:</span><span class="w"> </span><span class="nb">String</span><span class="w"> </span><span class="p">}],</span>
 <span class="w">    </span><span class="nx">carrier</span><span class="o">:</span><span class="w">             </span><span class="nb">Object</span><span class="p">,</span>
-<span class="w">    </span><span class="nx">receivedFromCarrier</span><span class="o">:</span><span class="w"> </span><span class="nb">Object</span><span class="p">,</span><span class="w">      </span><span class="c1">// required when collectionType is &#39;TRANSIT&#39;</span>
+<span class="w">    </span><span class="nx">receivedFromCarrier</span><span class="o">:</span><span class="w"> </span><span class="nb">Object</span><span class="p">,</span><span class="w">      </span><span class="c1">// required when collectionType is 'TRANSIT'</span>
 <span class="w">    </span><span class="nx">brokerOrDealer</span><span class="o">:</span><span class="w">      </span><span class="nb">Object</span><span class="w">       </span><span class="c1">// optional (D-008)</span>
 <span class="w">  </span><span class="p">}</span>
 <span class="p">}</span>
@@ -699,7 +699,7 @@ others append to an existing stream.</p>
 correction or soft-delete of the latest active collection event. The
 aggregate applies this during rehydration.</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="nx">eventType</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;CollectionAmended&#39;</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">eventType</span><span class="o">:</span><span class="w"> </span><span class="s1">'CollectionAmended'</span><span class="p">,</span>
 <span class="w">  </span><span class="nx">payload</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="nx">movementId</span><span class="o">:</span><span class="w"> </span><span class="nb">String</span><span class="p">,</span>
 <span class="w">    </span><span class="nx">sequence</span><span class="o">:</span><span class="w">   </span><span class="nb">Number</span><span class="p">,</span><span class="w">    </span><span class="c1">// which collection event is being amended</span>
@@ -717,7 +717,7 @@ aggregate applies this during rehydration.</p>
 aggregate enforces that no <code>CollectionRecorded</code> event exists in the
 stream before allowing this.</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="nx">eventType</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;MovementDeleted&#39;</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">eventType</span><span class="o">:</span><span class="w"> </span><span class="s1">'MovementDeleted'</span><span class="p">,</span>
 <span class="w">  </span><span class="nx">payload</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="nx">movementId</span><span class="o">:</span><span class="w"> </span><span class="nb">String</span>
 <span class="w">  </span><span class="p">}</span>
@@ -726,7 +726,7 @@ stream before allowing this.</p>
 <h4 id="movementundeleted"><code>MovementUndeleted</code></h4>
 <p>Appended by <code>PUT /movements/{movementId}</code> when <code>isDeleted: false</code>.</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="nx">eventType</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;MovementUndeleted&#39;</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">eventType</span><span class="o">:</span><span class="w"> </span><span class="s1">'MovementUndeleted'</span><span class="p">,</span>
 <span class="w">  </span><span class="nx">payload</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="nx">movementId</span><span class="o">:</span><span class="w"> </span><span class="nb">String</span>
 <span class="w">  </span><span class="p">}</span>
@@ -741,9 +741,9 @@ stream before allowing this.</p>
 guarantees there is exactly one). For a non-hazardous drop-off, <code>transferId</code>
 is minted independently as before.</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="nx">eventType</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;TransferCreated&#39;</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">eventType</span><span class="o">:</span><span class="w"> </span><span class="s1">'TransferCreated'</span><span class="p">,</span>
 <span class="w">  </span><span class="nx">payload</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="nx">transferId</span><span class="o">:</span><span class="w">            </span><span class="nb">String</span><span class="p">,</span><span class="w">    </span><span class="c1">// sqid — e.g. &quot;25XYZ456&quot;; for a</span>
+<span class="w">    </span><span class="nx">transferId</span><span class="o">:</span><span class="w">            </span><span class="nb">String</span><span class="p">,</span><span class="w">    </span><span class="c1">// sqid — e.g. "25XYZ456"; for a</span>
 <span class="w">                                       </span><span class="c1">// hazardous drop-off, equals the</span>
 <span class="w">                                       </span><span class="c1">// sole movementId below</span>
 <span class="w">    </span><span class="nx">movementIds</span><span class="o">:</span><span class="w">           </span><span class="p">[</span><span class="nb">String</span><span class="p">],</span><span class="w">  </span><span class="c1">// one or more movementIds linked at this drop-off</span>
@@ -765,7 +765,7 @@ is minted independently as before.</p>
 <h4 id="wastereceived"><code>WasteReceived</code></h4>
 <p>Appended by <code>POST /transfers/{transferId}/receipt</code>.</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="nx">eventType</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;WasteReceived&#39;</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">eventType</span><span class="o">:</span><span class="w"> </span><span class="s1">'WasteReceived'</span><span class="p">,</span>
 <span class="w">  </span><span class="nx">payload</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="nx">transferId</span><span class="o">:</span><span class="w">       </span><span class="nb">String</span><span class="p">,</span>
 <span class="w">    </span><span class="nx">dateTimeReceived</span><span class="o">:</span><span class="w"> </span><span class="nb">Date</span><span class="p">,</span>
@@ -795,7 +795,7 @@ is minted independently as before.</p>
 <p>Appended by <code>PUT /transfers/{transferId}/receipt</code>. Only the authoring
 organisation may append this (D-036).</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="nx">eventType</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;ReceiptAmended&#39;</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">eventType</span><span class="o">:</span><span class="w"> </span><span class="s1">'ReceiptAmended'</span><span class="p">,</span>
 <span class="w">  </span><span class="nx">payload</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="nx">transferId</span><span class="o">:</span><span class="w"> </span><span class="nb">String</span><span class="p">,</span>
 <span class="w">    </span><span class="c1">// amended fields:</span>
@@ -814,7 +814,7 @@ organisation may append this (D-036).</p>
 <p>Appended by <code>PUT /transfers/{transferId}</code> when <code>isDeleted: true</code>. The
 aggregate enforces that no <code>WasteReceived</code> event exists in the stream.</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="nx">eventType</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;TransferDeleted&#39;</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">eventType</span><span class="o">:</span><span class="w"> </span><span class="s1">'TransferDeleted'</span><span class="p">,</span>
 <span class="w">  </span><span class="nx">payload</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="nx">transferId</span><span class="o">:</span><span class="w"> </span><span class="nb">String</span>
 <span class="w">  </span><span class="p">}</span>
@@ -823,7 +823,7 @@ aggregate enforces that no <code>WasteReceived</code> event exists in the stream
 <h4 id="transferundeleted"><code>TransferUndeleted</code></h4>
 <p>Appended by <code>PUT /transfers/{transferId}</code> when <code>isDeleted: false</code>.</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="nx">eventType</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;TransferUndeleted&#39;</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">eventType</span><span class="o">:</span><span class="w"> </span><span class="s1">'TransferUndeleted'</span><span class="p">,</span>
 <span class="w">  </span><span class="nx">payload</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="nx">transferId</span><span class="o">:</span><span class="w"> </span><span class="nb">String</span>
 <span class="w">  </span><span class="p">}</span>
@@ -848,7 +848,7 @@ because the event store is the source of truth.</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
 <span class="w">  </span><span class="nx">_id</span><span class="o">:</span><span class="w">           </span><span class="nb">String</span><span class="p">,</span><span class="w">   </span><span class="c1">// movementId</span>
 <span class="w">  </span><span class="nx">movementId</span><span class="o">:</span><span class="w">    </span><span class="nb">String</span><span class="p">,</span>
-<span class="w">  </span><span class="nx">state</span><span class="o">:</span><span class="w">         </span><span class="nb">String</span><span class="p">,</span><span class="w">   </span><span class="c1">// &#39;PLANNED&#39; | &#39;IN_COLLECTION&#39; | &#39;IN_TRANSIT&#39;</span>
+<span class="w">  </span><span class="nx">state</span><span class="o">:</span><span class="w">         </span><span class="nb">String</span><span class="p">,</span><span class="w">   </span><span class="c1">// 'PLANNED' | 'IN_COLLECTION' | 'IN_TRANSIT'</span>
 <span class="w">  </span><span class="nx">revision</span><span class="o">:</span><span class="w">      </span><span class="nb">Number</span><span class="p">,</span><span class="w">   </span><span class="c1">// sequenceNumber of the last applied event</span>
 <span class="w">  </span><span class="nx">isDeleted</span><span class="o">:</span><span class="w">     </span><span class="nb">Boolean</span><span class="p">,</span>
 <span class="w">  </span><span class="nx">createdAt</span><span class="o">:</span><span class="w">     </span><span class="nb">Date</span><span class="p">,</span>
@@ -876,7 +876,7 @@ because the event store is the source of truth.</p>
 <span class="w">      </span><span class="nx">sequence</span><span class="o">:</span><span class="w">                </span><span class="nb">Number</span><span class="p">,</span>
 <span class="w">      </span><span class="nx">recordedAt</span><span class="o">:</span><span class="w">              </span><span class="nb">Date</span><span class="p">,</span>
 <span class="w">      </span><span class="nx">submittingOrganisation</span><span class="o">:</span><span class="w">  </span><span class="p">{</span><span class="w"> </span><span class="nx">defraCustomerOrganisationId</span><span class="o">:</span><span class="w"> </span><span class="nb">String</span><span class="w"> </span><span class="p">},</span>
-<span class="w">      </span><span class="nx">collectionType</span><span class="o">:</span><span class="w">          </span><span class="nb">String</span><span class="p">,</span><span class="w">   </span><span class="c1">// &#39;STATIC&#39; | &#39;TRANSIT&#39;</span>
+<span class="w">      </span><span class="nx">collectionType</span><span class="o">:</span><span class="w">          </span><span class="nb">String</span><span class="p">,</span><span class="w">   </span><span class="c1">// 'STATIC' | 'TRANSIT'</span>
 <span class="w">      </span><span class="nx">actualDateTimeCollected</span><span class="o">:</span><span class="w"> </span><span class="nb">Date</span><span class="p">,</span>
 <span class="w">      </span><span class="nx">yourUniqueReference</span><span class="o">:</span><span class="w">     </span><span class="nb">String</span><span class="p">,</span>
 <span class="w">      </span><span class="nx">otherReferencesForMovement</span><span class="o">:</span><span class="w"> </span><span class="p">[{</span><span class="w"> </span><span class="nx">label</span><span class="o">:</span><span class="w"> </span><span class="nb">String</span><span class="p">,</span><span class="w"> </span><span class="nx">reference</span><span class="o">:</span><span class="w"> </span><span class="nb">String</span><span class="w"> </span><span class="p">}],</span>
@@ -903,7 +903,7 @@ collection.</p>
 <span class="w">  </span><span class="nx">_id</span><span class="o">:</span><span class="w">           </span><span class="nb">String</span><span class="p">,</span><span class="w">   </span><span class="c1">// transferId</span>
 <span class="w">  </span><span class="nx">transferId</span><span class="o">:</span><span class="w">    </span><span class="nb">String</span><span class="p">,</span>
 <span class="w">  </span><span class="nx">movementIds</span><span class="o">:</span><span class="w">   </span><span class="p">[</span><span class="nb">String</span><span class="p">],</span>
-<span class="w">  </span><span class="nx">state</span><span class="o">:</span><span class="w">         </span><span class="nb">String</span><span class="p">,</span><span class="w">   </span><span class="c1">// &#39;DROPPED_OFF&#39; | &#39;RECEIVED&#39;</span>
+<span class="w">  </span><span class="nx">state</span><span class="o">:</span><span class="w">         </span><span class="nb">String</span><span class="p">,</span><span class="w">   </span><span class="c1">// 'DROPPED_OFF' | 'RECEIVED'</span>
 <span class="w">  </span><span class="nx">revision</span><span class="o">:</span><span class="w">      </span><span class="nb">Number</span><span class="p">,</span><span class="w">   </span><span class="c1">// sequenceNumber of the last applied event</span>
 <span class="w">  </span><span class="nx">isDeleted</span><span class="o">:</span><span class="w">     </span><span class="nb">Boolean</span><span class="p">,</span>
 <span class="w">  </span><span class="nx">createdAt</span><span class="o">:</span><span class="w">     </span><span class="nb">Date</span><span class="p">,</span>
