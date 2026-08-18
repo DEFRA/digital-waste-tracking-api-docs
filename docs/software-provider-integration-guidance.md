@@ -42,6 +42,10 @@ Section headings and structure are stable; most section bodies are placeholders 
 
 ## 2. Service overview
 
+![DWT events](./dwt-movement-transfer-events.drawio)
+
+
+
 ### 2.1 Actors
 - **Producer** – the organisation whose waste is being moved
 - **Broker** – arranges the movement on behalf of a producer or receiver
