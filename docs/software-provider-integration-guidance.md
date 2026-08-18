@@ -42,7 +42,7 @@ Section headings and structure are stable; most section bodies are placeholders 
 
 ## 2. Service overview
 
-![DWT events](./dwt-movement-transfer-events.drawio)
+![DWT events](./images/dwt-movement-transfer-events.drawio)
 
 
 
