@@ -12,9 +12,9 @@ Section headings and structure are stable; most section bodies are placeholders 
 
 - [1. Introduction](#1-introduction)
 - [2. Service overview](#2-service-overview)
-  - [2.1 Actors](#21-actors)
-  - [2.2 Core entities](#22-core-entities)
-  - [2.3 Lifecycle stages](#23-lifecycle-stages)
+  - [2.1 Lifecycle stages](#21-lifecycle-stages)
+  - [2.2 Actors](#22-actors)
+  - [2.3 Core entities](#23-core-entities)
   - [2.4 Recording modes](#24-recording-modes)
 - [3. API reference](#3-api-reference)
   - [3.1 Create movement](#31-create-movement)
@@ -40,24 +40,14 @@ Section headings and structure are stable; most section bodies are placeholders 
 - Scope of this document: the integration API only – not the DWT frontend service, which is out of scope here
 - How to give feedback on this guidance while it's in draft
 
+<br>
+
 ## 2. Service overview
 
-![DWT events](./images/dwt-movement-transfer-events.drawio)
+![DWT events](./images/dwt-movement-transfer-events.png)
 
-
-
-### 2.1 Actors
-- **Producer** – the organisation whose waste is being moved
-- **Broker** – arranges the movement on behalf of a producer or receiver
-- **Carrier** – the organisation licensed to transport the waste; may operate through a **Driver** as the field-level user recording events in real time
-- **Receiver** – the site accepting the waste for treatment, disposal or recovery
-
-### 2.2 Core entities
-- **Waste Movement** – the primary record of an intended waste movement, identified by a **Waste Movement ID**, created before the waste moves
-- **Waste Transfer** – the record created at drop-off, identified by a **Waste Transfer ID**; a single Transfer can bundle one or more Movement IDs together
-
-### 2.3 Lifecycle stages
-The API is organised around five stages, matching the Mural board:
+### 2.1 Lifecycle stages
+The API is organised around four stages
 
 | Stage | What happens |
 |---|---|
@@ -66,8 +56,20 @@ The API is organised around five stages, matching the Mural board:
 | Drop-off | Driver records drop-off (generates a Transfer ID); receiver inspects and records receipt |
 | Receipt | Any deferred or retrospective records are completed; producer can check the fate of their waste |
 
+### 2.2 Actors
+- **Producer** – the organisation whose waste is being moved (green)
+- **Broker** – arranges the movement on behalf of a producer or receiver (green)
+- **Carrier** – the organisation licensed to transport the waste; may operate through a **Driver** as the field-level user recording events in real time (blue / purple)
+- **Receiver** – the site accepting the waste for treatment, disposal or recovery (yellow)
+
+### 2.3 Core entities
+- **Waste Movement** – the primary record of an intended waste movement, identified by a **Waste Movement ID**, created before the waste moves
+- **Waste Transfer** – the record created at drop-off, identified by a **Waste Transfer ID**; a single Transfer can bundle one or more Movement IDs together
+
 ### 2.4 Recording modes
 Collection and receipt can each be recorded in real time or deferred/retrospectively. Software providers need to support both, including handling offline capture in field/driver apps.
+
+<br>
 
 ## 3. API reference
 
@@ -121,6 +123,8 @@ See [section 7.1](#71-estimated-vs-actual-declarations) for how this reconciles 
 - Idempotency behaviour on retries – *TBC*
 - Rate limits and pagination – *TBC*
 
+<br>
+
 ## 4. Business rules and data reconciliation
 
 ### 4.1 Collection cardinality
@@ -133,11 +137,15 @@ Many Movement IDs can be linked to a single Transfer ID at drop-off; a Transfer 
 - Time limits, if any, for deferred/retrospective collection and receipt recording – *TBC*
 - Whether a Movement can be deleted/cancelled after collection has started – *TBC*
 
+<br>
+
 ## 5. Testing and conformance
 
 - Sandbox scenarios covering each of the four endpoint groups in section 6
 - Reference test data, including chained Movement ID → Transfer ID scenarios and hazardous/POPs edge cases
 - Conformance or certification process ahead of production access – *TBC*
+
+<br>
 
 ## Appendix A: glossary
 
