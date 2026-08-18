@@ -4,7 +4,9 @@
 
 **Owner:** Dave Oliver
 
-This is a working skeleton for a guidance document to help software providers integrate their systems with the Defra API for recording waste movements. Section headings and structure are stable; most section bodies are placeholders to be filled in as the API design firms up. [Appendix C](#appendix-c-open-questions-log) includes a list of gaps so far.
+This is a working skeleton for a guidance document to help software providers integrate their systems with the Defra API for recording waste movements. Development and implementation will take place in an agile environment and we welcome the input of software providers to help us develop and refine the integration of the service. 
+
+Section headings and structure are stable; most section bodies are placeholders to be filled in as the API design firms up. [Appendix C](#appendix-c-open-questions-log) includes a list of gaps so far.
 
 ## Contents
 
@@ -14,23 +16,17 @@ This is a working skeleton for a guidance document to help software providers in
   - [2.2 Core entities](#22-core-entities)
   - [2.3 Lifecycle stages](#23-lifecycle-stages)
   - [2.4 Recording modes](#24-recording-modes)
-- [3. Integration personas](#3-integration-personas)
-- [4. Becoming an integrated software provider](#4-becoming-an-integrated-software-provider)
-- [5. Authentication and security](#5-authentication-and-security)
-- [6. API reference](#6-api-reference)
-  - [6.1 Create movement (BWM)](#61-create-movement-bwm)
-  - [6.2 Record collection (WWC)](#62-record-collection-wwc)
-  - [6.3 Record drop-off (WWR)](#63-record-drop-off-wwr)
-  - [6.4 Record receipt (WWR / AWR)](#64-record-receipt-wwr--awr)
-  - [6.5 General conventions](#65-general-conventions)
-- [7. Business rules and data reconciliation](#7-business-rules-and-data-reconciliation)
-  - [7.1 Estimated vs actual declarations](#71-estimated-vs-actual-declarations)
-  - [7.2 Collection cardinality](#72-collection-cardinality)
-  - [7.3 Movement-to-transfer cardinality](#73-movement-to-transfer-cardinality)
-  - [7.4 Timing rules](#74-timing-rules)
-- [8. Testing and conformance](#8-testing-and-conformance)
-- [9. Go-live and operations](#9-go-live-and-operations)
-- [10. Compliance and legal considerations](#10-compliance-and-legal-considerations)
+- [3. API reference](#3-api-reference)
+  - [3.1 Create movement](#31-create-movement)
+  - [3.2 Record collection](#32-record-collection)
+  - [3.3 Record drop-off](#33-record-drop-off)
+  - [3.4 Record receipt](#34-record-receipt)
+  - [3.5 General conventions](#35-general-conventions)
+- [4. Business rules and data reconciliation](#4-business-rules-and-data-reconciliation)
+  - [4.1 Collection cardinality](#41-collection-cardinality)
+  - [4.2 Movement-to-transfer cardinality](#42-movement-to-transfer-cardinality)
+  - [4.3 Timing rules](#43-timing-rules)
+- [5. Testing and conformance](#5-testing-and-conformance)
 - [Appendix A: glossary](#appendix-a-glossary)
 - [Appendix B: endpoint quick reference](#appendix-b-endpoint-quick-reference)
 - [Appendix C: open questions log](#appendix-c-open-questions-log)
@@ -57,49 +53,25 @@ This is a working skeleton for a guidance document to help software providers in
 - **Waste Transfer** – the record created at drop-off, identified by a **Waste Transfer ID**; a single Transfer can bundle one or more Movement IDs together
 
 ### 2.3 Lifecycle stages
-The API is organised around four stages:
+The API is organised around five stages, matching the Mural board:
 
-| Stage | Code | What happens |
-|---|---|---|
-| Before the waste moves | BWM | Movement is created; estimated details are declared |
-| When the waste is collected | WWC | Carrier/driver records each collection against a Movement ID |
-| When the waste is being dropped off / received | WWR | Driver records drop-off (generates a Transfer ID); receiver inspects and records receipt |
-| After the waste has been received | AWR | Any deferred or retrospective records are completed; producer can check the fate of their waste |
+| Stage | What happens |
+|---|---|
+| Creation | Movement is created; estimated details are declared |
+| Collection | Carrier/driver records each collection against a Movement ID |
+| Drop-off | Driver records drop-off (generates a Transfer ID); receiver inspects and records receipt |
+| Receipt | Any deferred or retrospective records are completed; producer can check the fate of their waste |
 
 ### 2.4 Recording modes
 Collection and receipt can each be recorded in real time or deferred/retrospectively. Software providers need to support both, including handling offline capture in field/driver apps.
 
-## 3. Integration personas
+## 3. API reference
 
-Most software providers will fall into one or more of these personas, which map onto the endpoint groups in [section 6](#6-api-reference):
+Structured by lifecycle stage rather than by resource, so it reads in the same order a movement actually happens.
 
-| Persona | Typical software | Endpoints used |
-|---|---|---|
-| Producer/broker system | Waste management, ERP | Create movement |
-| Carrier/driver system | Field/mobile logistics app | Record collection, record drop-off |
-| Receiver system | Site/gate management system | Record receipt |
+**[API specs](https://github.com/DEFRA/digital-waste-tracking-api-docs/blob/main/docs/api/openapi.yaml)**
 
-A single product may cover more than one persona e.g. a waste management company that both carries and receives.
-
-## 4. Becoming an integrated software provider
-
-- Registration/onboarding process – *TBC*
-- Any conformance or listing requirements, comparable to HMRC's Making Tax Digital recognised-software model – *TBC*
-- Sandbox access and setting up a test organisation – *TBC*
-- Support contacts during onboarding – *TBC*
-
-## 5. Authentication and security
-
-- Identity model: organisation-level authentication with user/role delegation – *TBC exact mechanism*
-- Credential type: likely OAuth2/OIDC or API key-based, consistent with other Defra digital services? – *TBC*
-- Required scopes per persona – *TBC*
-- Transport security (TLS) and data protection requirements
-
-## 6. API reference
-
-Structured by lifecycle stage rather than by resource, so it reads in the same order a movement actually happens?
-
-### 6.1 Create movement (BWM)
+### 3.1 Create movement
 
 | | |
 |---|---|
@@ -107,7 +79,7 @@ Structured by lifecycle stage rather than by resource, so it reads in the same o
 | **Input** | Waste classification, hazardous details, POPs details, producer details, estimated collection details, estimated receiver details, estimated carrier details, broker details |
 | **Output** | Validation result, Waste Movement ID |
 
-### 6.2 Record collection (WWC)
+### 3.2 Record collection
 
 | | |
 |---|---|
@@ -117,7 +89,7 @@ Structured by lifecycle stage rather than by resource, so it reads in the same o
 
 Each physical collection is recorded as a separate entry – there's no requirement to model consolidation where multiple loads are later combined.
 
-### 6.3 Record drop-off (WWR)
+### 3.3 Record drop-off
 
 | | |
 |---|---|
@@ -127,7 +99,7 @@ Each physical collection is recorded as a separate entry – there's no requirem
 
 A drop-off can link multiple Movement IDs to a single Transfer ID.
 
-### 6.4 Record receipt (WWR / AWR)
+### 3.4 Record receipt
 
 | | |
 |---|---|
@@ -137,7 +109,7 @@ A drop-off can link multiple Movement IDs to a single Transfer ID.
 
 See [section 7.1](#71-estimated-vs-actual-declarations) for how this reconciles against the estimated details captured at creation.
 
-### 6.5 General conventions
+### 3.5 General conventions
 
 - Environments and base URLs (sandbox/production) – *TBC*
 - API versioning and deprecation policy – *TBC*
@@ -145,72 +117,51 @@ See [section 7.1](#71-estimated-vs-actual-declarations) for how this reconciles 
 - Idempotency behaviour on retries – *TBC*
 - Rate limits and pagination – *TBC*
 
-## 7. Business rules and data reconciliation
+## 4. Business rules and data reconciliation
 
-### 7.1 Estimated vs actual declarations
-Waste classification, hazardous details, POPs details and carrier details are declared twice: as estimates at movement creation, and as actuals at receipt. This is a declare-then-reconcile pattern rather than a strict match requirement – the receiver may accept a load as compliant even where the actual details diverge from the estimate, at their discretion.
-
-Software providers building receiver-side systems should design their accept/reject/flag interaction around this discretionary tolerance rather than a hard validation failure. See the open question in [Appendix C](#appendix-c-open-questions-log) about how this decision is represented in the API contract.
-
-### 7.2 Collection cardinality
+### 4.1 Collection cardinality
 One collection entry per physical collection event, even where loads are later combined at drop-off.
 
-### 7.3 Movement-to-transfer cardinality
+### 4.2 Movement-to-transfer cardinality
 Many Movement IDs can be linked to a single Transfer ID at drop-off; a Transfer ID always originates from exactly one drop-off event.
 
-### 7.4 Timing rules
+### 4.3 Timing rules
 - Time limits, if any, for deferred/retrospective collection and receipt recording – *TBC*
 - Whether a Movement can be deleted/cancelled after collection has started – *TBC*
 
-## 8. Testing and conformance
+## 5. Testing and conformance
 
 - Sandbox scenarios covering each of the four endpoint groups in section 6
 - Reference test data, including chained Movement ID → Transfer ID scenarios and hazardous/POPs edge cases
 - Conformance or certification process ahead of production access – *TBC*
 
-## 9. Go-live and operations
-
-- Go-live checklist – *TBC*
-- Support channels and escalation paths – *TBC*
-- Service status page and incident communication – *TBC*
-- How API changes and deprecations are communicated – *TBC*
-
-## 10. Compliance and legal considerations
-
-- Data retention and audit trail obligations
-- Regulatory reporting responsibilities, and how liability splits between the software provider and the end-user organisation
-- GDPR and data protection requirements for personal data captured in producer/carrier/receiver details
-
 ## Appendix A: glossary
 
 | Term | Meaning |
 |---|---|
-| AWR | After the waste has been received – lifecycle stage |
-| BWM | Before the waste moves – lifecycle stage |
 | DWT | Digital Waste Tracking – the digital service this API supports |
 | EWC | European Waste Catalogue – the code list used to classify waste type |
 | HWCN | Hazardous Waste Consignment Note – the paper record DWT replaces for hazardous waste |
-| POPs | Persistent organic pollutants – chemicals subject to additional handling and reporting rules e.g. old sofas with chemical flame retardants, legacy electrical equipment, historical pesticide products |
+| POPs | Persistent organic pollutants – chemicals subject to additional handling and reporting rules |
 | Waste Movement ID | Identifier issued when a movement is created, before waste moves |
 | Waste Transfer ID | Identifier issued at drop-off; can link multiple Movement IDs together |
 | WTN | Waste Transfer Note – the paper record DWT replaces for non-hazardous waste |
-| WWC | When the waste is collected – lifecycle stage |
-| WWR | When the waste is being dropped off / received – lifecycle stage |
 
 
 ## Appendix B: endpoint quick reference
 
-| Stage | Method | Path |
-|---|---|---|
-| BWM | POST | `/movements/create` |
-| BWM | PUT | `/movements/{id}/create` |
-| BWM | DELETE | `/movements/create` |
-| WWC | POST/PUT/GET | `/movements/static-collection` |
-| WWC | POST/PUT/GET | `/movements/transit-collection` |
-| WWR | POST | `/movements/drop-off` |
-| WWR | POST | `/movements/{id}/drop-off` |
-| WWR/AWR | POST | `/movements/receive` |
-| WWR/AWR | PUT | `/movements/{id}/receive` |
+| Method | Path |
+|---|---|
+| POST | `/movements/create` |
+| PUT | `/movements/{id}/create` |
+| DELETE | `/movements/create` |
+| POST/PUT/GET | `/movements/static-collection` |
+| POST/PUT/GET | `/movements/transit-collection` |
+| POST | `/movements/drop-off` |
+| POST | `/movements/{id}/drop-off` |
+| POST | `/movements/receive` |
+| PUT | `/movements/{id}/receive` |
+
 
 ## Appendix C: open questions log
 
@@ -221,3 +172,6 @@ Many Movement IDs can be linked to a single Transfer ID at drop-off; a Transfer 
 | 3 | Can a Movement be deleted or cancelled once collection has started? | 2026-08-13 |
 | 4 | What authentication mechanism does the API use (OAuth2/OIDC, API key, or other)? | 2026-08-13 |
 | 5 | Is there a conformance or certification process for software providers before production access is granted? | 2026-08-13 |
+| 6 | Can we add step-by-step guidance for a sample API integration? | 2026-08-18 |
+| 7 | What's the process for onboarding of software providers and how will they gain test credentials? | 2026-08-18 |
+| 8 | Do we require more detailed business rules? | 2026-08-18 |
