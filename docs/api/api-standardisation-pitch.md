@@ -8,7 +8,6 @@ The smallest consistent set of cross-cutting conventions for the DWT API, applie
 - **Responses** — one envelope: success `{ data, meta?, validation? }`, failure `{ error: { code, message, details? }, requestId }`.
 - **Accept-with-warnings** — store on soft data-quality issues, reject only on schema/structure/state/authorisation.
 - **Tracing** — `x-request-id` on every response; `requestId` in error bodies.
-- **Versioning** — versioned during alpha (`/v1-alpha-N`, parallel milestones), then **unversioned + additive-only at GA**; deprecate via `Deprecation: true`.
 - **Pagination** — none yet (reserve `meta.pagination`). **Auth** — open.
 
 ## Baseline
@@ -17,11 +16,11 @@ Today only the **Receipt of Waste** API is implemented — the live `waste-movem
 
 Where a convention already exists in the implemented endpoints or is provided by the CDP platform, we prefer to **codify what already works** over inventing something new.
 
-Beyond our own code, an external baseline already applies: the [GOV.UK API technical and data standards](https://www.gov.uk/guidance/gds-api-technical-and-data-standards), with companion guidance on [documenting APIs](https://www.gov.uk/guidance/how-to-document-apis), are the cross-government standards we are expected to follow. We **adopt** them where they apply rather than invent our own — they inform our decisions on versioning, status codes, error handling and deprecation. The full list is in [References](#references).
+Beyond our own code, an external baseline already applies: the [GOV.UK API technical and data standards](https://www.gov.uk/guidance/gds-api-technical-and-data-standards), with companion guidance on [documenting APIs](https://www.gov.uk/guidance/how-to-document-apis), are the cross-government standards we are expected to follow. We **adopt** them where they apply rather than invent our own — they inform our decisions on status codes and error handling. The full list is in [References](#references).
 
 ## Problem
 
-The cross-cutting API conventions — how we signal outcomes, shape responses, authenticate, version, page, and trace requests — were never standardised for the receipt endpoints. Without an agreed standard, each new endpoint is free to invent its own. Left unaddressed, patterns diverge, integrators have to special-case our responses, and the cost of correcting it only grows as more of the journey ships.
+The cross-cutting API conventions — how we signal outcomes, shape responses, authenticate, page, and trace requests — were never standardised for the receipt endpoints. Without an agreed standard, each new endpoint is free to invent its own. Left unaddressed, patterns diverge, integrators have to special-case our responses, and the cost of correcting it only grows as more of the journey ships.
 
 That makes **now** — before the remaining endpoints are written — the right moment to set a **basic, consistent foundation**. We are not aiming for a complete API-design rulebook: we want the **smallest set of conventions that is consistent and can scale** into a richer standard later if the service needs it.
 
@@ -146,28 +145,14 @@ The question for the standard: should organisation authorization move to a heade
 
 Keep it minimal: the header echo is the essential part; the error-body field is a developer-friendly addition. **Success (`2xx`) responses carry the id in the `x-request-id` header only** — the body stays the clean `{ data, … }` envelope. The id appears in the body solely on `4xx`/`5xx`, where a developer needs to quote it to support. If cross-vendor distributed tracing is ever needed, a standard `traceparent` header can be added alongside without breaking `x-request-id`.
 
-### 7. Versioning
-
-**In the code today:** no versioning of any kind — no path prefix, no version header, no query parameter. The spec's `info.version` (`0.2.5-alpha`) is a documentation label, not a runtime version, and the server URL carries no `/v1`. The only existing statement is a terms-of-service line telling integrators to keep their software compatible with "the latest version" — a single-track policy with no technical scheme.
-
-**Proposal:** **version while in alpha, then drop the version at GA.** Use versioning as a development-phase tool to iterate on the API shape; once the shape is settled, publish a single stable **unversioned** API and evolve it additively from then on. This applies the ["just say no to versioning"](https://www.hmeid.com/blog/just-say-no-to-versioning) discipline exactly where it matters — the stable public contract — while keeping versioning where it earns its keep — rapid, breaking iteration during alpha.
-
-- **During alpha — versioned in the URI path.** While we are still discovering the shape, breaks are frequent, so we version each milestone in the path (`/v1-alpha-0`, `/v1-alpha-1`, …) and can run milestones **in parallel**, letting the small, controlled set of early integrators migrate at their own pace. Path is the simplest addressable form and alpha is non-public, so it is acceptable here; a request header would keep URLs cleaner (nodding to review feedback that milestone labels shouldn't sit in public paths), but that only matters once public — which, by design, this never is.
-- **At GA — drop the version; unversioned and additive-only thereafter.** Once the shape is settled we publish one **unversioned** API and commit to never breaking it: additive changes only (new optional fields/endpoints/enum values, shipped in place), clients tolerate unknown fields, complexity absorbed server-side. A genuinely unavoidable breaking change is treated as a **new resource/API**, not a `/v2`. This honours the GOV.UK standard's overriding principle — don't break existing consumers — and the response envelopes (Topics 2–3) are already built to extend this way.
-- **The alpha→GA cutover.** Dropping the version at GA is itself a one-time breaking change for alpha integrators — but that is expected (an alpha contract is unstable by definition) and it is a single, announced event. Smooth it with the deprecation mechanism below: run the final alpha version **alongside** the unversioned GA API for a migration window, mark the alpha paths deprecated, then retire them.
-- **New endpoints only; existing stay put.** All of this applies to the new waste-movement endpoints; the already-live endpoints keep their current unversioned paths — we don't move them ("new endpoints only").
-- **Orchestrated in the service — working assumption, to confirm.** Running alpha milestones in parallel is assumed to live in the **same service** (branching/duplicated handlers per milestone). We do **not** yet know what CDP offers — there may be a platform- or gateway-level way to route/version services we should use instead. Confirm CDP's capability before relying on in-service duplication. (Post-GA there is a single unversioned API, so this cost disappears.)
-- **Usage-driven deprecation, signalled by `Deprecation: true`.** To retire an alpha version, monitor calls **per software provider** (via the JWT `client_id`, Topic 5), nudge remaining providers to migrate, and once use is negligible, withdraw it. While deprecated, every response from that version carries a single `Deprecation: true` header — an in-band signal a monitoring client can detect immediately, not only via out-of-band comms.
-
 ## Rabbit holes
 
 - **Pagination (Topic 4).** Don't choose or build a paging scheme now — there is no read/collection endpoint that needs one. Reserve the `meta` hook and stop there; the scheme is decided with the first endpoint that actually pages.
-- **Platform-level versioning (Topic 7).** We assume version orchestration lives in the service (parallel code paths per milestone). Before hard-coding that, confirm whether CDP or the API gateway already offers versioning/routing we should use instead — it may move where the duplication lives, or remove it.
 
 ## References
 
 Cross-government and Defra standards this pitch is expected to follow. Individual topics cite the specific one that applies.
 
-- [GOV.UK — API technical and data standards](https://www.gov.uk/guidance/gds-api-technical-and-data-standards) — the baseline government API guidance (informs versioning, status codes, error handling and deprecation).
+- [GOV.UK — API technical and data standards](https://www.gov.uk/guidance/gds-api-technical-and-data-standards) — the baseline government API guidance (informs status codes and error handling).
 - [GOV.UK — Documenting APIs](https://www.gov.uk/guidance/how-to-document-apis) — how government API documentation should be structured and written (informs the eventual published spec/docs).
-- [Defra software development standards](https://defra.github.io/software-development-standards/) — Defra's development standards; add no separate API-versioning rule and defer to the GOV.UK standard above.
+- [Defra software development standards](https://defra.github.io/software-development-standards/) — Defra's development standards.
