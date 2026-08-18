@@ -1,4 +1,4 @@
-# Digital Waste Tracking: software provider integration guidance
+# Digital Waste Tracking: API integration guidance
 
 **Status:** draft outline, v0.1
 
