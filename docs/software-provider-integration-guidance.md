@@ -15,7 +15,6 @@ Section headings and structure are stable; most section bodies are placeholders 
   - [2.1 Lifecycle stages](#21-lifecycle-stages)
   - [2.2 Actors](#22-actors)
   - [2.3 Core entities](#23-core-entities)
-  - [2.4 Recording modes](#24-recording-modes)
 - [3. API reference](#3-api-reference)
   - [3.1 Create movement](#31-create-movement)
   - [3.2 Record collection](#32-record-collection)
@@ -35,10 +34,11 @@ Section headings and structure are stable; most section bodies are placeholders 
 
 ## 1. Introduction
 
-- Purpose of this document and who it's for: software vendors building producer, broker, carrier/driver or receiver-facing systems that need to record waste movements
-- Policy context: Digital Waste Tracking (DWT) replaces the paper Waste Transfer Note (WTN) and Hazardous Waste Consignment Note (HWCN) with a digital waste movement record
-- Scope of this document: the integration API only – not the DWT frontend service, which is out of scope here
-- How to give feedback on this guidance while it's in draft
+This document provides guidance for software providers building producer, broker, carrier/driver or receiver-facing systems that will interact with Defra's dedicated API to record waste movements. 
+
+Digital Waste Tracking (DWT) is a UK cross-government programme to build a single digital service for tracking waste movements, ultimately replacing paper-based waste transfer records. Its main aims are to reduce waste crime and misclassification, improve data on how waste moves domestically to support the transition to a circular economy, and cut the administrative burden of the current fragmented, paper-based system.
+
+The current focus of the DWT development team is to reach the first 'development milestone' of the service (Aug/Sep 2026) - to test API interactions in a sandbox environment and use the findings to better refine the service for rollout. The scope of this document is there focused on the integration API only, rather than the overall DWT service, which will follow. 
 
 <br>
 
@@ -51,23 +51,20 @@ The API is organised around four stages
 
 | Stage | What happens |
 |---|---|
-| Creation | Movement is created; estimated details are declared |
-| Collection | Carrier/driver records each collection against a Movement ID |
-| Drop-off | Driver records drop-off (generates a Transfer ID); receiver inspects and records receipt |
-| Receipt | Any deferred or retrospective records are completed; producer can check the fate of their waste |
+| Creation | Movement created; estimated details declared; Movement ID generated |
+| Collection | Carrier/driver records the collection against a Movement ID |
+| Drop-off | Driver records drop-off and declares the Movement ID in scope; Transfer ID generated |
+| Receipt | Receiving site records acceptance of the waste against the Transfer ID |
 
 ### 2.2 Actors
-- **Producer** – the organisation whose waste is being moved (green)
-- **Broker** – arranges the movement on behalf of a producer or receiver (green)
-- **Carrier** – the organisation licensed to transport the waste; may operate through a **Driver** as the field-level user recording events in real time (blue / purple)
-- **Receiver** – the site accepting the waste for treatment, disposal or recovery (yellow)
+- **Producer / Controller** – the organisation whose waste is being moved
+- **Broker / Controller** – arranges the movement on behalf of a producer or receiver
+- **Carrier / Transporter** – the organisation licensed to transport the waste; may operate through a **Driver** as the field-level user recording events in real time
+- **Receiver** – the site accepting the waste for treatment, disposal or recovery
 
 ### 2.3 Core entities
-- **Waste Movement** – the primary record of an intended waste movement, identified by a **Waste Movement ID**, created before the waste moves
-- **Waste Transfer** – the record created at drop-off, identified by a **Waste Transfer ID**; a single Transfer can bundle one or more Movement IDs together
-
-### 2.4 Recording modes
-Collection and receipt can each be recorded in real time or deferred/retrospectively. Software providers need to support both, including handling offline capture in field/driver apps.
+- **Waste Movement ID** – the primary record of an intended waste movement, created before the waste moves
+- **Waste Transfer ID** – the record created at drop-off; a single Transfer ID can bundle one or more Movement IDs together
 
 <br>
 
@@ -86,35 +83,137 @@ To explore requests and responses before you build, preview the YAML in [Swagger
 | | |
 |---|---|
 | **Endpoints** | `POST /movements/create`, `PUT /movements/{id}/create`, `DELETE /movements/create` |
-| **Input** | Waste classification, hazardous details, POPs details, producer details, estimated collection details, estimated receiver details, estimated carrier details, broker details |
+| **Input** | Waste classification, producer details, estimated collection details, estimated receiver details, estimated carrier details, broker details |
 | **Output** | Validation result, Waste Movement ID |
 
+**Example:**
+```
+{​
+
+"apiCode": "25b14080-5e77-4f91-9957-2482a0cb8775",​
+
+"estimatedDateTimeCollected": "2025-09-15T08:00:00Z",​
+
+"hazardousWasteConsignmentCode": "CJ123E/A0001",​
+
+"producer": {​
+
+"wasteSource": "Commercial",​
+
+"organisationName": "ACME Waste Producers Ltd",​
+
+"authorisationNumber": "EAS/P/123456",​
+
+"sicCode": "38110",​
+
+"address": { "fullAddress": "10 Industrial Way, Test City", "postcode": "TE1 2PQ" },​
+
+"councilMovement": false​
+
+},​
+
+"carrier": { "meansOfTransport": "Road", "registrationNumber": "CBDU123456",​
+
+"organisationName": "Test Carrier Ltd", "vehicleRegistration": "AB12 CDE" },​
+
+"receiver": { "siteName": "Test Receiver Site", "authorisationNumber": "HP3456XX",​
+
+"address": { "fullAddress": "99 Receiver Road, Test City", "postcode": "TE1 3RX" } },​
+
+"wasteItems": [{​
+
+"ewcCodes": ["200121"], "wasteDescription": "Fluorescent tubes (mercury)",​
+
+"physicalForm": "Solid", "numberOfContainers": 4, "typeOfContainers": "SKI",​
+
+"weight": { "metric": "Tonnes", "amount": 0.5, "isEstimate": true },​
+
+"containsPops": true, "pops": { "sourceOfComponents": "PROVIDED_WITH_WASTE" },​
+
+"containsHazardous": true,​
+
+"hazardous": { "sourceOfComponents": "GUIDANCE", "hazCodes": ["HP_4"],​
+
+"components": [{ "name": "Mercury", "concentration": 5 }] }​
+
+}]​
+
+}​
+```
+
 ### 3.2 Record collection
+Real-time STATIC pickup (producer to driver)​.
 
 | | |
 |---|---|
-| **Endpoints** | `POST/PUT/GET /movements/static-collection`, `POST/PUT/GET /movements/transit-collection` (treated as equivalent for integration purposes) |
-| **Input** | Waste Movement ID, collection dateTime, carrier details |
+| **Endpoints** | `POST /movements/static-collection` |
+| **Input** | Waste Movement ID, collection dateTime, carrier details, collection address |
 | **Output** | Validation result |
 
 Each physical collection is recorded as a separate entry – there's no requirement to model consolidation where multiple loads are later combined.
 
-### 3.3 Record drop-off
+**Example:**
+```
+{​
+
+"apiCode": "25b14080-5e77-4f91-9957-2482a0cb8775",​
+
+"actualDateTimeCollected": "2025-09-15T08:34:00Z",​
+
+"yourUniqueReference": "DRIVER-TRIP-001",​
+
+"carrier": { "meansOfTransport": "Road", "registrationNumber": "CBDU123456",​
+
+"organisationName": "Test Carrier Ltd", "vehicleRegistration": "AB12 CDE" },​
+
+"collection": { "address": { "fullAddress": "10 Industrial Way, Test City", "postcode": "TE1 2PQ" } }​
+
+}​
+```
+
+### 3.3 Record drop-off 
+Multi-collection consolidated drop-off (non-hazardous only)​.
 
 | | |
 |---|---|
-| **Endpoints** | `POST /movements/drop-off`, `POST /movements/{id}/drop-off` |
+| **Endpoints** | `POST /movements/drop-off` |
 | **Input** | Drop-off dateTime, drop-off address, one or more Movement IDs, carrier details |
 | **Output** | Validation result, Waste Transfer ID |
 
 A drop-off can link multiple Movement IDs to a single Transfer ID.
 
+**Example:**
+```{​
+
+"apiCode": "25b14080-5e77-4f91-9957-2482a0cb8775",​
+
+"movementIds": ["25HRA0B2", "25TKP3C9", "25ZWQ7D1"],​
+
+"actualDateTimeDropOff": "2025-09-15T11:15:00Z",​
+
+"yourUniqueReference": "DRIVER-RUN-AM-001",​
+
+"carrier": { "meansOfTransport": "Road", "registrationNumber": "CBDU123456",​
+
+"organisationName": "Test Carrier Ltd", "vehicleRegistration": "AB12 CDE" },​
+
+"dropOff": {​
+
+"DropOff.organisationName": "Test Drop-off Site",​
+
+"address": { "fullAddress": "99 Receiver Road, Test City", "postcode": "TE1 3RX" }​
+
+}​
+
+}​
+```
+
 ### 3.4 Record receipt
 
 | | |
 |---|---|
-| **Endpoints** | `POST /movements/receive`, `PUT /movements/{id}/receive` |
-| **Input** | Waste Transfer ID, waste classification, hazardous details, POPs details, receiver details, carrier details, broker details |
+| **Endpoints** | `POST /movements/receive` |
+| **Input** | Waste Transfer ID, waste item details, hazardous details, POPs details, receiver details, carrier details, broker details |
 | **Output** | Validation result |
 
 See [section 7.1](#71-estimated-vs-actual-declarations) for how this reconciles against the estimated details captured at creation.
