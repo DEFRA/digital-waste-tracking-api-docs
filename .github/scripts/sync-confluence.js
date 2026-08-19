@@ -81,6 +81,79 @@ function normaliseTables(html) {
   return out;
 }
 
+// Confluence anchors inline comments to page text with <ac:inline-comment-marker> tags in the
+// storage body. A full-body overwrite (which is what every sync does) has no way to know about
+// those tags and silently drops them, orphaning every inline comment on the page. To avoid that,
+// fetch the comments that currently exist and re-wrap their anchor text in the freshly generated
+// body before publishing it.
+async function fetchInlineComments() {
+  const comments = [];
+  let next = `/${PAGE_ID}/child/comment?expand=extensions.inlineProperties&limit=200`;
+  while (next) {
+    const data = await (await confluenceFetch(next)).json();
+    comments.push(...data.results);
+    next = data._links && data._links.next
+      ? next.split('?')[0] + '?' + data._links.next.split('?')[1]
+      : null;
+  }
+  return comments
+    .filter((c) => c.extensions.location === 'inline' && c.extensions.inlineProperties)
+    .map((c) => ({
+      id: c.id,
+      ref: c.extensions.inlineProperties.markerRef,
+      sel: c.extensions.inlineProperties.originalSelection
+    }))
+    .sort((a, b) => a.id.localeCompare(b.id)); // ascending id as a stable creation-order proxy
+}
+
+// True for the closing </a> of a table-of-contents entry, e.g. <a href="#slug">TEXT</a> - lets
+// heading text get its marker on the real heading rather than its Contents-list link.
+function endsInsideTocLink(body, endIdx) {
+  return body.slice(endIdx, endIdx + 4) === '</a>';
+}
+
+function restoreCommentMarkers(html, comments) {
+  let body = html;
+  const usedOccurrences = new Map(); // sel -> how many times it's already been claimed
+  let restored = 0;
+  const orphaned = [];
+
+  for (const c of comments) {
+    const targetOcc = usedOccurrences.get(c.sel) || 0;
+    let searchFrom = 0;
+    let occ = -1;
+    let placed = false;
+
+    while (true) {
+      const idx = body.indexOf(c.sel, searchFrom);
+      if (idx === -1) break;
+      const endIdx = idx + c.sel.length;
+      if (!endsInsideTocLink(body, endIdx)) {
+        occ++;
+        if (occ === targetOcc) {
+          body = body.slice(0, idx) +
+            `<ac:inline-comment-marker ac:ref="${c.ref}">${c.sel}</ac:inline-comment-marker>` +
+            body.slice(endIdx);
+          placed = true;
+          break;
+        }
+      }
+      searchFrom = idx + 1;
+    }
+
+    usedOccurrences.set(c.sel, targetOcc + 1);
+    if (placed) restored++;
+    else orphaned.push(c);
+  }
+
+  console.log(`Restored ${restored}/${comments.length} inline comment anchors.`);
+  if (orphaned.length > 0) {
+    console.log(`${orphaned.length} comment(s) orphaned - their anchor text no longer appears on the page:`);
+    orphaned.forEach((c) => console.log(`  ${c.id}: ${JSON.stringify(c.sel.slice(0, 60))}`));
+  }
+  return body;
+}
+
 async function main() {
   const raw = fs.readFileSync(DOC_PATH, 'utf8');
   const docDir = path.dirname(DOC_PATH);
@@ -95,6 +168,9 @@ async function main() {
   html = replaceImageTagsWithMacros(html);
   html = normaliseTables(html);
   html = html.replace(/<hr>/g, '<hr/>').replace(/<br>/g, '<br/>');
+
+  const inlineComments = await fetchInlineComments();
+  html = restoreCommentMarkers(html, inlineComments);
 
   const banner =
     '<ac:structured-macro ac:name="info" ac:schema-version="1"><ac:rich-text-body><p>' +
