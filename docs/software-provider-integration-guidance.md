@@ -40,6 +40,8 @@ Digital Waste Tracking (DWT) is a UK cross-government programme to build a singl
 
 The current focus of the DWT development team is to reach the first 'development milestone' of the service (Aug/Sep 2026) - to test API interactions in a sandbox environment and use the findings to better refine the service for rollout. The scope of this document is there focused on the integration API only, rather than the overall DWT service, which will follow. 
 
+**[API roadmap](./images/dwt-api-delivery-roadmap.png)**
+
 <br>
 
 ## 2. Service overview
@@ -294,7 +296,7 @@ This mints a fresh Transfer ID, unlike the hazardous single-movement case above.
 
 | | |
 |---|---|
-| **Endpoints** | `POST /movements/receive` |
+| **Endpoints** | `POST /movements/{id}/receive` |
 | **Input** | Waste Transfer ID, waste item details, receiver details, carrier details, broker details |
 | **Output** | Validation result |
 
@@ -387,10 +389,6 @@ One collection entry per physical collection event, even where loads are later c
 ### 4.2 Movement-to-transfer cardinality
 Many Movement IDs can be linked to a single Transfer ID at drop-off; a Transfer ID always originates from exactly one drop-off event.
 
-### 4.3 Timing rules
-- Time limits, if any, for deferred/retrospective collection and receipt recording – *TBC*
-- Whether a Movement can be deleted/cancelled after collection has started – *TBC*
-
 <br>
 
 ## 5. Testing and conformance
@@ -419,14 +417,9 @@ Many Movement IDs can be linked to a single Transfer ID at drop-off; a Transfer 
 | Method | Path |
 |---|---|
 | POST | `/movements/create` |
-| PUT | `/movements/{id}/create` |
-| DELETE | `/movements/create` |
-| POST | `/movements/static-collection` |
-| POST | `/movements/transit-collection` |
+| POST | `/movements/{id}/collection` |
 | POST | `/movements/drop-off` |
-| POST | `/movements/{id}/drop-off` |
-| POST | `/movements/receive` |
-| PUT | `/movements/{id}/receive` |
+| POST | `/movements/{id}/receive` |
 
 
 ## Appendix C: open questions log
