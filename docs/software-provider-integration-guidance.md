@@ -395,7 +395,7 @@ Many Movement IDs can be linked to a single Transfer ID at drop-off; a Transfer 
 
 ## 5. Testing and conformance
 
-- Sandbox scenarios covering each of the four endpoint groups in section 6
+- Sandbox scenarios covering each of the four endpoint groups in [section 3](#3-api-reference)
 - Reference test data, including chained Movement ID → Transfer ID scenarios and hazardous/POPs edge cases
 - Conformance or certification process ahead of production access – *TBC*
 
