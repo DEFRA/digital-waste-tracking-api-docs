@@ -73,9 +73,7 @@ Collection and receipt can each be recorded in real time or deferred/retrospecti
 
 ## 3. API reference
 
-Structured by lifecycle stage rather than by resource, so it reads in the same order a movement actually happens.
-
-The [Digital Waste Tracking OpenAPI specification](https://github.com/DEFRA/digital-waste-tracking-api-docs/blob/main/docs/api/openapi.yaml) is the definitive source for these endpoints. Use it for exact paths, request and response schemas – not the summaries below, which may not always be current.
+These endpoints are structured by lifecycle stage rather than by resource, so they read in the same order a movement actually happens. The endpoint summaries below may not always be current, so be sure to use the definitive source for exact paths, request and response schemas: [Digital Waste Tracking OpenAPI specification](https://github.com/DEFRA/digital-waste-tracking-api-docs/blob/main/docs/api/openapi.yaml).
 
 The spec is in alpha and still changing. Expect some shapes to shift before go-live.
 
