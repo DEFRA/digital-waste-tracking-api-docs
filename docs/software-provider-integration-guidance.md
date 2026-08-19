@@ -261,6 +261,35 @@ Hazardous waste cannot be aggregated across movements: if any linked Movement is
 
 For a hazardous single-movement drop-off, the returned Transfer ID is the same as the Movement ID – nothing new is minted. A non-hazardous multi-movement drop-off mints a fresh Transfer ID instead.
 
+**Non-hazardous variant:** when none of the linked movements are hazardous, a single drop-off can consolidate more than one Movement ID – for example, two non-hazardous movements collected on the same run and dropped off together (assume `25TKP3C9` and `25ZWQ7D1` were each already created and collected, following the same pattern as 3.1 and 3.2):
+
+```json
+{
+  "apiCode": "25b14080-5e77-4f91-9957-2482a0cb8775",
+  "movementIds": [
+    "25TKP3C9",
+    "25ZWQ7D1"
+  ],
+  "actualDateTimeDropOff": "2025-09-15T14:45:00Z",
+  "yourUniqueReference": "DRIVER-RUN-PM-002",
+  "carrier": {
+    "meansOfTransport": "Road",
+    "registrationNumber": "CBDU123456",
+    "organisationName": "Test Carrier Ltd",
+    "vehicleRegistration": "AB12 CDE"
+  },
+  "dropOff": {
+    "siteName": "Test Drop-off Site",
+    "address": {
+      "fullAddress": "99 Receiver Road, Test City",
+      "postcode": "TE1 3RX"
+    }
+  }
+}
+```
+
+This mints a fresh Transfer ID, unlike the hazardous single-movement case above.
+
 ### 3.4 Record receipt
 
 | | |
