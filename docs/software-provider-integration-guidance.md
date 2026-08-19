@@ -87,62 +87,84 @@ To explore requests and responses before you build, preview the YAML in [Swagger
 | **Output** | Validation result, Waste Movement ID |
 
 **Example:**
-```
-{​
-
-"apiCode": "25b14080-5e77-4f91-9957-2482a0cb8775",​
-
-"estimatedDateTimeCollected": "2025-09-15T08:00:00Z",​
-
-"hazardousWasteConsignmentCode": "CJ123E/A0001",​
-
-"producer": {​
-
-"wasteSource": "Commercial",​
-
-"organisationName": "ACME Waste Producers Ltd",​
-
-"authorisationNumber": "EAS/P/123456",​
-
-"sicCode": "38110",​
-
-"address": { "fullAddress": "10 Industrial Way, Test City", "postcode": "TE1 2PQ" },​
-
-"councilMovement": false​
-
-},​
-
-"carrier": { "meansOfTransport": "Road", "registrationNumber": "CBDU123456",​
-
-"organisationName": "Test Carrier Ltd", "vehicleRegistration": "AB12 CDE" },​
-
-"receiver": { "siteName": "Test Receiver Site", "authorisationNumber": "HP3456XX",​
-
-"address": { "fullAddress": "99 Receiver Road, Test City", "postcode": "TE1 3RX" } },​
-
-"wasteItems": [{​
-
-"ewcCodes": ["200121"], "wasteDescription": "Fluorescent tubes (mercury)",​
-
-"physicalForm": "Solid", "numberOfContainers": 4, "typeOfContainers": "SKI",​
-
-"weight": { "metric": "Tonnes", "amount": 0.5, "isEstimate": true },​
-
-"containsPops": true, "pops": { "sourceOfComponents": "PROVIDED_WITH_WASTE" },​
-
-"containsHazardous": true,​
-
-"hazardous": { "sourceOfComponents": "GUIDANCE", "hazCodes": ["HP_4"],​
-
-"components": [{ "name": "Mercury", "concentration": 5 }] }​
-
-}]​
-
-}​
+```json
+{
+  "apiCode": "25b14080-5e77-4f91-9957-2482a0cb8775",
+  "estimatedDateTimeCollected": "2025-09-15T08:00:00Z",
+  "hazardousWasteConsignmentCode": "CJ123E/A0001",
+  "producer": {
+    "wasteSource": "Commercial",
+    "organisationName": "ACME Waste Producers Ltd",
+    "authorisationNumber": "EAS/P/123456",
+    "sicCode": "38110",
+    "address": {
+      "fullAddress": "10 Industrial Way, Test City",
+      "postcode": "TE1 2PQ"
+    },
+    "councilMovement": false
+  },
+  "carrier": {
+    "meansOfTransport": "Road",
+    "registrationNumber": "CBDU123456",
+    "organisationName": "Test Carrier Ltd",
+    "vehicleRegistration": "AB12 CDE"
+  },
+  "receiver": {
+    "siteName": "Test Receiver Site",
+    "authorisationNumber": "HP3456XX",
+    "address": {
+      "fullAddress": "99 Receiver Road, Test City",
+      "postcode": "TE1 3RX"
+    }
+  },
+  "wasteItems": [
+    {
+      "ewcCodes": [
+        "200121"
+      ],
+      "wasteDescription": "Fluorescent tubes (mercury)",
+      "physicalForm": "Solid",
+      "numberOfContainers": 4,
+      "typeOfContainers": "SKI",
+      "weight": {
+        "metric": "Tonnes",
+        "amount": 0.5,
+        "isEstimate": true
+      },
+      "containsPops": true,
+      "pops": {
+        "sourceOfComponents": "PROVIDED_WITH_WASTE"
+      },
+      "containsHazardous": true,
+      "hazardous": {
+        "sourceOfComponents": "GUIDANCE",
+        "hazCodes": [
+          "HP_4"
+        ],
+        "components": [
+          {
+            "name": "Mercury",
+            "concentration": 5
+          }
+        ]
+      },
+      "disposalOrRecoveryCodes": [
+        {
+          "code": "R1",
+          "weight": {
+            "metric": "Tonnes",
+            "amount": 0.5,
+            "isEstimate": true
+          }
+        }
+      ]
+    }
+  ]
+}
 ```
 
 ### 3.2 Record collection
-Real-time STATIC pickup (producer to driver)​.
+Real-time STATIC pickup (producer to driver).
 
 | | |
 |---|---|
@@ -153,26 +175,28 @@ Real-time STATIC pickup (producer to driver)​.
 Each physical collection is recorded as a separate entry – there's no requirement to model consolidation where multiple loads are later combined.
 
 **Example:**
-```
-{​
-
-"apiCode": "25b14080-5e77-4f91-9957-2482a0cb8775",​
-
-"actualDateTimeCollected": "2025-09-15T08:34:00Z",​
-
-"yourUniqueReference": "DRIVER-TRIP-001",​
-
-"carrier": { "meansOfTransport": "Road", "registrationNumber": "CBDU123456",​
-
-"organisationName": "Test Carrier Ltd", "vehicleRegistration": "AB12 CDE" },​
-
-"collection": { "address": { "fullAddress": "10 Industrial Way, Test City", "postcode": "TE1 2PQ" } }​
-
-}​
+```json
+{
+  "apiCode": "25b14080-5e77-4f91-9957-2482a0cb8775",
+  "actualDateTimeCollected": "2025-09-15T08:34:00Z",
+  "yourUniqueReference": "DRIVER-TRIP-001",
+  "carrier": {
+    "meansOfTransport": "Road",
+    "registrationNumber": "CBDU123456",
+    "organisationName": "Test Carrier Ltd",
+    "vehicleRegistration": "AB12 CDE"
+  },
+  "collection": {
+    "address": {
+      "fullAddress": "10 Industrial Way, Test City",
+      "postcode": "TE1 2PQ"
+    }
+  }
+}
 ```
 
 ### 3.3 Record drop-off 
-Multi-collection consolidated drop-off (non-hazardous only)​.
+Multi-collection consolidated drop-off (non-hazardous only).
 
 | | |
 |---|---|
@@ -183,29 +207,30 @@ Multi-collection consolidated drop-off (non-hazardous only)​.
 A drop-off can link multiple Movement IDs to a single Transfer ID.
 
 **Example:**
-```{​
-
-"apiCode": "25b14080-5e77-4f91-9957-2482a0cb8775",​
-
-"movementIds": ["25HRA0B2", "25TKP3C9", "25ZWQ7D1"],​
-
-"actualDateTimeDropOff": "2025-09-15T11:15:00Z",​
-
-"yourUniqueReference": "DRIVER-RUN-AM-001",​
-
-"carrier": { "meansOfTransport": "Road", "registrationNumber": "CBDU123456",​
-
-"organisationName": "Test Carrier Ltd", "vehicleRegistration": "AB12 CDE" },​
-
-"dropOff": {​
-
-"DropOff.organisationName": "Test Drop-off Site",​
-
-"address": { "fullAddress": "99 Receiver Road, Test City", "postcode": "TE1 3RX" }​
-
-}​
-
-}​
+```json
+{
+  "apiCode": "25b14080-5e77-4f91-9957-2482a0cb8775",
+  "movementIds": [
+    "25HRA0B2",
+    "25TKP3C9",
+    "25ZWQ7D1"
+  ],
+  "actualDateTimeDropOff": "2025-09-15T11:15:00Z",
+  "yourUniqueReference": "DRIVER-RUN-AM-001",
+  "carrier": {
+    "meansOfTransport": "Road",
+    "registrationNumber": "CBDU123456",
+    "organisationName": "Test Carrier Ltd",
+    "vehicleRegistration": "AB12 CDE"
+  },
+  "dropOff": {
+    "siteName": "Test Drop-off Site",
+    "address": {
+      "fullAddress": "99 Receiver Road, Test City",
+      "postcode": "TE1 3RX"
+    }
+  }
+}
 ```
 
 ### 3.4 Record receipt
@@ -217,6 +242,8 @@ A drop-off can link multiple Movement IDs to a single Transfer ID.
 | **Output** | Validation result |
 
 See [section 7.1](#71-estimated-vs-actual-declarations) for how this reconciles against the estimated details captured at creation.
+
+**Example:** *not yet added.*
 
 ### 3.5 General conventions
 
