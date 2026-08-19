@@ -298,8 +298,6 @@ This mints a fresh Transfer ID, unlike the hazardous single-movement case above.
 | **Input** | Waste Transfer ID, waste item details, receiver details, carrier details, broker details |
 | **Output** | Validation result |
 
-See [section 7.1](#71-estimated-vs-actual-declarations) for how this reconciles against the estimated details captured at creation.
-
 Recorded against Transfer ID `25HRA0B2` from the drop-off response above. The waste item here carries the actual, confirmed weight and treatment – compare `weight.isEstimate` and `disposalOrRecoveryCodes` against the estimates declared at creation in 3.1.
 
 **Example:**
@@ -397,7 +395,7 @@ Many Movement IDs can be linked to a single Transfer ID at drop-off; a Transfer 
 
 ## 5. Testing and conformance
 
-- Sandbox scenarios covering each of the four endpoint groups in section 6
+- Sandbox scenarios covering each of the four endpoint groups in [section 3](#3-api-reference)
 - Reference test data, including chained Movement ID → Transfer ID scenarios and hazardous/POPs edge cases
 - Conformance or certification process ahead of production access – *TBC*
 
