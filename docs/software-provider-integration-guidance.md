@@ -80,7 +80,7 @@ The original Phase 1 receipt endpoints still work. They're marked deprecated, no
 
 To explore requests and responses before you build, preview the YAML in [Swagger Editor](https://editor.swagger.io) or a VS Code OpenAPI extension.
 
-The examples in 3.1 to 3.4 follow a single movement end to end: a hazardous consignment of mercury-containing fluorescent tubes, created, collected, dropped off and received. The Movement ID minted at creation is reused throughout so you can see how the four stages connect – in practice, every real movement mints its own IDs.
+The examples in 3.1 to 3.4 follow a single movement end to end: a consignment of mixed construction and demolition waste, created, collected, dropped off and received. The Movement ID minted at creation is reused throughout so you can see how the four stages connect – in practice, every real movement mints its own IDs.
 
 ### 3.1 Create movement
 
@@ -90,14 +90,11 @@ The examples in 3.1 to 3.4 follow a single movement end to end: a hazardous cons
 | **Input** | Waste classification, producer details, estimated collection details, estimated receiver details, estimated carrier details, broker details |
 | **Output** | Validation result, Waste Movement ID |
 
-This example is a hazardous movement, which is why `hazardousWasteConsignmentCode`, `hazardous` and `receiver` are all present – none of the three is required for a non-hazardous movement.
-
 **Example:**
 ```json
 {
   "apiCode": "25b14080-5e77-4f91-9957-2482a0cb8775",
   "estimatedDateTimeCollected": "2025-09-15T08:00:00Z",
-  "hazardousWasteConsignmentCode": "CJ123E/A0001",
   "producer": {
     "wasteSource": "Commercial",
     "organisationName": "ACME Waste Producers Ltd",
@@ -115,51 +112,28 @@ This example is a hazardous movement, which is why `hazardousWasteConsignmentCod
     "organisationName": "Test Carrier Ltd",
     "vehicleRegistration": "AB12 CDE"
   },
-  "receiver": {
-    "siteName": "Test Receiver Site",
-    "authorisationNumber": "HP3456XX",
-    "address": {
-      "fullAddress": "99 Receiver Road, Test City",
-      "postcode": "TE1 3RX"
-    }
-  },
   "wasteItems": [
     {
       "ewcCodes": [
-        "200121"
+        "170107"
       ],
-      "wasteDescription": "Fluorescent tubes (mercury)",
+      "wasteDescription": "Basic mixed construction and demolition waste, this includes recyclable house bricks, gypsum plaster and slates.",
       "physicalForm": "Solid",
-      "numberOfContainers": 4,
+      "numberOfContainers": 1,
       "typeOfContainers": "SKI",
       "weight": {
         "metric": "Tonnes",
-        "amount": 0.5,
+        "amount": 2.5,
         "isEstimate": true
       },
-      "containsPops": true,
-      "pops": {
-        "sourceOfComponents": "PROVIDED_WITH_WASTE"
-      },
-      "containsHazardous": true,
-      "hazardous": {
-        "sourceOfComponents": "GUIDANCE",
-        "hazCodes": [
-          "HP_4"
-        ],
-        "components": [
-          {
-            "name": "Mercury",
-            "concentration": 5
-          }
-        ]
-      },
+      "containsPops": false,
+      "containsHazardous": false,
       "disposalOrRecoveryCodes": [
         {
-          "code": "R1",
+          "code": "R5",
           "weight": {
             "metric": "Tonnes",
-            "amount": 0.5,
+            "amount": 2.5,
             "isEstimate": true
           }
         }
@@ -216,7 +190,6 @@ Recorded against Movement ID `25HRA0B2` from the creation response above – the
 The response is a validation envelope only; no new identifier is returned, so the walkthrough continues to use the same Movement ID.
 
 ### 3.3 Record drop-off
-Single-movement drop-off – required here because this movement is hazardous.
 
 | | |
 |---|---|
@@ -224,7 +197,7 @@ Single-movement drop-off – required here because this movement is hazardous.
 | **Input** | Drop-off dateTime, drop-off address, one or more Movement IDs, carrier details |
 | **Output** | Validation result, Waste Transfer ID |
 
-Hazardous waste cannot be aggregated across movements: if any linked Movement is hazardous, `movementIds` must contain exactly one ID. Non-hazardous movements can be consolidated into a single drop-off with more than one ID – see [4.2 Movement-to-transfer cardinality](#42-movement-to-transfer-cardinality).
+The movement collected above is dropped off on its own; a drop-off can just as easily aggregate more than one Movement ID – see [4.2 Movement-to-transfer cardinality](#42-movement-to-transfer-cardinality).
 
 **Example:**
 ```json
@@ -254,43 +227,12 @@ Hazardous waste cannot be aggregated across movements: if any linked Movement is
 **Response:**
 ```json
 {
-  "transferId": "25HRA0B2",
+  "transferId": "25TKP3C9",
   "validation": {
     "warnings": []
   }
 }
 ```
-
-For a hazardous single-movement drop-off, the returned Transfer ID is the same as the Movement ID – nothing new is minted. A non-hazardous multi-movement drop-off mints a fresh Transfer ID instead.
-
-**Non-hazardous variant:** when none of the linked movements are hazardous, a single drop-off can consolidate more than one Movement ID – for example, two non-hazardous movements collected on the same run and dropped off together (assume `25TKP3C9` and `25ZWQ7D1` were each already created and collected, following the same pattern as 3.1 and 3.2):
-
-```json
-{
-  "apiCode": "25b14080-5e77-4f91-9957-2482a0cb8775",
-  "movementIds": [
-    "25TKP3C9",
-    "25ZWQ7D1"
-  ],
-  "actualDateTimeDropOff": "2025-09-15T14:45:00Z",
-  "yourUniqueReference": "DRIVER-RUN-PM-002",
-  "carrier": {
-    "meansOfTransport": "Road",
-    "registrationNumber": "CBDU123456",
-    "organisationName": "Test Carrier Ltd",
-    "vehicleRegistration": "AB12 CDE"
-  },
-  "dropOff": {
-    "siteName": "Test Drop-off Site",
-    "address": {
-      "fullAddress": "99 Receiver Road, Test City",
-      "postcode": "TE1 3RX"
-    }
-  }
-}
-```
-
-This mints a fresh Transfer ID, unlike the hazardous single-movement case above.
 
 ### 3.4 Record receipt
 
@@ -300,14 +242,13 @@ This mints a fresh Transfer ID, unlike the hazardous single-movement case above.
 | **Input** | Waste Transfer ID, waste item details, receiver details, carrier details, broker details |
 | **Output** | Validation result |
 
-Recorded against Transfer ID `25HRA0B2` from the drop-off response above. The waste item here carries the actual, confirmed weight and treatment – compare `weight.isEstimate` and `disposalOrRecoveryCodes` against the estimates declared at creation in 3.1.
+Recorded against Transfer ID `25TKP3C9` from the drop-off response above. The waste item here carries the actual, confirmed weight and treatment – compare `weight.isEstimate` and `disposalOrRecoveryCodes` against the estimates declared at creation in 3.1.
 
 **Example:**
 ```json
 {
   "apiCode": "8f2c1a90-6b3e-4c1d-9a55-1e7f4b8d2c31",
   "dateTimeReceived": "2025-09-15T12:30:00Z",
-  "hazardousWasteConsignmentCode": "CJ123E/A0001",
   "yourUniqueReference": "RECEIPT-CHECK-001",
   "carrier": {
     "meansOfTransport": "Road",
@@ -328,40 +269,25 @@ Recorded against Transfer ID `25HRA0B2` from the drop-off response above. The wa
   "wasteItems": [
     {
       "ewcCodes": [
-        "200121"
+        "170107"
       ],
-      "wasteDescription": "Fluorescent tubes (mercury)",
+      "wasteDescription": "Basic mixed construction and demolition waste, this includes recyclable house bricks, gypsum plaster and slates.",
       "physicalForm": "Solid",
-      "numberOfContainers": 4,
+      "numberOfContainers": 1,
       "typeOfContainers": "SKI",
       "weight": {
         "metric": "Tonnes",
-        "amount": 0.48,
+        "amount": 2.3,
         "isEstimate": false
       },
-      "containsPops": true,
-      "pops": {
-        "sourceOfComponents": "PROVIDED_WITH_WASTE"
-      },
-      "containsHazardous": true,
-      "hazardous": {
-        "sourceOfComponents": "GUIDANCE",
-        "hazCodes": [
-          "HP_4"
-        ],
-        "components": [
-          {
-            "name": "Mercury",
-            "concentration": 5
-          }
-        ]
-      },
+      "containsPops": false,
+      "containsHazardous": false,
       "disposalOrRecoveryCodes": [
         {
-          "code": "R1",
+          "code": "R5",
           "weight": {
             "metric": "Tonnes",
-            "amount": 0.48,
+            "amount": 2.3,
             "isEstimate": false
           }
         }
