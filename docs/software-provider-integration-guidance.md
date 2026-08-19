@@ -75,7 +75,13 @@ Collection and receipt can each be recorded in real time or deferred/retrospecti
 
 Structured by lifecycle stage rather than by resource, so it reads in the same order a movement actually happens.
 
-**[API specs](https://github.com/DEFRA/digital-waste-tracking-api-docs/blob/main/docs/api/openapi.yaml)**
+The [Digital Waste Tracking OpenAPI specification](https://github.com/DEFRA/digital-waste-tracking-api-docs/blob/main/docs/api/openapi.yaml) is the definitive source for these endpoints. Use it for exact paths, request and response schemas – not the summaries below, which may not always be current.
+
+The spec is in alpha and still changing. Expect some shapes to shift before go-live.
+
+The original Phase 1 receipt endpoints still work. They're marked deprecated, not removed, so existing integrations keep running while the fuller model is built alongside them.
+
+To explore requests and responses before you build, preview the YAML in [Swagger Editor](https://editor.swagger.io) or a VS Code OpenAPI extension.
 
 ### 3.1 Create movement
 
