@@ -29,17 +29,31 @@ async function confluenceFetch(pathAndQuery, options = {}) {
   return res;
 }
 
-// Confluence Cloud auto-versions an attachment when you upload one with a name that already exists.
+// Confluence Cloud rejects a create-attachment call if the filename already exists on the page
+// (400 "Cannot add a new attachment with same file name"), so an existing attachment has to go
+// through the separate update-data endpoint instead of the create one.
+async function findExistingAttachmentId(filename) {
+  const res = await confluenceFetch(`/${PAGE_ID}/child/attachment?filename=${encodeURIComponent(filename)}`);
+  const data = await res.json();
+  return data.results.length > 0 ? data.results[0].id : null;
+}
+
 async function uploadAttachment(filePath) {
   const filename = path.basename(filePath);
   const form = new FormData();
   form.append('file', new Blob([fs.readFileSync(filePath)]), filename);
-  await confluenceFetch(`/${PAGE_ID}/child/attachment`, {
+
+  const existingId = await findExistingAttachmentId(filename);
+  const endpoint = existingId
+    ? `/${PAGE_ID}/child/attachment/${existingId}/data`
+    : `/${PAGE_ID}/child/attachment`;
+
+  await confluenceFetch(endpoint, {
     method: 'POST',
     headers: { 'X-Atlassian-Token': 'nocheck' },
     body: form
   });
-  console.log(`Uploaded attachment: ${filename}`);
+  console.log(`${existingId ? 'Updated' : 'Uploaded'} attachment: ${filename}`);
   return filename;
 }
 
