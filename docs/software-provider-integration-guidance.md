@@ -298,8 +298,6 @@ This mints a fresh Transfer ID, unlike the hazardous single-movement case above.
 | **Input** | Waste Transfer ID, waste item details, receiver details, carrier details, broker details |
 | **Output** | Validation result |
 
-See [section 7.1](#71-estimated-vs-actual-declarations) for how this reconciles against the estimated details captured at creation.
-
 Recorded against Transfer ID `25HRA0B2` from the drop-off response above. The waste item here carries the actual, confirmed weight and treatment – compare `weight.isEstimate` and `disposalOrRecoveryCodes` against the estimates declared at creation in 3.1.
 
 **Example:**
