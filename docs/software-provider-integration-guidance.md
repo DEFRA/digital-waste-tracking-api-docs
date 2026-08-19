@@ -213,7 +213,7 @@ A drop-off can link multiple Movement IDs to a single Transfer ID.
 | | |
 |---|---|
 | **Endpoints** | `POST /movements/receive` |
-| **Input** | Waste Transfer ID, waste item details, hazardous details, POPs details, receiver details, carrier details, broker details |
+| **Input** | Waste Transfer ID, waste item details, receiver details, carrier details, broker details |
 | **Output** | Validation result |
 
 See [section 7.1](#71-estimated-vs-actual-declarations) for how this reconciles against the estimated details captured at creation.
@@ -270,8 +270,8 @@ Many Movement IDs can be linked to a single Transfer ID at drop-off; a Transfer 
 | POST | `/movements/create` |
 | PUT | `/movements/{id}/create` |
 | DELETE | `/movements/create` |
-| POST/PUT/GET | `/movements/static-collection` |
-| POST/PUT/GET | `/movements/transit-collection` |
+| POST | `/movements/static-collection` |
+| POST | `/movements/transit-collection` |
 | POST | `/movements/drop-off` |
 | POST | `/movements/{id}/drop-off` |
 | POST | `/movements/receive` |
