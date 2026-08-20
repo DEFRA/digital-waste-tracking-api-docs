@@ -63,8 +63,8 @@ The API is organised around four stages:
 - **Receiver** – the site accepting the waste for treatment, disposal or recovery
 
 ### 2.3 Core identifiers
-- **Waste Movement ID** – the primary record of an intended waste movement, created before the waste moves
-- **Waste Transfer ID** – the record created at drop-off; a single Transfer ID can bundle one or more Movement IDs together
+- **Waste Movement ID** – `movementId` is the primary record of an intended waste movement, created before the waste moves
+- **Waste Transfer ID** – `transferId` is the record created at drop-off; a single Transfer ID can bundle one or more Movement IDs together
 
 <br>
 
