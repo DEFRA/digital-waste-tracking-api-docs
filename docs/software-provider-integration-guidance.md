@@ -24,6 +24,7 @@ Section headings and structure are stable; most section bodies are placeholders 
 - [4. Business rules and data reconciliation](#4-business-rules-and-data-reconciliation)
   - [4.1 Collection cardinality](#41-collection-cardinality)
   - [4.2 Movement-to-transfer cardinality](#42-movement-to-transfer-cardinality)
+  - [4.3 Movement deletion](#43-movement-deletion)
 - [5. Testing and conformance](#5-testing-and-conformance)
 - [Appendix A: glossary](#appendix-a-glossary)
 - [Appendix B: endpoint quick reference](#appendix-b-endpoint-quick-reference)
@@ -316,6 +317,9 @@ One collection entry per physical collection event, even where loads are later c
 ### 4.2 Movement-to-transfer cardinality
 Many Movement IDs can be linked to a single Transfer ID at drop-off; a Transfer ID always originates from exactly one drop-off event.
 
+### 4.3 Movement deletion
+A Movement can only be deleted (`PUT /movements/{movementId}` with `isDeleted: true`) while no Collection has been recorded against it. Once a Collection exists, the attempt is rejected as a `NotAllowed` validation error – there's no way to cancel a Movement after collection has started.
+
 <br>
 
 ## 5. Testing and conformance
@@ -353,12 +357,10 @@ Many Movement IDs can be linked to a single Transfer ID at drop-off; a Transfer 
 |---|---|---|
 | 1 | How is the accept/reject/partial-accept decision at receipt represented in the `receive` request or response? Only a generic validation result is currently defined as output | 2026-08-13 |
 | 2 | Are there time limits on deferred/retrospective collection or receipt recording? | 2026-08-13 |
-| 3 | Can a Movement be deleted or cancelled once collection has started? | 2026-08-13 |
-| 4 | What authentication mechanism does the API use (OAuth2/OIDC, API key, or other)? | 2026-08-13 |
-| 5 | Is there a conformance or certification process for software providers before production access is granted? | 2026-08-13 |
-| 6 | Can we add step-by-step guidance for a sample API integration? | 2026-08-18 |
-| 7 | What's the process for onboarding of software providers and how will they gain test credentials? | 2026-08-18 |
-| 8 | Do we require more detailed business rules? | 2026-08-18 |
-| 9 | Should we use the stale, non-compliant endpoint paths in section 3 vs. the more RESTful `openapi.yaml` design? | 2026-08-20 |
-| 10 | At what point should we reinstate an Authentication and security section once the mechanism (Q4) is decided? | 2026-08-20 |
-| 11 | What API versioning strategy will be used? See [Defra's API guidance](https://eaflood.atlassian.net/wiki/spaces/DT/pages/5749932170/How+to+build+APIs+at+Defra) | 2026-08-20 |
+| 3 | What authentication mechanism does the API use (OAuth2/OIDC, API key, or other)? | 2026-08-13 |
+| 4 | Is there a conformance or certification process for software providers before production access is granted? | 2026-08-13 |
+| 5 | What's the process for onboarding of software providers and how will they gain test credentials? | 2026-08-18 |
+| 6 | Do we require more detailed business rules? | 2026-08-18 |
+| 7 | Should we use the stale, non-compliant endpoint paths in section 3 vs. the more RESTful `openapi.yaml` design? | 2026-08-20 |
+| 8 | At what point should we reinstate an Authentication and security section once the mechanism (Q3) is decided? | 2026-08-20 |
+| 9 | What API versioning strategy will be used? See [Defra's API guidance](https://eaflood.atlassian.net/wiki/spaces/DT/pages/5749932170/How+to+build+APIs+at+Defra) | 2026-08-20 |
