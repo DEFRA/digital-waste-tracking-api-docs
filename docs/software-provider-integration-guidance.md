@@ -326,6 +326,7 @@ Many Movement IDs can be linked to a single Transfer ID at drop-off; a Transfer 
 | Term | Meaning |
 |---|---|
 | DWT | Digital Waste Tracking – the digital service this API supports |
+| EA | Environment Agency|
 | EWC | European Waste Catalogue – the code list used to classify waste type |
 | HWCN | Hazardous Waste Consignment Note – the paper record DWT replaces for hazardous waste |
 | POPs | Persistent organic pollutants – chemicals subject to additional handling and reporting rules |
