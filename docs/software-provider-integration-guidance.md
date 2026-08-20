@@ -360,4 +360,4 @@ Many Movement IDs can be linked to a single Transfer ID at drop-off; a Transfer 
 | 8 | Do we require more detailed business rules? | 2026-08-18 |
 | 9 | Should we use the stale, non-compliant endpoint paths in section 3 vs. the more RESTful `openapi.yaml` design? | 2026-08-20 |
 | 10 | At what point should we reinstate an Authentication and security section once the mechanism (Q4) is decided? | 2026-08-20 |
-| 11 | What versioning strategy will be used? | 2026-08-20 |
+| 11 | What API versioning strategy will be used? See [Defra's API guidance](https://eaflood.atlassian.net/wiki/spaces/DT/pages/5749932170/How+to+build+APIs+at+Defra) | 2026-08-20 |
