@@ -58,12 +58,20 @@ async function uploadAttachment(filePath) {
 }
 
 // marked doesn't treat colon-namespaced tags (ac:image, ri:attachment) as passthrough HTML -
-// it escapes them - so images are converted normally to <img> first, then swapped for the
-// Confluence macro as an HTML post-processing step instead of a markdown pre-processing one.
-async function uploadLocalImages(markdown, docDir) {
-  const imagePattern = /!\[[^\]]*\]\((?!https?:\/\/)([^)]+)\)/g;
-  for (const match of markdown.matchAll(imagePattern)) {
-    await uploadAttachment(path.join(docDir, match[1]));
+// it escapes them - so images/links are converted normally to <img>/<a> first, then swapped for
+// the Confluence macros as an HTML post-processing step instead of a markdown pre-processing one.
+//
+// Covers both markdown image embeds (![alt](path)) and plain links to a local file
+// ([text](path)) - a link to a local image or other file needs the same attachment upload as an
+// embed does, or it renders as a relative href that doesn't resolve to anything on Confluence.
+async function uploadLocalFiles(markdown, docDir) {
+  const pattern = /!?\[[^\]]*\]\((?!https?:\/\/)(?!#)([^)]+)\)/g;
+  const uploaded = new Set();
+  for (const match of markdown.matchAll(pattern)) {
+    const relPath = match[1];
+    if (uploaded.has(relPath)) continue;
+    uploaded.add(relPath);
+    await uploadAttachment(path.join(docDir, relPath));
   }
 }
 
@@ -72,6 +80,14 @@ function replaceImageTagsWithMacros(html) {
     if (/^https?:\/\//.test(src)) return _; // leave external images alone
     const filename = path.basename(src);
     return `<ac:image ac:alt="${alt}"><ri:attachment ri:filename="${filename}" /></ac:image>`;
+  });
+}
+
+function replaceLocalLinksWithAttachmentLinks(html) {
+  return html.replace(/<a href="([^"]+)">([^<]*)<\/a>/g, (full, href, text) => {
+    if (href.startsWith('#') || /^https?:\/\//.test(href)) return full; // leave anchors/external links alone
+    const filename = path.basename(href);
+    return `<ac:link><ri:attachment ri:filename="${filename}" /><ac:plain-text-link-body><![CDATA[${text}]]></ac:plain-text-link-body></ac:link>`;
   });
 }
 
@@ -162,10 +178,11 @@ async function main() {
   const title = titleMatch ? titleMatch[1].trim() : 'Digital Waste Tracking: software provider integration guidance';
   const bodyMarkdown = titleMatch ? raw.slice(titleMatch[0].length) : raw;
 
-  await uploadLocalImages(bodyMarkdown, docDir);
+  await uploadLocalFiles(bodyMarkdown, docDir);
 
   let html = marked.parse(bodyMarkdown);
   html = replaceImageTagsWithMacros(html);
+  html = replaceLocalLinksWithAttachmentLinks(html);
   html = normaliseTables(html);
   html = html.replace(/<hr>/g, '<hr/>').replace(/<br>/g, '<br/>');
 
