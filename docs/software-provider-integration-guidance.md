@@ -358,7 +358,6 @@ Many Movement IDs can be linked to a single Transfer ID at drop-off; a Transfer 
 | 6 | Can we add step-by-step guidance for a sample API integration? | 2026-08-18 |
 | 7 | What's the process for onboarding of software providers and how will they gain test credentials? | 2026-08-18 |
 | 8 | Do we require more detailed business rules? | 2026-08-18 |
-| 9 | Do the endpoint paths shown in section 3 need updating to match the current `openapi.yaml` design (`POST /movements`, `POST /movements/{movementId}/collection`, `POST /transfers`, `POST /transfers/{transferId}/receipt`)? The verb-in-path style currently shown (`/movements/create`, `/movements/static-collection`, `/movements/drop-off`) doesn't follow Defra's API design guidelines, which the underlying API has already moved away from | 2026-08-20 |
-| 10 | Once the authentication mechanism (open question 4) is decided, should an Authentication and security section be reinstated in this document to cover Defra's Secure By Design / OAuth 2.0 requirements? There's currently no `securitySchemes` defined in `openapi.yaml` either | 2026-08-20 |
-| 11 | What versioning strategy (URI or header-based, per Defra's API design guidelines) will this API use, and when will that replace the "TBC" in section 3.5? | 2026-08-20 |
-| 12 | Is the "Standard error response shape and status codes – TBC" note in section 3.5 still accurate? `openapi.yaml` already defines a `validationResult` error shape (`key`/`errorType`/`message`) and uses consistent HTTP status codes | 2026-08-20 |
+| 9 | Should we use the stale, non-compliant endpoint paths in section 3 vs. the more RESTful `openapi.yaml` design? | 2026-08-20 |
+| 10 | At what point should we reinstate an Authentication and security section once the mechanism (Q4) is decided? | 2026-08-20 |
+| 11 | What versioning strategy will be used? | 2026-08-20 |
