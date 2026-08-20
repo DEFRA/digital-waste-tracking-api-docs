@@ -40,6 +40,10 @@ Digital Waste Tracking (DWT) is a UK cross-government programme to build a singl
 
 The current focus of the DWT development team is to reach the first 'development milestone' of the service (Aug/Sep 2026) - to test API interactions in a sandbox environment and use the findings to better refine the service for rollout. The scope of this document is there focused on the integration API only, rather than the overall DWT service, which will follow. 
 
+![DWT events](./images/dwt-api-delivery-roadmap-milestone-1..png)
+
+**API roadmap milesone 1**
+
 **[API roadmap](./images/dwt-api-delivery-roadmap.png)**
 
 <br>
