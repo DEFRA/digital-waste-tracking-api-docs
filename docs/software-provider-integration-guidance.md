@@ -24,7 +24,6 @@ Section headings and structure are stable; most section bodies are placeholders 
 - [4. Business rules and data reconciliation](#4-business-rules-and-data-reconciliation)
   - [4.1 Collection cardinality](#41-collection-cardinality)
   - [4.2 Movement-to-transfer cardinality](#42-movement-to-transfer-cardinality)
-  - [4.3 Timing rules](#43-timing-rules)
 - [5. Testing and conformance](#5-testing-and-conformance)
 - [Appendix A: glossary](#appendix-a-glossary)
 - [Appendix B: endpoint quick reference](#appendix-b-endpoint-quick-reference)
@@ -40,11 +39,9 @@ Digital Waste Tracking (DWT) is a UK cross-government programme to build a singl
 
 The current focus of the DWT development team is to reach the first 'development milestone' of the service (Aug/Sep 2026) - to test API interactions in a sandbox environment and use the findings to better refine the service for rollout. The scope of this document is there focused on the integration API only, rather than the overall DWT service, which will follow. 
 
-![DWT events](./images/dwt-api-delivery-roadmap-milestone-1..png)
+![DWT events](./images/dwt-api-delivery-roadmap-milestone-1.png)
 
-**API roadmap milesone 1**
-
-**[API roadmap](./images/dwt-api-delivery-roadmap.png)**
+**[API roadmap – full view](./images/dwt-api-delivery-roadmap.png)**
 
 <br>
 
