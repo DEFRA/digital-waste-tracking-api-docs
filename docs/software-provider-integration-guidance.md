@@ -11,7 +11,7 @@
 - [2. Service overview](#2-service-overview)
   - [2.1 Lifecycle stages](#21-lifecycle-stages)
   - [2.2 Actors](#22-actors)
-  - [2.3 Core entities](#23-core-entities)
+  - [2.3 Core identifiers](#23-core-identifiers)
 - [3. API reference](#3-api-reference)
   - [3.1 Create movement](#31-create-movement)
   - [3.2 Record collection](#32-record-collection)
@@ -21,7 +21,6 @@
 - [4. Business rules and data reconciliation](#4-business-rules-and-data-reconciliation)
   - [4.1 Collection cardinality](#41-collection-cardinality)
   - [4.2 Movement-to-transfer cardinality](#42-movement-to-transfer-cardinality)
-  - [4.3 Movement deletion](#43-movement-deletion)
 - [5. Testing and conformance](#5-testing-and-conformance)
 - [Appendix A: glossary](#appendix-a-glossary)
 - [Appendix B: endpoint quick reference](#appendix-b-endpoint-quick-reference)
@@ -31,11 +30,11 @@
 
 ## 1. Introduction
 
-This document provides guidance for software providers building producer, broker, carrier/driver or receiver-facing systems that will interact with Defra's dedicated API to record waste movements. 
+**Purpose of document:** This document provides guidance for software providers building producer, broker, carrier/driver or receiver-facing systems that will interact with Defra's dedicated API to record waste movements. 
 
-Digital Waste Tracking (DWT) is a UK cross-government programme to build a single digital service for tracking waste movements, ultimately replacing paper-based waste transfer records. Its main aims are to reduce waste crime and misclassification, improve data on how waste moves domestically to support the transition to a circular economy, and cut the administrative burden of the current fragmented, paper-based system.
+**Service background:** Digital Waste Tracking (DWT) is a UK cross-government programme to build a single digital service for tracking waste movements, ultimately replacing paper-based waste transfer records. Its main aims are to reduce waste crime and misclassification, improve data on how waste moves domestically to support the transition to a circular economy, and cut the administrative burden of the current fragmented, paper-based system.
 
-The current focus of the DWT development team is to reach the first 'development milestone' of the service (Aug/Sep 2026) - to test API interactions in a sandbox environment and use the findings to better refine the service for rollout. The scope of this document is there focused on the integration API only, rather than the overall DWT service, which will follow. 
+**Current status:** The current focus of the DWT development team is to reach the first 'development milestone' of the service (Aug/Sep 2026) - to test API interactions in a sandbox environment and use the findings to better refine the service for rollout. The scope of this document is there focused on the integration API only, rather than the overall DWT service, which will follow. 
 
 ![DWT events](./images/dwt-api-delivery-roadmap-milestone-1.png)
 
