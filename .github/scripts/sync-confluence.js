@@ -48,13 +48,17 @@ async function uploadAttachment(filePath) {
     ? `/${PAGE_ID}/child/attachment/${existingId}/data`
     : `/${PAGE_ID}/child/attachment`;
 
-  await confluenceFetch(endpoint, {
+  const res = await confluenceFetch(endpoint, {
     method: 'POST',
     headers: { 'X-Atlassian-Token': 'nocheck' },
     body: form
   });
   console.log(`${existingId ? 'Updated' : 'Uploaded'} attachment: ${filename}`);
-  return filename;
+
+  // The update-data endpoint already gave us the id (existingId); the create endpoint returns
+  // it in the response body instead.
+  const id = existingId || (await res.json()).results[0].id;
+  return { filename, id };
 }
 
 // marked doesn't treat colon-namespaced tags (ac:image, ri:attachment) as passthrough HTML -
@@ -66,13 +70,16 @@ async function uploadAttachment(filePath) {
 // embed does, or it renders as a relative href that doesn't resolve to anything on Confluence.
 async function uploadLocalFiles(markdown, docDir) {
   const pattern = /!?\[[^\]]*\]\((?!https?:\/\/)(?!#)([^)]+)\)/g;
+  const attachmentIds = new Map(); // filename -> attachment id, for building download links
   const uploaded = new Set();
   for (const match of markdown.matchAll(pattern)) {
     const relPath = match[1];
     if (uploaded.has(relPath)) continue;
     uploaded.add(relPath);
-    await uploadAttachment(path.join(docDir, relPath));
+    const { filename, id } = await uploadAttachment(path.join(docDir, relPath));
+    attachmentIds.set(filename, id);
   }
+  return attachmentIds;
 }
 
 function replaceImageTagsWithMacros(html) {
@@ -86,13 +93,18 @@ function replaceImageTagsWithMacros(html) {
 // Confluence's live editor renders <ac:link><ri:attachment> as a "smart card" for image
 // attachments, which shows the filename instead of the custom link text - the storage format
 // and the classic render-view API both look correct, but the actual page doesn't honour it. A
-// plain href straight to the attachment's download path sidesteps that special-case handling
-// entirely, so it behaves like any other link on the page and keeps the given text.
-function replaceLocalLinksWithAttachmentLinks(html) {
+// plain href sidesteps that special-case handling, but the legacy /wiki/download/attachments/...
+// path (a guess at the pattern Confluence's own renderer uses) turned out to render as
+// link-styled text with no working click target - the live SPA likely doesn't recognise it as a
+// real route. Using the attachment's own official REST _links.download path instead, which is
+// what the API itself hands back as the canonical way to fetch that attachment's bytes.
+function replaceLocalLinksWithAttachmentLinks(html, attachmentIds) {
   return html.replace(/<a href="([^"]+)">([^<]*)<\/a>/g, (full, href, text) => {
     if (href.startsWith('#') || /^https?:\/\//.test(href)) return full; // leave anchors/external links alone
     const filename = path.basename(href);
-    return `<a href="/wiki/download/attachments/${PAGE_ID}/${encodeURIComponent(filename)}">${text}</a>`;
+    const id = attachmentIds.get(filename);
+    if (!id) return full; // shouldn't happen - uploadLocalFiles uploads every local link target
+    return `<a href="/wiki/rest/api/content/${PAGE_ID}/child/attachment/${id}/download">${text}</a>`;
   });
 }
 
@@ -183,11 +195,11 @@ async function main() {
   const title = titleMatch ? titleMatch[1].trim() : 'Digital Waste Tracking: software provider integration guidance';
   const bodyMarkdown = titleMatch ? raw.slice(titleMatch[0].length) : raw;
 
-  await uploadLocalFiles(bodyMarkdown, docDir);
+  const attachmentIds = await uploadLocalFiles(bodyMarkdown, docDir);
 
   let html = marked.parse(bodyMarkdown);
   html = replaceImageTagsWithMacros(html);
-  html = replaceLocalLinksWithAttachmentLinks(html);
+  html = replaceLocalLinksWithAttachmentLinks(html, attachmentIds);
   html = normaliseTables(html);
   html = html.replace(/<hr>/g, '<hr/>').replace(/<br>/g, '<br/>');
 
