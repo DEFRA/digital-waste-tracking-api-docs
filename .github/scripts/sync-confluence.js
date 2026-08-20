@@ -83,11 +83,16 @@ function replaceImageTagsWithMacros(html) {
   });
 }
 
+// Confluence's live editor renders <ac:link><ri:attachment> as a "smart card" for image
+// attachments, which shows the filename instead of the custom link text - the storage format
+// and the classic render-view API both look correct, but the actual page doesn't honour it. A
+// plain href straight to the attachment's download path sidesteps that special-case handling
+// entirely, so it behaves like any other link on the page and keeps the given text.
 function replaceLocalLinksWithAttachmentLinks(html) {
   return html.replace(/<a href="([^"]+)">([^<]*)<\/a>/g, (full, href, text) => {
     if (href.startsWith('#') || /^https?:\/\//.test(href)) return full; // leave anchors/external links alone
     const filename = path.basename(href);
-    return `<ac:link><ri:attachment ri:filename="${filename}" /><ac:plain-text-link-body><![CDATA[${text}]]></ac:plain-text-link-body></ac:link>`;
+    return `<a href="/wiki/download/attachments/${PAGE_ID}/${encodeURIComponent(filename)}">${text}</a>`;
   });
 }
 
