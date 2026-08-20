@@ -41,6 +41,8 @@ The current focus of the DWT development team is to reach the first 'development
 
 ![DWT events](./images/dwt-api-delivery-roadmap-milestone-1.png)
 
+**API roadmap – full view**
+
 **[API roadmap – full view](./images/dwt-api-delivery-roadmap.png)**
 
 <br>
