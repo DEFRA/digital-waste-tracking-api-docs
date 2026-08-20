@@ -4,9 +4,6 @@
 
 **Owner:** Dave Oliver
 
-This is a working skeleton for a guidance document to help software providers integrate their systems with the Defra API for recording waste movements. Development and implementation will take place in an agile environment and we welcome the input of software providers to help us develop and refine the integration of the service. 
-
-Section headings and structure are stable; most section bodies are placeholders to be filled in as the API design firms up. [Appendix C](#appendix-c-open-questions-log) includes a list of gaps so far.
  
 ## Contents
 
@@ -51,7 +48,7 @@ The current focus of the DWT development team is to reach the first 'development
 ![DWT events](./images/dwt-movement-transfer-events.png)
 
 ### 2.1 Lifecycle stages
-The API is organised around four stages
+The API is organised around four stages:
 
 | Stage | What happens |
 |---|---|
@@ -61,12 +58,12 @@ The API is organised around four stages
 | Receipt | Receiving site records acceptance of the waste against the Transfer ID |
 
 ### 2.2 Actors
-- **Producer / Controller** – the organisation whose waste is being moved
-- **Broker / Controller** – arranges the movement on behalf of a producer or receiver
-- **Carrier / Transporter** – the organisation licensed to transport the waste; may operate through a **Driver** as the field-level user recording events in real time
+- **Producer / Controller (EA term)** – the organisation whose waste is being moved
+- **Broker / Controller (EA term)** – arranges the movement on behalf of a producer or receiver
+- **Carrier / Transporter (EA term)** – the organisation licensed to transport the waste; may operate through a **Driver** as the field-level user recording events in real time
 - **Receiver** – the site accepting the waste for treatment, disposal or recovery
 
-### 2.3 Core entities
+### 2.3 Core identifiers
 - **Waste Movement ID** – the primary record of an intended waste movement, created before the waste moves
 - **Waste Transfer ID** – the record created at drop-off; a single Transfer ID can bundle one or more Movement IDs together
 
@@ -76,9 +73,9 @@ The API is organised around four stages
 
 These endpoints are structured by lifecycle stage rather than by resource, so they read in the same order a movement actually happens. The endpoint summaries below may not always be current, so be sure to use the definitive source for exact paths, request and response schemas: [Digital Waste Tracking OpenAPI specification](https://github.com/DEFRA/digital-waste-tracking-api-docs/blob/main/docs/api/openapi.yaml).
 
-The spec is in alpha and still changing. Expect some shapes to shift before go-live.
+The target API spec is still in draft and continuing to change. Expect some shapes to shift before go-live.
 
-The original Phase 1 receipt endpoints still work. They're marked deprecated, not removed, so existing integrations keep running while the fuller model is built alongside them.
+The original Phase 1 receipt endpoints will still work. They'll be marked deprecated, not removed, so existing integrations keep running while the fuller model is built alongside them.
 
 To explore requests and responses before you build, preview the YAML in [Swagger Editor](https://editor.swagger.io) or a VS Code OpenAPI extension.
 
@@ -88,7 +85,7 @@ The examples in 3.1 to 3.4 follow a single movement end to end: a consignment of
 
 | | |
 |---|---|
-| **Endpoints** | `POST /movements/create`, `PUT /movements/{id}/create`, `DELETE /movements/create` |
+| **Endpoints** | `POST /movements/create` |
 | **Input** | Waste classification, producer details, estimated collection details, estimated receiver details, estimated carrier details, broker details |
 | **Output** | Validation result, Waste Movement ID |
 
@@ -156,11 +153,10 @@ The examples in 3.1 to 3.4 follow a single movement end to end: a consignment of
 ```
 
 ### 3.2 Record collection
-Real-time STATIC pickup (producer to driver).
 
 | | |
 |---|---|
-| **Endpoints** | `POST /movements/static-collection` |
+| **Endpoints** | `POST /movements/{id}/collection` |
 | **Input** | Waste Movement ID, collection dateTime, carrier details, collection address |
 | **Output** | Validation result |
 
@@ -316,9 +312,6 @@ One collection entry per physical collection event, even where loads are later c
 
 ### 4.2 Movement-to-transfer cardinality
 Many Movement IDs can be linked to a single Transfer ID at drop-off; a Transfer ID always originates from exactly one drop-off event.
-
-### 4.3 Movement deletion
-A Movement can only be deleted (`PUT /movements/{movementId}` with `isDeleted: true`) while no Collection has been recorded against it. Once a Collection exists, the attempt is rejected as a `NotAllowed` validation error – there's no way to cancel a Movement after collection has started.
 
 <br>
 
