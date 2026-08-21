@@ -33,7 +33,7 @@
 
 **Service background:** Digital Waste Tracking (DWT) is a UK cross-government programme to build a single digital service for tracking waste movements, ultimately replacing paper-based waste transfer records. Its main aims are to reduce waste crime and misclassification, improve data on how waste moves domestically to support the transition to a circular economy, and cut the administrative burden of the current fragmented, paper-based system.
 
-**Current status:** The current focus of the DWT development team is to reach the first 'development milestone' of the service (Aug/Sep 2026) - to test API interactions in a sandbox environment and use the findings to better refine the service for rollout. The scope of this document is there focused on the integration API only, rather than the overall DWT service, which will follow. 
+**Current status:** The current focus of the DWT development team is to reach the first 'development milestone' of the service (Aug/Sep 2026) - to test API interactions in a sandbox environment and use the findings to better refine the service for rollout. The scope of this document is therefore focused on the integration API only, rather than the overall DWT service, which will follow. While the overall concept and rollout timetable are approved, some coding and naming elements may evolve as the development progresses.
 
 ![DWT events](./images/dwt-api-delivery-roadmap-milestone-1.png)
 
