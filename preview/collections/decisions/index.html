@@ -531,6 +531,13 @@ low impact.</p>
 <td><strong>Authorisation</strong></td>
 </tr>
 <tr>
+<td>D-038</td>
+<td><a href="#api-versioning-versioned-during-alpha-unversioned-at-ga">API versioning: versioned during alpha, unversioned at GA</a></td>
+<td>✅ Decided</td>
+<td>🔴 High</td>
+<td><strong>Versioning</strong></td>
+</tr>
+<tr>
 <td>D-004</td>
 <td><a href="#receipt-path-parameter-stays-wastetrackingid">Receipt path parameter stays <code>{wasteTrackingId}</code></a></td>
 <td>✅ Decided</td>
@@ -1796,6 +1803,40 @@ D-037 was first decided. It addresses all five of the above concerns:</p>
 <p>A full evaluation of the CQRS model against all 37 decisions and the live Phase 1
 implementation is available as an
 <a href="https://claude.ai/code/artifact/f52d0e9b-f90d-44d0-b956-0dafbe9a5fb0">interactive report</a>.</p>
+<p><a id="d-038"></a></p>
+<h3 id="api-versioning-versioned-during-alpha-unversioned-at-ga">API versioning: versioned during alpha, unversioned at GA</h3>
+<p><strong>D-038</strong> · ✅ Decided · Impact: 🔴 High · Area: <strong>Versioning</strong> · Related: <a href="#d-023">D-023</a></p>
+<p><strong>Context.</strong> The API has no versioning today — no path prefix, header or query
+parameter; <code>info.version</code> is only a documentation label. As the remaining
+waste-movement endpoints are built, the shape will be found by iteration, which
+means frequent breaking changes before it stabilises; once stable, the public
+contract must not break its integrators. A single fixed policy fits one phase and
+not the other: always-version adds needless machinery and duplication once the
+shape is stable, while never-version makes breaking iteration painful while we
+are still designing. GOV.UK recommends URI-path versioning <em>if</em> you version and
+advises against header/media-type versioning, but its overriding principle is not
+to break existing consumers.</p>
+<p><strong>Decision.</strong> Version the API <strong>during alpha</strong> and <strong>drop the version at GA</strong>:</p>
+<ul>
+<li><strong>During alpha</strong> — each milestone is versioned in the URI path (<code>/v1-alpha-0</code>,
+  <code>/v1-alpha-1</code>, …) and milestones can run in parallel, letting the small,
+  controlled set of early integrators migrate at their own pace. Alpha is
+  non-public, so path labels are acceptable here.</li>
+<li><strong>At GA</strong> — drop the version and publish one stable <strong>unversioned</strong> API,
+  evolving it <strong>additive-only</strong> thereafter (new optional fields/endpoints/enum
+  values in place; clients tolerate unknown fields). A genuinely unavoidable
+  breaking change is a new resource/API, not a <code>/v2</code>.</li>
+<li><strong>Cutover</strong> — dropping the version at GA is a one-time, announced breaking
+  change for alpha integrators (expected of an alpha contract); the final alpha
+  version runs alongside the unversioned GA API for a migration window, marked
+  deprecated, then retired.</li>
+<li><strong>Deprecation</strong> — alpha versions are retired by usage: monitor calls per
+  software provider (via the JWT <code>client_id</code>), and while deprecated every response
+  carries a single <code>Deprecation: true</code> header as an in-band signal.</li>
+</ul>
+<p>Applies only to the new endpoints; the already-live Receipt of Waste endpoints
+keep their current unversioned paths.</p>
+<p>Full rationale in the <a href="../../api/api-versioning-pitch/">versioning pitch</a>.</p>
 <p><strong>Options.</strong></p>
 <p><strong>Option A — Aggregate model.</strong> Implement as described in
 <code>model/mongo-schema-proposal.md</code>. Closest to Phase 1 conventions; lowest learning
