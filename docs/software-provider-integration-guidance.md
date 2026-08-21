@@ -17,14 +17,13 @@
   - [3.2 Record collection](#32-record-collection)
   - [3.3 Record drop-off](#33-record-drop-off)
   - [3.4 Record receipt](#34-record-receipt)
-  - [3.5 General conventions](#35-general-conventions)
 - [4. Business rules and data reconciliation](#4-business-rules-and-data-reconciliation)
   - [4.1 Collection cardinality](#41-collection-cardinality)
   - [4.2 Movement-to-transfer cardinality](#42-movement-to-transfer-cardinality)
 - [5. Testing and conformance](#5-testing-and-conformance)
 - [Appendix A: glossary](#appendix-a-glossary)
 - [Appendix B: endpoint quick reference](#appendix-b-endpoint-quick-reference)
-- [Appendix C: open questions log](#appendix-c-open-questions-log)
+
 
 ---
 
