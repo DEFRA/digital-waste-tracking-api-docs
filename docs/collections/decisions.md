@@ -44,6 +44,7 @@ At-a-glance view of every decision, sorted by status, then by impact (structural
 | D-015 | [Movement ↔ Collection and Transfer ↔ Receipt are 1:1](#movement-collection-and-transfer-receipt-are-11) | ✅ Decided | 🔴 High | **Resource model** |
 | D-016 | [Level 2 (Richardson Maturity Model) resource model](#level-2-richardson-maturity-model-resource-model) | ✅ Decided | 🔴 High | **Resource model** |
 | D-036 | [Write authorisation: open append, amend restricted to the authoring organisation](#write-authorisation-open-append-amend-restricted-to-the-authoring-organisation) | ✅ Decided | 🔴 High | **Authorisation** |
+| D-038 | [API versioning: versioned during alpha, unversioned at GA](#api-versioning-versioned-during-alpha-unversioned-at-ga) | ✅ Decided | 🔴 High | **Versioning** |
 | D-004 | [Receipt path parameter stays `{wasteTrackingId}`](#receipt-path-parameter-stays-wastetrackingid) | ✅ Decided | 🟠 Medium | **Identifiers** |
 | D-006 | [Cross-check of receipt details against the linked drop-off](#cross-check-of-receipt-details-against-the-linked-drop-off) | ✅ Decided | 🟠 Medium | **Receipt** |
 | D-008 | [Carrier always required; broker or dealer optional, at every stage](#carrier-always-required-broker-or-dealer-optional-at-every-stage) | ✅ Decided | 🟠 Medium | **Actors** |
@@ -1326,6 +1327,45 @@ D-037 was first decided. It addresses all five of the above concerns:
 A full evaluation of the CQRS model against all 37 decisions and the live Phase 1
 implementation is available as an
 [interactive report](https://claude.ai/code/artifact/f52d0e9b-f90d-44d0-b956-0dafbe9a5fb0).
+
+<a id="d-038"></a>
+### API versioning: versioned during alpha, unversioned at GA
+
+**D-038** · ✅ Decided · Impact: 🔴 High · Area: **Versioning** · Related: [D-023](#d-023)
+
+**Context.** The API has no versioning today — no path prefix, header or query
+parameter; `info.version` is only a documentation label. As the remaining
+waste-movement endpoints are built, the shape will be found by iteration, which
+means frequent breaking changes before it stabilises; once stable, the public
+contract must not break its integrators. A single fixed policy fits one phase and
+not the other: always-version adds needless machinery and duplication once the
+shape is stable, while never-version makes breaking iteration painful while we
+are still designing. GOV.UK recommends URI-path versioning *if* you version and
+advises against header/media-type versioning, but its overriding principle is not
+to break existing consumers.
+
+**Decision.** Version the API **during alpha** and **drop the version at GA**:
+
+- **During alpha** — each milestone is versioned in the URI path (`/v1-alpha-0`,
+  `/v1-alpha-1`, …) and milestones can run in parallel, letting the small,
+  controlled set of early integrators migrate at their own pace. Alpha is
+  non-public, so path labels are acceptable here.
+- **At GA** — drop the version and publish one stable **unversioned** API,
+  evolving it **additive-only** thereafter (new optional fields/endpoints/enum
+  values in place; clients tolerate unknown fields). A genuinely unavoidable
+  breaking change is a new resource/API, not a `/v2`.
+- **Cutover** — dropping the version at GA is a one-time, announced breaking
+  change for alpha integrators (expected of an alpha contract); the final alpha
+  version runs alongside the unversioned GA API for a migration window, marked
+  deprecated, then retired.
+- **Deprecation** — alpha versions are retired by usage: monitor calls per
+  software provider (via the JWT `client_id`), and while deprecated every response
+  carries a single `Deprecation: true` header as an in-band signal.
+
+Applies only to the new endpoints; the already-live Receipt of Waste endpoints
+keep their current unversioned paths.
+
+Full rationale in the [versioning pitch](../api/api-versioning-pitch.md).
 
 **Options.**
 
