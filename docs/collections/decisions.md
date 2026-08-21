@@ -1410,7 +1410,7 @@ to break existing consumers.
 Applies only to the new endpoints; the already-live Receipt of Waste endpoints
 keep their current unversioned paths.
 
-Full rationale in the [versioning pitch](../api/api-versioning-pitch.md).
+Full rationale in the [versioning pitch](../api/api-versioning.md).
 
 **Options.**
 
