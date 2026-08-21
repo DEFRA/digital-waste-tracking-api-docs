@@ -538,6 +538,13 @@ low impact.</p>
 <td><strong>Versioning</strong></td>
 </tr>
 <tr>
+<td>D-039</td>
+<td><a href="#cross-cutting-api-standards-for-new-endpoints">Cross-cutting API standards for new endpoints</a></td>
+<td>✅ Decided</td>
+<td>🔴 High</td>
+<td><strong>API conventions</strong></td>
+</tr>
+<tr>
 <td>D-004</td>
 <td><a href="#receipt-path-parameter-stays-wastetrackingid">Receipt path parameter stays <code>{wasteTrackingId}</code></a></td>
 <td>✅ Decided</td>
@@ -1573,6 +1580,46 @@ to the observability / non-reconciled-movement work planned for Beta. If
 policy later mandates participation restrictions, they are added as
 authorisation checks in the Movement domain service against the
 already-captured identity, without changing the public contract shape.</p>
+<p><a id="d-039"></a></p>
+<h3 id="cross-cutting-api-standards-for-new-endpoints">Cross-cutting API standards for new endpoints</h3>
+<p><strong>D-039</strong> · ✅ Decided · Impact: 🔴 High · Area: <strong>API conventions</strong> · Related: <a href="#d-006">D-006</a>, <a href="#d-009">D-009</a>, <a href="#d-014">D-014</a>, <a href="#d-036">D-036</a></p>
+<p><strong>Context.</strong> The cross-cutting conventions — how new endpoints signal outcomes,
+shape responses, and trace requests — were never standardised for the receipt
+endpoints, so each new endpoint was free to invent its own. Before the rest of
+the waste-movement journey is built, a small consistent foundation was agreed:
+adopt the <a href="https://www.gov.uk/guidance/gds-api-technical-and-data-standards">GOV.UK API standards</a>
+where they apply, and codify what the live receipt endpoints already do. Applies
+to <strong>new</strong> endpoints only — the live Receipt of Waste create/update endpoints
+are untouched.</p>
+<p><strong>Decision.</strong> Adopt the conventions set out in
+<a href="../../api/api-standards/"><code>../api/api-standards.md</code></a>, which is the <strong>source of
+truth</strong> for the detail, examples and rationale. This register entry is the
+pointer to it, not a second copy. In brief:</p>
+<ul>
+<li><strong>Status codes</strong> — <code>201</code> create / <code>200</code> update; every operation documents
+  <code>400</code> + <code>401</code> + <code>500</code>, <code>404</code> where the path has an id, <code>402</code> on charge-gated
+  writes; <code>204</code> not used. Reject-vs-warn follows the accept-with-warnings model
+  (<a href="#d-006">D-006</a>, <a href="#d-009">D-009</a>, <a href="#d-036">D-036</a>). <code>409</code>/<code>422</code> are noted as
+  future refinements, not adopted now.</li>
+<li><strong><code>2xx</code> envelope</strong> — one shape, <code>{ data, meta?, validation }</code>; <code>validation</code>
+  always present on writes (empty array when clean); create returns the new id
+  inside <code>data</code> as an object.</li>
+<li><strong><code>4xx</code>/<code>5xx</code> envelope</strong> — one shape, <code>{ error: { code, message, details? },
+  requestId }</code>; machine-readable <code>error.code</code>; per-field <code>errorType</code> enum
+  adopted from the code; the <a href="#d-014">D-014</a> <code>404</code> distinction rides in
+  <code>error.code</code>.</li>
+<li><strong>Tracing</strong> — a trace id is guaranteed per request and echoed on every
+  response as the public <code>x-request-id</code> header (mapped from CDP's internal
+  <code>x-cdp-request-id</code>), with a top-level <code>requestId</code> on error bodies.</li>
+<li><strong>Pagination — deferred.</strong> No list endpoints exist yet; the <code>meta.pagination</code>
+  slot is reserved so paging can be added purely additively later. The scheme
+  itself is decided with the first endpoint that pages.</li>
+</ul>
+<p><strong>Consequences.</strong> New endpoints share one status-code vocabulary, one success
+envelope and one failure envelope with each other and with the GOV.UK API
+standards, and every response is traceable. The detail is maintained in
+<a href="../../api/api-standards/"><code>../api/api-standards.md</code></a> — update that document, not
+this record, when the conventions evolve.</p>
 <h2 id="open">Open</h2>
 <p><a id="d-019"></a></p>
 <h3 id="fate-of-waste-get-producer-journey-query-proposal">Fate-of-waste GET — producer journey query (proposal)</h3>
