@@ -12,7 +12,7 @@ robots: noindex, nofollow
 The smallest consistent set of cross-cutting conventions for the DWT API, applied to **new** endpoints only (live Receipt-of-Waste endpoints untouched), adopting the [GOV.UK API standards](https://www.gov.uk/guidance/gds-api-technical-and-data-standards) where they apply.
 
 - **Status codes** — `201`/`200`; every op documents `400`+`401`+`500`, `404` with an id, `402` on charge-gated writes.
-- **Responses** — one envelope: success `{ data, meta?, validation? }`, failure `{ error: { code, message, details? }, requestId }`.
+- **Responses** — success envelope `{ data, meta?, validation? }`; failure as **RFC 9457 Problem Details** (`application/problem+json` — `type`, `title`, `detail`, `instance`, `requestId`, `errors[]`).
 - **Accept-with-warnings** — store on soft data-quality issues, reject only on schema/structure/state/authorisation.
 - **Tracing** — `x-request-id` on every response; `requestId` in error bodies.
 - **Pagination** — none yet (reserve `meta.pagination`).
@@ -61,7 +61,7 @@ Agree one convention per concern and apply it uniformly to the endpoints we buil
 - **One consistent envelope for every response:** `data` holds the payload, `meta` is reserved for response metadata (e.g. pagination, added later), and `validation` carries warnings on write operations.
 - **`validation` always present on writes:** create/update responses always include `validation.warnings` — an empty array when clean — so the shape is predictable and clients need no null-check.
 - **Create returns the new id inside `data`,** e.g. `data: { movementId }`. It stays an _object_ deliberately, so it can be extended to the full created resource later without a breaking change.
-- **Warnings and errors share one item shape** — `{ key, errorType, message }`. `validation.warnings` here and `validation.errors` (topic 3) differ only by the array name.
+- **Warnings and field errors share one item shape** — `{ pointer, errorType, message }`, where `pointer` is a JSON Pointer to the field. The same item appears in `validation.warnings` here and in the `errors[]` of a `400` Problem Details response (topic 3).
 
 ```json
 // 201 create
@@ -82,39 +82,48 @@ Agree one convention per concern and apply it uniformly to the endpoints we buil
 
 **In the code today:** two error shapes. `400` uses `{ validation: { errors: [{ key, errorType, message }] } }` (its `errorType` enum includes `UnexpectedError`); `401/402/404/500` use the default **Hapi Boom** shape `{ statusCode, error, message }`.
 
-**Proposal:**
+**Proposal:** adopt **[RFC 9457 Problem Details](https://www.rfc-editor.org/rfc/rfc9457)** (`application/problem+json`) as the single failure envelope for every `4xx`/`5xx`. This is a change from the code (which emits two shapes today); GOV.UK neither mandates nor forbids it — we take it because it is an established IETF standard that gives one consistent, self-describing error shape.
 
-- **One unified failure envelope for every `4xx`/`5xx`:** the presence of `error` means the request failed. Field-level problems (`400`) ride in `error.details[]`, reusing the shared item shape `{ key, errorType, message }` (topic 2). Non-validation failures omit `details`.
+- **Members we use** (a flat top-level object, no `error` wrapper):
+
+  - `type` — a stable URI identifying the problem kind; our machine-readable id, dereferenceable to a docs page. Replaces the old `code` enum.
+  - `title` — short, stable human summary for that `type`.
+  - `detail` — human message specific to this occurrence.
+  - `instance` — the request path where it occurred.
+  - `requestId` — extension member, the trace id (topic 5).
+  - `errors[]` — extension member carrying field-level problems on `400`; omitted otherwise.
+  - We **omit** the optional advisory `status` member — the HTTP status line already carries it, and duplicating it only invites drift.
 
   ```json
-  // 400 — validation
+  // 400 — validation   (Content-Type: application/problem+json)
   {
-    "error": {
-      "code": "VALIDATION_FAILED",
-      "message": "…",
-      "details": [
-        { "key": "wasteItems[0].weight", "errorType": "NotProvided", "message": "…" }
-      ]
-    },
-    "requestId": "…"
+    "type": "https://waste-tracking.service.gov.uk/problems/validation-error",
+    "title": "Request validation failed",
+    "detail": "The receipt could not be stored because 2 fields are invalid.",
+    "instance": "/movements/25HRA0B2/receive",
+    "requestId": "…",
+    "errors": [
+      { "pointer": "/wasteItems/0/ewcCodes/0", "errorType": "InvalidValue", "message": "EWC code '99 99 99' is not a recognised code" },
+      { "pointer": "/receiver/authorisationNumbers", "errorType": "NotProvided", "message": "At least one authorisation number is required" }
+    ]
   }
-  // 404 / 401 / 500
+  // 404 / 401 / 500   (no field errors)
   {
-    "error": {
-      "code": "MOVEMENT_NOT_FOUND",
-      "message": "…"
-    },
+    "type": "https://waste-tracking.service.gov.uk/problems/movement-not-found",
+    "title": "Waste movement not found",
+    "detail": "No waste movement exists with tracking ID 25HRA0B2.",
+    "instance": "/movements/25HRA0B2",
     "requestId": "…"
   }
   ```
 
-- **Machine-readable `error.code`:** a stable top-level enum for programmatic handling — e.g. `VALIDATION_FAILED`, `UNAUTHORIZED`, `PAYMENT_REQUIRED`, `INTERNAL_ERROR`, and the `404` variants below — separate from the per-field `errorType`.
+- **`404` distinguished by `type` (D-014):** distinct type URIs — `…/movement-not-found` / `…/transfer-not-found` (parent missing) vs `…/collection-not-recorded` / `…/receipt-not-recorded` (parent exists, event not recorded yet). The status stays `404`; the distinction rides in `type`.
 
-- **`404` distinguished by `error.code` (D-014):** `MOVEMENT_NOT_FOUND` / `TRANSFER_NOT_FOUND` (parent missing) vs `COLLECTION_NOT_RECORDED` / `RECEIPT_NOT_RECORDED` (parent exists, event not recorded yet). The status stays `404`; the distinction rides in `error.code`.
+- **Field errors keep `errorType`, and use JSON Pointer.** Each `errors[]` item is `{ pointer, errorType, message }`: `pointer` is an [RFC 6901](https://www.rfc-editor.org/rfc/rfc6901) JSON Pointer (`/wasteItems/0/weight`), replacing the code's current dotted `key` (`wasteItems[0].weight`); `errorType` is kept as-is from the code — `NotProvided`, `NotAllowed`, `InvalidType`, `InvalidFormat`, `InvalidValue`, `OutOfRange`, `BusinessRuleViolation`, `UnexpectedError`. Same item shape as `validation.warnings` (topic 2).
 
-- **Per-field `errorType` enum, adopted as-is from the code:** `NotProvided`, `NotAllowed`, `InvalidType`, `InvalidFormat`, `InvalidValue`, `OutOfRange`, `BusinessRuleViolation`, `UnexpectedError`.
+- **`5xx`** uses the same Problem Details shape, with `detail` never leaking internals (stack traces, downstream errors). All error responses set `Content-Type: application/problem+json`.
 
-- **`requestId` top-level on every error body** (topic 5). **`5xx`** uses the same envelope, with `message` never leaking internals (stack traces, downstream errors).
+- **`type` URIs are minted under a stable base** — `https://waste-tracking.service.gov.uk/problems/…` — ideally resolving to a short docs page per problem type.
 
 ### 4. Pagination
 
@@ -145,8 +154,10 @@ Keep it minimal: the header echo is the essential part; the error-body field is 
 
 ## References
 
-Cross-government and Defra standards this pitch is expected to follow. Individual topics cite the specific one that applies.
+Standards and guidance this pitch draws on. Individual topics cite the specific one that applies.
 
 - [GOV.UK — API technical and data standards](https://www.gov.uk/guidance/gds-api-technical-and-data-standards) — the baseline government API guidance (informs status codes and error handling).
 - [GOV.UK — Documenting APIs](https://www.gov.uk/guidance/how-to-document-apis) — how government API documentation should be structured and written (informs the eventual published spec/docs).
 - [Defra software development standards](https://defra.github.io/software-development-standards/) — Defra's development standards.
+- [RFC 9457 — Problem Details for HTTP APIs](https://www.rfc-editor.org/rfc/rfc9457) — the IETF standard error-response format adopted for `4xx`/`5xx` (topic 3).
+- [RFC 6901 — JSON Pointer](https://www.rfc-editor.org/rfc/rfc6901) — the field-path syntax used in `errors[].pointer` (topic 3).
