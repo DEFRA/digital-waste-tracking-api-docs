@@ -8,7 +8,7 @@ The smallest consistent set of cross-cutting conventions for the DWT API, applie
 - **Responses** — one envelope: success `{ data, meta?, validation? }`, failure `{ error: { code, message, details? }, requestId }`.
 - **Accept-with-warnings** — store on soft data-quality issues, reject only on schema/structure/state/authorisation.
 - **Tracing** — `x-request-id` on every response; `requestId` in error bodies.
-- **Pagination** — none yet (reserve `meta.pagination`). **Auth** — open.
+- **Pagination** — none yet (reserve `meta.pagination`).
 
 ## Baseline
 
@@ -20,7 +20,7 @@ Beyond our own code, an external baseline already applies: the [GOV.UK API techn
 
 ## Problem
 
-The cross-cutting API conventions — how we signal outcomes, shape responses, authenticate, page, and trace requests — were never standardised for the receipt endpoints. Without an agreed standard, each new endpoint is free to invent its own. Left unaddressed, patterns diverge, integrators have to special-case our responses, and the cost of correcting it only grows as more of the journey ships.
+The cross-cutting API conventions — how we signal outcomes, shape responses, page, and trace requests — were never standardised for the receipt endpoints. Without an agreed standard, each new endpoint is free to invent its own. Left unaddressed, patterns diverge, integrators have to special-case our responses, and the cost of correcting it only grows as more of the journey ships.
 
 That makes **now** — before the remaining endpoints are written — the right moment to set a **basic, consistent foundation**. We are not aiming for a complete API-design rulebook: we want the **smallest set of conventions that is consistent and can scale** into a richer standard later if the service needs it.
 
@@ -107,7 +107,7 @@ Agree one convention per concern and apply it uniformly to the endpoints we buil
 
 - **Per-field `errorType` enum, adopted as-is from the code:** `NotProvided`, `NotAllowed`, `InvalidType`, `InvalidFormat`, `InvalidValue`, `OutOfRange`, `BusinessRuleViolation`, `UnexpectedError`.
 
-- **`requestId` top-level on every error body** (topic 6). **`5xx`** uses the same envelope, with `message` never leaking internals (stack traces, downstream errors).
+- **`requestId` top-level on every error body** (topic 5). **`5xx`** uses the same envelope, with `message` never leaking internals (stack traces, downstream errors).
 
 ### 4. Pagination
 
@@ -117,20 +117,7 @@ Agree one convention per concern and apply it uniformly to the endpoints we buil
 
 When an list endpoint is eventually added, it returns the Topic 2 `{ data, meta }` envelope — the list under `data`, `meta` reserved for response metadata. Because paging metadata would live under `meta.pagination`, never mixed into `data`, pagination can then be introduced **purely additively**, without breaking existing clients.
 
-### 5. Authentication — headers vs request body
-
-**In the code today:** there are **two credentials doing two jobs**, and one of them travels in the body:
-
-- The **JWT Bearer** token (AWS Cognito, the default auth strategy) carries `client_id` — it _authenticates the calling software_ and is forwarded downstream as `x-dwt-client-id`.
-- The **`apiCode`** in the request body _authorizes acting for a waste organisation_. It is not just a label: the backend rejects an unknown `apiCode`, and on update it must resolve to the **same org that created the record**.
-
-So `apiCode` is effectively an **authorization credential carried in the request body** — a shared, bearer-like secret, yet typed as a plain `uuid` with no secret handling. Critically, **nothing binds the two**: any valid JWT combined with any valid `apiCode` is accepted, so `apiCode` alone decides which organisation you may act as.
-
-The question for the standard: should organisation authorization move to a header / the token rather than the body, and how do we bind it to the authenticated caller?
-
-**Proposal:** _TBD — to discuss._
-
-### 6. Tracing
+### 5. Tracing
 
 **In the code today:** the CDP platform propagates a trace id _internally_ — `@defra/hapi-tracing` reads the inbound `x-cdp-request-id` header, surfaces it in logs as `trace.id`, and forwards it to downstream calls. But it is **read-only inbound and never returned to the client**, and it is **not generated** when the header is absent. So a client currently has no way to learn the trace id for a request.
 
