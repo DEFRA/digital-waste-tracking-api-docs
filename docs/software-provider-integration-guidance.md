@@ -294,14 +294,6 @@ Recorded against Transfer ID `25TKP3C9` from the drop-off response above. The wa
 }
 ```
 
-### 3.5 General conventions
-
-- Environments and base URLs (sandbox/production) – *TBC*
-- API versioning and deprecation policy – *TBC*
-- Standard error response shape and status codes – *TBC*
-- Idempotency behaviour on retries – *TBC*
-- Rate limits and pagination – *TBC*
-
 <br>
 
 ## 4. Business rules and data reconciliation
@@ -343,17 +335,3 @@ Many Movement IDs can be linked to a single Transfer ID at drop-off; a Transfer 
 | POST | `/movements/drop-off` |
 | POST | `/movements/{id}/receive` |
 
-
-## Appendix C: open questions log
-
-| # | Question | Raised |
-|---|---|---|
-| 1 | How is the accept/reject/partial-accept decision at receipt represented in the `receive` request or response? Only a generic validation result is currently defined as output | 2026-08-13 |
-| 2 | Are there time limits on deferred/retrospective collection or receipt recording? | 2026-08-13 |
-| 3 | What authentication mechanism does the API use (OAuth2/OIDC, API key, or other)? | 2026-08-13 |
-| 4 | Is there a conformance or certification process for software providers before production access is granted? | 2026-08-13 |
-| 5 | What's the process for onboarding of software providers and how will they gain test credentials? | 2026-08-18 |
-| 6 | Do we require more detailed business rules? | 2026-08-18 |
-| 7 | Should we use the stale, non-compliant endpoint paths in section 3 vs. the more RESTful `openapi.yaml` design? | 2026-08-20 |
-| 8 | At what point should we reinstate an Authentication and security section once the mechanism (Q3) is decided? | 2026-08-20 |
-| 9 | What API versioning strategy will be used? See [Defra's API guidance](https://eaflood.atlassian.net/wiki/spaces/DT/pages/5749932170/How+to+build+APIs+at+Defra) | 2026-08-20 |
