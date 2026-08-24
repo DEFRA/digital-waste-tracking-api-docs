@@ -438,6 +438,7 @@
   
 
 
+<!-- prettier-ignore -->
 <div class="admonition warning">
 <p class="admonition-title">Internal documentation</p>
 <p>This page is internal design/planning material for the delivery team, not published guidance for Software Providers integrating with the Digital Waste Tracking API. Content here may be incomplete, in-progress, or superseded.</p>
@@ -450,24 +451,16 @@
 <li>drop-off / transfer creation</li>
 <li>receipt recording</li>
 </ul>
-<p>This is a proposal for the server-side storage shape. It is not yet a
-decided implementation.</p>
+<p>This is a proposal for the server-side storage shape. It is not yet a decided implementation.</p>
 <h2 id="design-goals">Design goals</h2>
 <ul>
 <li>Keep one current-state aggregate per durable public identifier.</li>
-<li>Keep Movement and Transfer as separate aggregates because the API and
-  decisions already separate them.</li>
+<li>Keep Movement and Transfer as separate aggregates because the API and decisions already separate them.</li>
 <li>Support ordered collection events on a Movement.</li>
 <li>Support Transfer as the aggregation point for one or more Movement IDs.</li>
-<li>Keep a revisioned current-state plus history pattern close to the current
-  <code>waste-inputs</code> / <code>waste-inputs-history</code> approach, while treating
-  <code>revision</code> as the current aggregate version after any successful mutation.</li>
-<li>Preserve write provenance per event so different organisations can record
-  creation, collection, drop-off, and receipt against the same movement
-  journey.</li>
-<li>Allow optional denormalised <code>transferIds</code> on Movement for read
-  convenience, while treating <code>transfers.movementIds[]</code> as the primary
-  relationship source of truth.</li>
+<li>Keep a revisioned current-state plus history pattern close to the current <code>waste-inputs</code> / <code>waste-inputs-history</code> approach, while treating <code>revision</code> as the current aggregate version after any successful mutation.</li>
+<li>Preserve write provenance per event so different organisations can record creation, collection, drop-off, and receipt against the same movement journey.</li>
+<li>Allow optional denormalised <code>transferIds</code> on Movement for read convenience, while treating <code>transfers.movementIds[]</code> as the primary relationship source of truth.</li>
 </ul>
 <h2 id="proposed-collections">Proposed collections</h2>
 <ul>
@@ -483,19 +476,14 @@ decided implementation.</p>
 <li><code>transfer-events</code></li>
 </ul>
 <h3 id="invalid-submissions"><code>invalid-submissions</code></h3>
-<p>Operational holding collection for write attempts that could not be applied
-because the target aggregate could not be found or matched at write time.</p>
+<p>Operational holding collection for write attempts that could not be applied because the target aggregate could not be found or matched at write time.</p>
 <p>Examples:</p>
 <ul>
 <li>a collection update for a <code>movementId</code> that does not exist</li>
 <li>a receipt write for a <code>transferId</code> that does not exist</li>
-<li>an update request that references a valid identifier but fails aggregate
-  ownership / matching checks</li>
+<li>an update request that references a valid identifier but fails aggregate ownership / matching checks</li>
 </ul>
-<p>This is not intended to duplicate normal request-validation errors returned
-to the caller at the API boundary. It is intended for submissions that were
-accepted far enough into processing to warrant persistence for investigation,
-replay, support handling, or audit.</p>
+<p>This is not intended to duplicate normal request-validation errors returned to the caller at the API boundary. It is intended for submissions that were accepted far enough into processing to warrant persistence for investigation, replay, support handling, or audit.</p>
 <p>Suggested shape:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
 <span class="w">  </span><span class="nx">_id</span><span class="o">:</span><span class="w"> </span><span class="nx">ObjectId</span><span class="p">,</span>
@@ -608,19 +596,12 @@ replay, support handling, or audit.</p>
 <h3 id="notes-on-movements">Notes on <code>movements</code></h3>
 <ul>
 <li><code>creation</code> is singular because <code>POST /movements</code> creates the Movement.</li>
-<li><code>collectionEvents[]</code> is plural because collection is now an ordered event
-  sequence on the same Movement.</li>
-<li><code>submittingOrganisation</code> is stored on each business event rather than once
-  at Movement level, because creation and later collection events may be
-  recorded by different organisations.</li>
-<li><code>transferIds[]</code> is included for now because it may make read models simpler,
-  but it should be treated as derived from <code>transfers.movementIds[]</code>.</li>
+<li><code>collectionEvents[]</code> is plural because collection is now an ordered event sequence on the same Movement.</li>
+<li><code>submittingOrganisation</code> is stored on each business event rather than once at Movement level, because creation and later collection events may be recorded by different organisations.</li>
+<li><code>transferIds[]</code> is included for now because it may make read models simpler, but it should be treated as derived from <code>transfers.movementIds[]</code>.</li>
 </ul>
 <h2 id="proposed-transfers-schema">Proposed <code>transfers</code> schema</h2>
-<p>For a hazardous drop-off, <code>transferId</code> is not freshly minted: it is the sole
-<code>movementId</code> referenced in the request (<a href="../../decisions/#d-010">D-010</a>
-guarantees there is exactly one). For a non-hazardous drop-off, <code>transferId</code>
-is minted independently as before.</p>
+<p>For a hazardous drop-off, <code>transferId</code> is not freshly minted: it is the sole <code>movementId</code> referenced in the request (<a href="../../decisions/#d-010">D-010</a> guarantees there is exactly one). For a non-hazardous drop-off, <code>transferId</code> is minted independently as before.</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
 <span class="w">  </span><span class="nx">_id</span><span class="o">:</span><span class="w"> </span><span class="nb">String</span><span class="p">,</span><span class="w"> </span><span class="c1">// transferId — for a hazardous drop-off, equals the sole</span>
 <span class="w">               </span><span class="c1">// referenced movementId</span>
@@ -700,18 +681,13 @@ is minted independently as before.</p>
 <li><code>movementIds[]</code> is the canonical relationship from Transfer to Movement.</li>
 <li><code>dropOff</code> is singular because one Transfer is minted per drop-off event.</li>
 <li><code>receipt</code> is singular because receipt is modelled as one receipt per Transfer.</li>
-<li><code>submittingOrganisation</code> is stored on both <code>dropOff</code> and <code>receipt</code>, because
-  those events may be written by different organisations against the same
-  <code>transferId</code>.</li>
-<li><code>submittedByApiCode</code> is optional but useful if one organisation can hold
-  multiple API keys and exact key-level provenance matters for audit.</li>
-<li><code>outcome</code> is reserved because receipt acceptance / rejection is still an open
-  design point.</li>
+<li><code>submittingOrganisation</code> is stored on both <code>dropOff</code> and <code>receipt</code>, because those events may be written by different organisations against the same <code>transferId</code>.</li>
+<li><code>submittedByApiCode</code> is optional but useful if one organisation can hold multiple API keys and exact key-level provenance matters for audit.</li>
+<li><code>outcome</code> is reserved because receipt acceptance / rejection is still an open design point.</li>
 </ul>
 <h2 id="proposed-history-collections">Proposed history collections</h2>
 <h3 id="movements-history"><code>movements-history</code></h3>
-<p>Snapshot of the full previous Movement document before each successful
-mutation of an existing Movement aggregate.</p>
+<p>Snapshot of the full previous Movement document before each successful mutation of an existing Movement aggregate.</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
 <span class="w">  </span><span class="p">...</span><span class="nx">previousMovementDocument</span><span class="p">,</span>
 <span class="w">  </span><span class="nx">movementId</span><span class="o">:</span><span class="w"> </span><span class="nb">String</span><span class="p">,</span>
@@ -719,8 +695,7 @@ mutation of an existing Movement aggregate.</p>
 <span class="p">}</span>
 </code></pre></div>
 <h3 id="transfers-history"><code>transfers-history</code></h3>
-<p>Snapshot of the full previous Transfer document before each successful
-mutation of an existing Transfer aggregate.</p>
+<p>Snapshot of the full previous Transfer document before each successful mutation of an existing Transfer aggregate.</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
 <span class="w">  </span><span class="p">...</span><span class="nx">previousTransferDocument</span><span class="p">,</span>
 <span class="w">  </span><span class="nx">transferId</span><span class="o">:</span><span class="w"> </span><span class="nb">String</span><span class="p">,</span>
@@ -779,26 +754,16 @@ mutation of an existing Transfer aggregate.</p>
 </ul>
 <h2 id="source-of-truth-rules">Source-of-truth rules</h2>
 <ul>
-<li><code>movements._id</code> / <code>movementId</code> is the durable public identifier for a
-  Movement.</li>
-<li><code>transfers._id</code> / <code>transferId</code> is the durable public identifier for a
-  Transfer. For a hazardous drop-off, <code>transferId</code> equals the sole
-  <code>movementId</code> on the transfer rather than being independently minted (see
-  <code>POST /transfers</code> above and <a href="../../decisions/#d-010">D-010</a>).</li>
-<li><code>revision</code> is the current version number of the aggregate document, not of
-  an individual nested event.</li>
+<li><code>movements._id</code> / <code>movementId</code> is the durable public identifier for a Movement.</li>
+<li><code>transfers._id</code> / <code>transferId</code> is the durable public identifier for a Transfer. For a hazardous drop-off, <code>transferId</code> equals the sole <code>movementId</code> on the transfer rather than being independently minted (see <code>POST /transfers</code> above and <a href="../../decisions/#d-010">D-010</a>).</li>
+<li><code>revision</code> is the current version number of the aggregate document, not of an individual nested event.</li>
 <li>New aggregates are created at <code>revision: 1</code>.</li>
-<li>Every successful mutation of an existing aggregate increments <code>revision</code>,
-  regardless of whether the API operation is a <code>POST</code> or a <code>PUT</code>.</li>
-<li>Event-level <code>submittingOrganisation</code> is the source of truth for who wrote
-  creation, collection, drop-off, and receipt.</li>
-<li>Optional event-level <code>submittedByApiCode</code> is the source of truth for which
-  API key wrote the event when multiple keys exist for one organisation.</li>
-<li><code>transfers.movementIds[]</code> is the source of truth for Movement-to-Transfer
-  membership.</li>
+<li>Every successful mutation of an existing aggregate increments <code>revision</code>, regardless of whether the API operation is a <code>POST</code> or a <code>PUT</code>.</li>
+<li>Event-level <code>submittingOrganisation</code> is the source of truth for who wrote creation, collection, drop-off, and receipt.</li>
+<li>Optional event-level <code>submittedByApiCode</code> is the source of truth for which API key wrote the event when multiple keys exist for one organisation.</li>
+<li><code>transfers.movementIds[]</code> is the source of truth for Movement-to-Transfer membership.</li>
 <li><code>movements.transferIds[]</code> is denormalised convenience data only.</li>
-<li>History collections are source-of-truth for past snapshots, not for
-  individual business events.</li>
+<li>History collections are source-of-truth for past snapshots, not for individual business events.</li>
 </ul>
 <h2 id="write-path-mapping">Write-path mapping</h2>
 <ul>
@@ -842,13 +807,9 @@ mutation of an existing Transfer aggregate.</p>
 <li>set <code>movementIds[]</code></li>
 <li>set <code>dropOff</code></li>
 <li>set <code>receipt</code> to <code>null</code> or omit</li>
-<li>determine <code>transferId</code>: if the request is a hazardous drop-off (always
-    exactly one <code>movementId</code>, per <a href="../../decisions/#d-010">D-010</a>), reuse
-    that <code>movementId</code> as <code>transferId</code> — no new identifier is minted.
-    Otherwise, mint <code>transferId</code> via <code>waste-tracking-id-backend</code> as today.</li>
+<li>determine <code>transferId</code>: if the request is a hazardous drop-off (always exactly one <code>movementId</code>, per <a href="../../decisions/#d-010">D-010</a>), reuse that <code>movementId</code> as <code>transferId</code> — no new identifier is minted. Otherwise, mint <code>transferId</code> via <code>waste-tracking-id-backend</code> as today.</li>
 <li>
-<p>optionally update each referenced Movement to append <code>transferId</code> to
-    <code>transferIds[]</code></p>
+<p>optionally update each referenced Movement to append <code>transferId</code> to <code>transferIds[]</code></p>
 </li>
 <li>
 <p><code>POST /transfers/{transferId}/receipt</code></p>
@@ -875,9 +836,7 @@ mutation of an existing Transfer aggregate.</p>
 </ul>
 <h2 id="why-not-keep-everything-in-waste-inputs">Why not keep everything in <code>waste-inputs</code></h2>
 <p>The current <code>waste-inputs</code> model is receipt-first and Phase 1-specific:</p>
-<p>See <a href="../phase1-waste-inputs/">Phase 1 movement store</a> for the compact
-description of the current <code>waste-inputs</code> / <code>waste-inputs-history</code>
-behaviour that this proposal is evolving from.</p>
+<p>See <a href="../phase1-waste-inputs/">Phase 1 movement store</a> for the compact description of the current <code>waste-inputs</code> / <code>waste-inputs-history</code> behaviour that this proposal is evolving from.</p>
 <ul>
 <li>it is keyed by <code>wasteTrackingId</code></li>
 <li>it stores receipt-centric payload under <code>receipt.movement</code></li>
@@ -892,15 +851,11 @@ behaviour that this proposal is evolving from.</p>
 </ul>
 <h2 id="open-points">Open points</h2>
 <ul>
-<li>Whether to persist <code>submittedByApiCode</code> in plaintext, hashed form, or as a
-  separate API-key identifier if audit needs exact key provenance without
-  exposing the raw code in operational reads.</li>
-<li>Whether receipt outcome should remain embedded in <code>receipt</code> or become a
-  further nested sub-document with richer status modelling.</li>
+<li>Whether to persist <code>submittedByApiCode</code> in plaintext, hashed form, or as a separate API-key identifier if audit needs exact key provenance without exposing the raw code in operational reads.</li>
+<li>Whether receipt outcome should remain embedded in <code>receipt</code> or become a further nested sub-document with richer status modelling.</li>
 <li>Whether <code>transferIds[]</code> on Movement proves worth the denormalisation cost.</li>
 <li>Whether event-level collections are needed in addition to history snapshots. Three options are under evaluation — aggregate (this document), per-event-type, and CQRS/event-sourcing (see <a href="../mongo-schema-proposal-CQRS/"><code>mongo-schema-proposal-CQRS.md</code></a>) — tracked as <a href="../../decisions/#d-037">D-037</a>.</li>
-<li>Whether soft-delete metadata should be per aggregate only, per event only,
-  or both.</li>
+<li>Whether soft-delete metadata should be per aggregate only, per event only, or both.</li>
 </ul>
 
 

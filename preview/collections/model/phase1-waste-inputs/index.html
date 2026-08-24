@@ -438,19 +438,16 @@
   
 
 
+<!-- prettier-ignore -->
 <div class="admonition warning">
 <p class="admonition-title">Internal documentation</p>
 <p>This page is internal design/planning material for the delivery team, not published guidance for Software Providers integrating with the Digital Waste Tracking API. Content here may be incomplete, in-progress, or superseded.</p>
 </div>
 <h1 id="phase-1-movement-store">Phase 1 movement store</h1>
-<p>This note describes the current Phase 1 MongoDB storage model used by
-<code>waste-movement-backend</code>.</p>
-<p>It exists so the Phase 2 model work has a concrete description of what is
-already live, and so migration discussions can refer to one small document
-instead of piecing the behaviour together from code.</p>
+<p>This note describes the current Phase 1 MongoDB storage model used by <code>waste-movement-backend</code>.</p>
+<p>It exists so the Phase 2 model work has a concrete description of what is already live, and so migration discussions can refer to one small document instead of piecing the behaviour together from code.</p>
 <h2 id="scope">Scope</h2>
-<p>Phase 1 is receipt-first. The live backend stores receipt movements keyed by
-<code>wasteTrackingId</code>.</p>
+<p>Phase 1 is receipt-first. The live backend stores receipt movements keyed by <code>wasteTrackingId</code>.</p>
 <p>The collections in scope are:</p>
 <ul>
 <li><code>waste-inputs</code></li>
@@ -460,31 +457,25 @@ instead of piecing the behaviour together from code.</p>
 <h2 id="what-each-collection-is-for">What each collection is for</h2>
 <h3 id="waste-inputs"><code>waste-inputs</code></h3>
 <p>The current-state collection.</p>
-<p>One document represents the latest known version of a single waste movement
-record keyed by <code>wasteTrackingId</code>. In practice, the live routes currently
-populate the receipt side of the record.</p>
+<p>One document represents the latest known version of a single waste movement record keyed by <code>wasteTrackingId</code>. In practice, the live routes currently populate the receipt side of the record.</p>
 <h3 id="waste-inputs-history"><code>waste-inputs-history</code></h3>
 <p>The history / audit-trail collection.</p>
-<p>Before a successful update is applied to <code>waste-inputs</code>, the previous full
-document is copied into <code>waste-inputs-history</code> with a <code>timestamp</code>. This means
-history is stored as full-document snapshots rather than event deltas.</p>
+<p>Before a successful update is applied to <code>waste-inputs</code>, the previous full document is copied into <code>waste-inputs-history</code> with a <code>timestamp</code>. This means history is stored as full-document snapshots rather than event deltas.</p>
 <h3 id="invalid-submissions"><code>invalid-submissions</code></h3>
-<p>Operational holding collection for update attempts that could not be applied,
-for example because the target <code>wasteTrackingId</code> was not found.</p>
+<p>Operational holding collection for update attempts that could not be applied, for example because the target <code>wasteTrackingId</code> was not found.</p>
 <h2 id="current-persisted-shape">Current persisted shape</h2>
-<p>The current domain object in <code>waste-movement-backend</code> exposes these top-level
-fields (<a href="C:/Applications/EqualExperts/Defra/WasteTracking/Repos/waste-movement-backend/src/domain/wasteInput.js:1">wasteInput.js</a>):</p>
+<p>The current domain object in <code>waste-movement-backend</code> exposes these top-level fields (<a href="C:/Applications/EqualExperts/Defra/WasteTracking/Repos/waste-movement-backend/src/domain/wasteInput.js:1">wasteInput.js</a>):</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="nx">wasteTrackingId</span><span class="p">,</span>
-<span class="w">  </span><span class="nx">creation</span><span class="p">,</span>
-<span class="w">  </span><span class="nx">collection</span><span class="p">,</span>
-<span class="w">  </span><span class="nx">receipt</span><span class="p">,</span>
-<span class="w">  </span><span class="nx">submittingOrganisation</span><span class="p">,</span>
-<span class="w">  </span><span class="nx">createdAt</span><span class="p">,</span>
-<span class="w">  </span><span class="nx">lastUpdatedAt</span><span class="p">,</span>
-<span class="w">  </span><span class="nx">orgId</span><span class="p">,</span>
-<span class="w">  </span><span class="nx">traceId</span><span class="p">,</span>
-<span class="w">  </span><span class="nx">bulkId</span>
+<span class="w">  </span><span class="p">(</span><span class="nx">wasteTrackingId</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">creation</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">collection</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">receipt</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">submittingOrganisation</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">createdAt</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">lastUpdatedAt</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">orgId</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">traceId</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">bulkId</span><span class="p">);</span>
 <span class="p">}</span>
 </code></pre></div>
 <p>In the live Phase 1 receipt flow, the create route currently writes:</p>
@@ -543,9 +534,7 @@ fields (<a href="C:/Applications/EqualExperts/Defra/WasteTracking/Repos/waste-mo
 <span class="w">  </span><span class="p">}</span>
 <span class="p">}</span>
 </code></pre></div>
-<p>The exact nested payload shape is driven by the receipt request schema and can
-be seen in the Phase 1 receipt examples under
-<a href="C:/Applications/EqualExperts/Defra/WasteTracking/Repos/waste-tracking-service/docs/collections/data/receiptEvent.js:1">receiptEvent.js</a>.</p>
+<p>The exact nested payload shape is driven by the receipt request schema and can be seen in the Phase 1 receipt examples under <a href="C:/Applications/EqualExperts/Defra/WasteTracking/Repos/waste-tracking-service/docs/collections/data/receiptEvent.js:1">receiptEvent.js</a>.</p>
 <h2 id="revision-model">Revision model</h2>
 <p>The current backend uses document revisioning rather than event sourcing.</p>
 <ul>
@@ -553,9 +542,7 @@ be seen in the Phase 1 receipt examples under
 <li>each successful update increments <code>revision</code></li>
 <li>the prior full document is copied into <code>waste-inputs-history</code></li>
 </ul>
-<p>The history entry is created by shallow-copying the previous live document,
-adding <code>timestamp</code>, and removing <code>_id</code>
-(<a href="C:/Applications/EqualExperts/Defra/WasteTracking/Repos/waste-movement-backend/src/common/helpers/create-history-entry.js:1">create-history-entry.js</a>).</p>
+<p>The history entry is created by shallow-copying the previous live document, adding <code>timestamp</code>, and removing <code>_id</code> (<a href="C:/Applications/EqualExperts/Defra/WasteTracking/Repos/waste-movement-backend/src/common/helpers/create-history-entry.js:1">create-history-entry.js</a>).</p>
 <h2 id="example-waste-inputs-history-document">Example <code>waste-inputs-history</code> document</h2>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
 <span class="w">  </span><span class="nx">wasteTrackingId</span><span class="o">:</span><span class="w"> </span><span class="s2">"2578ZCY8"</span><span class="p">,</span>
@@ -573,8 +560,7 @@ adding <code>timestamp</code>, and removing <code>_id</code>
 <span class="p">}</span>
 </code></pre></div>
 <h2 id="current-indexes">Current indexes</h2>
-<p>The backend currently creates these indexes
-(<a href="C:/Applications/EqualExperts/Defra/WasteTracking/Repos/waste-movement-backend/src/common/helpers/mongodb.js:72">mongodb.js</a>):</p>
+<p>The backend currently creates these indexes (<a href="C:/Applications/EqualExperts/Defra/WasteTracking/Repos/waste-movement-backend/src/common/helpers/mongodb.js:72">mongodb.js</a>):</p>
 <h3 id="waste-inputs_1"><code>waste-inputs</code></h3>
 <ul>
 <li><code>{ id: 1 }</code></li>
@@ -589,10 +575,8 @@ adding <code>timestamp</code>, and removing <code>_id</code>
 <li><code>{ bulkId: 1, revision: 1 }</code></li>
 </ul>
 <h2 id="current-update-behaviour">Current update behaviour</h2>
-<p>The live update route updates <code>receipt.movement</code> in place rather than
-appending a new business event object.</p>
-<p>See <a href="C:/Applications/EqualExperts/Defra/WasteTracking/Repos/waste-movement-backend/src/routes/update-receipt-movement.js:13">update-receipt-movement.js</a>
-and <a href="C:/Applications/EqualExperts/Defra/WasteTracking/Repos/waste-movement-backend/src/services/movement-update.js:55">movement-update.js</a>.</p>
+<p>The live update route updates <code>receipt.movement</code> in place rather than appending a new business event object.</p>
+<p>See <a href="C:/Applications/EqualExperts/Defra/WasteTracking/Repos/waste-movement-backend/src/routes/update-receipt-movement.js:13">update-receipt-movement.js</a> and <a href="C:/Applications/EqualExperts/Defra/WasteTracking/Repos/waste-movement-backend/src/services/movement-update.js:55">movement-update.js</a>.</p>
 <p>This is a key distinction from the proposed Phase 2 model:</p>
 <ul>
 <li>Phase 1 history is snapshot-based</li>
@@ -600,30 +584,22 @@ and <a href="C:/Applications/EqualExperts/Defra/WasteTracking/Repos/waste-moveme
 <li>Phase 2 drop-off / receipt introduces Transfer as a separate aggregate</li>
 </ul>
 <h2 id="role-during-phase-1-phase-2-migration">Role during Phase 1 -&gt; Phase 2 migration</h2>
-<p>For now, the working proposal is to keep <code>waste-inputs</code> /
-<code>waste-inputs-history</code> in place during migration.</p>
+<p>For now, the working proposal is to keep <code>waste-inputs</code> / <code>waste-inputs-history</code> in place during migration.</p>
 <p>That can mean:</p>
 <ul>
-<li>the existing Phase 1 receipt endpoints continue to read and write these
-  collections unchanged</li>
-<li>the new Phase 2 model is introduced alongside them rather than replacing
-  them immediately</li>
-<li>any migration or coexistence layer is explicit about which endpoints write
-  to the old Phase 1 store and which write to the new Phase 2 store</li>
+<li>the existing Phase 1 receipt endpoints continue to read and write these collections unchanged</li>
+<li>the new Phase 2 model is introduced alongside them rather than replacing them immediately</li>
+<li>any migration or coexistence layer is explicit about which endpoints write to the old Phase 1 store and which write to the new Phase 2 store</li>
 </ul>
 <h2 id="suggested-coexistence-rule">Suggested coexistence rule</h2>
 <p>Until a formal migration decision is made, the safest assumption is:</p>
 <ul>
-<li>Phase 1 endpoints continue to use <code>waste-inputs</code> /
-  <code>waste-inputs-history</code></li>
+<li>Phase 1 endpoints continue to use <code>waste-inputs</code> / <code>waste-inputs-history</code></li>
 <li>Phase 2 endpoints use the proposed <code>movements</code> / <code>transfers</code> model</li>
-<li>any bridge between <code>wasteTrackingId</code> and new identifiers is handled
-  deliberately rather than inferred implicitly</li>
+<li>any bridge between <code>wasteTrackingId</code> and new identifiers is handled deliberately rather than inferred implicitly</li>
 </ul>
 <h2 id="why-this-document-exists">Why this document exists</h2>
-<p>The Mongo schema proposal for Phase 2 references the current
-<code>waste-inputs</code> / <code>waste-inputs-history</code> pattern as the baseline being
-evolved from. This note is the compact description of that baseline.</p>
+<p>The Mongo schema proposal for Phase 2 references the current <code>waste-inputs</code> / <code>waste-inputs-history</code> pattern as the baseline being evolved from. This note is the compact description of that baseline.</p>
 
 
 

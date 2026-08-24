@@ -438,16 +438,13 @@
   
 
 
+<!-- prettier-ignore -->
 <div class="admonition warning">
 <p class="admonition-title">Internal documentation</p>
 <p>This page is internal design/planning material for the delivery team, not published guidance for Software Providers integrating with the Digital Waste Tracking API. Content here may be incomplete, in-progress, or superseded.</p>
 </div>
 <h1 id="assessment-feedback">Assessment Feedback</h1>
-<p>Records advice from the GDS Alpha service assessment (23 July 2026)
-relevant to the Phase 2 collections work, alongside the current-state
-findings gathered in response for each point. This is a context/findings
-record, not a decision — see <a href="../../decisions/">Decisions</a> for the formal
-register.</p>
+<p>Records advice from the GDS Alpha service assessment (23 July 2026) relevant to the Phase 2 collections work, alongside the current-state findings gathered in response for each point. This is a context/findings record, not a decision — see <a href="../../decisions/">Decisions</a> for the formal register.</p>
 <h2 id="contents">Contents</h2>
 <ul>
 <li><a href="#point-13--vendor-delegation-model">Point 13 — Vendor Delegation Model</a></li>
@@ -457,226 +454,90 @@ register.</p>
 <h3 id="the-advice">The advice</h3>
 <p>Verbatim, from Point 13 of the assessment report:</p>
 <blockquote>
-<p>The team is leveraging the existing user accounts and management
-portals that allow a user to authorize software providers to act on
-that user's behalf. For Private Beta, investigate options that allow
-a user to authorise a software provider without the user needing to
-manage API keys, which might require collaboration with teams owning
-those common components so that the journey can be improved.</p>
+<p>The team is leveraging the existing user accounts and management portals that allow a user to authorize software providers to act on that user's behalf. For Private Beta, investigate options that allow a user to authorise a software provider without the user needing to manage API keys, which might require collaboration with teams owning those common components so that the journey can be improved.</p>
 </blockquote>
-<p>— GDS Alpha assessment, 23 July 2026, Point 13 (page 8). Advice given
-ahead of Private Beta.</p>
-<p>Note: the assessment doesn't prescribe a specific mechanism (e.g. OAuth)
-— it names the outcome (a user authorising a provider without handling
-API keys) and flags that it may need collaboration with the team(s)
-owning the "common components" (the existing user accounts / management
-portal) referenced in the first sentence. Anywhere this doc uses "OAuth
-authorisation-grant" below, that's our own framing of one possible
-mechanism, not a quote from the assessment.</p>
+<p>— GDS Alpha assessment, 23 July 2026, Point 13 (page 8). Advice given ahead of Private Beta.</p>
+<p>Note: the assessment doesn't prescribe a specific mechanism (e.g. OAuth) — it names the outcome (a user authorising a provider without handling API keys) and flags that it may need collaboration with the team(s) owning the "common components" (the existing user accounts / management portal) referenced in the first sentence. Anywhere this doc uses "OAuth authorisation-grant" below, that's our own framing of one possible mechanism, not a quote from the assessment.</p>
 <h3 id="current-state-how-vendor-delegation-works-today">Current state: how vendor delegation works today</h3>
-<p>Two separate, unrelated auth layers exist today. The "existing user
-accounts and management portal" the assessment refers to is the
-organisation frontend's API-code management pages (below) — a user does
-today "authorise" a provider through it, but the mechanism is copying a
-raw static key, not a scoped or revocable grant.</p>
-<p><strong>1. Software client authentication — OAuth2 client-credentials
-(machine-to-machine), not user delegation.</strong>
-- <code>waste-movement-external-api/src/plugins/jwt-auth.js</code> validates a
-  Cognito-issued JWT (scope <code>waste-movement-external-api-resource-srv/access</code>).
-- A Cognito app client is manually provisioned per third-party
-  integrator; credentials are shared via a secure channel, not
-  self-service (<code>digital-waste-tracking-docs/technology/integration-architecture/interfaces/aws-cognito.md</code>).</p>
-<p><strong>2. Vendor-to-organisation delegation — a static shared secret, not a
-grant.</strong>
-- <code>waste-movement-backend/src/common/helpers/validate-api-code.js</code>
-  resolves a flat, config-based allow-list (<code>orgApiCodes</code>) mapping a
-  UUID <code>apiCode</code> to an <code>orgId</code>.
-- <code>waste-organisation-backend/src/domain/organisation.js</code> —
-  <code>createApiCode()</code> generates <code>crypto.randomUUID()</code>; no expiry, scope,
-  or per-vendor consent, just enable/disable.
-- User experience: the organisation copies a raw code and hands it to
-  their software provider out-of-band
-  (<code>waste-organisation-frontend/src/config/content.js</code>: <em>"If you work
-  with multiple software providers, you should give each one an API
-  code."</em>).
-- A migration is already under way to resolve org identity server-side
-  rather than trust a client-supplied secret directly: the shared
-  schema supports <code>apiCode</code> <strong>or</strong> <code>submittingOrganisation</code>
-  (<code>waste-movement-utils/src/schemas/receipt.js</code>,
-  <code>.xor('apiCode', 'submittingOrganisation')</code>) — a precursor step, not
-  yet a consent/grant model.</p>
-<p><strong>Separately, human portal sign-in</strong> uses Defra ID (OIDC
-authorisation-code flow via Hapi Bell,
-<code>waste-organisation-frontend/src/server/common/helpers/auth/open-id-provider.js</code>)
-— this is the "existing user accounts" half of the assessment's first
-sentence, and is unrelated to how a provider is then handed an API code.</p>
+<p>Two separate, unrelated auth layers exist today. The "existing user accounts and management portal" the assessment refers to is the organisation frontend's API-code management pages (below) — a user does today "authorise" a provider through it, but the mechanism is copying a raw static key, not a scoped or revocable grant.</p>
+<p><strong>1. Software client authentication — OAuth2 client-credentials (machine-to-machine), not user delegation.</strong></p>
+<ul>
+<li><code>waste-movement-external-api/src/plugins/jwt-auth.js</code> validates a Cognito-issued JWT (scope <code>waste-movement-external-api-resource-srv/access</code>).</li>
+<li>A Cognito app client is manually provisioned per third-party integrator; credentials are shared via a secure channel, not self-service (<code>digital-waste-tracking-docs/technology/integration-architecture/interfaces/aws-cognito.md</code>).</li>
+</ul>
+<p><strong>2. Vendor-to-organisation delegation — a static shared secret, not a grant.</strong></p>
+<ul>
+<li><code>waste-movement-backend/src/common/helpers/validate-api-code.js</code> resolves a flat, config-based allow-list (<code>orgApiCodes</code>) mapping a UUID <code>apiCode</code> to an <code>orgId</code>.</li>
+<li><code>waste-organisation-backend/src/domain/organisation.js</code> — <code>createApiCode()</code> generates <code>crypto.randomUUID()</code>; no expiry, scope, or per-vendor consent, just enable/disable.</li>
+<li>User experience: the organisation copies a raw code and hands it to their software provider out-of-band (<code>waste-organisation-frontend/src/config/content.js</code>: <em>"If you work with multiple software providers, you should give each one an API code."</em>).</li>
+<li>A migration is already under way to resolve org identity server-side rather than trust a client-supplied secret directly: the shared schema supports <code>apiCode</code> <strong>or</strong> <code>submittingOrganisation</code> (<code>waste-movement-utils/src/schemas/receipt.js</code>, <code>.xor('apiCode', 'submittingOrganisation')</code>) — a precursor step, not yet a consent/grant model.</li>
+</ul>
+<p><strong>Separately, human portal sign-in</strong> uses Defra ID (OIDC authorisation-code flow via Hapi Bell, <code>waste-organisation-frontend/src/server/common/helpers/auth/open-id-provider.js</code>) — this is the "existing user accounts" half of the assessment's first sentence, and is unrelated to how a provider is then handed an API code.</p>
 <h3 id="relevant-existing-decisions-and-adrs">Relevant existing decisions and ADRs</h3>
 <ul>
-<li><strong><a href="../../decisions/#d-027">D-027</a> — Per-organisation vs per-actor API
-  credentials.</strong> Locks in per-organisation, not per-actor, credentials
-  for Phase 2.</li>
-<li><strong><a href="../../decisions/#d-036">D-036</a> — Write authorisation: open append,
-  amend restricted to the authoring organisation.</strong> Built on top of the
-  current <code>apiCode</code> model.</li>
-<li><strong>WTS-ADR001 — API Authentication &amp; Authorization</strong>
-  (<code>digital-waste-tracking-docs/technology/quality-assurance-view/sda-adr-001/sda-adr-001.md</code>,
-  Oct 2025). Evaluated 4 options; chose Cognito client-credentials with
-  manual onboarding. Option 4 ("integrate AWS Gateway with Defra
-  Customer ID") was shelved as having "no approved/agreed
-  timescales... not aligned with WTS go-live" — but even that option
-  authenticated the vendor/gateway, not a user-authorised delegation.
-  No option modelled letting the <em>user</em> authorise a provider directly.</li>
+<li><strong><a href="../../decisions/#d-027">D-027</a> — Per-organisation vs per-actor API credentials.</strong> Locks in per-organisation, not per-actor, credentials for Phase 2.</li>
+<li><strong><a href="../../decisions/#d-036">D-036</a> — Write authorisation: open append, amend restricted to the authoring organisation.</strong> Built on top of the current <code>apiCode</code> model.</li>
+<li><strong>WTS-ADR001 — API Authentication &amp; Authorization</strong> (<code>digital-waste-tracking-docs/technology/quality-assurance-view/sda-adr-001/sda-adr-001.md</code>, Oct 2025). Evaluated 4 options; chose Cognito client-credentials with manual onboarding. Option 4 ("integrate AWS Gateway with Defra Customer ID") was shelved as having "no approved/agreed timescales... not aligned with WTS go-live" — but even that option authenticated the vendor/gateway, not a user-authorised delegation. No option modelled letting the <em>user</em> authorise a provider directly.</li>
 </ul>
 <h3 id="the-common-components-angle">The "common components" angle</h3>
-<p>The closest match to "teams owning those common components" is an
-early, undecided exploration:
-<code>digital-waste-tracking-docs/technology/integration-architecture/scratchpad/epr-manage-account-as-strategic-identity-and-access-layer.md</code>
-— "EPR Manage Account" as a strategic identity/access layer instead of
-Defra ID directly. Sourced from a Slack note (9 July 2026), flagged as
-"early exploration only, no decision or ADR yet," MVP target December
-2026. It addresses receiver-user identity, not vendor delegation
-directly, but is the one active cross-team identity conversation to
-loop in.</p>
+<p>The closest match to "teams owning those common components" is an early, undecided exploration: <code>digital-waste-tracking-docs/technology/integration-architecture/scratchpad/epr-manage-account-as-strategic-identity-and-access-layer.md</code> — "EPR Manage Account" as a strategic identity/access layer instead of Defra ID directly. Sourced from a Slack note (9 July 2026), flagged as "early exploration only, no decision or ADR yet," MVP target December 2026. It addresses receiver-user identity, not vendor delegation directly, but is the one active cross-team identity conversation to loop in.</p>
 <h3 id="gap">Gap</h3>
-<p>No repo — <code>waste-movement-backend</code>, <code>waste-movement-external-api</code>,
-<code>waste-movement-utils</code>, <code>waste-organisation-backend</code>,
-<code>waste-organisation-frontend</code>, <code>waste-tracking-id-backend</code>,
-<code>digital-waste-tracking-docs</code>, or this repo — contains any code,
-comment, ADR, or doc describing a way for a user to authorise a
-provider without that provider ending up holding a static, copyable
-key. The <code>apiCode</code> → <code>submittingOrganisation</code> migration is the only
-movement away from raw key handling so far, and it doesn't touch who
-authorises whom — it just moves org-resolution server-side.</p>
+<p>No repo — <code>waste-movement-backend</code>, <code>waste-movement-external-api</code>, <code>waste-movement-utils</code>, <code>waste-organisation-backend</code>, <code>waste-organisation-frontend</code>, <code>waste-tracking-id-backend</code>, <code>digital-waste-tracking-docs</code>, or this repo — contains any code, comment, ADR, or doc describing a way for a user to authorise a provider without that provider ending up holding a static, copyable key. The <code>apiCode</code> → <code>submittingOrganisation</code> migration is the only movement away from raw key handling so far, and it doesn't touch who authorises whom — it just moves org-resolution server-side.</p>
 <h3 id="open-questions">Open questions</h3>
 <ul>
-<li>What does "without the user needing to manage API keys" mean in
-  practice here — no key at all (e.g. a scoped, revocable grant instead,
-  such as OAuth authorisation-code/consent), or the same key mechanism
-  with a better-managed issuance/rotation journey?</li>
-<li>Would this change the D-027/D-036 assumptions for Phase 2, or sit
-  alongside them as an additive auth path?</li>
-<li>If a consent-based grant replaces <code>apiCode</code>, does it replace the
-  mechanism entirely or coexist during a transition (as Phase 1 →
-  submittingOrganisation did)?</li>
-<li>Is EPR Manage Account (MVP December 2026) on a timeline compatible
-  with Private Beta, or does this need an interim solution as WTS-ADR001
-  Option 4 found for Alpha?</li>
+<li>What does "without the user needing to manage API keys" mean in practice here — no key at all (e.g. a scoped, revocable grant instead, such as OAuth authorisation-code/consent), or the same key mechanism with a better-managed issuance/rotation journey?</li>
+<li>Would this change the D-027/D-036 assumptions for Phase 2, or sit alongside them as an additive auth path?</li>
+<li>If a consent-based grant replaces <code>apiCode</code>, does it replace the mechanism entirely or coexist during a transition (as Phase 1 → submittingOrganisation did)?</li>
+<li>Is EPR Manage Account (MVP December 2026) on a timeline compatible with Private Beta, or does this need an interim solution as WTS-ADR001 Option 4 found for Alpha?</li>
 </ul>
 <h3 id="suggested-next-steps">Suggested next steps</h3>
 <ul>
-<li>Loop in the team behind the EPR Manage Account exploration — the
-  first genuine cross-team identity conversation this could attach to.</li>
-<li>Revisit WTS-ADR001's Option 4 rationale now that Private Beta changes
-  the timeline calculus that shelved it.</li>
-<li>Flag the D-027/D-036 dependency before those decisions are treated as
-  final for Phase 2.</li>
+<li>Loop in the team behind the EPR Manage Account exploration — the first genuine cross-team identity conversation this could attach to.</li>
+<li>Revisit WTS-ADR001's Option 4 rationale now that Private Beta changes the timeline calculus that shelved it.</li>
+<li>Flag the D-027/D-036 dependency before those decisions are treated as final for Phase 2.</li>
 </ul>
 <h2 id="point-14-reliable-service-api-versioning">Point 14 — Reliable Service: API Versioning</h2>
 <h3 id="the-advice_1">The advice</h3>
-<p>Verbatim, from the report's "Optional advice to help the service team
-continually improve the service" section:</p>
+<p>Verbatim, from the report's "Optional advice to help the service team continually improve the service" section:</p>
 <blockquote>
-<p>The team is using the OpenAPI open standard for documenting their API
-and using API versioning at the schema level which aligns with the
-goals of this standard. For Private Beta, the team should proactively
-consider versioning of API resources (endpoints and data models) to
-mitigate the risk of a breaking change being required. It is possible
-to introduce this in a non-breaking way to the current API without the
-need to introduce version numbers in the resource URL by allowing the
-integrating system to provide the version as an HTTP header, with
-implementations using the Accept or a custom HTTP header as an
-example. This implementation is only given as an example, and the
-team is encouraged to investigate a versioning mechanism that aligns
-to their department standards.</p>
+<p>The team is using the OpenAPI open standard for documenting their API and using API versioning at the schema level which aligns with the goals of this standard. For Private Beta, the team should proactively consider versioning of API resources (endpoints and data models) to mitigate the risk of a breaking change being required. It is possible to introduce this in a non-breaking way to the current API without the need to introduce version numbers in the resource URL by allowing the integrating system to provide the version as an HTTP header, with implementations using the Accept or a custom HTTP header as an example. This implementation is only given as an example, and the team is encouraged to investigate a versioning mechanism that aligns to their department standards.</p>
 </blockquote>
-<p>— GDS Alpha assessment, 23 July 2026, Point 14 ("optional advice", not a
-finding).</p>
-<p>Context relayed separately (not from the report text itself, so treat as
-colour rather than citable content): the team had already named
-versioning as a top risk ahead of the assessment, and the panel's
-response — optional advice rather than a finding — was read as
-validation of that call.</p>
+<p>— GDS Alpha assessment, 23 July 2026, Point 14 ("optional advice", not a finding).</p>
+<p>Context relayed separately (not from the report text itself, so treat as colour rather than citable content): the team had already named versioning as a top risk ahead of the assessment, and the panel's response — optional advice rather than a finding — was read as validation of that call.</p>
 <h3 id="current-state-no-versioning-exists-in-any-repo-today">Current state: no versioning exists in any repo today</h3>
-<p>Checked across all seven repos — none implement URL path or
-header-based API versioning of any kind.</p>
+<p>Checked across all seven repos — none implement URL path or header-based API versioning of any kind.</p>
 <ul>
-<li>No <code>/v1/</code>, <code>/v2/</code> (or any) version segment in any route path, in any
-  repo (<code>waste-movement-backend</code>, <code>waste-movement-external-api</code>,
-  <code>waste-organisation-backend</code>, <code>waste-tracking-id-backend</code>).</li>
-<li>No <code>Accept-Version</code>, <code>X-API-Version</code>, vendor media-type (<code>vnd.</code>), or
-  any content-negotiation/header-matching logic anywhere.</li>
-<li>Each Hapi-based API independently hardcodes a static, unused
-  <code>info.version</code> string in its Swagger config — <code>'1.0'</code>
-  (<code>waste-movement-backend/src/plugins/swagger.js</code>,
-  <code>waste-movement-external-api/src/plugins/swagger.js</code>), <code>'1'</code>
-  (<code>waste-organisation-backend/src/api-server.js:51</code>) — none tied to
-  <code>package.json</code>, none reflected in routes.
-  <code>waste-tracking-id-backend</code> has no Swagger plugin at all.</li>
-<li><code>waste-movement-utils</code> (the shared library other services import
-  from) has no versioning helper — no shared scheme exists to adopt.</li>
-<li><code>waste-tracking-service/docs/collections/api/openapi.yaml</code>:
-  <code>info.version: 0.2.5-alpha</code> (spec-document version, not a resource
-  scheme), <code>servers</code> URL has no version path segment, no version header
-  parameter defined anywhere in the spec.</li>
-<li>One data-record false lead: <code>waste-organisation-backend/src/routes/swagger-common.js:5-8</code>
-  has an <code>addVersionField()</code> helper, but it appends a numeric <code>version</code>
-  field to individual data records (optimistic concurrency, same
-  pattern as <code>waste-inputs.revision</code> in waste-movement-backend) —
-  unrelated to API resource versioning.</li>
+<li>No <code>/v1/</code>, <code>/v2/</code> (or any) version segment in any route path, in any repo (<code>waste-movement-backend</code>, <code>waste-movement-external-api</code>, <code>waste-organisation-backend</code>, <code>waste-tracking-id-backend</code>).</li>
+<li>No <code>Accept-Version</code>, <code>X-API-Version</code>, vendor media-type (<code>vnd.</code>), or any content-negotiation/header-matching logic anywhere.</li>
+<li>Each Hapi-based API independently hardcodes a static, unused <code>info.version</code> string in its Swagger config — <code>'1.0'</code> (<code>waste-movement-backend/src/plugins/swagger.js</code>, <code>waste-movement-external-api/src/plugins/swagger.js</code>), <code>'1'</code> (<code>waste-organisation-backend/src/api-server.js:51</code>) — none tied to <code>package.json</code>, none reflected in routes. <code>waste-tracking-id-backend</code> has no Swagger plugin at all.</li>
+<li><code>waste-movement-utils</code> (the shared library other services import from) has no versioning helper — no shared scheme exists to adopt.</li>
+<li><code>waste-tracking-service/docs/collections/api/openapi.yaml</code>: <code>info.version: 0.2.5-alpha</code> (spec-document version, not a resource scheme), <code>servers</code> URL has no version path segment, no version header parameter defined anywhere in the spec.</li>
+<li>One data-record false lead: <code>waste-organisation-backend/src/routes/swagger-common.js:5-8</code> has an <code>addVersionField()</code> helper, but it appends a numeric <code>version</code> field to individual data records (optimistic concurrency, same pattern as <code>waste-inputs.revision</code> in waste-movement-backend) — unrelated to API resource versioning.</li>
 </ul>
 <h3 id="relevant-existing-decisions-and-precedent">Relevant existing decisions and precedent</h3>
 <ul>
-<li><strong>D-023</strong> (<code>../decisions.md#d-023</code>, status: Open) — "Phase 1 receipt
-  endpoint deprecation timeline." Phase 1 endpoints are marked
-  <code>deprecated: true</code> in-spec and coexist with Phase 2 equivalents at the
-  same unversioned path, with no removal date set. This is the closest
-  thing to an existing versioning pattern in production — an ad hoc
-  "old and new side by side," not a designed scheme — and it's still an
-  open decision.</li>
-<li><strong>D-003</strong> — "OpenAPI 3.0.3, not 3.1." Spec-format version choice, not
-  API/resource versioning; tangential.</li>
-<li>No ADR on versioning exists — <code>digital-waste-tracking-docs</code> has six
-  ADRs (auth, reporting ×2, admin, spreadsheet submission, service
-  charge), none about versioning.</li>
-<li>No DEFRA departmental API versioning standard is referenced or present
-  anywhere in either docs repo — the "aligning to a departmental
-  standard" part of the advice has nothing in-repo to check against yet.</li>
-<li>No risk-log or delivery-passport entry corroborates "versioning named
-  as a risk before the assessment" — that currently rests on
-  verbal/slide content, not a written record.</li>
+<li><strong>D-023</strong> (<code>../decisions.md#d-023</code>, status: Open) — "Phase 1 receipt endpoint deprecation timeline." Phase 1 endpoints are marked <code>deprecated: true</code> in-spec and coexist with Phase 2 equivalents at the same unversioned path, with no removal date set. This is the closest thing to an existing versioning pattern in production — an ad hoc "old and new side by side," not a designed scheme — and it's still an open decision.</li>
+<li><strong>D-003</strong> — "OpenAPI 3.0.3, not 3.1." Spec-format version choice, not API/resource versioning; tangential.</li>
+<li>No ADR on versioning exists — <code>digital-waste-tracking-docs</code> has six ADRs (auth, reporting ×2, admin, spreadsheet submission, service charge), none about versioning.</li>
+<li>No DEFRA departmental API versioning standard is referenced or present anywhere in either docs repo — the "aligning to a departmental standard" part of the advice has nothing in-repo to check against yet.</li>
+<li>No risk-log or delivery-passport entry corroborates "versioning named as a risk before the assessment" — that currently rests on verbal/slide content, not a written record.</li>
 </ul>
 <h3 id="gap_1">Gap</h3>
-<p>This is greenfield: no existing versioning implementation to migrate
-away from, and no conflicting scheme to reconcile. The ADR can be
-written directly against the advice.</p>
+<p>This is greenfield: no existing versioning implementation to migrate away from, and no conflicting scheme to reconcile. The ADR can be written directly against the advice.</p>
 <h3 id="open-questions_1">Open questions</h3>
 <ul>
-<li>Where is the DEFRA departmental API versioning standard the panel
-  referenced, and does the team have access to it / need to request it?</li>
-<li>Accept-based content negotiation vs. a custom version header — is
-  that department's call, or open for the team to choose?</li>
-<li>Does resource versioning apply retroactively to the live Phase 1
-  receipt endpoints, or start clean with Phase 2?</li>
-<li>How does header-based versioning interact with D-023's current
-  approach (deprecated Phase 1 endpoints coexisting unversioned) — does
-  it replace that pattern once written?</li>
-<li>The advice explicitly covers "data models," not just endpoints — does
-  that mean a schema-version field belongs in the Mongo documents
-  themselves? Worth cross-checking against the <a href="../../decisions/#d-037">Phase 2 Mongo schema
-  evaluation</a> (D-037, still open) so the two
-  pieces of design work don't diverge.</li>
+<li>Where is the DEFRA departmental API versioning standard the panel referenced, and does the team have access to it / need to request it?</li>
+<li>Accept-based content negotiation vs. a custom version header — is that department's call, or open for the team to choose?</li>
+<li>Does resource versioning apply retroactively to the live Phase 1 receipt endpoints, or start clean with Phase 2?</li>
+<li>How does header-based versioning interact with D-023's current approach (deprecated Phase 1 endpoints coexisting unversioned) — does it replace that pattern once written?</li>
+<li>The advice explicitly covers "data models," not just endpoints — does that mean a schema-version field belongs in the Mongo documents themselves? Worth cross-checking against the <a href="../../decisions/#d-037">Phase 2 Mongo schema evaluation</a> (D-037, still open) so the two pieces of design work don't diverge.</li>
 </ul>
 <h3 id="suggested-next-steps_1">Suggested next steps</h3>
 <ul>
-<li>Track down the DEFRA departmental API versioning standard referenced
-  by the panel, to confirm the expected header name/format.</li>
-<li>Write the versioning ADR (next <code>sda-adr-00N</code>) formalising:
-  header-based, non-breaking, covering both endpoints and data models.</li>
-<li>Reconcile with D-023 once the ADR exists — decide whether it
-  supersedes the current deprecated-endpoint approach.</li>
-<li>Check with whoever owns the D-037 Mongo schema decision on whether
-  API-resource versioning and stored-document schema versioning should
-  share one version identifier or stay independent.</li>
+<li>Track down the DEFRA departmental API versioning standard referenced by the panel, to confirm the expected header name/format.</li>
+<li>Write the versioning ADR (next <code>sda-adr-00N</code>) formalising: header-based, non-breaking, covering both endpoints and data models.</li>
+<li>Reconcile with D-023 once the ADR exists — decide whether it supersedes the current deprecated-endpoint approach.</li>
+<li>Check with whoever owns the D-037 Mongo schema decision on whether API-resource versioning and stored-document schema versioning should share one version identifier or stay independent.</li>
 </ul>
 
 

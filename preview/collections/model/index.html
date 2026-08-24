@@ -438,57 +438,32 @@
   
 
 
+<!-- prettier-ignore -->
 <div class="admonition warning">
 <p class="admonition-title">Internal documentation</p>
 <p>This page is internal design/planning material for the delivery team, not published guidance for Software Providers integrating with the Digital Waste Tracking API. Content here may be incomplete, in-progress, or superseded.</p>
 </div>
 <h1 id="data-model">Data model</h1>
-<p>The entities, identifiers, and state transitions underlying the extended
-API.</p>
+<p>The entities, identifiers, and state transitions underlying the extended API.</p>
 <h2 id="status">Status</h2>
-<p>Started at proposal level. This workstream now contains draft notes on the
-current Phase 1 storage model and a proposed MongoDB shape for Phase 2.
-It is still exploratory rather than settled design: the
-<a href="../../api/README.md">API spec</a> and decisions register remain the primary
-drivers, and the model will continue to evolve as those stabilise.</p>
+<p>Started at proposal level. This workstream now contains draft notes on the current Phase 1 storage model and a proposed MongoDB shape for Phase 2. It is still exploratory rather than settled design: the <a href="../../api/README.md">API spec</a> and decisions register remain the primary drivers, and the model will continue to evolve as those stabilise.</p>
 <h2 id="what-will-be-here">What will be here</h2>
 <p>This folder is expected to grow into:</p>
 <ul>
-<li>An entity-relationship view of the main aggregates — Movement,
-  Collection, Drop-off, Receipt — and the reference data they depend on.</li>
-<li>A journey state diagram showing how events transition a Movement
-  between states (planned → in-collection → in-transit → dropped-off →
-  accepted / rejected / returned), reconciled against the four terminal
-  states named in the <a href="../glossary/">glossary</a>.</li>
-<li>A reconciliation view of how Phase 1 receipt entities (<code>wasteItem</code>,
-  <code>wasteReceiver</code>, etc.) map to the entities introduced by the new
-  endpoints.</li>
+<li>An entity-relationship view of the main aggregates — Movement, Collection, Drop-off, Receipt — and the reference data they depend on.</li>
+<li>A journey state diagram showing how events transition a Movement between states (planned → in-collection → in-transit → dropped-off → accepted / rejected / returned), reconciled against the four terminal states named in the <a href="../glossary/">glossary</a>.</li>
+<li>A reconciliation view of how Phase 1 receipt entities (<code>wasteItem</code>, <code>wasteReceiver</code>, etc.) map to the entities introduced by the new endpoints.</li>
 </ul>
-<p>The OpenAPI spec defines the wire shapes; this workstream describes the
-storage and lifecycle shape that may back them.</p>
+<p>The OpenAPI spec defines the wire shapes; this workstream describes the storage and lifecycle shape that may back them.</p>
 <h2 id="current-proposals">Current proposals</h2>
 <ul>
-<li><a href="phase1-waste-inputs/">Phase 1 movement store</a> - what the current
-  <code>waste-inputs</code> / <code>waste-inputs-history</code> collections store, how revisioning
-  works, and how they may be retained during migration.</li>
-<li><a href="mongo-schema-proposal/">Mongo schema proposal</a> - proposed current-state
-  collections, history collections, document shapes, and index list for
-  Movements and Transfers, including event-level organisation provenance.</li>
-<li><a href="mongo-schema-proposal-per-event/">Mongo schema proposal — Per-event-type collections</a> -
-  Option B: one collection per business event type (movement-creations,
-  collection-events, transfer-dropoffs, receipt-events); under evaluation
-  alongside the aggregate model above.</li>
-<li><a href="mongo-schema-proposal-CQRS/">Mongo schema proposal — CQRS / Event Sourcing</a> -
-  Option C: append-only event store with derived projections; evaluated and
-  not adopted — retained as a record of what was considered.</li>
+<li><a href="phase1-waste-inputs/">Phase 1 movement store</a> - what the current <code>waste-inputs</code> / <code>waste-inputs-history</code> collections store, how revisioning works, and how they may be retained during migration.</li>
+<li><a href="mongo-schema-proposal/">Mongo schema proposal</a> - proposed current-state collections, history collections, document shapes, and index list for Movements and Transfers, including event-level organisation provenance.</li>
+<li><a href="mongo-schema-proposal-per-event/">Mongo schema proposal — Per-event-type collections</a> - Option B: one collection per business event type (movement-creations, collection-events, transfer-dropoffs, receipt-events); under evaluation alongside the aggregate model above.</li>
+<li><a href="mongo-schema-proposal-CQRS/">Mongo schema proposal — CQRS / Event Sourcing</a> - Option C: append-only event store with derived projections; evaluated and not adopted — retained as a record of what was considered.</li>
 </ul>
 <h2 id="working-assumption">Working assumption</h2>
-<p>The relationship between Movement IDs and the per-event identifiers —
-Movement ID is durable and immutable; Creation, Collection, Drop-off and
-Receive IDs are event-level and can multiply per Movement; Transfer ID
-links one or more Movements at a single drop-off — is treated as
-established. The data model elaborates on it but is not expected to
-change it.</p>
+<p>The relationship between Movement IDs and the per-event identifiers — Movement ID is durable and immutable; Creation, Collection, Drop-off and Receive IDs are event-level and can multiply per Movement; Transfer ID links one or more Movements at a single drop-off — is treated as established. The data model elaborates on it but is not expected to change it.</p>
 
 
 

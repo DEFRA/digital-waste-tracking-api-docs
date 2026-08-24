@@ -438,29 +438,18 @@
   
 
 
+<!-- prettier-ignore -->
 <div class="admonition warning">
 <p class="admonition-title">Internal documentation</p>
 <p>This page is internal design/planning material for the delivery team, not published guidance for Software Providers integrating with the Digital Waste Tracking API. Content here may be incomplete, in-progress, or superseded.</p>
 </div>
 <h1 id="software-provider-registration-and-apicode-issuance">Software Provider Registration and <code>apiCode</code> Issuance</h1>
-<p>This document covers how software providers (carrier, broker, producer, and
-receiver integrators) obtain the credentials they need to call the external
-API, and what needs to change as Phase 2 onboards new actor types.</p>
-<p>For the credential flow itself — Cognito client/secret exchange, JWT
-structure, scope requirements — see the
-<a href="../api-software-developer-onboarding-process.md">software developer onboarding process</a>.
-For the policy decision that all actor types share the same credential shape,
-see <a href="../decisions/#d-027">D-027</a>.</p>
+<p>This document covers how software providers (carrier, broker, producer, and receiver integrators) obtain the credentials they need to call the external API, and what needs to change as Phase 2 onboards new actor types.</p>
+<p>For the credential flow itself — Cognito client/secret exchange, JWT structure, scope requirements — see the <a href="../api-software-developer-onboarding-process.md">software developer onboarding process</a>. For the policy decision that all actor types share the same credential shape, see <a href="../decisions/#d-027">D-027</a>.</p>
 <hr />
 <h2 id="how-apicode-issuance-works-today">How <code>apiCode</code> issuance works today</h2>
-<p>Every API request body carries an <code>apiCode</code> field. The external API resolves
-this to a <code>defraCustomerOrganisationId</code> by calling
-<code>GET /organisation/{apiCode}</code> on <code>waste-organisation-backend</code> before
-forwarding to <code>waste-movement-backend</code>. The <code>apiCode</code> is therefore the link
-between a software provider's credentials and the organisation the record is
-attributed to.</p>
-<p><code>apiCode</code> values are created in <code>waste-organisation-backend</code>. The key
-functions are in <code>src/domain/organisation.js</code>:</p>
+<p>Every API request body carries an <code>apiCode</code> field. The external API resolves this to a <code>defraCustomerOrganisationId</code> by calling <code>GET /organisation/{apiCode}</code> on <code>waste-organisation-backend</code> before forwarding to <code>waste-movement-backend</code>. The <code>apiCode</code> is therefore the link between a software provider's credentials and the organisation the record is attributed to.</p>
+<p><code>apiCode</code> values are created in <code>waste-organisation-backend</code>. The key functions are in <code>src/domain/organisation.js</code>:</p>
 <div class="highlight"><pre><span></span><code><span class="k">export</span><span class="w"> </span><span class="kd">const</span><span class="w"> </span><span class="nx">createApiCode</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="nx">org</span><span class="p">,</span><span class="w"> </span><span class="nx">name</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
 <span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">apiCodes</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">org</span><span class="p">.</span><span class="nx">apiCodes</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="p">[]</span>
 <span class="w">  </span><span class="nx">apiCodes</span><span class="p">.</span><span class="nx">push</span><span class="p">({</span>
@@ -479,15 +468,8 @@ functions are in <code>src/domain/organisation.js</code>:</p>
 <span class="w">  </span><span class="p">}</span>
 <span class="p">}</span>
 </code></pre></div>
-<p><code>ensureAtLeastOneApiCodeExists</code> is called automatically when an organisation
-record is written via
-<code>PUT /user/{userId}/organisation/{organisationId}</code>.
-This means an <code>apiCode</code> is created on first registration without any
-explicit step.</p>
-<p>Additional codes can be added at any time via
-<code>POST /organisation/{organisationId}/apiCodes</code>.
-All codes for an organisation are listed via
-<code>GET /organisation/{organisationId}/apiCodes</code>.</p>
+<p><code>ensureAtLeastOneApiCodeExists</code> is called automatically when an organisation record is written via <code>PUT /user/{userId}/organisation/{organisationId}</code>. This means an <code>apiCode</code> is created on first registration without any explicit step.</p>
+<p>Additional codes can be added at any time via <code>POST /organisation/{organisationId}/apiCodes</code>. All codes for an organisation are listed via <code>GET /organisation/{organisationId}/apiCodes</code>.</p>
 <hr />
 <h2 id="the-org-schema-is-role-agnostic">The org schema is role-agnostic</h2>
 <p>The organisation schema in <code>waste-organisation-backend</code> (<code>orgSchemaWithoutApiCodes</code>) is:</p>
@@ -537,109 +519,68 @@ All codes for an organisation are listed via
 </tr>
 </tbody>
 </table>
-<p>There is no <code>isCarrier</code>, <code>isBroker</code>, or <code>isProducer</code> flag. More importantly,
-the JWT auth plugin in <code>waste-movement-external-api</code> (<code>src/plugins/jwt-auth.js</code>)
-does <strong>not</strong> inspect <code>isWasteReceiver</code> — it only validates the Cognito JWT
-(scope, <code>token_use</code>, JWKS signature). The <code>apiCode</code> lookup confirms the
-organisation exists; role checks are not performed.</p>
-<p><strong>Conclusion:</strong> issuing an <code>apiCode</code> to a carrier or broker requires zero
-code changes. The existing mechanism works for any actor type.</p>
+<p>There is no <code>isCarrier</code>, <code>isBroker</code>, or <code>isProducer</code> flag. More importantly, the JWT auth plugin in <code>waste-movement-external-api</code> (<code>src/plugins/jwt-auth.js</code>) does <strong>not</strong> inspect <code>isWasteReceiver</code> — it only validates the Cognito JWT (scope, <code>token_use</code>, JWKS signature). The <code>apiCode</code> lookup confirms the organisation exists; role checks are not performed.</p>
+<p><strong>Conclusion:</strong> issuing an <code>apiCode</code> to a carrier or broker requires zero code changes. The existing mechanism works for any actor type.</p>
 <hr />
 <h2 id="short-term-provisioning-in-the-test-environment">Short-term: provisioning in the test environment</h2>
-<p>Until a self-serve registration journey exists for carriers and brokers, the
-options below cover the test environment. Option A is recommended because it
-requires no code change and no manual database access.</p>
+<p>Until a self-serve registration journey exists for carriers and brokers, the options below cover the test environment. Option A is recommended because it requires no code change and no manual database access.</p>
 <h3 id="option-a-direct-api-call-to-waste-organisation-backend-recommended">Option A — Direct API call to <code>waste-organisation-backend</code> (recommended)</h3>
 <p>No code change required. No UI, no database access.</p>
 <p><strong>Steps:</strong></p>
 <ol>
-<li>Call <code>PUT /user/{userId}/organisation/{organisationId}</code> on
-   <code>waste-organisation-backend</code> with a JSON body representing the new
-   carrier org:
-   <div class="highlight"><pre><span></span><code><span class="p">{</span>
+<li>Call <code>PUT /user/{userId}/organisation/{organisationId}</code> on <code>waste-organisation-backend</code> with a JSON body representing the new carrier org:</li>
+</ol>
+<p><div class="highlight"><pre><span></span><code><span class="p">{</span>
 <span class="w">  </span><span class="nt">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Carrier Ltd (test)"</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">"isWasteReceiver"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span>
 <span class="p">}</span>
-</code></pre></div></li>
-<li><code>userId</code>: any valid Defra ID user UUID (an admin or test user is fine —
-     this field is used for multi-tenancy lookup, not to set the owner
-     permanently).</li>
-<li><code>organisationId</code>: a fresh UUID for the carrier org.</li>
-<li>
-<p><code>isWasteReceiver: false</code> is optional but makes intent explicit.</p>
-</li>
-<li>
-<p><code>ensureAtLeastOneApiCodeExists</code> fires automatically on first write,
-   creating a UUID <code>apiCode</code> and persisting it alongside the org record.</p>
-</li>
-<li>
-<p>Retrieve the generated code:
-   <div class="highlight"><pre><span></span><code>GET /organisation/{organisationId}/apiCodes
 </code></pre></div>
-   The response lists all <code>apiCode</code> values for the org.</p>
+   - <code>userId</code>: any valid Defra ID user UUID (an admin or test user is fine — this field is used for multi-tenancy lookup, not to set the owner permanently).
+   - <code>organisationId</code>: a fresh UUID for the carrier org.
+   - <code>isWasteReceiver: false</code> is optional but makes intent explicit.</p>
+<ol>
+<li>
+<p><code>ensureAtLeastOneApiCodeExists</code> fires automatically on first write, creating a UUID <code>apiCode</code> and persisting it alongside the org record.</p>
 </li>
 <li>
-<p>Distribute the <code>apiCode</code> to the software integrator alongside their
-   Cognito <code>client_id</code> and <code>client_secret</code>.</p>
+<p>Retrieve the generated code:</p>
 </li>
 </ol>
-<p>This is the same path that receivers currently use — D-027 formalises that
-there is nothing receiver-specific in it.</p>
+<div class="highlight"><pre><span></span><code>GET /organisation/{organisationId}/apiCodes
+</code></pre></div>
+<p>The response lists all <code>apiCode</code> values for the org.</p>
+<ol>
+<li>Distribute the <code>apiCode</code> to the software integrator alongside their Cognito <code>client_id</code> and <code>client_secret</code>.</li>
+</ol>
+<p>This is the same path that receivers currently use — D-027 formalises that there is nothing receiver-specific in it.</p>
 <h3 id="option-b-carrier-signs-in-via-waste-organisation-frontend">Option B — Carrier signs in via <code>waste-organisation-frontend</code></h3>
-<p>The carrier rep signs into the frontend using their Defra ID account. On
-first sign-in, <code>ensureAtLeastOneApiCodeExists</code> is triggered and an <code>apiCode</code>
-is auto-generated. The rep retrieves it from the UI settings page and
-forwards it to their software provider.</p>
-<p><strong>Downside:</strong> requires the carrier to have a Defra ID account and navigate a
-UI designed around receiver workflows. Confusing for non-receiver actors and
-not suitable as a repeatable test process.</p>
+<p>The carrier rep signs into the frontend using their Defra ID account. On first sign-in, <code>ensureAtLeastOneApiCodeExists</code> is triggered and an <code>apiCode</code> is auto-generated. The rep retrieves it from the UI settings page and forwards it to their software provider.</p>
+<p><strong>Downside:</strong> requires the carrier to have a Defra ID account and navigate a UI designed around receiver workflows. Confusing for non-receiver actors and not suitable as a repeatable test process.</p>
 <h3 id="option-c-new-admin-endpoint">Option C — New admin endpoint</h3>
-<p>Add a lightweight admin endpoint to <code>waste-organisation-backend</code>
-(e.g., <code>POST /admin/organisations</code>) that accepts an org name and actor type
-and returns the new <code>organisationId</code> and initial <code>apiCode</code> in one call.</p>
-<p>Cleaner developer experience than Option A but requires a code change and a
-deployment. Worthwhile if the manual provisioning volume grows.</p>
+<p>Add a lightweight admin endpoint to <code>waste-organisation-backend</code> (e.g., <code>POST /admin/organisations</code>) that accepts an org name and actor type and returns the new <code>organisationId</code> and initial <code>apiCode</code> in one call.</p>
+<p>Cleaner developer experience than Option A but requires a code change and a deployment. Worthwhile if the manual provisioning volume grows.</p>
 <hr />
 <h2 id="long-term-gaps-that-need-addressing-for-production">Long-term: gaps that need addressing for production</h2>
-<p>The following are not blockers for Phase 2 testing but will need to be
-resolved before carriers and brokers can self-register in production.</p>
+<p>The following are not blockers for Phase 2 testing but will need to be resolved before carriers and brokers can self-register in production.</p>
 <h3 id="1-carrier-broker-registration-journey">1. Carrier / broker registration journey</h3>
-<p><code>waste-organisation-frontend</code> has no registration path for non-receiver
-actors. Phase 1 was receiver-first: every onboarding flow assumes
-<code>isWasteReceiver</code>. A new section of the frontend (or a separate portal) is
-needed so that carrier and broker organisations can register themselves,
-receive an <code>apiCode</code>, and manage their credentials without manual
-provisioning.</p>
-<p>This is the largest piece of work and is gated on policy decisions about
-who is allowed to register and whether there is a verification step (e.g.,
-confirming a carrier's CB:DU registration number).</p>
+<p><code>waste-organisation-frontend</code> has no registration path for non-receiver actors. Phase 1 was receiver-first: every onboarding flow assumes <code>isWasteReceiver</code>. A new section of the frontend (or a separate portal) is needed so that carrier and broker organisations can register themselves, receive an <code>apiCode</code>, and manage their credentials without manual provisioning.</p>
+<p>This is the largest piece of work and is gated on policy decisions about who is allowed to register and whether there is a verification step (e.g., confirming a carrier's CB:DU registration number).</p>
 <h3 id="2-service-charge-subscription-model">2. Service charge / subscription model</h3>
-<p>The <code>disableAfter</code> field and <code>isDisabled</code> flag on the org schema support
-time-limited access, which is used for receiver payment gating. If carriers
-and brokers will also be subject to a service charge, the same fields apply
-but:</p>
+<p>The <code>disableAfter</code> field and <code>isDisabled</code> flag on the org schema support time-limited access, which is used for receiver payment gating. If carriers and brokers will also be subject to a service charge, the same fields apply but:</p>
 <ul>
 <li>the payment integration is not yet wired up for non-receiver actors;</li>
 <li>the billing policy for new actor types has not been confirmed.</li>
 </ul>
 <p>This is a policy question before it is an engineering question.</p>
 <h3 id="3-software-developer-onboarding-process">3. Software developer onboarding process</h3>
-<p>The existing
-<a href="../api-software-developer-onboarding-process.md">onboarding process</a>
-is written around receivers. It should be extended to cover:</p>
+<p>The existing <a href="../api-software-developer-onboarding-process.md">onboarding process</a> is written around receivers. It should be extended to cover:</p>
 <ul>
 <li>how a carrier or broker obtains their <code>apiCode</code> (once self-serve exists);</li>
 <li>how the Cognito credential request works for non-receiver actor types;</li>
 <li>any differences in the PAT test suite a carrier/broker integration must pass.</li>
 </ul>
 <h3 id="4-role-flags-in-the-org-schema">4. Role flags in the org schema</h3>
-<p>Currently <code>isWasteReceiver</code> is the only role flag. If role-based access
-control, reporting by actor type, or future per-role restrictions are needed,
-<code>isCarrier</code>, <code>isBroker</code>, and <code>isProducer</code> flags would need to be added to
-<code>orgSchema</code> in <code>waste-organisation-backend</code> and propagated to any downstream
-consumers. This is not required for Phase 2 — the external API does not gate
-on role today — but it is a likely future requirement once more actor types
-are active on the system.</p>
+<p>Currently <code>isWasteReceiver</code> is the only role flag. If role-based access control, reporting by actor type, or future per-role restrictions are needed, <code>isCarrier</code>, <code>isBroker</code>, and <code>isProducer</code> flags would need to be added to <code>orgSchema</code> in <code>waste-organisation-backend</code> and propagated to any downstream consumers. This is not required for Phase 2 — the external API does not gate on role today — but it is a likely future requirement once more actor types are active on the system.</p>
 
 
 

@@ -438,22 +438,17 @@
   
 
 
+<!-- prettier-ignore -->
 <div class="admonition warning">
 <p class="admonition-title">Internal documentation</p>
 <p>This page is internal design/planning material for the delivery team, not published guidance for Software Providers integrating with the Digital Waste Tracking API. Content here may be incomplete, in-progress, or superseded.</p>
 </div>
 <h1 id="mongo-schema-proposal-per-event-type-collections">Mongo schema proposal — Per-event-type collections</h1>
-<p>This document describes <strong>Option B</strong> for Phase 2 storage: one MongoDB
-collection per business event type. It sits alongside the aggregate model
-(<a href="../mongo-schema-proposal/">mongo-schema-proposal.md</a>) and the evaluated-but-rejected
-CQRS model (<a href="../mongo-schema-proposal-CQRS/">mongo-schema-proposal-CQRS.md</a>)
-as the three options under evaluation in <a href="../../decisions/#d-037">D-037</a>.</p>
+<p>This document describes <strong>Option B</strong> for Phase 2 storage: one MongoDB collection per business event type. It sits alongside the aggregate model (<a href="../mongo-schema-proposal/">mongo-schema-proposal.md</a>) and the evaluated-but-rejected CQRS model (<a href="../mongo-schema-proposal-CQRS/">mongo-schema-proposal-CQRS.md</a>) as the three options under evaluation in <a href="../../decisions/#d-037">D-037</a>.</p>
 <p>This is a <strong>proposal under evaluation</strong>, not a decided implementation.</p>
 <hr />
 <h2 id="core-concept">Core concept</h2>
-<p>The aggregate model stores all data for a Movement's lifetime in one document
-(creation + collection events embedded). The per-event model separates each
-business event into its own collection:</p>
+<p>The aggregate model stores all data for a Movement's lifetime in one document (creation + collection events embedded). The per-event model separates each business event into its own collection:</p>
 <table>
 <thead>
 <tr>
@@ -485,13 +480,8 @@ business event into its own collection:</p>
 </tr>
 </tbody>
 </table>
-<p>Each collection is the canonical home for one event type and is indexed
-independently. Cross-event reads — for GETs and for constraint checking —
-require joining across collections, either with a MongoDB <code>$lookup</code> or
-multiple sequential reads in the application layer.</p>
-<p>The Phase 1 collections (<code>waste-inputs</code>, <code>waste-inputs-history</code>) are
-unchanged. This model introduces entirely new collections and coexists with
-Phase 1 in the same database without collision.</p>
+<p>Each collection is the canonical home for one event type and is indexed independently. Cross-event reads — for GETs and for constraint checking — require joining across collections, either with a MongoDB <code>$lookup</code> or multiple sequential reads in the application layer.</p>
+<p>The Phase 1 collections (<code>waste-inputs</code>, <code>waste-inputs-history</code>) are unchanged. This model introduces entirely new collections and coexists with Phase 1 in the same database without collision.</p>
 <hr />
 <h2 id="collections-overview">Collections overview</h2>
 <table>
@@ -577,45 +567,20 @@ Phase 1 in the same database without collision.</p>
 <p>A Movement transitions through lifecycle states as later events are recorded:</p>
 <div class="highlight"><pre><span></span><code>PLANNED  →  IN_COLLECTION  →  DROPPED_OFF
 </code></pre></div>
-<p>With events in separate collections, state has no natural single home.
-Two options are viable:</p>
-<p><strong>Option B1 — Denormalised state on <code>movement-creations</code>.</strong> The <code>state</code>
-field lives on the creation document and is updated by subsequent event
-writes (collection recorded → <code>IN_COLLECTION</code>; movement referenced in a
-drop-off → <code>DROPPED_OFF</code>). Writes that update state must also update the
-creation document in the same MongoDB session, making it a multi-document
-transaction.</p>
-<p><strong>Option B2 — Read-time derivation.</strong> No <code>state</code> field is stored. Every
-GET computes state by checking which downstream events exist. Simple to
-implement; expensive for any query that filters by state across many
-Movements (requires a multi-collection aggregation pipeline).</p>
-<p>This proposal uses <strong>Option B1</strong> (denormalised state) for consistency with
-the aggregate model pattern and to keep <code>GET /movements/{movementId}</code> a
-two-collection read rather than a four-collection computation. The
-transaction requirement is documented under Write-path mapping.</p>
+<p>With events in separate collections, state has no natural single home. Two options are viable:</p>
+<p><strong>Option B1 — Denormalised state on <code>movement-creations</code>.</strong> The <code>state</code> field lives on the creation document and is updated by subsequent event writes (collection recorded → <code>IN_COLLECTION</code>; movement referenced in a drop-off → <code>DROPPED_OFF</code>). Writes that update state must also update the creation document in the same MongoDB session, making it a multi-document transaction.</p>
+<p><strong>Option B2 — Read-time derivation.</strong> No <code>state</code> field is stored. Every GET computes state by checking which downstream events exist. Simple to implement; expensive for any query that filters by state across many Movements (requires a multi-collection aggregation pipeline).</p>
+<p>This proposal uses <strong>Option B1</strong> (denormalised state) for consistency with the aggregate model pattern and to keep <code>GET /movements/{movementId}</code> a two-collection read rather than a four-collection computation. The transaction requirement is documented under Write-path mapping.</p>
 <hr />
 <h2 id="concurrency-model">Concurrency model</h2>
-<p>The Phase 1 pattern (<a href="../../decisions/#d-034">D-034</a>) uses <code>{ _id, revision }</code>
-in an <code>updateOne</code> filter as an optimistic concurrency guard — if another
-writer mutated the document since it was read, the revision no longer matches
-and the update safely fails. This applies to:</p>
+<p>The Phase 1 pattern (<a href="../../decisions/#d-034">D-034</a>) uses <code>{ _id, revision }</code> in an <code>updateOne</code> filter as an optimistic concurrency guard — if another writer mutated the document since it was read, the revision no longer matches and the update safely fails. This applies to:</p>
 <ul>
-<li><code>PUT /movements/{movementId}</code> — amendment guarded by <code>revision</code> on
-  <code>movement-creations</code>.</li>
-<li><code>PUT /movements/{movementId}/collection</code> — amendment guarded by <code>revision</code>
-  on the targeted <code>collection-events</code> document.</li>
-<li><code>PUT /transfers/{transferId}</code> — soft-delete guarded by <code>revision</code> on
-  <code>transfer-dropoffs</code>.</li>
-<li><code>PUT /transfers/{transferId}/receipt</code> — amendment guarded by <code>revision</code> on
-  <code>receipt-events</code>.</li>
+<li><code>PUT /movements/{movementId}</code> — amendment guarded by <code>revision</code> on <code>movement-creations</code>.</li>
+<li><code>PUT /movements/{movementId}/collection</code> — amendment guarded by <code>revision</code> on the targeted <code>collection-events</code> document.</li>
+<li><code>PUT /transfers/{transferId}</code> — soft-delete guarded by <code>revision</code> on <code>transfer-dropoffs</code>.</li>
+<li><code>PUT /transfers/{transferId}/receipt</code> — amendment guarded by <code>revision</code> on <code>receipt-events</code>.</li>
 </ul>
-<p>For <strong>appending</strong> a new collection event (<code>POST /movements/{movementId}/collection</code>),
-there is no existing document to guard against. The concurrency risk is two
-concurrent requests both computing <code>sequence: 3</code> and both trying to insert.
-The guard is a <strong>unique compound index on <code>{ movementId, sequence }</code></strong> in
-<code>collection-events</code> — the second writer gets a duplicate-key error (MongoDB
-code <code>11000</code>) and must retry. This replaces the aggregate model's <code>revision</code>
-increment for collection-event appends.</p>
+<p>For <strong>appending</strong> a new collection event (<code>POST /movements/{movementId}/collection</code>), there is no existing document to guard against. The concurrency risk is two concurrent requests both computing <code>sequence: 3</code> and both trying to insert. The guard is a <strong>unique compound index on <code>{ movementId, sequence }</code></strong> in <code>collection-events</code> — the second writer gets a duplicate-key error (MongoDB code <code>11000</code>) and must retry. This replaces the aggregate model's <code>revision</code> increment for collection-event appends.</p>
 <hr />
 <h2 id="document-shapes">Document shapes</h2>
 <h3 id="movement-creations"><code>movement-creations</code></h3>
@@ -655,20 +620,13 @@ increment for collection-event appends.</p>
 </code></pre></div>
 <p>Notes:</p>
 <ul>
-<li><code>state</code> is the denormalised signal updated by downstream event writes
-  (Option B1). If Option B2 is chosen, remove <code>state</code> and derive it at
-  read time.</li>
-<li><code>revision</code> guards only <code>PUT /movements</code> amendments. It does not guard
-  collection event appends — those are guarded by the unique index on
-  <code>collection-events.{ movementId, sequence }</code>.</li>
-<li><code>hazardousWasteConsignmentCode</code> is needed here so that <code>POST /transfers</code>
-  can check the hazardous constraint (<a href="../../decisions/#d-010">D-010</a>) with
-  a single read on <code>movement-creations</code>.</li>
+<li><code>state</code> is the denormalised signal updated by downstream event writes (Option B1). If Option B2 is chosen, remove <code>state</code> and derive it at read time.</li>
+<li><code>revision</code> guards only <code>PUT /movements</code> amendments. It does not guard collection event appends — those are guarded by the unique index on <code>collection-events.{ movementId, sequence }</code>.</li>
+<li><code>hazardousWasteConsignmentCode</code> is needed here so that <code>POST /transfers</code> can check the hazardous constraint (<a href="../../decisions/#d-010">D-010</a>) with a single read on <code>movement-creations</code>.</li>
 <li><code>wasteItems</code> is here for the receipt cross-check (<a href="../../decisions/#d-006">D-006</a>).</li>
 </ul>
 <h3 id="movement-creations-history"><code>movement-creations-history</code></h3>
-<p>Full-document snapshot of <code>movement-creations</code> before each successful
-<code>PUT /movements</code> amendment. Pattern identical to Phase 1 <code>waste-inputs-history</code>.</p>
+<p>Full-document snapshot of <code>movement-creations</code> before each successful <code>PUT /movements</code> amendment. Pattern identical to Phase 1 <code>waste-inputs-history</code>.</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
 <span class="w">  </span><span class="p">...</span><span class="nx">previousMovementCreationDocument</span><span class="p">,</span>
 <span class="w">  </span><span class="nx">movementId</span><span class="o">:</span><span class="w"> </span><span class="nb">String</span><span class="p">,</span>
@@ -677,9 +635,7 @@ increment for collection-event appends.</p>
 </code></pre></div>
 <hr />
 <h3 id="collection-events"><code>collection-events</code></h3>
-<p>One document per collection event. A Movement with transit handovers
-(<a href="../../decisions/#d-029">D-029</a>) has multiple documents here — one <code>STATIC</code>
-and one or more <code>TRANSIT</code> events, each with a distinct <code>sequence</code>.</p>
+<p>One document per collection event. A Movement with transit handovers (<a href="../../decisions/#d-029">D-029</a>) has multiple documents here — one <code>STATIC</code> and one or more <code>TRANSIT</code> events, each with a distinct <code>sequence</code>.</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
 <span class="w">  </span><span class="nx">_id</span><span class="o">:</span><span class="w"> </span><span class="nx">ObjectId</span><span class="p">,</span><span class="w">               </span><span class="c1">// MongoDB-assigned; not exposed in the public API (D-012)</span>
 <span class="w">  </span><span class="nx">movementId</span><span class="o">:</span><span class="w"> </span><span class="nb">String</span><span class="p">,</span><span class="w">          </span><span class="c1">// FK to movement-creations</span>
@@ -711,19 +667,13 @@ and one or more <code>TRANSIT</code> events, each with a distinct <code>sequence
 </code></pre></div>
 <p>Notes:</p>
 <ul>
-<li><code>sequence</code> starts at <code>1</code> for the first collection event on a Movement and
-  increments for each transit handover. The unique index on
-  <code>{ movementId, sequence }</code> is the concurrency guard for appends.</li>
-<li><code>_id</code> is a MongoDB <code>ObjectId</code>, not a public sqid — per <a href="../../decisions/#d-012">D-012</a>,
-  per-event IDs are not exposed in the public API. The combination of
-  <code>movementId</code> + <code>sequence</code> addresses a collection event for amendment.</li>
-<li><code>isDeleted</code> applies per-event, but only the latest active event is eligible
-  for soft-delete (tail-only rule, <a href="../../decisions/#d-029">D-029</a>).</li>
+<li><code>sequence</code> starts at <code>1</code> for the first collection event on a Movement and increments for each transit handover. The unique index on <code>{ movementId, sequence }</code> is the concurrency guard for appends.</li>
+<li><code>_id</code> is a MongoDB <code>ObjectId</code>, not a public sqid — per <a href="../../decisions/#d-012">D-012</a>, per-event IDs are not exposed in the public API. The combination of <code>movementId</code> + <code>sequence</code> addresses a collection event for amendment.</li>
+<li><code>isDeleted</code> applies per-event, but only the latest active event is eligible for soft-delete (tail-only rule, <a href="../../decisions/#d-029">D-029</a>).</li>
 <li>No <code>wasteItems</code> — weights are not captured at collection (<a href="../../decisions/#d-032">D-032</a>).</li>
 </ul>
 <h3 id="collection-events-history"><code>collection-events-history</code></h3>
-<p>Full-document snapshot of a <code>collection-events</code> document before each
-successful <code>PUT /movements/{movementId}/collection</code> amendment.</p>
+<p>Full-document snapshot of a <code>collection-events</code> document before each successful <code>PUT /movements/{movementId}/collection</code> amendment.</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
 <span class="w">  </span><span class="p">...</span><span class="nx">previousCollectionEventDocument</span><span class="p">,</span>
 <span class="w">  </span><span class="nx">movementId</span><span class="o">:</span><span class="w"> </span><span class="nb">String</span><span class="p">,</span>
@@ -733,13 +683,8 @@ successful <code>PUT /movements/{movementId}/collection</code> amendment.</p>
 </code></pre></div>
 <hr />
 <h3 id="transfer-dropoffs"><code>transfer-dropoffs</code></h3>
-<p>One document per <code>transferId</code>. Records the drop-off event
-(<code>POST /transfers</code>). <code>isDeleted</code> is the only mutable field via
-<code>PUT /transfers/{transferId}</code> (<a href="../../decisions/#d-017">D-017</a>).</p>
-<p>For a hazardous drop-off, <code>transferId</code> is not a freshly minted value: it is
-the sole <code>movementId</code> referenced in the request (see step 4 of the write
-path below). For a non-hazardous drop-off, <code>transferId</code> is minted
-independently as before.</p>
+<p>One document per <code>transferId</code>. Records the drop-off event (<code>POST /transfers</code>). <code>isDeleted</code> is the only mutable field via <code>PUT /transfers/{transferId}</code> (<a href="../../decisions/#d-017">D-017</a>).</p>
+<p>For a hazardous drop-off, <code>transferId</code> is not a freshly minted value: it is the sole <code>movementId</code> referenced in the request (see step 4 of the write path below). For a non-hazardous drop-off, <code>transferId</code> is minted independently as before.</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
 <span class="w">  </span><span class="nx">_id</span><span class="o">:</span><span class="w"> </span><span class="nb">String</span><span class="p">,</span><span class="w">                 </span><span class="c1">// transferId (sqid — e.g. "26XYZ456"; for a</span>
 <span class="w">                                </span><span class="c1">// hazardous drop-off this equals the sole</span>
@@ -779,24 +724,12 @@ independently as before.</p>
 </code></pre></div>
 <p>Notes:</p>
 <ul>
-<li><code>movementIds[]</code> is the source of truth for the Movement→Transfer
-  relationship (<a href="../../decisions/#d-007">D-007</a>). The aggregate model stores
-  a denormalised <code>transferIds[]</code> on each Movement; in this model, that
-  denormalisation is optional — the <code>transfer-dropoffs.movementIds</code> index
-  supports reverse lookups.</li>
-<li><code>carrier</code> is stored here because the receipt cross-check
-  (<a href="../../decisions/#d-006">D-006</a>) compares the receipt carrier against the
-  drop-off carrier. Having it here means <code>handleRecordReceipt</code> reads one
-  document (<code>transfer-dropoffs</code>) and gets both the existence check and the
-  carrier value — no additional read needed.</li>
-<li><code>isDeleted</code> guards the drop-off lifecycle. A drop-off cannot be deleted
-  once a receipt exists (<a href="../../decisions/#d-009">D-009</a>) — checked by
-  querying <code>receipt-events</code> for the <code>transferId</code> before applying the
-  soft-delete.</li>
+<li><code>movementIds[]</code> is the source of truth for the Movement→Transfer relationship (<a href="../../decisions/#d-007">D-007</a>). The aggregate model stores a denormalised <code>transferIds[]</code> on each Movement; in this model, that denormalisation is optional — the <code>transfer-dropoffs.movementIds</code> index supports reverse lookups.</li>
+<li><code>carrier</code> is stored here because the receipt cross-check (<a href="../../decisions/#d-006">D-006</a>) compares the receipt carrier against the drop-off carrier. Having it here means <code>handleRecordReceipt</code> reads one document (<code>transfer-dropoffs</code>) and gets both the existence check and the carrier value — no additional read needed.</li>
+<li><code>isDeleted</code> guards the drop-off lifecycle. A drop-off cannot be deleted once a receipt exists (<a href="../../decisions/#d-009">D-009</a>) — checked by querying <code>receipt-events</code> for the <code>transferId</code> before applying the soft-delete.</li>
 </ul>
 <h3 id="transfer-dropoffs-history"><code>transfer-dropoffs-history</code></h3>
-<p>Full-document snapshot of <code>transfer-dropoffs</code> before each successful
-<code>PUT /transfers/{transferId}</code> soft-delete toggle.</p>
+<p>Full-document snapshot of <code>transfer-dropoffs</code> before each successful <code>PUT /transfers/{transferId}</code> soft-delete toggle.</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
 <span class="w">  </span><span class="p">...</span><span class="nx">previousTransferDropoffDocument</span><span class="p">,</span>
 <span class="w">  </span><span class="nx">transferId</span><span class="o">:</span><span class="w"> </span><span class="nb">String</span><span class="p">,</span>
@@ -805,8 +738,7 @@ independently as before.</p>
 </code></pre></div>
 <hr />
 <h3 id="receipt-events"><code>receipt-events</code></h3>
-<p>One document per <code>transferId</code>. Created by
-<code>POST /transfers/{transferId}/receipt</code>.</p>
+<p>One document per <code>transferId</code>. Created by <code>POST /transfers/{transferId}/receipt</code>.</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
 <span class="w">  </span><span class="nx">_id</span><span class="o">:</span><span class="w"> </span><span class="nb">String</span><span class="p">,</span><span class="w">                 </span><span class="c1">// transferId — 1:1 with transfer-dropoffs (D-015)</span>
 <span class="w">  </span><span class="nx">transferId</span><span class="o">:</span><span class="w"> </span><span class="nb">String</span><span class="p">,</span><span class="w">          </span><span class="c1">// FK to transfer-dropoffs</span>
@@ -846,19 +778,12 @@ independently as before.</p>
 </code></pre></div>
 <p>Notes:</p>
 <ul>
-<li><code>_id</code> is the <code>transferId</code> — a Transfer has at most one receipt
-  (<a href="../../decisions/#d-015">D-015</a>), so the <code>transferId</code> is a valid unique
-  key. A second <code>POST</code> to the same <code>transferId</code> gets a duplicate-key error
-  (natural idempotency guard).</li>
-<li>Receipt has no <code>isDeleted</code>. Once recorded, a receipt cannot be deleted
-  (<a href="../../decisions/#d-009">D-009</a>). The receipt <code>PUT</code> amends in place and
-  snapshots to history; there is no soft-delete toggle.</li>
-<li><code>revision</code> guards <code>PUT /transfers/{transferId}/receipt</code> amendments — same
-  pattern as Phase 1 <code>waste-inputs</code> revision guard (<a href="../../decisions/#d-034">D-034</a>).</li>
+<li><code>_id</code> is the <code>transferId</code> — a Transfer has at most one receipt (<a href="../../decisions/#d-015">D-015</a>), so the <code>transferId</code> is a valid unique key. A second <code>POST</code> to the same <code>transferId</code> gets a duplicate-key error (natural idempotency guard).</li>
+<li>Receipt has no <code>isDeleted</code>. Once recorded, a receipt cannot be deleted (<a href="../../decisions/#d-009">D-009</a>). The receipt <code>PUT</code> amends in place and snapshots to history; there is no soft-delete toggle.</li>
+<li><code>revision</code> guards <code>PUT /transfers/{transferId}/receipt</code> amendments — same pattern as Phase 1 <code>waste-inputs</code> revision guard (<a href="../../decisions/#d-034">D-034</a>).</li>
 </ul>
 <h3 id="receipt-events-history"><code>receipt-events-history</code></h3>
-<p>Full-document snapshot of <code>receipt-events</code> before each successful
-<code>PUT /transfers/{transferId}/receipt</code> amendment.</p>
+<p>Full-document snapshot of <code>receipt-events</code> before each successful <code>PUT /transfers/{transferId}/receipt</code> amendment.</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
 <span class="w">  </span><span class="p">...</span><span class="nx">previousReceiptEventDocument</span><span class="p">,</span>
 <span class="w">  </span><span class="nx">transferId</span><span class="o">:</span><span class="w"> </span><span class="nb">String</span><span class="p">,</span>
@@ -871,8 +796,7 @@ independently as before.</p>
 <ol>
 <li>Validate Joi schema at route boundary.</li>
 <li>Mint <code>movementId</code> via <code>waste-tracking-id-backend</code>.</li>
-<li><code>insertOne</code> into <code>movement-creations</code> with <code>revision: 1</code>, <code>state: 'PLANNED'</code>,
-   <code>isDeleted: false</code>.</li>
+<li><code>insertOne</code> into <code>movement-creations</code> with <code>revision: 1</code>, <code>state: 'PLANNED'</code>, <code>isDeleted: false</code>.</li>
 <li>Return <code>{ movementId }</code>.</li>
 </ol>
 <p>No cross-collection reads. Single collection write. No transaction needed.</p>
@@ -883,57 +807,29 @@ independently as before.</p>
 <li>Read <code>movement-creations</code> by <code>movementId</code>.</li>
 <li><code>MOVEMENT_NOT_FOUND</code> (404) if absent.</li>
 <li><code>BusinessRuleViolation</code> (400) if <code>isDeleted: true</code> (<a href="../../decisions/#d-009">D-009</a>).</li>
-<li>Check closed-sequence rule (<a href="../../decisions/#d-029">D-029</a>): query
-   <code>transfer-dropoffs</code> for any document whose <code>movementIds</code> includes this
-   <code>movementId</code>. If found, the collection sequence is closed — reject with
-   <code>BusinessRuleViolation</code>.</li>
+<li>Check closed-sequence rule (<a href="../../decisions/#d-029">D-029</a>): query <code>transfer-dropoffs</code> for any document whose <code>movementIds</code> includes this <code>movementId</code>. If found, the collection sequence is closed — reject with <code>BusinessRuleViolation</code>.</li>
 <li>Read <code>collection-events</code> for this <code>movementId</code>, sorted by <code>sequence</code>.</li>
-<li>Derive current <code>sequence</code> as <code>(max existing sequence) + 1</code>, or <code>1</code> if
-     none exist.</li>
-<li>Enforce ordering (<a href="../../decisions/#d-029">D-029</a>): if <code>sequence === 1</code>,
-     <code>collectionType</code> must be <code>STATIC</code>; if <code>sequence &gt; 1</code>, must be <code>TRANSIT</code>.</li>
-<li><code>insertOne</code> into <code>collection-events</code> with the computed <code>sequence</code>. If
-   another concurrent writer already inserted at this <code>sequence</code>, MongoDB
-   raises a duplicate-key error on <code>{ movementId, sequence }</code> — surface as
-   <code>ConcurrencyError</code> and let the caller retry.</li>
-<li>In the same MongoDB session, <code>updateOne</code> on <code>movement-creations</code>:
-   <code>{ $set: { state: 'IN_COLLECTION', lastUpdatedAt } }</code>. This step does not
-   increment <code>revision</code> — <code>revision</code> on the creation document guards only
-   <code>PUT /movements</code> amendments; the collection append is guarded by the
-   unique index.</li>
+<li>Derive current <code>sequence</code> as <code>(max existing sequence) + 1</code>, or <code>1</code> if none exist.</li>
+<li>Enforce ordering (<a href="../../decisions/#d-029">D-029</a>): if <code>sequence === 1</code>, <code>collectionType</code> must be <code>STATIC</code>; if <code>sequence &gt; 1</code>, must be <code>TRANSIT</code>.</li>
+<li><code>insertOne</code> into <code>collection-events</code> with the computed <code>sequence</code>. If another concurrent writer already inserted at this <code>sequence</code>, MongoDB raises a duplicate-key error on <code>{ movementId, sequence }</code> — surface as <code>ConcurrencyError</code> and let the caller retry.</li>
+<li>In the same MongoDB session, <code>updateOne</code> on <code>movement-creations</code>: <code>{ $set: { state: 'IN_COLLECTION', lastUpdatedAt } }</code>. This step does not increment <code>revision</code> — <code>revision</code> on the creation document guards only <code>PUT /movements</code> amendments; the collection append is guarded by the unique index.</li>
 <li>Return <code>HTTP 201</code>.</li>
 </ol>
-<p>Cross-collection reads: <code>movement-creations</code> (existence + deleted guard),
-<code>transfer-dropoffs</code> (closed-sequence check), <code>collection-events</code> (ordering
-check + sequence derivation). The <code>movement-creations</code> update in step 6
-requires a multi-document write if both the <code>collection-events</code> insert and
-the state update are to be atomic.</p>
+<p>Cross-collection reads: <code>movement-creations</code> (existence + deleted guard), <code>transfer-dropoffs</code> (closed-sequence check), <code>collection-events</code> (ordering check + sequence derivation). The <code>movement-creations</code> update in step 6 requires a multi-document write if both the <code>collection-events</code> insert and the state update are to be atomic.</p>
 <hr />
 <h3 id="post-transfers"><code>POST /transfers</code></h3>
 <ol>
 <li>Validate Joi schema.</li>
 <li>Read <code>movement-creations</code> for each <code>movementId</code> in <code>payload.movementIds[]</code>.</li>
 <li>Fail if any is absent or <code>isDeleted: true</code>.</li>
-<li>Check <code>collection-events</code> for each <code>movementId</code>: reject if any has an
-     active (non-deleted) collection event with <code>isDeleted: true</code> at the
-     movement level — i.e. a Movement whose Collection is deleted (<a href="../../decisions/#d-009">D-009</a>).</li>
-<li>D-010 hazardous check (<a href="../../decisions/#d-010">D-010</a>): if any referenced
-   <code>movement-creations</code> document has a non-empty <code>hazardousWasteConsignmentCode</code>
-   or contains hazardous items in <code>wasteItems[]</code>, <code>movementIds.length</code> must
-   equal <code>1</code>. Reject with <code>BusinessRuleViolation</code> if not.</li>
-<li>Determine <code>transferId</code>: if step 3's hazardous check applies (a hazardous
-   drop-off, always exactly one <code>movementId</code>), reuse that <code>movementId</code> as
-   <code>transferId</code> — no new identifier is minted. Otherwise, mint <code>transferId</code>
-   via <code>waste-tracking-id-backend</code> as today.</li>
+<li>Check <code>collection-events</code> for each <code>movementId</code>: reject if any has an active (non-deleted) collection event with <code>isDeleted: true</code> at the movement level — i.e. a Movement whose Collection is deleted (<a href="../../decisions/#d-009">D-009</a>).</li>
+<li>D-010 hazardous check (<a href="../../decisions/#d-010">D-010</a>): if any referenced <code>movement-creations</code> document has a non-empty <code>hazardousWasteConsignmentCode</code> or contains hazardous items in <code>wasteItems[]</code>, <code>movementIds.length</code> must equal <code>1</code>. Reject with <code>BusinessRuleViolation</code> if not.</li>
+<li>Determine <code>transferId</code>: if step 3's hazardous check applies (a hazardous drop-off, always exactly one <code>movementId</code>), reuse that <code>movementId</code> as <code>transferId</code> — no new identifier is minted. Otherwise, mint <code>transferId</code> via <code>waste-tracking-id-backend</code> as today.</li>
 <li><code>insertOne</code> into <code>transfer-dropoffs</code> with <code>revision: 1</code>, <code>isDeleted: false</code>.</li>
-<li>In the same MongoDB session, <code>updateMany</code> on <code>movement-creations</code> for each
-   <code>movementId</code>: <code>{ $set: { state: 'DROPPED_OFF', lastUpdatedAt } }</code>.</li>
+<li>In the same MongoDB session, <code>updateMany</code> on <code>movement-creations</code> for each <code>movementId</code>: <code>{ $set: { state: 'DROPPED_OFF', lastUpdatedAt } }</code>.</li>
 <li>Return <code>{ transferId }</code>.</li>
 </ol>
-<p>Cross-collection reads: <code>movement-creations</code> (existence, deleted, hazardous)
-and <code>collection-events</code> (deleted status per movement). The <code>movement-creations</code>
-state update (step 6) requires a multi-document transaction if atomicity with
-the <code>transfer-dropoffs</code> insert is required.</p>
+<p>Cross-collection reads: <code>movement-creations</code> (existence, deleted, hazardous) and <code>collection-events</code> (deleted status per movement). The <code>movement-creations</code> state update (step 6) requires a multi-document transaction if atomicity with the <code>transfer-dropoffs</code> insert is required.</p>
 <hr />
 <h3 id="post-transferstransferidreceipt"><code>POST /transfers/{transferId}/receipt</code></h3>
 <ol>
@@ -941,53 +837,32 @@ the <code>transfer-dropoffs</code> insert is required.</p>
 <li>Read <code>transfer-dropoffs</code> by <code>transferId</code>.</li>
 <li><code>TRANSFER_NOT_FOUND</code> (404) if absent.</li>
 <li><code>BusinessRuleViolation</code> (400) if <code>isDeleted: true</code>.</li>
-<li>Check for duplicate receipt: query <code>receipt-events</code> by <code>transferId</code>.
-   If a document already exists, return <code>ValidationError</code> ("Receipt already
-   recorded — use <code>PUT /transfers/{transferId}/receipt</code> to amend").</li>
-<li>D-006 carrier cross-check (<a href="../../decisions/#d-006">D-006</a>): compare
-   <code>payload.carrier</code> against <code>transfer-dropoffs.carrier</code>. Mismatch → push a
-   <code>CARRIER_MISMATCH</code> warning to <code>validation.warnings</code>. Not a hard error.</li>
-<li>D-036 authoring: <code>submittingOrganisation</code> is stamped from the authenticated
-   caller and stored on the receipt document.</li>
-<li><code>insertOne</code> into <code>receipt-events</code>. The <code>_id</code> is the <code>transferId</code> — a
-   duplicate-key error here means a concurrent <code>POST</code> already completed; the
-   application layer catches this and returns the same <code>ValidationError</code> as
-   step 3.</li>
+<li>Check for duplicate receipt: query <code>receipt-events</code> by <code>transferId</code>. If a document already exists, return <code>ValidationError</code> ("Receipt already recorded — use <code>PUT /transfers/{transferId}/receipt</code> to amend").</li>
+<li>D-006 carrier cross-check (<a href="../../decisions/#d-006">D-006</a>): compare <code>payload.carrier</code> against <code>transfer-dropoffs.carrier</code>. Mismatch → push a <code>CARRIER_MISMATCH</code> warning to <code>validation.warnings</code>. Not a hard error.</li>
+<li>D-036 authoring: <code>submittingOrganisation</code> is stamped from the authenticated caller and stored on the receipt document.</li>
+<li><code>insertOne</code> into <code>receipt-events</code>. The <code>_id</code> is the <code>transferId</code> — a duplicate-key error here means a concurrent <code>POST</code> already completed; the application layer catches this and returns the same <code>ValidationError</code> as step 3.</li>
 <li>Return <code>{ warnings }</code>.</li>
 </ol>
-<p>Cross-collection reads: <code>transfer-dropoffs</code> (one read — provides existence
-check, deleted guard, and the carrier needed for D-006 in a single document).
-No additional Movement reads are needed for the carrier check because the
-carrier is stored directly on <code>transfer-dropoffs</code>.</p>
-<p>This is the simplest write path in this model: two collections, one read and
-one insert, no transaction required.</p>
+<p>Cross-collection reads: <code>transfer-dropoffs</code> (one read — provides existence check, deleted guard, and the carrier needed for D-006 in a single document). No additional Movement reads are needed for the carrier check because the carrier is stored directly on <code>transfer-dropoffs</code>.</p>
+<p>This is the simplest write path in this model: two collections, one read and one insert, no transaction required.</p>
 <hr />
 <h3 id="put-movementsmovementidcollection-amendment"><code>PUT /movements/{movementId}/collection</code> (amendment)</h3>
 <ol>
 <li>Read <code>movement-creations</code> (existence + deleted guard).</li>
-<li>Read <code>collection-events</code> for this <code>movementId</code> to find the latest active
-   event (highest <code>sequence</code> where <code>isDeleted: false</code>).</li>
+<li>Read <code>collection-events</code> for this <code>movementId</code> to find the latest active event (highest <code>sequence</code> where <code>isDeleted: false</code>).</li>
 <li><code>COLLECTION_NOT_RECORDED</code> (404) if none exist.</li>
-<li>D-036 authorisation: <code>submittingOrganisation</code> on the latest event must
-   match the authenticated caller.</li>
-<li>Read-then-write with revision guard: snapshot the current event to
-   <code>collection-events-history</code>; <code>updateOne</code> with
-   <code>{ movementId, sequence: latestSeq, revision: currentRevision }</code> filter;
-   increment <code>revision</code>. Concurrent writer detected by 0 matched documents.</li>
+<li>D-036 authorisation: <code>submittingOrganisation</code> on the latest event must match the authenticated caller.</li>
+<li>Read-then-write with revision guard: snapshot the current event to <code>collection-events-history</code>; <code>updateOne</code> with <code>{ movementId, sequence: latestSeq, revision: currentRevision }</code> filter; increment <code>revision</code>. Concurrent writer detected by 0 matched documents.</li>
 <li>Return <code>HTTP 200</code>.</li>
 </ol>
 <hr />
 <h3 id="put-transferstransferid-soft-delete"><code>PUT /transfers/{transferId}</code> (soft-delete)</h3>
 <ol>
 <li>Read <code>transfer-dropoffs</code> (existence guard).</li>
-<li>If <code>isDeleted: true</code>, check <code>receipt-events</code> — reject if a receipt exists
-   (<a href="../../decisions/#d-009">D-009</a>: a Transfer cannot be deleted once a
-   receipt has been recorded).</li>
-<li>D-036 authorisation: <code>submittingOrganisation</code> on <code>transfer-dropoffs</code> must
-   match authenticated caller.</li>
+<li>If <code>isDeleted: true</code>, check <code>receipt-events</code> — reject if a receipt exists (<a href="../../decisions/#d-009">D-009</a>: a Transfer cannot be deleted once a receipt has been recorded).</li>
+<li>D-036 authorisation: <code>submittingOrganisation</code> on <code>transfer-dropoffs</code> must match authenticated caller.</li>
 <li>Snapshot <code>transfer-dropoffs</code> to <code>transfer-dropoffs-history</code>.</li>
-<li><code>updateOne</code> on <code>transfer-dropoffs</code> with <code>{ _id, revision }</code> filter;
-   set <code>isDeleted</code>; increment <code>revision</code>.</li>
+<li><code>updateOne</code> on <code>transfer-dropoffs</code> with <code>{ _id, revision }</code> filter; set <code>isDeleted</code>; increment <code>revision</code>.</li>
 <li>Return <code>HTTP 200</code>.</li>
 </ol>
 <hr />
@@ -1016,8 +891,7 @@ one insert, no transaction required.</p>
 <h3 id="collection-events_1"><code>collection-events</code></h3>
 <p>Required:</p>
 <ul>
-<li><code>{ movementId: 1, sequence: 1 }</code> <strong>unique</strong> — concurrency guard for appends;
-  also the primary query key for loading all events for a Movement</li>
+<li><code>{ movementId: 1, sequence: 1 }</code> <strong>unique</strong> — concurrency guard for appends; also the primary query key for loading all events for a Movement</li>
 <li><code>{ movementId: 1, isDeleted: 1, sequence: -1 }</code> — latest active event lookup</li>
 <li><code>{ 'submittingOrganisation.defraCustomerOrganisationId': 1 }</code></li>
 <li><code>{ traceId: 1 }</code></li>
@@ -1076,26 +950,19 @@ one insert, no transaction required.</p>
 </ul>
 <hr />
 <h2 id="get-read-patterns">GET read patterns</h2>
-<p>Per-event collections shift cost from writes to reads. The patterns below
-illustrate what each common GET requires.</p>
+<p>Per-event collections shift cost from writes to reads. The patterns below illustrate what each common GET requires.</p>
 <h3 id="get-movementsmovementid"><code>GET /movements/{movementId}</code></h3>
 <p>Requires two reads:</p>
 <ol>
-<li><code>movement-creations.findOne({ _id: movementId })</code> — creation data, state,
-   <code>isDeleted</code>.</li>
-<li><code>collection-events.find({ movementId }).sort({ sequence: 1 })</code> — ordered
-   collection event array.</li>
+<li><code>movement-creations.findOne({ _id: movementId })</code> — creation data, state, <code>isDeleted</code>.</li>
+<li><code>collection-events.find({ movementId }).sort({ sequence: 1 })</code> — ordered collection event array.</li>
 </ol>
-<p>The application assembles the response from both results. If <code>state</code> is
-denormalized (Option B1), step 1 also gives the current lifecycle state
-without a third read. If using Option B2 (read-time derivation), a third
-read on <code>transfer-dropoffs</code> is needed to compute <code>DROPPED_OFF</code>.</p>
+<p>The application assembles the response from both results. If <code>state</code> is denormalized (Option B1), step 1 also gives the current lifecycle state without a third read. If using Option B2 (read-time derivation), a third read on <code>transfer-dropoffs</code> is needed to compute <code>DROPPED_OFF</code>.</p>
 <h3 id="get-transferstransferid"><code>GET /transfers/{transferId}</code></h3>
 <p>Requires two reads:</p>
 <ol>
 <li><code>transfer-dropoffs.findOne({ _id: transferId })</code> — drop-off data.</li>
-<li><code>receipt-events.findOne({ _id: transferId })</code> — receipt data, or <code>null</code>
-   if not yet recorded.</li>
+<li><code>receipt-events.findOne({ _id: transferId })</code> — receipt data, or <code>null</code> if not yet recorded.</li>
 </ol>
 <p>The application assembles the response from both.</p>
 <h3 id="get-movementsmovementidfate-of-waste-d-019"><code>GET /movements/{movementId}/fate-of-waste</code> (<a href="../../decisions/#d-019">D-019</a>)</h3>
@@ -1106,27 +973,12 @@ read on <code>transfer-dropoffs</code> is needed to compute <code>DROPPED_OFF</c
 <li><code>transfer-dropoffs</code> — drop-off date, site, carrier.</li>
 <li><code>receipt-events</code> — actual weights, treatment codes, outcome.</li>
 </ol>
-<p>This is the most complex read in the model. An aggregation pipeline using
-<code>$lookup</code> can serve it in one round trip from the database, but the pipeline
-is non-trivial. A MongoDB view wrapping this pipeline is the natural
-implementation, and is what the Data Architect's original proposal meant by
-"resolve at the view level."</p>
+<p>This is the most complex read in the model. An aggregation pipeline using <code>$lookup</code> can serve it in one round trip from the database, but the pipeline is non-trivial. A MongoDB view wrapping this pipeline is the natural implementation, and is what the Data Architect's original proposal meant by "resolve at the view level."</p>
 <hr />
 <h2 id="how-this-model-relates-to-the-phase-1-receipt-implementation">How this model relates to the Phase 1 receipt implementation</h2>
-<p>Phase 1 (<code>POST /movements/receive</code> / <code>PUT /movements/{wasteTrackingId}/receive</code>)
-writes to <code>waste-inputs</code> / <code>waste-inputs-history</code> — unchanged in this model.</p>
-<p>The Phase 2 receipt (<code>POST /transfers/{transferId}/receipt</code>) writes to
-<code>receipt-events</code>. The two receipt handlers share no storage path: the Phase 1
-handler continues to use the <code>waste-inputs</code> aggregate; the Phase 2 handler
-uses <code>receipt-events</code>. The revision/history pattern (<a href="../../decisions/#d-034">D-034</a>)
-applies to both, but through separate collection pairs.</p>
-<p>The carrier cross-check (<a href="../../decisions/#d-006">D-006</a>) is particularly clean
-in this model at Phase 2 receipt time: the <code>transfer-dropoffs</code> document
-stores the drop-off carrier directly on the event document. A single read of
-<code>transfer-dropoffs</code> by <code>transferId</code> gives both the existence check and the
-carrier — no aggregate rehydration or separate reads needed. This contrasts
-with the aggregate model, where the carrier must be extracted from the
-embedded <code>dropOff</code> sub-document on the <code>transfers</code> aggregate.</p>
+<p>Phase 1 (<code>POST /movements/receive</code> / <code>PUT /movements/{wasteTrackingId}/receive</code>) writes to <code>waste-inputs</code> / <code>waste-inputs-history</code> — unchanged in this model.</p>
+<p>The Phase 2 receipt (<code>POST /transfers/{transferId}/receipt</code>) writes to <code>receipt-events</code>. The two receipt handlers share no storage path: the Phase 1 handler continues to use the <code>waste-inputs</code> aggregate; the Phase 2 handler uses <code>receipt-events</code>. The revision/history pattern (<a href="../../decisions/#d-034">D-034</a>) applies to both, but through separate collection pairs.</p>
+<p>The carrier cross-check (<a href="../../decisions/#d-006">D-006</a>) is particularly clean in this model at Phase 2 receipt time: the <code>transfer-dropoffs</code> document stores the drop-off carrier directly on the event document. A single read of <code>transfer-dropoffs</code> by <code>transferId</code> gives both the existence check and the carrier — no aggregate rehydration or separate reads needed. This contrasts with the aggregate model, where the carrier must be extracted from the embedded <code>dropOff</code> sub-document on the <code>transfers</code> aggregate.</p>
 <hr />
 <h2 id="key-differences-from-option-a-aggregate-model">Key differences from Option A (aggregate model)</h2>
 <table>
@@ -1202,66 +1054,27 @@ embedded <code>dropOff</code> sub-document on the <code>transfers</code> aggrega
 </table>
 <hr />
 <h2 id="genuine-advantages-over-option-a">Genuine advantages over Option A</h2>
-<p><strong>1. Independent event-type queries.</strong> Querying "all collection events recorded
-by carrier X this month across all Movements" is a direct query on
-<code>collection-events</code> with a compound index. In the aggregate model, the same
-query requires scanning and unwinding the <code>collectionEvents[]</code> array on every
-<code>movements</code> document — less efficient at large volume and harder to index
-selectively.</p>
-<p><strong>2. Bounded document growth.</strong> In the aggregate model, a Movement with many
-transit handovers (<a href="../../decisions/#d-029">D-029</a>) accumulates collection
-events inside a single document. There is no explicit cap, but MongoDB's 16 MB
-document size limit and BSON overhead make unbounded array growth a latent
-risk. Per-event collections grow horizontally (more documents) not vertically
-(larger documents).</p>
-<p><strong>3. Simpler migration unit.</strong> Adding a new Phase 3 event type (for example,
-a treatment-handover event) means adding a new collection and handler. In the
-aggregate model, it means adding a new embedded sub-document or array to an
-existing collection that already has live data.</p>
-<p><strong>4. Natural home for cross-event-type operational queries.</strong> A regulator's
-query for "all drop-offs for carrier X that have no receipt" is a set
-difference between <code>transfer-dropoffs</code> and <code>receipt-events</code>, joined on
-<code>transferId</code>. This is a natural <code>$lookup</code> in the per-event model. In the
-aggregate model, it requires a query on <code>transfers</code> where <code>receipt: null</code> and
-<code>dropOff.carrier.cbDuNumber: x</code> — achievable but the carrier is nested inside
-the <code>dropOff</code> sub-document, requiring a deep-path index.</p>
+<p><strong>1. Independent event-type queries.</strong> Querying "all collection events recorded by carrier X this month across all Movements" is a direct query on <code>collection-events</code> with a compound index. In the aggregate model, the same query requires scanning and unwinding the <code>collectionEvents[]</code> array on every <code>movements</code> document — less efficient at large volume and harder to index selectively.</p>
+<p><strong>2. Bounded document growth.</strong> In the aggregate model, a Movement with many transit handovers (<a href="../../decisions/#d-029">D-029</a>) accumulates collection events inside a single document. There is no explicit cap, but MongoDB's 16 MB document size limit and BSON overhead make unbounded array growth a latent risk. Per-event collections grow horizontally (more documents) not vertically (larger documents).</p>
+<p><strong>3. Simpler migration unit.</strong> Adding a new Phase 3 event type (for example, a treatment-handover event) means adding a new collection and handler. In the aggregate model, it means adding a new embedded sub-document or array to an existing collection that already has live data.</p>
+<p><strong>4. Natural home for cross-event-type operational queries.</strong> A regulator's query for "all drop-offs for carrier X that have no receipt" is a set difference between <code>transfer-dropoffs</code> and <code>receipt-events</code>, joined on <code>transferId</code>. This is a natural <code>$lookup</code> in the per-event model. In the aggregate model, it requires a query on <code>transfers</code> where <code>receipt: null</code> and <code>dropOff.carrier.cbDuNumber: x</code> — achievable but the carrier is nested inside the <code>dropOff</code> sub-document, requiring a deep-path index.</p>
 <hr />
 <h2 id="known-gaps-and-open-points">Known gaps and open points</h2>
 <ul>
 <li>
-<p><strong>State management decision.</strong> Option B1 (denormalised <code>state</code> on
-  <code>movement-creations</code>) introduces multi-document transaction requirements
-  on every collection-event write and every transfer-creation write. Option
-  B2 (read-time derivation) avoids transactions but makes state-filtered
-  queries expensive. A decision on which approach to take is needed before
-  implementation.</p>
+<p><strong>State management decision.</strong> Option B1 (denormalised <code>state</code> on <code>movement-creations</code>) introduces multi-document transaction requirements on every collection-event write and every transfer-creation write. Option B2 (read-time derivation) avoids transactions but makes state-filtered queries expensive. A decision on which approach to take is needed before implementation.</p>
 </li>
 <li>
-<p><strong>Transaction scope.</strong> Two of the four POST write paths require coordinated
-  writes across collections: <code>POST /movements/{id}/collection</code> (insert
-  <code>collection-events</code> + update <code>movement-creations.state</code>) and <code>POST /transfers</code>
-  (insert <code>transfer-dropoffs</code> + update <code>movement-creations.state</code> for each
-  referenced Movement). Whether to wrap these in MongoDB multi-document
-  transactions or to accept a small window of state inconsistency with an
-  eventual-consistency repair path needs deciding before production.</p>
+<p><strong>Transaction scope.</strong> Two of the four POST write paths require coordinated writes across collections: <code>POST /movements/{id}/collection</code> (insert <code>collection-events</code> + update <code>movement-creations.state</code>) and <code>POST /transfers</code> (insert <code>transfer-dropoffs</code> + update <code>movement-creations.state</code> for each referenced Movement). Whether to wrap these in MongoDB multi-document transactions or to accept a small window of state inconsistency with an eventual-consistency repair path needs deciding before production.</p>
 </li>
 <li>
-<p><strong>Fate-of-waste GET implementation.</strong> The most complex read in this model.
-  Whether to implement as four sequential application-layer reads, a MongoDB
-  aggregation pipeline (written as a view), or a dedicated read-model
-  document built at write time needs deciding before <a href="../../decisions/#d-019">D-019</a>
-  is resolved.</p>
+<p><strong>Fate-of-waste GET implementation.</strong> The most complex read in this model. Whether to implement as four sequential application-layer reads, a MongoDB aggregation pipeline (written as a view), or a dedicated read-model document built at write time needs deciding before <a href="../../decisions/#d-019">D-019</a> is resolved.</p>
 </li>
 <li>
-<p><strong>Collection-events history addressing.</strong> In the aggregate model, a history
-  entry is addressed by <code>{ movementId, revision }</code>. In this model, a
-  collection-events history entry needs <code>{ movementId, sequence, revision }</code> to
-  be unambiguous. The history collection shape above includes both.</p>
+<p><strong>Collection-events history addressing.</strong> In the aggregate model, a history entry is addressed by <code>{ movementId, revision }</code>. In this model, a collection-events history entry needs <code>{ movementId, sequence, revision }</code> to be unambiguous. The history collection shape above includes both.</p>
 </li>
 <li>
-<p><strong><code>invalid-submissions</code> shape.</strong> The existing shape from
-  <a href="../mongo-schema-proposal/">mongo-schema-proposal.md</a> applies unchanged —
-  it is event-type-aware via <code>submissionType</code> and <code>aggregateType</code> fields.</p>
+<p><strong><code>invalid-submissions</code> shape.</strong> The existing shape from <a href="../mongo-schema-proposal/">mongo-schema-proposal.md</a> applies unchanged — it is event-type-aware via <code>submissionType</code> and <code>aggregateType</code> fields.</p>
 </li>
 </ul>
 
