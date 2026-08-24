@@ -157,9 +157,9 @@ The public request payload is a single `ReceiveMovementRequest` object.
 
 ### Receipt
 
-| Field | Type | Required | Rules |
-| --- | --- | --- | --- |
-| `address` | `ReceiptAddress` | Yes | Receipt address block. |
+| Field     | Type             | Required | Rules                  |
+| --------- | ---------------- | -------- | ---------------------- |
+| `address` | `ReceiptAddress` | Yes      | Receipt address block. |
 
 ### Address
 

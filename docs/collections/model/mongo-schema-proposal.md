@@ -17,25 +17,17 @@ Proposed MongoDB storage model for the extended movement journey covering:
 - drop-off / transfer creation
 - receipt recording
 
-This is a proposal for the server-side storage shape. It is not yet a
-decided implementation.
+This is a proposal for the server-side storage shape. It is not yet a decided implementation.
 
 ## Design goals
 
 - Keep one current-state aggregate per durable public identifier.
-- Keep Movement and Transfer as separate aggregates because the API and
-  decisions already separate them.
+- Keep Movement and Transfer as separate aggregates because the API and decisions already separate them.
 - Support ordered collection events on a Movement.
 - Support Transfer as the aggregation point for one or more Movement IDs.
-- Keep a revisioned current-state plus history pattern close to the current
-  `waste-inputs` / `waste-inputs-history` approach, while treating
-  `revision` as the current aggregate version after any successful mutation.
-- Preserve write provenance per event so different organisations can record
-  creation, collection, drop-off, and receipt against the same movement
-  journey.
-- Allow optional denormalised `transferIds` on Movement for read
-  convenience, while treating `transfers.movementIds[]` as the primary
-  relationship source of truth.
+- Keep a revisioned current-state plus history pattern close to the current `waste-inputs` / `waste-inputs-history` approach, while treating `revision` as the current aggregate version after any successful mutation.
+- Preserve write provenance per event so different organisations can record creation, collection, drop-off, and receipt against the same movement journey.
+- Allow optional denormalised `transferIds` on Movement for read convenience, while treating `transfers.movementIds[]` as the primary relationship source of truth.
 
 ## Proposed collections
 
@@ -52,20 +44,15 @@ Optional later addition if stronger audit/event replay is needed:
 
 ### `invalid-submissions`
 
-Operational holding collection for write attempts that could not be applied
-because the target aggregate could not be found or matched at write time.
+Operational holding collection for write attempts that could not be applied because the target aggregate could not be found or matched at write time.
 
 Examples:
 
 - a collection update for a `movementId` that does not exist
 - a receipt write for a `transferId` that does not exist
-- an update request that references a valid identifier but fails aggregate
-  ownership / matching checks
+- an update request that references a valid identifier but fails aggregate ownership / matching checks
 
-This is not intended to duplicate normal request-validation errors returned
-to the caller at the API boundary. It is intended for submissions that were
-accepted far enough into processing to warrant persistence for investigation,
-replay, support handling, or audit.
+This is not intended to duplicate normal request-validation errors returned to the caller at the API boundary. It is intended for submissions that were accepted far enough into processing to warrant persistence for investigation, replay, support handling, or audit.
 
 Suggested shape:
 
@@ -190,20 +177,13 @@ Owns:
 ### Notes on `movements`
 
 - `creation` is singular because `POST /movements` creates the Movement.
-- `collectionEvents[]` is plural because collection is now an ordered event
-  sequence on the same Movement.
-- `submittingOrganisation` is stored on each business event rather than once
-  at Movement level, because creation and later collection events may be
-  recorded by different organisations.
-- `transferIds[]` is included for now because it may make read models simpler,
-  but it should be treated as derived from `transfers.movementIds[]`.
+- `collectionEvents[]` is plural because collection is now an ordered event sequence on the same Movement.
+- `submittingOrganisation` is stored on each business event rather than once at Movement level, because creation and later collection events may be recorded by different organisations.
+- `transferIds[]` is included for now because it may make read models simpler, but it should be treated as derived from `transfers.movementIds[]`.
 
 ## Proposed `transfers` schema
 
-For a hazardous drop-off, `transferId` is not freshly minted: it is the sole
-`movementId` referenced in the request ([D-010](../decisions.md#d-010)
-guarantees there is exactly one). For a non-hazardous drop-off, `transferId`
-is minted independently as before.
+For a hazardous drop-off, `transferId` is not freshly minted: it is the sole `movementId` referenced in the request ([D-010](../decisions.md#d-010) guarantees there is exactly one). For a non-hazardous drop-off, `transferId` is minted independently as before.
 
 ```javascript
 {
@@ -286,20 +266,15 @@ is minted independently as before.
 - `movementIds[]` is the canonical relationship from Transfer to Movement.
 - `dropOff` is singular because one Transfer is minted per drop-off event.
 - `receipt` is singular because receipt is modelled as one receipt per Transfer.
-- `submittingOrganisation` is stored on both `dropOff` and `receipt`, because
-  those events may be written by different organisations against the same
-  `transferId`.
-- `submittedByApiCode` is optional but useful if one organisation can hold
-  multiple API keys and exact key-level provenance matters for audit.
-- `outcome` is reserved because receipt acceptance / rejection is still an open
-  design point.
+- `submittingOrganisation` is stored on both `dropOff` and `receipt`, because those events may be written by different organisations against the same `transferId`.
+- `submittedByApiCode` is optional but useful if one organisation can hold multiple API keys and exact key-level provenance matters for audit.
+- `outcome` is reserved because receipt acceptance / rejection is still an open design point.
 
 ## Proposed history collections
 
 ### `movements-history`
 
-Snapshot of the full previous Movement document before each successful
-mutation of an existing Movement aggregate.
+Snapshot of the full previous Movement document before each successful mutation of an existing Movement aggregate.
 
 ```javascript
 {
@@ -311,8 +286,7 @@ mutation of an existing Movement aggregate.
 
 ### `transfers-history`
 
-Snapshot of the full previous Transfer document before each successful
-mutation of an existing Transfer aggregate.
+Snapshot of the full previous Transfer document before each successful mutation of an existing Transfer aggregate.
 
 ```javascript
 {
@@ -377,26 +351,16 @@ Conditional / query-driven:
 
 ## Source-of-truth rules
 
-- `movements._id` / `movementId` is the durable public identifier for a
-  Movement.
-- `transfers._id` / `transferId` is the durable public identifier for a
-  Transfer. For a hazardous drop-off, `transferId` equals the sole
-  `movementId` on the transfer rather than being independently minted (see
-  `POST /transfers` above and [D-010](../decisions.md#d-010)).
-- `revision` is the current version number of the aggregate document, not of
-  an individual nested event.
+- `movements._id` / `movementId` is the durable public identifier for a Movement.
+- `transfers._id` / `transferId` is the durable public identifier for a Transfer. For a hazardous drop-off, `transferId` equals the sole `movementId` on the transfer rather than being independently minted (see `POST /transfers` above and [D-010](../decisions.md#d-010)).
+- `revision` is the current version number of the aggregate document, not of an individual nested event.
 - New aggregates are created at `revision: 1`.
-- Every successful mutation of an existing aggregate increments `revision`,
-  regardless of whether the API operation is a `POST` or a `PUT`.
-- Event-level `submittingOrganisation` is the source of truth for who wrote
-  creation, collection, drop-off, and receipt.
-- Optional event-level `submittedByApiCode` is the source of truth for which
-  API key wrote the event when multiple keys exist for one organisation.
-- `transfers.movementIds[]` is the source of truth for Movement-to-Transfer
-  membership.
+- Every successful mutation of an existing aggregate increments `revision`, regardless of whether the API operation is a `POST` or a `PUT`.
+- Event-level `submittingOrganisation` is the source of truth for who wrote creation, collection, drop-off, and receipt.
+- Optional event-level `submittedByApiCode` is the source of truth for which API key wrote the event when multiple keys exist for one organisation.
+- `transfers.movementIds[]` is the source of truth for Movement-to-Transfer membership.
 - `movements.transferIds[]` is denormalised convenience data only.
-- History collections are source-of-truth for past snapshots, not for
-  individual business events.
+- History collections are source-of-truth for past snapshots, not for individual business events.
 
 ## Write-path mapping
 
@@ -428,12 +392,8 @@ Conditional / query-driven:
   - set `movementIds[]`
   - set `dropOff`
   - set `receipt` to `null` or omit
-  - determine `transferId`: if the request is a hazardous drop-off (always
-    exactly one `movementId`, per [D-010](../decisions.md#d-010)), reuse
-    that `movementId` as `transferId` — no new identifier is minted.
-    Otherwise, mint `transferId` via `waste-tracking-id-backend` as today.
-  - optionally update each referenced Movement to append `transferId` to
-    `transferIds[]`
+  - determine `transferId`: if the request is a hazardous drop-off (always exactly one `movementId`, per [D-010](../decisions.md#d-010)), reuse that `movementId` as `transferId` — no new identifier is minted. Otherwise, mint `transferId` via `waste-tracking-id-backend` as today.
+  - optionally update each referenced Movement to append `transferId` to `transferIds[]`
 
 - `POST /transfers/{transferId}/receipt`
   - populate `receipt`
@@ -454,9 +414,7 @@ Conditional / query-driven:
 
 The current `waste-inputs` model is receipt-first and Phase 1-specific:
 
-See [Phase 1 movement store](./phase1-waste-inputs.md) for the compact
-description of the current `waste-inputs` / `waste-inputs-history`
-behaviour that this proposal is evolving from.
+See [Phase 1 movement store](./phase1-waste-inputs.md) for the compact description of the current `waste-inputs` / `waste-inputs-history` behaviour that this proposal is evolving from.
 
 - it is keyed by `wasteTrackingId`
 - it stores receipt-centric payload under `receipt.movement`
@@ -471,12 +429,8 @@ That shape does not naturally fit:
 
 ## Open points
 
-- Whether to persist `submittedByApiCode` in plaintext, hashed form, or as a
-  separate API-key identifier if audit needs exact key provenance without
-  exposing the raw code in operational reads.
-- Whether receipt outcome should remain embedded in `receipt` or become a
-  further nested sub-document with richer status modelling.
+- Whether to persist `submittedByApiCode` in plaintext, hashed form, or as a separate API-key identifier if audit needs exact key provenance without exposing the raw code in operational reads.
+- Whether receipt outcome should remain embedded in `receipt` or become a further nested sub-document with richer status modelling.
 - Whether `transferIds[]` on Movement proves worth the denormalisation cost.
 - Whether event-level collections are needed in addition to history snapshots. Three options are under evaluation — aggregate (this document), per-event-type, and CQRS/event-sourcing (see [`mongo-schema-proposal-CQRS.md`](./mongo-schema-proposal-CQRS.md)) — tracked as [D-037](../decisions.md#d-037).
-- Whether soft-delete metadata should be per aggregate only, per event only,
-  or both.
+- Whether soft-delete metadata should be per aggregate only, per event only, or both.

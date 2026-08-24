@@ -10,17 +10,13 @@ robots: noindex, nofollow
 
 # Phase 1 movement store
 
-This note describes the current Phase 1 MongoDB storage model used by
-`waste-movement-backend`.
+This note describes the current Phase 1 MongoDB storage model used by `waste-movement-backend`.
 
-It exists so the Phase 2 model work has a concrete description of what is
-already live, and so migration discussions can refer to one small document
-instead of piecing the behaviour together from code.
+It exists so the Phase 2 model work has a concrete description of what is already live, and so migration discussions can refer to one small document instead of piecing the behaviour together from code.
 
 ## Scope
 
-Phase 1 is receipt-first. The live backend stores receipt movements keyed by
-`wasteTrackingId`.
+Phase 1 is receipt-first. The live backend stores receipt movements keyed by `wasteTrackingId`.
 
 The collections in scope are:
 
@@ -34,40 +30,34 @@ The collections in scope are:
 
 The current-state collection.
 
-One document represents the latest known version of a single waste movement
-record keyed by `wasteTrackingId`. In practice, the live routes currently
-populate the receipt side of the record.
+One document represents the latest known version of a single waste movement record keyed by `wasteTrackingId`. In practice, the live routes currently populate the receipt side of the record.
 
 ### `waste-inputs-history`
 
 The history / audit-trail collection.
 
-Before a successful update is applied to `waste-inputs`, the previous full
-document is copied into `waste-inputs-history` with a `timestamp`. This means
-history is stored as full-document snapshots rather than event deltas.
+Before a successful update is applied to `waste-inputs`, the previous full document is copied into `waste-inputs-history` with a `timestamp`. This means history is stored as full-document snapshots rather than event deltas.
 
 ### `invalid-submissions`
 
-Operational holding collection for update attempts that could not be applied,
-for example because the target `wasteTrackingId` was not found.
+Operational holding collection for update attempts that could not be applied, for example because the target `wasteTrackingId` was not found.
 
 ## Current persisted shape
 
-The current domain object in `waste-movement-backend` exposes these top-level
-fields ([wasteInput.js](C:/Applications/EqualExperts/Defra/WasteTracking/Repos/waste-movement-backend/src/domain/wasteInput.js:1)):
+The current domain object in `waste-movement-backend` exposes these top-level fields ([wasteInput.js](C:/Applications/EqualExperts/Defra/WasteTracking/Repos/waste-movement-backend/src/domain/wasteInput.js:1)):
 
 ```javascript
 {
-  wasteTrackingId,
-  creation,
-  collection,
-  receipt,
-  submittingOrganisation,
-  createdAt,
-  lastUpdatedAt,
-  orgId,
-  traceId,
-  bulkId
+  (wasteTrackingId,
+    creation,
+    collection,
+    receipt,
+    submittingOrganisation,
+    createdAt,
+    lastUpdatedAt,
+    orgId,
+    traceId,
+    bulkId);
 }
 ```
 
@@ -133,9 +123,7 @@ Illustrative shape based on the current Phase 1 receipt write path:
 }
 ```
 
-The exact nested payload shape is driven by the receipt request schema and can
-be seen in the Phase 1 receipt examples under
-[receiptEvent.js](C:/Applications/EqualExperts/Defra/WasteTracking/Repos/waste-tracking-service/docs/collections/data/receiptEvent.js:1).
+The exact nested payload shape is driven by the receipt request schema and can be seen in the Phase 1 receipt examples under [receiptEvent.js](C:/Applications/EqualExperts/Defra/WasteTracking/Repos/waste-tracking-service/docs/collections/data/receiptEvent.js:1).
 
 ## Revision model
 
@@ -145,9 +133,7 @@ The current backend uses document revisioning rather than event sourcing.
 - each successful update increments `revision`
 - the prior full document is copied into `waste-inputs-history`
 
-The history entry is created by shallow-copying the previous live document,
-adding `timestamp`, and removing `_id`
-([create-history-entry.js](C:/Applications/EqualExperts/Defra/WasteTracking/Repos/waste-movement-backend/src/common/helpers/create-history-entry.js:1)).
+The history entry is created by shallow-copying the previous live document, adding `timestamp`, and removing `_id` ([create-history-entry.js](C:/Applications/EqualExperts/Defra/WasteTracking/Repos/waste-movement-backend/src/common/helpers/create-history-entry.js:1)).
 
 ## Example `waste-inputs-history` document
 
@@ -170,8 +156,7 @@ adding `timestamp`, and removing `_id`
 
 ## Current indexes
 
-The backend currently creates these indexes
-([mongodb.js](C:/Applications/EqualExperts/Defra/WasteTracking/Repos/waste-movement-backend/src/common/helpers/mongodb.js:72)):
+The backend currently creates these indexes ([mongodb.js](C:/Applications/EqualExperts/Defra/WasteTracking/Repos/waste-movement-backend/src/common/helpers/mongodb.js:72)):
 
 ### `waste-inputs`
 
@@ -188,11 +173,9 @@ The backend currently creates these indexes
 
 ## Current update behaviour
 
-The live update route updates `receipt.movement` in place rather than
-appending a new business event object.
+The live update route updates `receipt.movement` in place rather than appending a new business event object.
 
-See [update-receipt-movement.js](C:/Applications/EqualExperts/Defra/WasteTracking/Repos/waste-movement-backend/src/routes/update-receipt-movement.js:13)
-and [movement-update.js](C:/Applications/EqualExperts/Defra/WasteTracking/Repos/waste-movement-backend/src/services/movement-update.js:55).
+See [update-receipt-movement.js](C:/Applications/EqualExperts/Defra/WasteTracking/Repos/waste-movement-backend/src/routes/update-receipt-movement.js:13) and [movement-update.js](C:/Applications/EqualExperts/Defra/WasteTracking/Repos/waste-movement-backend/src/services/movement-update.js:55).
 
 This is a key distinction from the proposed Phase 2 model:
 
@@ -202,30 +185,22 @@ This is a key distinction from the proposed Phase 2 model:
 
 ## Role during Phase 1 -> Phase 2 migration
 
-For now, the working proposal is to keep `waste-inputs` /
-`waste-inputs-history` in place during migration.
+For now, the working proposal is to keep `waste-inputs` / `waste-inputs-history` in place during migration.
 
 That can mean:
 
-- the existing Phase 1 receipt endpoints continue to read and write these
-  collections unchanged
-- the new Phase 2 model is introduced alongside them rather than replacing
-  them immediately
-- any migration or coexistence layer is explicit about which endpoints write
-  to the old Phase 1 store and which write to the new Phase 2 store
+- the existing Phase 1 receipt endpoints continue to read and write these collections unchanged
+- the new Phase 2 model is introduced alongside them rather than replacing them immediately
+- any migration or coexistence layer is explicit about which endpoints write to the old Phase 1 store and which write to the new Phase 2 store
 
 ## Suggested coexistence rule
 
 Until a formal migration decision is made, the safest assumption is:
 
-- Phase 1 endpoints continue to use `waste-inputs` /
-  `waste-inputs-history`
+- Phase 1 endpoints continue to use `waste-inputs` / `waste-inputs-history`
 - Phase 2 endpoints use the proposed `movements` / `transfers` model
-- any bridge between `wasteTrackingId` and new identifiers is handled
-  deliberately rather than inferred implicitly
+- any bridge between `wasteTrackingId` and new identifiers is handled deliberately rather than inferred implicitly
 
 ## Why this document exists
 
-The Mongo schema proposal for Phase 2 references the current
-`waste-inputs` / `waste-inputs-history` pattern as the baseline being
-evolved from. This note is the compact description of that baseline.
+The Mongo schema proposal for Phase 2 references the current `waste-inputs` / `waste-inputs-history` pattern as the baseline being evolved from. This note is the compact description of that baseline.
