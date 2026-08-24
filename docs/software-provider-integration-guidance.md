@@ -307,7 +307,7 @@ Many Movement IDs can be linked to a single Transfer ID at drop-off; a Transfer 
 
 ## 5. Testing and conformance
 
-- Sandbox scenarios covering each of the four endpoint groups in [section 3](#3-api-reference)
+Sandbox scenarios covering each of the four endpoint groups in [section 3](#3-api-reference) will be updated in our [Scenarios repo](./collections).
 
 <br>
 
