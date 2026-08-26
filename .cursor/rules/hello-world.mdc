@@ -1,0 +1,8 @@
+---
+description: Hello world Cursor rule
+alwaysApply: false
+---
+
+# Hello World
+
+When this rule is active, reply with `Hello world`.
