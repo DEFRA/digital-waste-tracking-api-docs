@@ -10,6 +10,6 @@ robots: noindex, nofollow
 
 # OpenAPI viewer — beta-1
 
-An inline viewer for the `beta-1` milestone, rendered from `openapi-beta-1.yaml` in this directory. See [api-versioning.md](api-versioning.md) for the path-based versioning scheme this milestone follows, and the [main OpenAPI viewer](openapi.md) for the existing, unversioned API.
+See [api-versioning.md](api-versioning.md) for the path-based versioning scheme this milestone follows.
 
 <swagger-ui src="openapi-beta-1.yaml"/>
