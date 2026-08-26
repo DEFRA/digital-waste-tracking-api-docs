@@ -634,18 +634,18 @@ A full evaluation of the CQRS model against all 37 decisions and the live Phase 
 
 <a id="d-038"></a>
 
-### API versioning: versioned during alpha, unversioned at GA
+### API versioning: versioned during beta, unversioned at GA
 
 **D-038** · ✅ Decided · Impact: 🔴 High · Area: **Versioning** · Related: [D-023](#d-023)
 
 **Context.** The API has no versioning today — no path prefix, header or query parameter; `info.version` is only a documentation label. As the remaining waste-movement endpoints are built, the shape will be found by iteration, which means frequent breaking changes before it stabilises; once stable, the public contract must not break its integrators. A single fixed policy fits one phase and not the other: always-version adds needless machinery and duplication once the shape is stable, while never-version makes breaking iteration painful while we are still designing. GOV.UK recommends URI-path versioning _if_ you version and advises against header/media-type versioning, but its overriding principle is not to break existing consumers.
 
-**Decision.** Version the API **during alpha** and **drop the version at GA**:
+**Decision.** Version the API **during beta** and **drop the version at GA**:
 
-- **During alpha** — each milestone is versioned in the URI path (`/v1-alpha-0`, `/v1-alpha-1`, …) and milestones can run in parallel, letting the small, controlled set of early integrators migrate at their own pace. Alpha is non-public, so path labels are acceptable here.
+- **During beta** — each milestone is versioned in the URI path (`/beta-0`, `/beta-1`, …), a prefix on the resource path (e.g. `/beta-1/waste-movements/{id}`), and milestones can run in parallel, letting the small, controlled set of early integrators migrate at their own pace. Beta is non-public, so path labels are acceptable here. Every endpoint is available at every version — providers never see a split where some endpoints sit on one version and others on another, so a breaking change to one endpoint means copying **all** existing endpoints forward into the new version, not just the changed one. Orchestration is confirmed to live in-service (branching/duplicated handlers per milestone); there is no CDP platform- or gateway-level versioning/routing capability to use instead.
 - **At GA** — drop the version and publish one stable **unversioned** API, evolving it **additive-only** thereafter (new optional fields/endpoints/enum values in place; clients tolerate unknown fields). A genuinely unavoidable breaking change is a new resource/API, not a `/v2`.
-- **Cutover** — dropping the version at GA is a one-time, announced breaking change for alpha integrators (expected of an alpha contract); the final alpha version runs alongside the unversioned GA API for a migration window, marked deprecated, then retired.
-- **Deprecation** — alpha versions are retired by usage: monitor calls per software provider (via the JWT `client_id`), and while deprecated every response carries a single `Deprecation: true` header as an in-band signal.
+- **Cutover** — dropping the version at GA is a one-time, announced breaking change for beta integrators (expected of a beta contract); the final beta version runs alongside the unversioned GA API for a migration window, marked deprecated, then retired.
+- **Deprecation** — beta versions are retired by usage: monitor calls per software provider (via the JWT `client_id`), and while deprecated every response carries a single `Deprecation: true` header as an in-band signal.
 
 Applies only to the new endpoints; the already-live Receipt of Waste endpoints keep their current unversioned paths.
 
