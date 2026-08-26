@@ -69,13 +69,9 @@ The API is organised around four stages:
 
 ## 3. API reference
 
-These endpoints are structured by lifecycle stage rather than by resource, so they read in the same order a movement actually happens. The endpoint summaries below may not always be current, so be sure to use the definitive source for exact paths, request and response schemas: [Digital Waste Tracking OpenAPI specification](https://github.com/DEFRA/digital-waste-tracking-api-docs/blob/main/docs/api/openapi-beta-1.md).
+You can see the current API spec at: [Digital Waste Tracking OpenAPI specification](https://github.com/DEFRA/digital-waste-tracking-api-docs/blob/main/docs/api/openapi-beta-1.md).
 
-The target API spec is still in draft and continuing to change. Expect some shapes to shift before go-live.
-
-The original Phase 1 receipt endpoints will still work. They'll be marked deprecated, not removed, so existing integrations keep running while the fuller model is built alongside them.
-
-To explore requests and responses before you build, preview the YAML in [Swagger Editor](https://editor.swagger.io) or a VS Code OpenAPI extension.
+The spec will update with each milestone in the development process – expect some shapes to shift before go-live. 
 
 ### 3.1 Create movement
 
