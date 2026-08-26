@@ -69,15 +69,13 @@ The API is organised around four stages:
 
 ## 3. API reference
 
-These endpoints are structured by lifecycle stage rather than by resource, so they read in the same order a movement actually happens. The endpoint summaries below may not always be current, so be sure to use the definitive source for exact paths, request and response schemas: [Digital Waste Tracking OpenAPI specification](https://github.com/DEFRA/digital-waste-tracking-api-docs/blob/main/docs/api/openapi.yaml).
+These endpoints are structured by lifecycle stage rather than by resource, so they read in the same order a movement actually happens. The endpoint summaries below may not always be current, so be sure to use the definitive source for exact paths, request and response schemas: [Digital Waste Tracking OpenAPI specification](https://github.com/DEFRA/digital-waste-tracking-api-docs/blob/main/docs/api/openapi-beta-1.md).
 
 The target API spec is still in draft and continuing to change. Expect some shapes to shift before go-live.
 
 The original Phase 1 receipt endpoints will still work. They'll be marked deprecated, not removed, so existing integrations keep running while the fuller model is built alongside them.
 
 To explore requests and responses before you build, preview the YAML in [Swagger Editor](https://editor.swagger.io) or a VS Code OpenAPI extension.
-
-The examples in 3.1 to 3.4 follow a single movement end to end: a consignment of mixed construction and demolition waste, created, collected, dropped off and received. The Movement ID minted at creation is reused throughout so you can see how the four stages connect – in practice, every real movement mints its own IDs.
 
 ### 3.1 Create movement
 
@@ -87,68 +85,7 @@ The examples in 3.1 to 3.4 follow a single movement end to end: a consignment of
 | **Input** | Waste classification, producer details, estimated collection details, estimated receiver details, estimated carrier details, broker details |
 | **Output** | Validation result, Waste Movement ID |
 
-**Example:**
-```json
-{
-  "apiCode": "25b14080-5e77-4f91-9957-2482a0cb8775",
-  "estimatedDateTimeCollected": "2025-09-15T08:00:00Z",
-  "producer": {
-    "wasteSource": "Commercial",
-    "organisationName": "ACME Waste Producers Ltd",
-    "authorisationNumber": "EAS/P/123456",
-    "sicCode": "38110",
-    "address": {
-      "fullAddress": "10 Industrial Way, Test City",
-      "postcode": "TE1 2PQ"
-    },
-    "councilMovement": false
-  },
-  "carrier": {
-    "meansOfTransport": "Road",
-    "registrationNumber": "CBDU123456",
-    "organisationName": "Test Carrier Ltd",
-    "vehicleRegistration": "AB12 CDE"
-  },
-  "wasteItems": [
-    {
-      "ewcCodes": [
-        "170107"
-      ],
-      "wasteDescription": "Basic mixed construction and demolition waste, this includes recyclable house bricks, gypsum plaster and slates.",
-      "physicalForm": "Solid",
-      "numberOfContainers": 1,
-      "typeOfContainers": "SKI",
-      "weight": {
-        "metric": "Tonnes",
-        "amount": 2.5,
-        "isEstimate": true
-      },
-      "containsPops": false,
-      "containsHazardous": false,
-      "disposalOrRecoveryCodes": [
-        {
-          "code": "R5",
-          "weight": {
-            "metric": "Tonnes",
-            "amount": 2.5,
-            "isEstimate": true
-          }
-        }
-      ]
-    }
-  ]
-}
-```
 
-**Response:**
-```json
-{
-  "movementId": "25HRA0B2",
-  "validation": {
-    "warnings": []
-  }
-}
-```
 
 ### 3.2 Record collection
 
@@ -158,32 +95,6 @@ The examples in 3.1 to 3.4 follow a single movement end to end: a consignment of
 | **Input** | Waste Movement ID, collection dateTime, carrier details, collection address |
 | **Output** | Validation result |
 
-Each physical collection is recorded as a separate entry – there's no requirement to model consolidation where multiple loads are later combined.
-
-Recorded against Movement ID `25HRA0B2` from the creation response above – the Movement ID is supplied in the URL, not the request body.
-
-**Example:**
-```json
-{
-  "apiCode": "25b14080-5e77-4f91-9957-2482a0cb8775",
-  "actualDateTimeCollected": "2025-09-15T08:34:00Z",
-  "yourUniqueReference": "DRIVER-TRIP-001",
-  "carrier": {
-    "meansOfTransport": "Road",
-    "registrationNumber": "CBDU123456",
-    "organisationName": "Test Carrier Ltd",
-    "vehicleRegistration": "AB12 CDE"
-  },
-  "collection": {
-    "address": {
-      "fullAddress": "10 Industrial Way, Test City",
-      "postcode": "TE1 2PQ"
-    }
-  }
-}
-```
-
-The response is a validation envelope only; no new identifier is returned, so the walkthrough continues to use the same Movement ID.
 
 ### 3.3 Record drop-off
 
@@ -193,43 +104,6 @@ The response is a validation envelope only; no new identifier is returned, so th
 | **Input** | Drop-off dateTime, drop-off address, one or more Movement IDs, carrier details |
 | **Output** | Validation result, Waste Transfer ID |
 
-The movement collected above is dropped off on its own; a drop-off can just as easily aggregate more than one Movement ID – see [4.2 Movement-to-transfer cardinality](#42-movement-to-transfer-cardinality).
-
-**Example:**
-```json
-{
-  "apiCode": "25b14080-5e77-4f91-9957-2482a0cb8775",
-  "movementIds": [
-    "25HRA0B2"
-  ],
-  "actualDateTimeDropOff": "2025-09-15T11:15:00Z",
-  "yourUniqueReference": "DRIVER-RUN-AM-001",
-  "carrier": {
-    "meansOfTransport": "Road",
-    "registrationNumber": "CBDU123456",
-    "organisationName": "Test Carrier Ltd",
-    "vehicleRegistration": "AB12 CDE"
-  },
-  "dropOff": {
-    "siteName": "Test Drop-off Site",
-    "address": {
-      "fullAddress": "99 Receiver Road, Test City",
-      "postcode": "TE1 3RX"
-    }
-  }
-}
-```
-
-**Response:**
-```json
-{
-  "transferId": "25TKP3C9",
-  "validation": {
-    "warnings": []
-  }
-}
-```
-
 ### 3.4 Record receipt
 
 | | |
@@ -238,60 +112,6 @@ The movement collected above is dropped off on its own; a drop-off can just as e
 | **Input** | Waste Transfer ID, waste item details, receiver details, carrier details, broker details |
 | **Output** | Validation result |
 
-Recorded against Transfer ID `25TKP3C9` from the drop-off response above. The waste item here carries the actual, confirmed weight and treatment – compare `weight.isEstimate` and `disposalOrRecoveryCodes` against the estimates declared at creation in 3.1.
-
-**Example:**
-```json
-{
-  "apiCode": "8f2c1a90-6b3e-4c1d-9a55-1e7f4b8d2c31",
-  "dateTimeReceived": "2025-09-15T12:30:00Z",
-  "yourUniqueReference": "RECEIPT-CHECK-001",
-  "carrier": {
-    "meansOfTransport": "Road",
-    "registrationNumber": "CBDU123456",
-    "organisationName": "Test Carrier Ltd",
-    "vehicleRegistration": "AB12 CDE"
-  },
-  "receiver": {
-    "siteName": "Test Receiver Site",
-    "authorisationNumber": "HP3456XX"
-  },
-  "receipt": {
-    "address": {
-      "fullAddress": "99 Receiver Road, Test City",
-      "postcode": "TE1 3RX"
-    }
-  },
-  "wasteItems": [
-    {
-      "ewcCodes": [
-        "170107"
-      ],
-      "wasteDescription": "Basic mixed construction and demolition waste, this includes recyclable house bricks, gypsum plaster and slates.",
-      "physicalForm": "Solid",
-      "numberOfContainers": 1,
-      "typeOfContainers": "SKI",
-      "weight": {
-        "metric": "Tonnes",
-        "amount": 2.3,
-        "isEstimate": false
-      },
-      "containsPops": false,
-      "containsHazardous": false,
-      "disposalOrRecoveryCodes": [
-        {
-          "code": "R5",
-          "weight": {
-            "metric": "Tonnes",
-            "amount": 2.3,
-            "isEstimate": false
-          }
-        }
-      ]
-    }
-  ]
-}
-```
 
 <br>
 
