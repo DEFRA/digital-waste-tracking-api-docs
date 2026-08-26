@@ -104,6 +104,20 @@ components:
           description: Unique identifier of the submitting organisation.
           example: 25b14080-5e77-4f91-9957-2482a0cb8775
 
+    recordReceiptWithoutTransferRequest:
+      type: object
+      required: [apiCode, reason]
+      properties:
+        apiCode:
+          type: string
+          format: uuid
+          description: Unique identifier of the submitting organisation.
+          example: 25b14080-5e77-4f91-9957-2482a0cb8775
+        reason:
+          type: string
+          description: Mandatory explanation for why this receipt is being recorded without a Transfer ID.
+          example: No drop-off was recorded prior to receipt; waste received directly from the producer.
+
     issue:
       type: object
       required: [pointer, errorType, message]
@@ -355,6 +369,37 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/dropOffResponse'
+        "400":
+          $ref: '#/components/responses/400'
+        "401":
+          $ref: '#/components/responses/401'
+        "500":
+          $ref: '#/components/responses/500'
+
+  /transfers/receipt:
+    post:
+      tags: [Receipt]
+      summary: Record receipt of waste without a Transfer ID
+      description: >-
+        Fallback path for recording receipt when no Transfer ID is available (for example, no drop-off
+        was recorded beforehand). Not linked to any Movement or Transfer; `reason` must explain why.
+      operationId: recordReceiptWithoutTransfer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/recordReceiptWithoutTransferRequest'
+      responses:
+        "201":
+          description: Receipt recorded without a Transfer link. Body carries any validation warnings.
+          headers:
+            x-request-id:
+              $ref: '#/components/headers/RequestId'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/recordReceiptResponse'
         "400":
           $ref: '#/components/responses/400'
         "401":
