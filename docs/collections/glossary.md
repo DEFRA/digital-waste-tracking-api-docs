@@ -16,7 +16,7 @@ A reference for terms used across this section. Identifier vocabulary in particu
 
 ### Movement ID
 
-The identifier of a waste movement, minted when a movement is created via `POST /movements`. It is immutable once issued and lives across the whole journey of that movement, from creation through collection, drop-off, and receipt. Software vendors and integrators store and pass this value through their systems.
+The identifier of a waste movement, minted when a movement is created via `POST /movements`. It is immutable once issued and lives across the whole journey of that movement, from creation through collection, delivery, and receipt. Software vendors and integrators store and pass this value through their systems.
 
 Phase 1 had no creation event, so a movement was known only at receipt time and was identified by a `wasteTrackingId`. The Movement ID is **distinct** from the `wasteTrackingId` — they are minted by different events at different points in the lifecycle (creation vs receipt), and are not the same value. Both use sqids (sqids.org). How a Phase 1 `wasteTrackingId` reconciles to a Phase 2 Movement ID is a migration-strategy question, not settled here.
 
@@ -24,17 +24,19 @@ Phase 1 had no creation event, so a movement was known only at receipt time and 
 
 Phase 1's identifier for a received waste movement, minted at receipt by `POST /movements/receive`. Phase 1 had no creation event, so this was the only handle on a movement. Retained on the deprecated receipt endpoints for backward compatibility. Distinct from the Phase 2 Movement ID (see above); reconciliation between the two is deferred to the migration strategy. Format: 8-character sqid, two-letter prefix.
 
-### Transfer ID
+### Delivery ID
 
-The identifier of a drop-off event, minted when the carrier records a drop-off via `POST /transfers`. A single Transfer ID covers one or more Movement IDs delivered together at the same receiver site, which is what makes multi-collection runs possible.
+The identifier of a delivery event, minted when the carrier records a delivery via `POST /deliveries`. A single Delivery ID covers one or more Movement IDs delivered together at the same receiver site, which is what makes multi-collection runs possible.
 
-The driver passes the Transfer ID on to the receiver — typically on paper, sometimes digitally — and the receiver records the receipt against it via `POST /transfers/{transferId}/receipt`.
+The driver passes the Delivery ID on to the receiver — typically on paper, sometimes digitally — and the receiver records the receipt against it via `POST /deliveries/{deliveryId}/receipt`.
 
-### Creation ID, Collection ID, Drop-off ID, Receive ID
+### Creation ID, Collection ID, Delivery Event ID, Receive ID
 
-Per-event identifiers, distinct from the Movement ID and Transfer ID. Each event of a given type has its own ID. They are useful for audit purposes and for referring to specific events without conflating the event with the entity it acts on.
+Per-event identifiers, distinct from the Movement ID and Delivery ID. Each event of a given type has its own ID. They are useful for audit purposes and for referring to specific events without conflating the event with the entity it acts on.
 
-For example, a movement with two collections has one Movement ID, two Collection IDs (one per collection event), one Drop-off ID and one Transfer ID at delivery, and a single Receive ID at the receiver site.
+Note the naming clash the [D-040](decisions.md#d-040) rename introduced: the delivery event's own internal per-event id and the delivery's public identifier are now both "Delivery"-something. This glossary calls the former the **Delivery Event ID** to keep the two apart — the API itself never exposes it (see [D-012](decisions.md#d-012)).
+
+For example, a movement with two collections has one Movement ID, two Collection IDs (one per collection event), one Delivery Event ID and one Delivery ID at delivery, and a single Receive ID at the receiver site.
 
 ### WT-ID
 
@@ -42,23 +44,23 @@ A legacy term from early Phase 1 documentation for the `wasteTrackingId` (see it
 
 ## Resource hierarchy
 
-The API is organised around two top-level resources — Movements and Transfers — each with a sub-resource that captures the event happening to it. The sub-resources are 1:1: each Movement has exactly one Collection, each Transfer has exactly one Receipt. A Movement is on exactly one Transfer; a Transfer can aggregate multiple Movements.
+The API is organised around two top-level resources — Movements and Deliveries — each with a sub-resource that captures the event happening to it. The sub-resources are 1:1: each Movement has exactly one Collection, each Delivery has exactly one Receipt. A Movement is on exactly one Delivery; a Delivery can aggregate multiple Movements.
 
 ```
 /movements/{movementId}/collection      ← 1:1 (the pickup)
-/transfers/{transferId}/receipt         ← 1:1 (the acceptance)
-/transfers/{transferId}                 ← contains a list of Movement IDs
+/deliveries/{deliveryId}/receipt        ← 1:1 (the acceptance)
+/deliveries/{deliveryId}                ← contains a list of Movement IDs
 ```
 
 This shape has two practical consequences worth knowing:
 
-- **Multi-collection runs are multi-Movement.** A driver picking up from three producers in a single run creates three Movements, each with its own Movement ID and its own Collection event. The Movements are then aggregated under a single Transfer ID at the drop-off.
-- **Multi-drop-off runs are multi-Transfer.** A driver dropping at two receivers in a single run mints two Transfer IDs — one per drop-off event. The Movements being delivered are split across the two Transfers.
-- **Hazardous drop-offs reuse the Movement ID.** Hazardous waste cannot be aggregated under a shared Transfer ([D-010](decisions.md#d-010)), so a hazardous drop-off always covers exactly one Movement — and instead of minting a new Transfer ID, the server sets it equal to that Movement ID.
+- **Multi-collection runs are multi-Movement.** A driver picking up from three producers in a single run creates three Movements, each with its own Movement ID and its own Collection event. The Movements are then aggregated under a single Delivery ID at the delivery.
+- **Multi-delivery runs are multi-Delivery.** A driver dropping at two receivers in a single run mints two Delivery IDs — one per delivery event. The Movements being delivered are split across the two Deliveries.
+- **Hazardous deliveries reuse the Movement ID.** Hazardous waste cannot be aggregated under a shared Delivery ([D-010](decisions.md#d-010)), so a hazardous delivery always covers exactly one Movement — and instead of minting a new Delivery ID, the server sets it equal to that Movement ID.
 
 If a load is partially rejected at the receiver, that is recorded on the single Receipt, not by creating new Movements — the Movement is unchanged. How the partial outcome is represented on the receipt is a data-model question still being worked through and is not yet in the API spec.
 
-A recorded drop-off is **immutable**: once a Transfer has been registered via `POST /transfers`, the only property that can change is its soft-delete flag `isDeleted`. `PUT /transfers/{transferId}` accepts that flag alone — the place, carrier, timestamp and Movement IDs cannot be re-edited. To correct a drop-off, soft-delete it and record a fresh one (see D-017 in the [decisions register](decisions.md)).
+A recorded delivery is **immutable**: once a Delivery has been registered via `POST /deliveries`, the only property that can change is its soft-delete flag `isDeleted`. `PUT /deliveries/{deliveryId}` accepts that flag alone — the place, carrier, timestamp and Movement IDs cannot be re-edited. To correct a delivery, soft-delete it and record a fresh one (see D-017 in the [decisions register](decisions.md)).
 
 ## Actors and roles
 
@@ -78,7 +80,7 @@ In the API, the term `broker` is used as an umbrella for any non-carrier-initiat
 
 ### Driver
 
-The individual physically operating the vehicle for a carrier. Currently identified at event level (collection, drop-off) but treated as a sub-actor of the carrier rather than an independent party. The data model around drivers will firm up as we work through it.
+The individual physically operating the vehicle for a carrier. Currently identified at event level (collection, delivery) but treated as a sub-actor of the carrier rather than an independent party. The data model around drivers will firm up as we work through it.
 
 ### Receiver
 
@@ -94,7 +96,7 @@ The party who creates the movement and, in doing so, mints the Movement ID. The 
 
 A collection event is the act of waste passing from a producer into a driver's care, recorded against a specific Movement. Each Movement has exactly one Collection event — a driver picking up multiple loads on a run is recording one Collection per Movement, not multiple Collections on a single Movement.
 
-Earlier drafts of the API distinguished "static collection" (producer to driver) from "transit collection" (driver-to-driver handover). The final model collapses this distinction: every collection is just the collection event for its Movement. A driver-to-driver handover is modelled by ending one Movement at a drop-off and creating a new Movement at the next pickup, rather than as a separate event type.
+Earlier drafts of the API distinguished "static collection" (producer to driver) from "transit collection" (driver-to-driver handover). The final model collapses this distinction: every collection is just the collection event for its Movement. A driver-to-driver handover is modelled by ending one Movement at a delivery and creating a new Movement at the next pickup, rather than as a separate event type.
 
 Endpoint: `POST /movements/{movementId}/collection`.
 
@@ -104,7 +106,7 @@ A read-only flow in which the producer queries the fate of their waste via `GET 
 
 ### Cross-check
 
-The validation of a receipt's carrier and waste details against the linked drop-off. Mismatches return validation warnings rather than hard errors, so the receipt is still recorded when the paperwork chain has minor inconsistencies. The granularity of the check is undefined and tracked in the [decisions register](decisions.md). How the receipt links to the drop-off — and therefore whether the cross-check is unconditional or conditional on a supplied Transfer ID — depends on the open receipt-migration decision; see the register.
+The validation of a receipt's carrier and waste details against the linked delivery. Mismatches return validation warnings rather than hard errors, so the receipt is still recorded when the paperwork chain has minor inconsistencies. The granularity of the check is undefined and tracked in the [decisions register](decisions.md). How the receipt links to the delivery — and therefore whether the cross-check is unconditional or conditional on a supplied Delivery ID — depends on the open receipt-migration decision; see the register.
 
 ### Intended Treatment
 

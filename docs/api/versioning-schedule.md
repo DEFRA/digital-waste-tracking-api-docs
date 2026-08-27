@@ -20,12 +20,12 @@ Single source of truth for release scope.
 | :-- | :-- | :-- | :-- |
 | beta-0 | Receipt of Waste (Production baseline) | receipt | What's live today — the only release currently deployed to production. |
 | beta-1 | Contract API Test | all (no validation) | Tests structural alignment, and usage of identifiers across all the ednpoints. This ensures the process is implemented before the data. |
-| beta-2 | Full Validation (all endpoints) | create, collect, drop-off, receipt, reject | Tests business-rule validation and Success/Warning/Error handling across the full movement lifecycle, including rejection. |
+| beta-2 | Full Validation (all endpoints) | create, collect, delivery, receipt, reject | Tests business-rule validation and Success/Warning/Error handling across the full movement lifecycle, including rejection. |
 | beta-3 | Update a Waste Movement | all (update/cancel) | Tests amending or cancelling a movement already created. |
 | beta-4 | Retrieve Waste Movements | retrieve (GET) | Tests the read/query side; pulling back movement data that has already been submitted. |
 | beta-5 | Final Iterations | — | Absorbs outstanding high-priority feedback from beta-0–beta-4 before releasing to production |
 
-**Milestone:** beta-2 is the earliest release that constitutes a fully testable end-to-end service — the first point an integrator can exercise create → collect → drop-off → receipt (plus reject) with full validation. Flag this when a story depends on full end-to-end integration testing.
+**Milestone:** beta-2 is the earliest release that constitutes a fully testable end-to-end service — the first point an integrator can exercise create → collect → delivery → receipt (plus reject) with full validation. Flag this when a story depends on full end-to-end integration testing.
 
 ---
 
@@ -41,25 +41,25 @@ The current Production state of the platform, and the only release live and depl
 
 ## beta-1: Contract API Test
 
-- **Endpoints:** create, collect, drop-off, receipt
+- **Endpoints:** create, collect, delivery, receipt
 - **Data validation:** None
 - **Response types:** Success, Faked Error
 
 Exact mapping to the former Release 1.1. All endpoints are deployed to the test environment with no data validation or business rules enforced — any payload can be sent to an endpoint and a successful response is returned.
 
-**Value to software providers:** this is where an integrator confirms the highest-risk unknown first; structural alignment. Can the identifiers be correctly consumed and mapped to operational events within their systems, with the correct identifiers (Movement ID, Transfer ID). This release is not a source of validation or error-handling behaviour for story writing, that arrives in beta-2.
+**Value to software providers:** this is where an integrator confirms the highest-risk unknown first; structural alignment. Can the identifiers be correctly consumed and mapped to operational events within their systems, with the correct identifiers (Movement ID, Delivery ID). This release is not a source of validation or error-handling behaviour for story writing, that arrives in beta-2.
 
 ---
 
 ## beta-2: Full Validation (all endpoints)
 
-- **Endpoints:** create, collect, drop-off, receipt, reject
+- **Endpoints:** create, collect, delivery, receipt, reject
 - **Data validation:** Full
 - **Response types:** Success, Warning, Error
 
-Full data structure and business-rule validation is added across every core endpoint (create, collect, drop-off, receipt), and reject-movement functionality is introduced alongside it. Success, Warning, and Error responses can now be returned.
+Full data structure and business-rule validation is added across every core endpoint (create, collect, delivery, receipt), and reject-movement functionality is introduced alongside it. Success, Warning, and Error responses can now be returned.
 
-**Value to software providers:** this is where an integrator moves from "does the process work" to "does my data pass the rules”. Testing real validation logic, warning/error handling, and the ability to reject a movement, across the full create → collect → drop-off → receipt journey. Any story involving validation, warnings, error handling, or rejection belongs to beta-2 or later — not beta-0/beta-1, which have no validation.
+**Value to software providers:** this is where an integrator moves from "does the process work" to "does my data pass the rules”. Testing real validation logic, warning/error handling, and the ability to reject a movement, across the full create → collect → delivery → receipt journey. Any story involving validation, warnings, error handling, or rejection belongs to beta-2 or later — not beta-0/beta-1, which have no validation.
 
 **Open item:** whether beta-2 is released as one block or sliced into independent per-endpoint validation releases has not been decided. Confirm before tagging a story that assumes one or the other.
 

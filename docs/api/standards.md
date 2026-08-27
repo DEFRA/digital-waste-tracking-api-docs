@@ -22,7 +22,7 @@ The smallest consistent set of cross-cutting conventions for the DWT API, applie
 
 ## Baseline
 
-Today only the **Receipt of Waste** API is implemented — the live `waste-movement-external-api` gateway, its `waste-movement-backend`, and the shared `waste-movement-utils`, running on the CDP platform. The rest of the waste-movement journey (creation, collection, drop-off, producer tracking) is planned but not yet built.
+Today only the **Receipt of Waste** API is implemented — the live `waste-movement-external-api` gateway, its `waste-movement-backend`, and the shared `waste-movement-utils`, running on the CDP platform. The rest of the waste-movement journey (creation, collection, delivery, producer tracking) is planned but not yet built.
 
 Where a convention already exists in the implemented endpoints or is provided by the CDP platform, we prefer to **codify what already works** over inventing something new.
 
@@ -120,7 +120,7 @@ Agree one convention per concern and apply it uniformly to the endpoints we buil
   }
   ```
 
-- **`404` distinguished by `type` (D-014):** distinct type URIs — `…/movement-not-found` / `…/transfer-not-found` (parent missing) vs `…/collection-not-recorded` / `…/receipt-not-recorded` (parent exists, event not recorded yet). The status stays `404`; the distinction rides in `type`.
+- **`404` distinguished by `type` (D-014):** distinct type URIs — `…/movement-not-found` / `…/delivery-not-found` (parent missing) vs `…/collection-not-recorded` / `…/receipt-not-recorded` (parent exists, event not recorded yet). The status stays `404`; the distinction rides in `type`.
 
 - **Field errors keep `errorType`, and use JSON Pointer.** Each `errors[]` item is `{ pointer, errorType, message }`: `pointer` is an [RFC 6901](https://www.rfc-editor.org/rfc/rfc6901) JSON Pointer (`/wasteItems/0/weight`), replacing the code's current dotted `key` (`wasteItems[0].weight`); `errorType` is kept as-is from the code — `NotProvided`, `NotAllowed`, `InvalidType`, `InvalidFormat`, `InvalidValue`, `OutOfRange`, `BusinessRuleViolation`, `UnexpectedError`. Same item shape as `validation.warnings` (topic 2).
 
