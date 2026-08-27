@@ -8,7 +8,7 @@
       
       
       
-        <link rel="canonical" href="https://defra.github.io/digital-waste-tracking-api-docs/preview/api/api-standards/">
+        <link rel="canonical" href="https://defra.github.io/digital-waste-tracking-api-docs/preview/api/versioning/">
       
       
       
@@ -21,7 +21,7 @@
     
     
       
-        <title>Api standards - Digital Waste Tracking - API Docs</title>
+        <title>API Versioning - Digital Waste Tracking - API Docs</title>
       
     
     
@@ -140,6 +140,11 @@
     <label class="md-overlay" for="__drawer"></label>
     <div data-md-component="skip">
       
+        
+        <a href="#api-versioning" class="md-skip">
+          Skip to content
+        </a>
+      
     </div>
     <div data-md-component="announce">
       
@@ -175,7 +180,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Api standards
+              API Versioning
             
           </span>
         </div>
@@ -426,151 +431,46 @@
     
       
     
-    <a href="https://github.com/DEFRA/digital-waste-tracking-api-docs/raw/main/docs/api/api-standards.md" title="View source of this page" class="md-content__button md-icon">
+    <a href="https://github.com/DEFRA/digital-waste-tracking-api-docs/raw/main/docs/api/versioning.md" title="View source of this page" class="md-content__button md-icon">
       
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17 18c.56 0 1 .44 1 1s-.44 1-1 1-1-.44-1-1 .44-1 1-1m0-3c-2.73 0-5.06 1.66-6 4 .94 2.34 3.27 4 6 4s5.06-1.66 6-4c-.94-2.34-3.27-4-6-4m0 6.5a2.5 2.5 0 0 1-2.5-2.5 2.5 2.5 0 0 1 2.5-2.5 2.5 2.5 0 0 1 2.5 2.5 2.5 2.5 0 0 1-2.5 2.5M9.27 20H6V4h7v5h5v4.07c.7.08 1.36.25 2 .49V8l-6-6H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h4.5a8.2 8.2 0 0 1-1.23-2"/></svg>
     </a>
   
 
 
-  <h1>Api standards</h1>
-
+<h1 id="api-versioning">API Versioning</h1>
 <!-- prettier-ignore -->
 <div class="admonition warning">
 <p class="admonition-title">Internal documentation</p>
 <p>This page is internal design/planning material for the delivery team, not published guidance for Software Providers integrating with the Digital Waste Tracking API. Content here may be incomplete, in-progress, or superseded.</p>
 </div>
 <h2 id="tldr">TL;DR</h2>
-<p>The smallest consistent set of cross-cutting conventions for the DWT API, applied to <strong>new</strong> endpoints only (live Receipt-of-Waste endpoints untouched), adopting the <a href="https://www.gov.uk/guidance/gds-api-technical-and-data-standards">GOV.UK API standards</a> where they apply.</p>
-<ul>
-<li><strong>Status codes</strong> — <code>201</code>/<code>200</code>; every op documents <code>400</code>+<code>401</code>+<code>500</code>, <code>404</code> with an id, <code>402</code> on charge-gated writes.</li>
-<li><strong>Responses</strong> — success envelope <code>{ data, meta?, validation? }</code>; failure as <strong>RFC 9457 Problem Details</strong> (<code>application/problem+json</code> — <code>type</code>, <code>title</code>, <code>detail</code>, <code>instance</code>, <code>requestId</code>, <code>errors[]</code>).</li>
-<li><strong>Accept-with-warnings</strong> — store on soft data-quality issues, reject only on schema/structure/state/authorisation.</li>
-<li><strong>Tracing</strong> — <code>x-request-id</code> on every response; <code>requestId</code> in error bodies.</li>
-<li><strong>Pagination</strong> — none yet (reserve <code>meta.pagination</code>).</li>
-</ul>
+<p>Version the API <strong>during beta</strong> (path-based milestones, <code>/beta-N</code>, e.g. <code>/beta-1/waste-movements/{id}</code>, run in parallel) to iterate on shape while breaking changes are frequent; at <strong>GA drop the version</strong> and publish a single stable <strong>unversioned</strong> API that evolves <strong>additive-only</strong> thereafter. Within a given <code>/beta-N</code>, software providers get the <strong>full endpoint surface</strong> — never a split where some endpoints sit on one version and some on another. Beta versions are retired by usage, signalled in-band with a <code>Deprecation: true</code> header.</p>
 <h2 id="baseline">Baseline</h2>
-<p>Today only the <strong>Receipt of Waste</strong> API is implemented — the live <code>waste-movement-external-api</code> gateway, its <code>waste-movement-backend</code>, and the shared <code>waste-movement-utils</code>, running on the CDP platform. The rest of the waste-movement journey (creation, collection, drop-off, producer tracking) is planned but not yet built.</p>
-<p>Where a convention already exists in the implemented endpoints or is provided by the CDP platform, we prefer to <strong>codify what already works</strong> over inventing something new.</p>
-<p>Beyond our own code, an external baseline already applies: the <a href="https://www.gov.uk/guidance/gds-api-technical-and-data-standards">GOV.UK API technical and data standards</a>, with companion guidance on <a href="https://www.gov.uk/guidance/how-to-document-apis">documenting APIs</a>, are the cross-government standards we are expected to follow. We <strong>adopt</strong> them where they apply rather than invent our own — they inform our decisions on status codes and error handling. The full list is in <a href="#references">References</a>.</p>
+<p>There is no versioning of any kind today — no path prefix, no version header, no query parameter. The spec's <code>info.version</code> (<code>0.2.5-alpha</code>) is a documentation label, not a runtime version, and the server URL carries no <code>/v1</code>. The only existing statement is a terms-of-service line telling integrators to keep their software compatible with "the latest version" — a single-track policy with no technical scheme.</p>
+<p>Only the <strong>Receipt of Waste</strong> endpoints are live; the rest of the waste-movement journey is still to be built. This scheme applies to those <strong>new</strong> endpoints — the already-live endpoints keep their current unversioned paths.</p>
+<p>The <a href="https://www.gov.uk/guidance/gds-api-technical-and-data-standards">GOV.UK API technical and data standards</a> recommend URI-path versioning <em>if</em> you version, and advise against header and media-type versioning (proxies and firewalls can block them); their overriding principle is not to break existing consumers.</p>
 <h2 id="problem">Problem</h2>
-<p>The cross-cutting API conventions — how we signal outcomes, shape responses, page, and trace requests — were never standardised for the receipt endpoints. Without an agreed standard, each new endpoint is free to invent its own. Left unaddressed, patterns diverge, integrators have to special-case our responses, and the cost of correcting it only grows as more of the journey ships.</p>
-<p>That makes <strong>now</strong> — before the remaining endpoints are written — the right moment to set a <strong>basic, consistent foundation</strong>. We are not aiming for a complete API-design rulebook: we want the <strong>smallest set of conventions that is consistent and can scale</strong> into a richer standard later if the service needs it.</p>
+<p>As the remaining endpoints are built we will discover the right shape by iterating, which means frequent breaking changes before the contract stabilises. We need a way to ship those iterations without conflict — and, once stable, a public contract that never breaks its integrators. A single fixed policy serves one phase well and the other badly: always-version carries needless machinery and duplication once the shape is stable; never-version makes rapid, breaking iteration painful while we are still designing.</p>
 <h2 id="solution">Solution</h2>
-<p>Agree one convention per concern and apply it uniformly to the endpoints we build from here on. Keep each convention as simple as possible while leaving room to grow.</p>
-<p><strong>New endpoints only — leave what exists alone.</strong> These conventions apply to the <strong>newly created</strong> endpoints (the rest of the waste-movement journey, still to be built). We deliberately do <strong>not</strong> retrofit them onto the already-implemented endpoints — the live Receipt of Waste create/update endpoints.</p>
-<p><strong>Follow the cross-government standard.</strong> The <a href="https://www.gov.uk/guidance/gds-api-technical-and-data-standards">GOV.UK API technical and data standards</a> are the baseline government API guidance we are expected to follow.</p>
-<p><strong>Accept-with-warnings.</strong> This is the decided, current implementation. The service stores an operational record even when it has soft, data-quality problems, and returns those as <code>validation.warnings</code> (D-006). It still rejects with <code>400</code> when a request cannot be safely stored: schema/format errors, and structural, state-integrity or authorisation violations (D-009, D-036). In short: warn on data quality, reject on structure/state/authorisation. We adopt this as-is; it frames the status-code and response-format topics below.</p>
-<h3 id="1-status-codes-for-responses">1. Status codes for responses</h3>
-<p><strong>In the code today:</strong> a canonical <code>HTTP_STATUS</code> set already exists in <code>waste-movement-utils</code>. Live receipt endpoints emit <code>201</code> (create), <code>200</code> (update), <code>400</code>, <code>404</code>, <code>401</code> (JWT), <code>500</code>, and <code>402</code> (Payment Required — service-charge expiry).</p>
-<p><strong>Proposal:</strong></p>
+<p><strong>Version while in beta, then drop the version at GA.</strong> Use versioning as a development-phase tool to iterate on the API shape; once the shape is settled, publish a single stable <strong>unversioned</strong> API and evolve it additively from then on. This applies the <a href="https://www.hmeid.com/blog/just-say-no-to-versioning">"just say no to versioning"</a> discipline exactly where it matters — the stable public contract — while keeping versioning where it earns its keep — rapid, breaking iteration during beta.</p>
 <ul>
-<li><strong>Success:</strong> <code>201</code> for a POST that creates (body carries the new id), <code>200</code> for a PUT that updates (body carries any warnings). Matches the live gateway. <code>204 No Content</code> is not used, because responses carry a <code>validation</code> body.</li>
-<li><strong>Reject vs warn:</strong> governed by the accept-with-warnings model above — a storable record is <code>2xx</code> with <code>validation.warnings</code>; only unstorable requests are rejected with <code>400</code>.</li>
-<li><strong>Baseline error set every operation documents:</strong> <code>400</code> (validation), <code>401</code> (auth) and <code>500</code> (server) on every operation; <code>404</code> where the path has an id; <code>402</code> on service-charge-gated writes.</li>
-<li><strong>Not now:</strong> hold off on <code>409</code> (state conflicts) and <code>422</code> (malformed vs semantically-invalid split) — keep <code>400</code> for all client validation, and note these as future refinements so we don't preclude them.</li>
+<li><strong>During beta — versioned in the URI path.</strong> While we are still discovering the shape, breaks are frequent, so we version each milestone in the path (<code>/beta-0</code>, <code>/beta-1</code>, …) and can run milestones <strong>in parallel</strong>, letting the small, controlled set of early integrators migrate at their own pace. The version is a <strong>prefix</strong> on the resource path, not a separate host or query parameter — e.g. the collection-event endpoint is <code>/beta-0/waste-movements/{id}/collection</code> in milestone 0 and, unchanged in shape, <code>/beta-1/waste-movements/{id}/collection</code> once milestone 1 exists. Path is the simplest addressable form and beta is non-public, so it is acceptable here; a request header would keep URLs cleaner (nodding to review feedback that milestone labels shouldn't sit in public paths), but that only matters once public — which, by design, this never is.</li>
+<li><strong>Full endpoint parity within a version — no split access.</strong> A software provider integrating against <code>/beta-N</code> must be able to reach the <strong>entire</strong> endpoint surface at that prefix; it is never the case that some endpoints live only on <code>/beta-N</code> and others only on <code>/beta-N+1</code>. Concretely, this means: when a breaking change forces a milestone bump, we copy <strong>every</strong> existing endpoint forward into the new version — not just the one that changed — so <code>/beta-N+1</code> is complete and self-consistent from the moment it exists. This costs more duplication per bump but keeps the integration story simple: one version number to code against, never a matrix of which endpoint is on which milestone.</li>
+<li><strong>At GA — drop the version; unversioned and additive-only thereafter.</strong> Once the shape is settled we publish one <strong>unversioned</strong> API and commit to never breaking it: additive changes only (new optional fields/endpoints/enum values, shipped in place), clients tolerate unknown fields, complexity absorbed server-side. A genuinely unavoidable breaking change is treated as a <strong>new resource/API</strong>, not a <code>/v2</code>. This honours the GOV.UK standard's overriding principle — don't break existing consumers.</li>
+<li><strong>The beta→GA cutover.</strong> Dropping the version at GA is itself a one-time breaking change for beta integrators — but that is expected (a beta contract is unstable by definition) and it is a single, announced event. Smooth it with the deprecation mechanism below: run the final <code>/beta-N</code> <strong>alongside</strong> the unversioned GA API for a migration window, mark its paths deprecated, then retire them.</li>
+<li><strong>New endpoints only; existing stay put.</strong> All of this applies to the new waste-movement endpoints; the already-live endpoints keep their current unversioned paths — we don't move them.</li>
+<li><strong>Orchestrated in the service</strong> Running beta milestones in parallel lives in the <strong>same service</strong> (branching/duplicated handlers per milestone) — confirmed there is no CDP platform versioning/routing capability to use instead, so in-service duplication is the mechanism. (Post-GA there is a single unversioned API, so this cost disappears.)</li>
+<li><strong>Usage-driven deprecation, signalled by <code>Deprecation: true</code>.</strong> To retire a beta version, monitor calls <strong>per software provider</strong> (via the JWT <code>client_id</code> that identifies the calling software), nudge remaining providers to migrate, and once use is negligible, withdraw it. While deprecated, every response from that version carries a single <code>Deprecation: true</code> header — an in-band signal a monitoring client can detect immediately, not only via out-of-band comms.</li>
 </ul>
-<h3 id="2-2xx-response-format">2. <code>2xx</code> response format</h3>
-<p><strong>In the code today:</strong> success is <code>{ wasteTrackingId, validation?: { warnings } }</code> on create and <code>{ validation?: { warnings } }</code> (or <code>{}</code>) on update — the <code>validation</code> object is included <strong>only when warnings exist</strong>. Warning item is <code>{ key, errorType, message }</code>.</p>
-<p><strong>Proposal:</strong></p>
-<ul>
-<li><strong>One consistent envelope for every response:</strong> <code>data</code> holds the payload, <code>meta</code> is reserved for response metadata (e.g. pagination, added later), and <code>validation</code> carries warnings on write operations.</li>
-<li><strong><code>validation</code> always present on writes:</strong> create/update responses always include <code>validation.warnings</code> — an empty array when clean — so the shape is predictable and clients need no null-check.</li>
-<li><strong>Create returns the new id inside <code>data</code>,</strong> e.g. <code>data: { movementId }</code>. It stays an <em>object</em> deliberately, so it can be extended to the full created resource later without a breaking change.</li>
-<li><strong>Warnings and field errors share one item shape</strong> — <code>{ pointer, errorType, message }</code>, where <code>pointer</code> is a JSON Pointer to the field. The same item appears in <code>validation.warnings</code> here and in the <code>errors[]</code> of a <code>400</code> Problem Details response (topic 3).</li>
-</ul>
-<div class="highlight"><pre><span></span><code><span class="c1">// 201 create</span>
-<span class="p">{</span>
-<span class="w">  </span><span class="nt">"data"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">"movementId"</span><span class="p">:</span><span class="w"> </span><span class="s2">"25HRA0B2"</span><span class="w"> </span><span class="p">},</span>
-<span class="w">  </span><span class="nt">"validation"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">"warnings"</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span><span class="w"> </span><span class="p">}</span>
-<span class="p">}</span>
-<span class="c1">// 200 update</span>
-<span class="p">{</span>
-<span class="w">  </span><span class="nt">"data"</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">"validation"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">"warnings"</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span><span class="w"> </span><span class="p">}</span>
-<span class="p">}</span>
-<span class="c1">// 200 list</span>
-<span class="p">{</span><span class="w"> </span><span class="nt">"data"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="cm">/* items */</span><span class="w"> </span><span class="p">],</span><span class="w"> </span><span class="nt">"meta"</span><span class="p">:</span><span class="w"> </span><span class="p">{}</span><span class="w"> </span><span class="p">}</span>
-</code></pre></div>
-<h3 id="3-4xx-5xx-response-format">3. <code>4xx</code> &amp; <code>5xx</code> response format</h3>
-<p><strong>In the code today:</strong> two error shapes. <code>400</code> uses <code>{ validation: { errors: [{ key, errorType, message }] } }</code> (its <code>errorType</code> enum includes <code>UnexpectedError</code>); <code>401/402/404/500</code> use the default <strong>Hapi Boom</strong> shape <code>{ statusCode, error, message }</code>.</p>
-<p><strong>Proposal:</strong> adopt <strong><a href="https://www.rfc-editor.org/rfc/rfc9457">RFC 9457 Problem Details</a></strong> (<code>application/problem+json</code>) as the single failure envelope for every <code>4xx</code>/<code>5xx</code>. This is a change from the code (which emits two shapes today); GOV.UK neither mandates nor forbids it — we take it because it is an established IETF standard that gives one consistent, self-describing error shape.</p>
-<ul>
-<li>
-<p><strong>Members we use</strong> (a flat top-level object, no <code>error</code> wrapper):</p>
-</li>
-<li>
-<p><code>type</code> — a stable URI identifying the problem kind; our machine-readable id, dereferenceable to a docs page. Replaces the old <code>code</code> enum.</p>
-</li>
-<li><code>title</code> — short, stable human summary for that <code>type</code>.</li>
-<li><code>detail</code> — human message specific to this occurrence.</li>
-<li><code>instance</code> — the request path where it occurred.</li>
-<li><code>requestId</code> — extension member, the trace id (topic 5).</li>
-<li><code>errors[]</code> — extension member carrying field-level problems on <code>400</code>; omitted otherwise.</li>
-<li>We <strong>omit</strong> the optional advisory <code>status</code> member — the HTTP status line already carries it, and duplicating it only invites drift.</li>
-</ul>
-<div class="highlight"><pre><span></span><code><span class="c1">// 400 — validation   (Content-Type: application/problem+json)</span>
-<span class="p">{</span>
-<span class="w">  </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://waste-tracking.service.gov.uk/problems/validation-error"</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">"title"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Request validation failed"</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">"detail"</span><span class="p">:</span><span class="w"> </span><span class="s2">"The receipt could not be stored because 2 fields are invalid."</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">"instance"</span><span class="p">:</span><span class="w"> </span><span class="s2">"/movements/25HRA0B2/receive"</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">"requestId"</span><span class="p">:</span><span class="w"> </span><span class="s2">"…"</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">"errors"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="nt">"pointer"</span><span class="p">:</span><span class="w"> </span><span class="s2">"/wasteItems/0/ewcCodes/0"</span><span class="p">,</span><span class="w"> </span><span class="nt">"errorType"</span><span class="p">:</span><span class="w"> </span><span class="s2">"InvalidValue"</span><span class="p">,</span><span class="w"> </span><span class="nt">"message"</span><span class="p">:</span><span class="w"> </span><span class="s2">"EWC code '99 99 99' is not a recognised code"</span><span class="w"> </span><span class="p">},</span>
-<span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="nt">"pointer"</span><span class="p">:</span><span class="w"> </span><span class="s2">"/receiver/authorisationNumbers"</span><span class="p">,</span><span class="w"> </span><span class="nt">"errorType"</span><span class="p">:</span><span class="w"> </span><span class="s2">"NotProvided"</span><span class="p">,</span><span class="w"> </span><span class="nt">"message"</span><span class="p">:</span><span class="w"> </span><span class="s2">"At least one authorisation number is required"</span><span class="w"> </span><span class="p">}</span>
-<span class="w">  </span><span class="p">]</span>
-<span class="p">}</span>
-<span class="c1">// 404 / 401 / 500   (no field errors)</span>
-<span class="p">{</span>
-<span class="w">  </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://waste-tracking.service.gov.uk/problems/movement-not-found"</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">"title"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Waste movement not found"</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">"detail"</span><span class="p">:</span><span class="w"> </span><span class="s2">"No waste movement exists with tracking ID 25HRA0B2."</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">"instance"</span><span class="p">:</span><span class="w"> </span><span class="s2">"/movements/25HRA0B2"</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">"requestId"</span><span class="p">:</span><span class="w"> </span><span class="s2">"…"</span>
-<span class="p">}</span>
-</code></pre></div>
-<ul>
-<li>
-<p><strong><code>404</code> distinguished by <code>type</code> (D-014):</strong> distinct type URIs — <code>…/movement-not-found</code> / <code>…/transfer-not-found</code> (parent missing) vs <code>…/collection-not-recorded</code> / <code>…/receipt-not-recorded</code> (parent exists, event not recorded yet). The status stays <code>404</code>; the distinction rides in <code>type</code>.</p>
-</li>
-<li>
-<p><strong>Field errors keep <code>errorType</code>, and use JSON Pointer.</strong> Each <code>errors[]</code> item is <code>{ pointer, errorType, message }</code>: <code>pointer</code> is an <a href="https://www.rfc-editor.org/rfc/rfc6901">RFC 6901</a> JSON Pointer (<code>/wasteItems/0/weight</code>), replacing the code's current dotted <code>key</code> (<code>wasteItems[0].weight</code>); <code>errorType</code> is kept as-is from the code — <code>NotProvided</code>, <code>NotAllowed</code>, <code>InvalidType</code>, <code>InvalidFormat</code>, <code>InvalidValue</code>, <code>OutOfRange</code>, <code>BusinessRuleViolation</code>, <code>UnexpectedError</code>. Same item shape as <code>validation.warnings</code> (topic 2).</p>
-</li>
-<li>
-<p><strong><code>5xx</code></strong> uses the same Problem Details shape, with <code>detail</code> never leaking internals (stack traces, downstream errors). All error responses set <code>Content-Type: application/problem+json</code>.</p>
-</li>
-<li>
-<p><strong><code>type</code> URIs are minted under a stable base</strong> — <code>https://waste-tracking.service.gov.uk/problems/…</code> — ideally resolving to a short docs page per problem type.</p>
-</li>
-</ul>
-<h3 id="4-pagination">4. Pagination</h3>
-<p><strong>In the code today:</strong> there are no list endpoints, so nothing paginates.</p>
-<p><strong>Proposal:</strong> don't decide pagination now — keep the design extensible so it can be added later without a breaking change.</p>
-<p>When an list endpoint is eventually added, it returns the Topic 2 <code>{ data, meta }</code> envelope — the list under <code>data</code>, <code>meta</code> reserved for response metadata. Because paging metadata would live under <code>meta.pagination</code>, never mixed into <code>data</code>, pagination can then be introduced <strong>purely additively</strong>, without breaking existing clients.</p>
-<h3 id="5-tracing">5. Tracing</h3>
-<p><strong>In the code today:</strong> the CDP platform propagates a trace id <em>internally</em> — <code>@defra/hapi-tracing</code> reads the inbound <code>x-cdp-request-id</code> header, surfaces it in logs as <code>trace.id</code>, and forwards it to downstream calls. But it is <strong>read-only inbound and never returned to the client</strong>, and it is <strong>not generated</strong> when the header is absent. So a client currently has no way to learn the trace id for a request.</p>
-<p><strong>Requirement:</strong> a client must be able to obtain the trace id for their request, so that when something goes wrong they can quote it back to us and we can find that request in our logs.</p>
-<p><strong>Proposal:</strong></p>
-<ol>
-<li><strong>Guarantee a trace id exists</strong> for every request — use CDP's inbound <code>x-cdp-request-id</code>; if it is absent, generate one server-side so every request is traceable.</li>
-<li><strong>Echo it back on every response</strong> (success <em>and</em> error) under a <strong>public</strong> header, <strong><code>x-request-id</code></strong>. The value is the internal CDP trace id, but the public name deliberately does <strong>not</strong> leak the platform — we keep <code>x-cdp-request-id</code> for inbound/internal use only and map the same value onto <code>x-request-id</code> on the way out. This is the core change.</li>
-<li><strong>Surface it in the error body too</strong> — a top-level <code>requestId</code> on <code>4xx</code>/<code>5xx</code> responses — so a developer sees it without inspecting headers (ties into the error-format decision in topic 3). The body field is named <code>requestId</code> to match the <code>x-request-id</code> header.</li>
-<li><strong>Document it</strong> in the OpenAPI spec: the <code>x-request-id</code> response header on all responses, the <code>requestId</code> field on the error schema, and guidance to include it when contacting support.</li>
-</ol>
-<p>Keep it minimal: the header echo is the essential part; the error-body field is a developer-friendly addition. <strong>Success (<code>2xx</code>) responses carry the id in the <code>x-request-id</code> header only</strong> — the body stays the clean <code>{ data, … }</code> envelope. The id appears in the body solely on <code>4xx</code>/<code>5xx</code>, where a developer needs to quote it to support. If cross-vendor distributed tracing is ever needed, a standard <code>traceparent</code> header can be added alongside without breaking <code>x-request-id</code>.</p>
 <h2 id="rabbit-holes">Rabbit holes</h2>
 <ul>
-<li><strong>Pagination (Topic 4).</strong> Don't choose or build a paging scheme now — there is no read/collection endpoint that needs one. Reserve the <code>meta</code> hook and stop there; the scheme is decided with the first endpoint that actually pages.</li>
+<li><strong>Cost of full-surface duplication per bump.</strong> Requiring every endpoint to exist at the latest <code>/beta-N</code> means a single breaking change to one endpoint forces copying all the others forward too, not just the one that changed. As the endpoint count grows this makes each milestone bump more expensive — not a blocker, but worth watching if milestones turn out to be frequent.</li>
 </ul>
 <h2 id="references">References</h2>
-<p>Standards and guidance this pitch draws on. Individual topics cite the specific one that applies.</p>
 <ul>
-<li><a href="https://www.gov.uk/guidance/gds-api-technical-and-data-standards">GOV.UK — API technical and data standards</a> — the baseline government API guidance (informs status codes and error handling).</li>
-<li><a href="https://www.gov.uk/guidance/how-to-document-apis">GOV.UK — Documenting APIs</a> — how government API documentation should be structured and written (informs the eventual published spec/docs).</li>
-<li><a href="https://defra.github.io/software-development-standards/">Defra software development standards</a> — Defra's development standards.</li>
-<li><a href="https://www.rfc-editor.org/rfc/rfc9457">RFC 9457 — Problem Details for HTTP APIs</a> — the IETF standard error-response format adopted for <code>4xx</code>/<code>5xx</code> (topic 3).</li>
-<li><a href="https://www.rfc-editor.org/rfc/rfc6901">RFC 6901 — JSON Pointer</a> — the field-path syntax used in <code>errors[].pointer</code> (topic 3).</li>
+<li><a href="https://www.gov.uk/guidance/gds-api-technical-and-data-standards">GOV.UK — API technical and data standards</a> — recommends URI-path versioning; overriding principle is not to break existing consumers.</li>
+<li><a href="https://www.hmeid.com/blog/just-say-no-to-versioning">"Just say no to versioning" — hmeid.com</a> — the argument for evolving additively instead of versioning; the basis for the unversioned, additive-only GA approach.</li>
 </ul>
 
 

@@ -518,7 +518,7 @@
 </tr>
 <tr>
 <td>D-038</td>
-<td><a href="#api-versioning-versioned-during-alpha-unversioned-at-ga">API versioning: versioned during alpha, unversioned at GA</a></td>
+<td><a href="#api-versioning-versioned-during-beta-unversioned-at-ga">API versioning: versioned during beta, unversioned at GA</a></td>
 <td>✅ Decided</td>
 <td>🔴 High</td>
 <td><strong>Versioning</strong></td>
@@ -994,7 +994,7 @@
 <h3 id="cross-cutting-api-standards-for-new-endpoints">Cross-cutting API standards for new endpoints</h3>
 <p><strong>D-039</strong> · ✅ Decided · Impact: 🔴 High · Area: <strong>API conventions</strong> · Related: <a href="#d-006">D-006</a>, <a href="#d-009">D-009</a>, <a href="#d-014">D-014</a>, <a href="#d-036">D-036</a></p>
 <p><strong>Context.</strong> The cross-cutting conventions — how new endpoints signal outcomes, shape responses, and trace requests — were never standardised for the receipt endpoints, so each new endpoint was free to invent its own. Before the rest of the waste-movement journey is built, a small consistent foundation was agreed: adopt the <a href="https://www.gov.uk/guidance/gds-api-technical-and-data-standards">GOV.UK API standards</a> where they apply, and codify what the live receipt endpoints already do. Applies to <strong>new</strong> endpoints only — the live Receipt of Waste create/update endpoints are untouched.</p>
-<p><strong>Decision.</strong> Adopt the conventions set out in <a href="../../api/api-standards/"><code>../api/api-standards.md</code></a>, which is the <strong>source of truth</strong> for the detail, examples and rationale. This register entry is the pointer to it, not a second copy. In brief:</p>
+<p><strong>Decision.</strong> Adopt the conventions set out in <a href="../../api/standards/"><code>../api/standards.md</code></a>, which is the <strong>source of truth</strong> for the detail, examples and rationale. This register entry is the pointer to it, not a second copy. In brief:</p>
 <ul>
 <li><strong>Status codes</strong> — <code>201</code> create / <code>200</code> update; every operation documents <code>400</code> + <code>401</code> + <code>500</code>, <code>404</code> where the path has an id, <code>402</code> on charge-gated writes; <code>204</code> not used. Reject-vs-warn follows the accept-with-warnings model (<a href="#d-006">D-006</a>, <a href="#d-009">D-009</a>, <a href="#d-036">D-036</a>). <code>409</code>/<code>422</code> are noted as future refinements, not adopted now.</li>
 <li><strong><code>2xx</code> envelope</strong> — one shape, <code>{ data, meta?, validation }</code>; <code>validation</code> always present on writes (empty array when clean); create returns the new id inside <code>data</code> as an object.</li>
@@ -1002,7 +1002,7 @@
 <li><strong>Tracing</strong> — a trace id is guaranteed per request and echoed on every response as the public <code>x-request-id</code> header (mapped from CDP's internal <code>x-cdp-request-id</code>), with a top-level <code>requestId</code> on error bodies.</li>
 <li><strong>Pagination — deferred.</strong> No list endpoints exist yet; the <code>meta.pagination</code> slot is reserved so paging can be added purely additively later. The scheme itself is decided with the first endpoint that pages.</li>
 </ul>
-<p><strong>Consequences.</strong> New endpoints share one status-code vocabulary, one success envelope and one failure envelope with each other and with the GOV.UK API standards, and every response is traceable. The detail is maintained in <a href="../../api/api-standards/"><code>../api/api-standards.md</code></a> — update that document, not this record, when the conventions evolve.</p>
+<p><strong>Consequences.</strong> New endpoints share one status-code vocabulary, one success envelope and one failure envelope with each other and with the GOV.UK API standards, and every response is traceable. The detail is maintained in <a href="../../api/standards/"><code>../api/standards.md</code></a> — update that document, not this record, when the conventions evolve.</p>
 <h2 id="open">Open</h2>
 <p><a id="d-019"></a></p>
 <h3 id="fate-of-waste-get-producer-journey-query-proposal">Fate-of-waste GET — producer journey query (proposal)</h3>
@@ -1092,7 +1092,7 @@
 <li><strong>Deprecation</strong> — beta versions are retired by usage: monitor calls per software provider (via the JWT <code>client_id</code>), and while deprecated every response carries a single <code>Deprecation: true</code> header as an in-band signal.</li>
 </ul>
 <p>Applies only to the new endpoints; the already-live Receipt of Waste endpoints keep their current unversioned paths.</p>
-<p>Full rationale in the <a href="../../api/api-versioning/">versioning pitch</a>.</p>
+<p>Full rationale in the <a href="../../api/versioning/">versioning pitch</a>.</p>
 <p><strong>Options.</strong></p>
 <p><strong>Option A — Aggregate model.</strong> Implement as described in <code>model/mongo-schema-proposal.md</code>. Closest to Phase 1 conventions; lowest learning curve. Mutation-based writes; <code>-history</code> snapshot collections; <code>revision</code> as concurrency guard. Does not support projection rebuild or event replay without additional work. Previously decided; not yet implemented.</p>
 <p><strong>Option B — Per-event-type collections.</strong> Described in <a href="../model/mongo-schema-proposal-per-event/"><code>model/mongo-schema-proposal-per-event.md</code></a>. One collection per business event (<code>movement-creations</code>, <code>collection-events</code>, <code>transfer-dropoffs</code>, <code>receipt-events</code>), each with a <code>-history</code> companion. GET requests require two-collection reads; fate-of-waste requires up to four. State must either be denormalised onto the creation document (requiring multi-document transactions on collection-event writes) or computed at read time. The unique compound index on <code>{ movementId, sequence }</code> in <code>collection-events</code> handles concurrency for collection-event appends in place of the aggregate <code>revision</code> guard. Independent event-type queries and bounded document growth are the genuine advantages over Option A.</p>
