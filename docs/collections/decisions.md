@@ -30,7 +30,7 @@ At-a-glance view of every decision, sorted by status, then by impact (structural
 | D-015 | [Movement ↔ Collection and Transfer ↔ Receipt are 1:1](#movement-collection-and-transfer-receipt-are-11) | ✅ Decided | 🔴 High | **Resource model** |
 | D-016 | [Level 2 (Richardson Maturity Model) resource model](#level-2-richardson-maturity-model-resource-model) | ✅ Decided | 🔴 High | **Resource model** |
 | D-036 | [Write authorisation: open append, amend restricted to the authoring organisation](#write-authorisation-open-append-amend-restricted-to-the-authoring-organisation) | ✅ Decided | 🔴 High | **Authorisation** |
-| D-038 | [API versioning: versioned during alpha, unversioned at GA](#api-versioning-versioned-during-alpha-unversioned-at-ga) | ✅ Decided | 🔴 High | **Versioning** |
+| D-038 | [API versioning: versioned during beta, unversioned at GA](#api-versioning-versioned-during-beta-unversioned-at-ga) | ✅ Decided | 🔴 High | **Versioning** |
 | D-039 | [Cross-cutting API standards for new endpoints](#cross-cutting-api-standards-for-new-endpoints) | ✅ Decided | 🔴 High | **API conventions** |
 | D-004 | [Receipt path parameter stays `{wasteTrackingId}`](#receipt-path-parameter-stays-wastetrackingid) | ✅ Decided | 🟠 Medium | **Identifiers** |
 | D-006 | [Cross-check of receipt details against the linked drop-off](#cross-check-of-receipt-details-against-the-linked-drop-off) | ✅ Decided | 🟠 Medium | **Receipt** |
@@ -501,7 +501,7 @@ The two credentials are issued through different paths, and Phase 2 changes neit
 
 **Context.** The cross-cutting conventions — how new endpoints signal outcomes, shape responses, and trace requests — were never standardised for the receipt endpoints, so each new endpoint was free to invent its own. Before the rest of the waste-movement journey is built, a small consistent foundation was agreed: adopt the [GOV.UK API standards](https://www.gov.uk/guidance/gds-api-technical-and-data-standards) where they apply, and codify what the live receipt endpoints already do. Applies to **new** endpoints only — the live Receipt of Waste create/update endpoints are untouched.
 
-**Decision.** Adopt the conventions set out in [`../api/api-standards.md`](../api/api-standards.md), which is the **source of truth** for the detail, examples and rationale. This register entry is the pointer to it, not a second copy. In brief:
+**Decision.** Adopt the conventions set out in [`../api/standards.md`](../api/standards.md), which is the **source of truth** for the detail, examples and rationale. This register entry is the pointer to it, not a second copy. In brief:
 
 - **Status codes** — `201` create / `200` update; every operation documents `400` + `401` + `500`, `404` where the path has an id, `402` on charge-gated writes; `204` not used. Reject-vs-warn follows the accept-with-warnings model ([D-006](#d-006), [D-009](#d-009), [D-036](#d-036)). `409`/`422` are noted as future refinements, not adopted now.
 - **`2xx` envelope** — one shape, `{ data, meta?, validation }`; `validation` always present on writes (empty array when clean); create returns the new id inside `data` as an object.
@@ -509,7 +509,7 @@ The two credentials are issued through different paths, and Phase 2 changes neit
 - **Tracing** — a trace id is guaranteed per request and echoed on every response as the public `x-request-id` header (mapped from CDP's internal `x-cdp-request-id`), with a top-level `requestId` on error bodies.
 - **Pagination — deferred.** No list endpoints exist yet; the `meta.pagination` slot is reserved so paging can be added purely additively later. The scheme itself is decided with the first endpoint that pages.
 
-**Consequences.** New endpoints share one status-code vocabulary, one success envelope and one failure envelope with each other and with the GOV.UK API standards, and every response is traceable. The detail is maintained in [`../api/api-standards.md`](../api/api-standards.md) — update that document, not this record, when the conventions evolve.
+**Consequences.** New endpoints share one status-code vocabulary, one success envelope and one failure envelope with each other and with the GOV.UK API standards, and every response is traceable. The detail is maintained in [`../api/standards.md`](../api/standards.md) — update that document, not this record, when the conventions evolve.
 
 ## Open
 
@@ -649,7 +649,7 @@ A full evaluation of the CQRS model against all 37 decisions and the live Phase 
 
 Applies only to the new endpoints; the already-live Receipt of Waste endpoints keep their current unversioned paths.
 
-Full rationale in the [versioning pitch](../api/api-versioning.md).
+Full rationale in the [versioning pitch](../api/versioning.md).
 
 **Options.**
 
