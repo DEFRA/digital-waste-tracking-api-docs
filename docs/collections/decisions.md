@@ -48,6 +48,7 @@ At-a-glance view of every decision, sorted by status, then by impact (structural
 | D-002 | [Single OpenAPI file, not `$ref`-split](#single-openapi-file-not-ref-split) | ✅ Decided | 🟢 Low | **Spec structure** |
 | D-003 | [OpenAPI 3.0.3, not 3.1](#openapi-303-not-31) | ✅ Decided | 🟢 Low | **Spec structure** |
 | D-011 | [Static and transit collection collapsed into a single endpoint](#static-and-transit-collection-collapsed-into-a-single-endpoint) | ✅ Decided | 🟢 Low | **Collection** |
+| D-040 | [Rename drop-off and Transfer ID to delivery and Delivery ID](#rename-drop-off-and-transfer-id-to-delivery-and-delivery-id) | ✅ Decided | 🟢 Low | **Naming** |
 | D-022 | [Receipt migration: new endpoint vs extend Phase 1](#receipt-migration-new-endpoint-vs-extend-phase-1) | ⏳ Open | 🔴 High | **Receipt** |
 | D-025 | [Receipt acceptance / rejection outcome (new in Phase 2)](#receipt-acceptance-rejection-outcome-new-in-phase-2) | ⏳ Open | 🔴 High | **Receipt** |
 | D-037 | [Phase 2 MongoDB storage model — three options under evaluation](#phase-2-mongodb-storage-model-three-options-under-evaluation) | ⏳ Open | 🔴 High | **Data model** |
@@ -184,6 +185,7 @@ The rules, applied uniformly across the three deletable events:
 
 - **PUT-only.** `isDeleted` may only be set to `true` via the event's `PUT` (update). A `POST` (create) request that supplies `isDeleted: true` is rejected with a `NotAllowed` validation error; `POST` requests may omit the field or send `false`.
 - **No subsequent event.** An event may be marked deleted only while no later event in the chain has been recorded against it:
+
   - A Movement cannot be deleted once its Collection has been recorded.
   - A Collection cannot be deleted once its Movement has been referenced in a Drop-off.
   - A Drop-off (Transfer) cannot be deleted once a Receipt has been recorded against it.
@@ -191,6 +193,7 @@ The rules, applied uniformly across the three deletable events:
   This checks whether the later event's record _exists_, not whether it is itself currently active — once a Collection has been recorded against a Movement, that Movement stays locked from deletion even if the Collection is later deleted too. The chain of what-was-recorded is preserved; deleting a later event does not reopen an earlier one. Violating this returns a `BusinessRuleViolation` validation error.
 
 - **Deleted blocks what comes next.** While an event is `isDeleted: true`, no event later in the chain may be recorded or updated against it:
+
   - Collection cannot be recorded/updated against a deleted Movement.
   - A Movement that is deleted (with or without a Collection) cannot be named in a Drop-off's `movementIds`; nor can a Movement whose Collection is deleted.
   - Receipt cannot be recorded/updated against a deleted Transfer.
@@ -510,6 +513,24 @@ The two credentials are issued through different paths, and Phase 2 changes neit
 - **Pagination — deferred.** No list endpoints exist yet; the `meta.pagination` slot is reserved so paging can be added purely additively later. The scheme itself is decided with the first endpoint that pages.
 
 **Consequences.** New endpoints share one status-code vocabulary, one success envelope and one failure envelope with each other and with the GOV.UK API standards, and every response is traceable. The detail is maintained in [`../api/standards.md`](../api/standards.md) — update that document, not this record, when the conventions evolve.
+
+<a id="d-040"></a>
+
+### Rename drop-off and Transfer ID to delivery and Delivery ID
+
+**D-040** · ✅ Decided · Impact: 🟢 Low · Area: **Naming** · Related: [D-005](#d-005), [D-007](#d-007), [D-013](#d-013), [D-018](#d-018), [D-028](#d-028), [D-036](#d-036)
+
+**Context.** The event where a driver hands waste to a receiver, and the identifier it mints, were named "drop-off" and "Transfer ID" (`POST /transfers`, `transferId`). This reads awkwardly against the rest of the journey vocabulary (creation, collection, receipt) and "transfer" invites confusion with unrelated senses of the word (e.g. transfer of ownership/duty of care, data transfer).
+
+**Decision.** Rename "drop-off" to "delivery" and "Transfer ID" to "Delivery ID" everywhere in the public contract and documentation, decided by Perry May:
+
+- `POST /transfers` → `POST /deliveries`
+- `POST /transfers/receipt` → `POST /deliveries/receipt`
+- `POST /transfers/{transferId}/receipt` → `POST /deliveries/{deliveryId}/receipt`
+- `transferId` → `deliveryId`
+- The "Drop-off" tag/operation wording → "Delivery"
+
+This is a pure rename. It does not change the resource shape, the many-to-one cardinality against Movement IDs ([D-007](#d-007)), the identifier format ([D-013](#d-013)), or any other already-decided behaviour — those entries are left as originally written and now read with the old "drop-off"/"Transfer ID" terms; they are not being retroactively edited.
 
 ## Open
 
