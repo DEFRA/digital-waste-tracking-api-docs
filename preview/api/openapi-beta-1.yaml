@@ -3,7 +3,7 @@ openapi: 3.0.3
 info:
   title: Digital Waste Tracking API
   version: beta-1
-  description: Milestone `beta-1` of the waste-movement journey — creation, collection, drop-off and receipt.
+  description: Milestone `beta-1` of the waste-movement journey — creation, collection, delivery and receipt.
 
 servers:
   - url: https://api.example.defra.gov.uk/dwt/beta-1
@@ -14,8 +14,8 @@ tags:
     description: Create and manage a waste movement record.
   - name: Collection
     description: Record a collection event — waste passing from a producer to a driver.
-  - name: Drop-off
-    description: Record a drop-off event, generating a Transfer ID.
+  - name: Delivery
+    description: Record a delivery event, generating a Delivery ID.
   - name: Receipt
     description: Record receipt of waste at a receiver site.
 
@@ -31,13 +31,13 @@ components:
       schema:
         $ref: '#/components/schemas/movementId'
 
-    transferIdPath:
-      name: transferId
+    deliveryIdPath:
+      name: deliveryId
       in: path
       required: true
-      description: Transfer ID minted by `POST /transfers`.
+      description: Delivery ID minted by `POST /deliveries`.
       schema:
-        $ref: '#/components/schemas/transferId'
+        $ref: '#/components/schemas/deliveryId'
 
   headers:
 
@@ -53,9 +53,9 @@ components:
       description: Unique identifier for a waste movement, minted by the server on `POST /movements`.
       example: 25HRA0B2
 
-    transferId:
+    deliveryId:
       type: string
-      description: Unique identifier for a drop-off, minted by the server on `POST /transfers`.
+      description: Unique identifier for a delivery, minted by the server on `POST /deliveries`.
       example: 25KMT4Z9
 
     createMovementRequest:
@@ -78,7 +78,7 @@ components:
           description: Unique identifier of the submitting organisation.
           example: 25b14080-5e77-4f91-9957-2482a0cb8775
 
-    recordDropOffRequest:
+    recordDeliveryRequest:
       type: object
       required: [apiCode, movementIds]
       properties:
@@ -92,7 +92,7 @@ components:
           minItems: 1
           items:
             $ref: '#/components/schemas/movementId'
-          description: One or more Movement IDs delivered together at this drop-off.
+          description: One or more Movement IDs delivered together at this delivery.
 
     recordReceiptRequest:
       type: object
@@ -104,7 +104,7 @@ components:
           description: Unique identifier of the submitting organisation.
           example: 25b14080-5e77-4f91-9957-2482a0cb8775
 
-    recordReceiptWithoutTransferRequest:
+    recordReceiptWithoutDeliveryRequest:
       type: object
       required: [apiCode, reason]
       properties:
@@ -115,8 +115,8 @@ components:
           example: 25b14080-5e77-4f91-9957-2482a0cb8775
         reason:
           type: string
-          description: Mandatory explanation for why this receipt is being recorded without a Transfer ID.
-          example: No drop-off was recorded prior to receipt; waste received directly from the producer.
+          description: Mandatory explanation for why this receipt is being recorded without a Delivery ID.
+          example: No delivery was recorded prior to receipt; waste received directly from the producer.
 
     issue:
       type: object
@@ -212,17 +212,17 @@ components:
         validation:
           $ref: '#/components/schemas/validation'
 
-    dropOffResponse:
+    deliveryResponse:
       type: object
-      description: Response returned when a drop-off is recorded.
+      description: Response returned when a delivery is recorded.
       required: [data, validation]
       properties:
         data:
           type: object
-          required: [transferId]
+          required: [deliveryId]
           properties:
-            transferId:
-              $ref: '#/components/schemas/transferId'
+            deliveryId:
+              $ref: '#/components/schemas/deliveryId'
         validation:
           $ref: '#/components/schemas/validation'
 
@@ -347,28 +347,28 @@ paths:
         "500":
           $ref: '#/components/responses/500'
 
-  /transfers:
+  /deliveries:
     post:
-      tags: [Drop-off]
-      summary: Record a drop-off
-      description: Records a drop-off event and returns a Transfer ID.
-      operationId: recordDropOff
+      tags: [Delivery]
+      summary: Record a delivery
+      description: Records a delivery event and returns a Delivery ID.
+      operationId: recordDelivery
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/recordDropOffRequest'
+              $ref: '#/components/schemas/recordDeliveryRequest'
       responses:
         "201":
-          description: Drop-off recorded. Body carries the new Transfer ID and any validation warnings.
+          description: Delivery recorded. Body carries the new Delivery ID and any validation warnings.
           headers:
             x-request-id:
               $ref: '#/components/headers/RequestId'
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/dropOffResponse'
+                $ref: '#/components/schemas/deliveryResponse'
         "400":
           $ref: '#/components/responses/400'
         "401":
@@ -376,23 +376,23 @@ paths:
         "500":
           $ref: '#/components/responses/500'
 
-  /transfers/receipt:
+  /deliveries/receipt:
     post:
       tags: [Receipt]
-      summary: Record receipt of waste without a Transfer ID
+      summary: Record receipt of waste without a Delivery ID
       description: >-
-        Fallback path for recording receipt when no Transfer ID is available (for example, no drop-off
-        was recorded beforehand). Not linked to any Movement or Transfer; `reason` must explain why.
-      operationId: recordReceiptWithoutTransfer
+        Fallback path for recording receipt when no Delivery ID is available (for example, no delivery
+        was recorded beforehand). Not linked to any Movement or Delivery; `reason` must explain why.
+      operationId: recordReceiptWithoutDelivery
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/recordReceiptWithoutTransferRequest'
+              $ref: '#/components/schemas/recordReceiptWithoutDeliveryRequest'
       responses:
         "201":
-          description: Receipt recorded without a Transfer link. Body carries any validation warnings.
+          description: Receipt recorded without a Delivery link. Body carries any validation warnings.
           headers:
             x-request-id:
               $ref: '#/components/headers/RequestId'
@@ -407,13 +407,13 @@ paths:
         "500":
           $ref: '#/components/responses/500'
 
-  /transfers/{transferId}/receipt:
+  /deliveries/{deliveryId}/receipt:
     parameters:
-      - $ref: '#/components/parameters/transferIdPath'
+      - $ref: '#/components/parameters/deliveryIdPath'
     post:
       tags: [Receipt]
-      summary: Record receipt of waste against a transfer
-      description: Records receipt of the waste delivered under the given transfer.
+      summary: Record receipt of waste against a delivery
+      description: Records receipt of the waste delivered under the given delivery.
       operationId: recordReceipt
       requestBody:
         required: true
@@ -423,7 +423,7 @@ paths:
               $ref: '#/components/schemas/recordReceiptRequest'
       responses:
         "201":
-          description: Receipt recorded against the transfer.
+          description: Receipt recorded against the delivery.
           headers:
             x-request-id:
               $ref: '#/components/headers/RequestId'
@@ -436,7 +436,7 @@ paths:
         "401":
           $ref: '#/components/responses/401'
         "404":
-          description: Transfer not found.
+          description: Delivery not found.
           headers:
             x-request-id:
               $ref: '#/components/headers/RequestId'
@@ -445,10 +445,10 @@ paths:
               schema:
                 $ref: '#/components/schemas/problemDetails'
               example:
-                type: https://waste-tracking.service.gov.uk/problems/transfer-not-found
-                title: Transfer not found
-                detail: No transfer exists with this Transfer ID.
-                instance: /transfers/25KMT4Z9/receipt
+                type: https://waste-tracking.service.gov.uk/problems/delivery-not-found
+                title: Delivery not found
+                detail: No delivery exists with this Delivery ID.
+                instance: /deliveries/25KMT4Z9/receipt
                 requestId: 4c6f9e1a-8f2b-4e3d-9a1c-2b7d5e6f0a3c
         "500":
           $ref: '#/components/responses/500'

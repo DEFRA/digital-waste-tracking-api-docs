@@ -643,6 +643,13 @@
 <td><strong>Collection</strong></td>
 </tr>
 <tr>
+<td>D-040</td>
+<td><a href="#rename-drop-off-and-transfer-id-to-delivery-and-delivery-id">Rename drop-off and Transfer ID to delivery and Delivery ID</a></td>
+<td>✅ Decided</td>
+<td>🟢 Low</td>
+<td><strong>Naming</strong></td>
+</tr>
+<tr>
 <td>D-022</td>
 <td><a href="#receipt-migration-new-endpoint-vs-extend-phase-1">Receipt migration: new endpoint vs extend Phase 1</a></td>
 <td>⏳ Open</td>
@@ -789,15 +796,23 @@
 <p>The rules, applied uniformly across the three deletable events:</p>
 <ul>
 <li><strong>PUT-only.</strong> <code>isDeleted</code> may only be set to <code>true</code> via the event's <code>PUT</code> (update). A <code>POST</code> (create) request that supplies <code>isDeleted: true</code> is rejected with a <code>NotAllowed</code> validation error; <code>POST</code> requests may omit the field or send <code>false</code>.</li>
-<li><strong>No subsequent event.</strong> An event may be marked deleted only while no later event in the chain has been recorded against it:</li>
-<li>A Movement cannot be deleted once its Collection has been recorded.</li>
+<li>
+<p><strong>No subsequent event.</strong> An event may be marked deleted only while no later event in the chain has been recorded against it:</p>
+</li>
+<li>
+<p>A Movement cannot be deleted once its Collection has been recorded.</p>
+</li>
 <li>A Collection cannot be deleted once its Movement has been referenced in a Drop-off.</li>
 <li>A Drop-off (Transfer) cannot be deleted once a Receipt has been recorded against it.</li>
 </ul>
 <p>This checks whether the later event's record <em>exists</em>, not whether it is itself currently active — once a Collection has been recorded against a Movement, that Movement stays locked from deletion even if the Collection is later deleted too. The chain of what-was-recorded is preserved; deleting a later event does not reopen an earlier one. Violating this returns a <code>BusinessRuleViolation</code> validation error.</p>
 <ul>
-<li><strong>Deleted blocks what comes next.</strong> While an event is <code>isDeleted: true</code>, no event later in the chain may be recorded or updated against it:</li>
-<li>Collection cannot be recorded/updated against a deleted Movement.</li>
+<li>
+<p><strong>Deleted blocks what comes next.</strong> While an event is <code>isDeleted: true</code>, no event later in the chain may be recorded or updated against it:</p>
+</li>
+<li>
+<p>Collection cannot be recorded/updated against a deleted Movement.</p>
+</li>
 <li>A Movement that is deleted (with or without a Collection) cannot be named in a Drop-off's <code>movementIds</code>; nor can a Movement whose Collection is deleted.</li>
 <li>Receipt cannot be recorded/updated against a deleted Transfer.</li>
 </ul>
@@ -1003,6 +1018,19 @@
 <li><strong>Pagination — deferred.</strong> No list endpoints exist yet; the <code>meta.pagination</code> slot is reserved so paging can be added purely additively later. The scheme itself is decided with the first endpoint that pages.</li>
 </ul>
 <p><strong>Consequences.</strong> New endpoints share one status-code vocabulary, one success envelope and one failure envelope with each other and with the GOV.UK API standards, and every response is traceable. The detail is maintained in <a href="../../api/standards/"><code>../api/standards.md</code></a> — update that document, not this record, when the conventions evolve.</p>
+<p><a id="d-040"></a></p>
+<h3 id="rename-drop-off-and-transfer-id-to-delivery-and-delivery-id">Rename drop-off and Transfer ID to delivery and Delivery ID</h3>
+<p><strong>D-040</strong> · ✅ Decided · Impact: 🟢 Low · Area: <strong>Naming</strong> · Related: <a href="#d-005">D-005</a>, <a href="#d-007">D-007</a>, <a href="#d-013">D-013</a>, <a href="#d-018">D-018</a>, <a href="#d-028">D-028</a>, <a href="#d-036">D-036</a></p>
+<p><strong>Context.</strong> The event where a driver hands waste to a receiver, and the identifier it mints, were named "drop-off" and "Transfer ID" (<code>POST /transfers</code>, <code>transferId</code>). This reads awkwardly against the rest of the journey vocabulary (creation, collection, receipt) and "transfer" invites confusion with unrelated senses of the word (e.g. transfer of ownership/duty of care, data transfer).</p>
+<p><strong>Decision.</strong> Rename "drop-off" to "delivery" and "Transfer ID" to "Delivery ID" everywhere in the public contract and documentation, decided by Perry May:</p>
+<ul>
+<li><code>POST /transfers</code> → <code>POST /deliveries</code></li>
+<li><code>POST /transfers/receipt</code> → <code>POST /deliveries/receipt</code></li>
+<li><code>POST /transfers/{transferId}/receipt</code> → <code>POST /deliveries/{deliveryId}/receipt</code></li>
+<li><code>transferId</code> → <code>deliveryId</code></li>
+<li>The "Drop-off" tag/operation wording → "Delivery"</li>
+</ul>
+<p>This is a pure rename. It does not change the resource shape, the many-to-one cardinality against Movement IDs (<a href="#d-007">D-007</a>), the identifier format (<a href="#d-013">D-013</a>), or any other already-decided behaviour — those entries are left as originally written and now read with the old "drop-off"/"Transfer ID" terms; they are not being retroactively edited.</p>
 <h2 id="open">Open</h2>
 <p><a id="d-019"></a></p>
 <h3 id="fate-of-waste-get-producer-journey-query-proposal">Fate-of-waste GET — producer journey query (proposal)</h3>
