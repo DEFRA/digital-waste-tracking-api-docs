@@ -1,0 +1,56 @@
+---
+description: Conventions for authoring Cursor skills in this public repo
+alwaysApply: true
+---
+
+# Cursor skills
+
+Skills live in `.cursor/skills/<name>/` with a `SKILL.md` and optional `scripts/`.
+
+## Naming
+
+Use `get-` when the skill fetches information. Use `sync-` when it writes fetched data into the repo.
+
+- One item: `get-<thing>` (e.g. `get-jira-ticket`, `get-jira-release`)
+- A catalogue: `get-list-of-<things>` (e.g. `get-list-of-jira-releases`)
+- Write-back: `sync-<thing>` (e.g. `sync-version-scenarios`)
+
+Do not use `list-` as the verb. Keep list vs detail as separate skills.
+
+```
+# ❌ BAD
+list-jira-releases
+fetch-ticket
+jira-release
+
+# ✅ GOOD
+get-list-of-jira-releases
+get-jira-ticket
+get-jira-release
+sync-version-scenarios
+```
+
+## Public descriptions
+
+This repo is public. `SKILL.md` (including `description` and examples) must stay generic.
+
+- No site URLs, project keys, real ticket ids, or real release names
+- Use placeholders: `KEY-123`, `PROJ`, `"1.0"`
+- Point at env vars and script defaults instead of naming the instance
+
+```
+# ❌ BAD
+Targets https://example.atlassian.net. Default project is ABC.
+/get-jira-ticket ABC-99
+
+# ✅ GOOD
+Site comes from `ATLASSIAN_BASE_URL` if set, otherwise the script default.
+/get-jira-ticket KEY-123
+```
+
+## Behaviour
+
+- Put site/project defaults in scripts (or `ATLASSIAN_BASE_URL` / `JIRA_PROJECT`), not in skill text
+- Write output under `.tmp/`
+- If a script fails, stop; do not guess or scrape the UI
+- Return full fetched contents; do not summarise
