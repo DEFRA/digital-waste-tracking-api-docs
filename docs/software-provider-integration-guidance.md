@@ -19,7 +19,7 @@
   - [3.4 Record receipt](#34-record-receipt)
 - [4. Business rules and data reconciliation](#4-business-rules-and-data-reconciliation)
   - [4.1 Collection cardinality](#41-collection-cardinality)
-  - [4.2 Movement-to-transfer cardinality](#42-movement-to-transfer-cardinality)
+  - [4.2 Movement-to-delivery cardinality](#42-movement-to-delivery-cardinality)
 - [5. Testing and conformance](#5-testing-and-conformance)
 - [Appendix A: glossary](#appendix-a-glossary)
 - [Appendix B: endpoint quick reference](#appendix-b-endpoint-quick-reference)
@@ -31,7 +31,7 @@
 
 **Purpose of document:** This document provides guidance for software providers building producer, broker, carrier/driver or receiver-facing systems that will interact with Defra's dedicated API to record waste movements. 
 
-**Service background:** Digital Waste Tracking (DWT) is a UK cross-government programme to build a single digital service for tracking waste movements, ultimately replacing paper-based waste transfer records. Its main aims are to reduce waste crime and misclassification, improve data on how waste moves domestically to support the transition to a circular economy, and cut the administrative burden of the current fragmented, paper-based system.
+**Service background:** Digital Waste Tracking (DWT) is a UK cross-government programme to build a single digital service for tracking waste movements, ultimately replacing paper-based waste transfer notes (WTNs). Its main aims are to reduce waste crime and misclassification, improve data on how waste moves domestically to support the transition to a circular economy, and cut the administrative burden of the current fragmented, paper-based system.
 
 **Current status:** The current focus of the DWT development team is to reach the first 'development milestone' of the service (Aug/Sep 2026) - to test API interactions in a sandbox environment and use the findings to better refine the service for rollout. The scope of this document is therefore focused on the integration API only, rather than the overall DWT service, which will follow. While the overall concept and rollout timetable are approved, some coding and naming elements may evolve as the development progresses.
 
@@ -43,7 +43,7 @@
 
 ## 2. Service overview
 
-![DWT events](./images/dwt-movement-transfer-events.png)
+![DWT events](./images/dwt-movement-delivery-events.png)
 
 ### 2.1 Lifecycle stages
 The API is organised around four stages:
@@ -52,8 +52,8 @@ The API is organised around four stages:
 |---|---|
 | Creation | Movement created; estimated details declared; Movement ID generated |
 | Collection | Carrier/driver records the collection against a Movement ID |
-| Delivery | Driver records delivery and declares the Movement ID in scope; Transfer ID generated |
-| Receipt | Receiving site records acceptance of the waste against the Transfer ID |
+| Delivery | Driver records delivery and declares the Movement ID in scope; Delivery ID generated |
+| Receipt | Receiving site records acceptance of the waste against the Delivery ID |
 
 ### 2.2 Actors
 - **Producer / Controller (EA term)** – the organisation whose waste is being moved
@@ -63,7 +63,7 @@ The API is organised around four stages:
 
 ### 2.3 Core identifiers
 - **Waste Movement ID** – `movementId` is the primary record of an intended waste movement, created before the waste moves
-- **Waste Delivery ID** – `transferId` is the record created at delivery; a single Delivery ID can bundle one or more Movement IDs together
+- **Waste Delivery ID** – `deliveryId` is the record created at delivery; a single Delivery ID can bundle one or more Movement IDs together
 
 <br>
 
