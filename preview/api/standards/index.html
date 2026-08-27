@@ -454,7 +454,7 @@
 <li><strong>Pagination</strong> — none yet (reserve <code>meta.pagination</code>).</li>
 </ul>
 <h2 id="baseline">Baseline</h2>
-<p>Today only the <strong>Receipt of Waste</strong> API is implemented — the live <code>waste-movement-external-api</code> gateway, its <code>waste-movement-backend</code>, and the shared <code>waste-movement-utils</code>, running on the CDP platform. The rest of the waste-movement journey (creation, collection, drop-off, producer tracking) is planned but not yet built.</p>
+<p>Today only the <strong>Receipt of Waste</strong> API is implemented — the live <code>waste-movement-external-api</code> gateway, its <code>waste-movement-backend</code>, and the shared <code>waste-movement-utils</code>, running on the CDP platform. The rest of the waste-movement journey (creation, collection, delivery, producer tracking) is planned but not yet built.</p>
 <p>Where a convention already exists in the implemented endpoints or is provided by the CDP platform, we prefer to <strong>codify what already works</strong> over inventing something new.</p>
 <p>Beyond our own code, an external baseline already applies: the <a href="https://www.gov.uk/guidance/gds-api-technical-and-data-standards">GOV.UK API technical and data standards</a>, with companion guidance on <a href="https://www.gov.uk/guidance/how-to-document-apis">documenting APIs</a>, are the cross-government standards we are expected to follow. We <strong>adopt</strong> them where they apply rather than invent our own — they inform our decisions on status codes and error handling. The full list is in <a href="#references">References</a>.</p>
 <h2 id="problem">Problem</h2>
@@ -536,7 +536,7 @@
 </code></pre></div>
 <ul>
 <li>
-<p><strong><code>404</code> distinguished by <code>type</code> (D-014):</strong> distinct type URIs — <code>…/movement-not-found</code> / <code>…/transfer-not-found</code> (parent missing) vs <code>…/collection-not-recorded</code> / <code>…/receipt-not-recorded</code> (parent exists, event not recorded yet). The status stays <code>404</code>; the distinction rides in <code>type</code>.</p>
+<p><strong><code>404</code> distinguished by <code>type</code> (D-014):</strong> distinct type URIs — <code>…/movement-not-found</code> / <code>…/delivery-not-found</code> (parent missing) vs <code>…/collection-not-recorded</code> / <code>…/receipt-not-recorded</code> (parent exists, event not recorded yet). The status stays <code>404</code>; the distinction rides in <code>type</code>.</p>
 </li>
 <li>
 <p><strong>Field errors keep <code>errorType</code>, and use JSON Pointer.</strong> Each <code>errors[]</code> item is <code>{ pointer, errorType, message }</code>: <code>pointer</code> is an <a href="https://www.rfc-editor.org/rfc/rfc6901">RFC 6901</a> JSON Pointer (<code>/wasteItems/0/weight</code>), replacing the code's current dotted <code>key</code> (<code>wasteItems[0].weight</code>); <code>errorType</code> is kept as-is from the code — <code>NotProvided</code>, <code>NotAllowed</code>, <code>InvalidType</code>, <code>InvalidFormat</code>, <code>InvalidValue</code>, <code>OutOfRange</code>, <code>BusinessRuleViolation</code>, <code>UnexpectedError</code>. Same item shape as <code>validation.warnings</code> (topic 2).</p>
