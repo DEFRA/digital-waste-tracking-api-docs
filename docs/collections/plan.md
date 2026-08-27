@@ -53,7 +53,7 @@ Phase 1 captures waste at the point it arrives at a receiver site. Phase 2 broad
 | [D-016](decisions.md#d-016) | **Resource model.** Richardson Maturity Level 2 — URLs name resources, HTTP methods carry the verbs. |
 | [D-009](decisions.md#d-009) | **Soft-delete.** No `DELETE` endpoints. `isDeleted` flag on `PUT` only, for Movement, Collection, and Drop-off. Receipt cannot be deleted. |
 | [D-034](decisions.md#d-034) | **History/revision pattern** on all `PUT` operations — same as the Phase 1 receipt `PUT`. |
-| [D-038](decisions.md#d-038) | **API conventions** (new endpoints only). Status codes; one `2xx` `{ data, meta?, validation }` and one `4xx`/`5xx` `{ error, requestId }` envelope; `x-request-id` tracing; pagination deferred. Source of truth: [api-standards.md](../api/api-standards.md). |
+| [D-038](decisions.md#d-038) | **API conventions** (new endpoints only). Status codes; one `2xx` `{ data, meta?, validation }` and one `4xx`/`5xx` `{ error, requestId }` envelope; `x-request-id` tracing; pagination deferred. Source of truth: [standards.md](../api/standards.md). |
 
 ### Still open — resolve before building the affected endpoints
 

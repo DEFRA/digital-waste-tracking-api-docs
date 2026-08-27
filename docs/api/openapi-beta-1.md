@@ -10,6 +10,6 @@ robots: noindex, nofollow
 
 # OpenAPI viewer — beta-1
 
-See [api-versioning.md](api-versioning.md) for the path-based versioning scheme this milestone follows.
+See [versioning.md](versioning.md) for the path-based versioning scheme this milestone follows.
 
 <swagger-ui src="openapi-beta-1.yaml"/>
