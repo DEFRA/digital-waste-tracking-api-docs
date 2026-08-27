@@ -15,7 +15,7 @@
 - [3. API reference](#3-api-reference)
   - [3.1 Create movement](#31-create-movement)
   - [3.2 Record collection](#32-record-collection)
-  - [3.3 Record drop-off](#33-record-drop-off)
+  - [3.3 Record delivery](#33-record-delivery)
   - [3.4 Record receipt](#34-record-receipt)
 - [4. Business rules and data reconciliation](#4-business-rules-and-data-reconciliation)
   - [4.1 Collection cardinality](#41-collection-cardinality)
@@ -52,7 +52,7 @@ The API is organised around four stages:
 |---|---|
 | Creation | Movement created; estimated details declared; Movement ID generated |
 | Collection | Carrier/driver records the collection against a Movement ID |
-| Drop-off | Driver records drop-off and declares the Movement ID in scope; Transfer ID generated |
+| Delivery | Driver records delivery and declares the Movement ID in scope; Transfer ID generated |
 | Receipt | Receiving site records acceptance of the waste against the Transfer ID |
 
 ### 2.2 Actors
@@ -63,7 +63,7 @@ The API is organised around four stages:
 
 ### 2.3 Core identifiers
 - **Waste Movement ID** – `movementId` is the primary record of an intended waste movement, created before the waste moves
-- **Waste Transfer ID** – `transferId` is the record created at drop-off; a single Transfer ID can bundle one or more Movement IDs together
+- **Waste Delivery ID** – `transferId` is the record created at delivery; a single Delivery ID can bundle one or more Movement IDs together
 
 <br>
 
@@ -92,13 +92,13 @@ The spec will update with each milestone in the development process – expect s
 | **Output** | Validation result |
 
 
-### 3.3 Record drop-off
+### 3.3 Record delivery
 
 | | |
 |---|---|
-| **Endpoints** | `POST /movements/drop-off` |
-| **Input** | Drop-off dateTime, drop-off address, one or more Movement IDs, carrier details |
-| **Output** | Validation result, Waste Transfer ID |
+| **Endpoints** | `POST /movements/delivery` |
+| **Input** | Delivery dateTime, delivery address, one or more Movement IDs, carrier details |
+| **Output** | Validation result, Waste Delivery ID |
 
 ### 3.4 Record receipt
 
@@ -114,10 +114,10 @@ The spec will update with each milestone in the development process – expect s
 ## 4. Business rules and data reconciliation
 
 ### 4.1 Collection cardinality
-One collection entry per physical collection event, even where loads are later combined at drop-off.
+One collection entry per physical collection event, even where loads are later combined at delivery.
 
 ### 4.2 Movement-to-transfer cardinality
-Many Movement IDs can be linked to a single Transfer ID at drop-off; a Transfer ID always originates from exactly one drop-off event.
+Many Movement IDs can be linked to a single Transfer ID at delivery; a Transfer ID always originates from exactly one delivery event.
 
 <br>
 
@@ -137,7 +137,7 @@ Sandbox scenarios covering each of the four endpoint groups in [section 3](#3-ap
 | HWCN | Hazardous Waste Consignment Note – the paper record DWT replaces for hazardous waste |
 | POPs | Persistent organic pollutants – chemicals subject to additional handling and reporting rules |
 | Waste Movement ID | Identifier issued when a movement is created, before waste moves |
-| Waste Transfer ID | Identifier issued at drop-off; can link multiple Movement IDs together |
+| Waste Delivery ID | Identifier issued at delivery; can link multiple Movement IDs together |
 | WTN | Waste Transfer Note – the paper record DWT replaces for non-hazardous waste |
 
 
@@ -147,6 +147,6 @@ Sandbox scenarios covering each of the four endpoint groups in [section 3](#3-ap
 |---|---|
 | POST | `/movements/create` |
 | POST | `/movements/{id}/collection` |
-| POST | `/movements/drop-off` |
+| POST | `/movements/delivery` |
 | POST | `/movements/{id}/receive` |
 
