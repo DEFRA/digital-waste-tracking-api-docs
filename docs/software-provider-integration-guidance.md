@@ -70,7 +70,7 @@ The API is organised around four stages:
 
 ## 3. API reference
 
-You can see the current API spec at: [Digital Waste Tracking OpenAPI specification](https://github.com/DEFRA/digital-waste-tracking-api-docs/blob/main/docs/api/openapi-beta-1.md).
+You can see the current API spec at: [Digital Waste Tracking OpenAPI specification](../api/openapi-beta-1.md).
 
 The spec will update with each milestone in the development process – expect some shapes to shift before go-live.
 
