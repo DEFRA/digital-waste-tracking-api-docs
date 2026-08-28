@@ -105,7 +105,7 @@ The spec will update with each milestone in the development process – expect s
 | | |
 |---|---|
 | **Endpoints** | `POST /movements/{id}/receive` |
-| **Input** | Waste Transfer ID, waste item details, receiver details, carrier details, broker details |
+| **Input** | Waste Delivery ID, waste item details, receiver details, carrier details, broker details |
 | **Output** | Validation result |
 
 
@@ -117,7 +117,7 @@ The spec will update with each milestone in the development process – expect s
 One collection entry per physical collection event, even where loads are later combined at delivery.
 
 ### 4.2 Movement-to-delivery cardinality
-Many Movement IDs can be linked to a single Transfer ID at delivery; a Transfer ID always originates from exactly one delivery event.
+Many Movement IDs can be linked to a single Delivery ID at delivery; a Delivery ID always originates from exactly one delivery event.
 
 <br>
 
