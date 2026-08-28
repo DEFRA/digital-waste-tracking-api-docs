@@ -86,6 +86,7 @@ No code change required. No UI, no database access.
      "isWasteReceiver": false
    }
    ```
+
    - `userId`: any valid Defra ID user UUID (an admin or test user is fine — this field is used for multi-tenancy lookup, not to set the owner permanently).
    - `organisationId`: a fresh UUID for the carrier org.
    - `isWasteReceiver: false` is optional but makes intent explicit.

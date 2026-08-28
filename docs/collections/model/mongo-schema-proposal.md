@@ -365,6 +365,7 @@ Conditional / query-driven:
 ## Write-path mapping
 
 - `POST /movements`
+
   - insert one `movements` document
   - set `revision` to `1`
   - set `creation`
@@ -372,21 +373,25 @@ Conditional / query-driven:
   - set `transferIds` to `[]`
 
 - `POST /movements/{movementId}/collection`
+
   - append one item to `collectionEvents`
   - increment `revision`
   - write prior snapshot to `movements-history`
 
 - `PUT /movements/{movementId}`
+
   - mutate `creation` or movement-level fields
   - increment `revision`
   - write prior snapshot to `movements-history`
 
 - `PUT /movements/{movementId}/collection`
+
   - mutate the allowed collection event
   - increment `revision`
   - write prior snapshot to `movements-history`
 
 - `POST /transfers`
+
   - insert one `transfers` document
   - set `revision` to `1`
   - set `movementIds[]`
@@ -396,11 +401,13 @@ Conditional / query-driven:
   - optionally update each referenced Movement to append `transferId` to `transferIds[]`
 
 - `POST /transfers/{transferId}/receipt`
+
   - populate `receipt`
   - increment `revision`
   - write prior snapshot to `transfers-history`
 
 - `PUT /transfers/{transferId}`
+
   - mutate the allowed drop-off fields, currently soft-delete only
   - increment `revision`
   - write prior snapshot to `transfers-history`
