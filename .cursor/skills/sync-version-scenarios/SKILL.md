@@ -67,10 +67,11 @@ Jira still has fix versions. A fix version name must start with `beta-<N>:` (N i
 7. **Write markdown feature files** under `docs/collections/scenarios/beta-<N>/`.
 
    - One `.md` file per feature.
-   - Group by functional area folders: `creation/`, `collection/`, `drop-off/`, `receipt/`. Use `other/` when none fit. Infer from the ticket; this layout can change later.
+   - Group under a functional-area folder derived from the ticket (summary, feature title, and Gherkin). Slug the area name the ticket uses. Use `other/` when none is clear. Do not use a fixed list of folder names.
+   - If this version already has a folder for that area under an older name, put the file under the ticket's current term and drop the old folder rather than keeping both.
    - Keep Gherkin in a fenced `gherkin` block.
    - Put `source_ticket: KEY-123` in YAML frontmatter (the real ticket key).
-   - Filename: slug of the feature title, e.g. `carrier-single-drop-off.md`.
+   - Filename: slug of the feature title, e.g. `basic-create-endpoint.md`.
    - Keep existing MkDocs frontmatter on files you update if present.
 
    Template:
@@ -93,7 +94,7 @@ Jira still has fix versions. A fix version name must start with `beta-<N>:` (N i
 
 8. **Replace or drop copied files** only when this version's tickets clearly change earlier behaviour. Say what you changed and why. Prefer updating the existing file (same feature) over adding a duplicate.
 
-9. **Update** `docs/collections/scenarios/beta-<N>/index.md` so it lists the feature pages in that version.
+9. **Update** `docs/collections/scenarios/beta-<N>/index.md` so it lists the feature pages in that version, grouped by the same functional-area folders.
 
    Also add that version to the collections sidebar in `tech_docs_template/main.html` (`collections_nav`) if it is missing. Link only the version index (`collections/scenarios/beta-<N>/`), not individual feature files. Do not add a top-level tab in `mkdocs.yml`. Group label is `Scenarios`; item label is `beta-<N>`.
 
