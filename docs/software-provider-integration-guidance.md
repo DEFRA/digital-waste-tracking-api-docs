@@ -116,7 +116,7 @@ The spec will update with each milestone in the development process – expect s
 ### 4.1 Collection cardinality
 One collection entry per physical collection event, even where loads are later combined at delivery.
 
-### 4.2 Movement-to-transfer cardinality
+### 4.2 Movement-to-delivery cardinality
 Many Movement IDs can be linked to a single Transfer ID at delivery; a Transfer ID always originates from exactly one delivery event.
 
 <br>
