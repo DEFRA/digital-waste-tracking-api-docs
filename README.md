@@ -9,8 +9,6 @@ pip install mkdocs-material mike mkdocs-swagger-ui-tag
 mkdocs serve
 ```
 
-Open http://127.0.0.1:8000/digital-waste-tracking-api-docs/
-
 ## Prettifying markdown files
 
 Formatting rules live in `.prettierrc`. To format all markdown files in the repo:
