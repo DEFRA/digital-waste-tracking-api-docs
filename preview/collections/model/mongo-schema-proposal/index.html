@@ -777,8 +777,12 @@
 </ul>
 <h2 id="write-path-mapping">Write-path mapping</h2>
 <ul>
-<li><code>POST /movements</code></li>
-<li>insert one <code>movements</code> document</li>
+<li>
+<p><code>POST /movements</code></p>
+</li>
+<li>
+<p>insert one <code>movements</code> document</p>
+</li>
 <li>set <code>revision</code> to <code>1</code></li>
 <li>set <code>creation</code></li>
 <li>set <code>collectionEvents</code> to <code>[]</code></li>
@@ -788,7 +792,9 @@
 <li>
 <p><code>POST /movements/{movementId}/collection</code></p>
 </li>
-<li>append one item to <code>collectionEvents</code></li>
+<li>
+<p>append one item to <code>collectionEvents</code></p>
+</li>
 <li>increment <code>revision</code></li>
 <li>
 <p>write prior snapshot to <code>movements-history</code></p>
@@ -796,7 +802,9 @@
 <li>
 <p><code>PUT /movements/{movementId}</code></p>
 </li>
-<li>mutate <code>creation</code> or movement-level fields</li>
+<li>
+<p>mutate <code>creation</code> or movement-level fields</p>
+</li>
 <li>increment <code>revision</code></li>
 <li>
 <p>write prior snapshot to <code>movements-history</code></p>
@@ -804,7 +812,9 @@
 <li>
 <p><code>PUT /movements/{movementId}/collection</code></p>
 </li>
-<li>mutate the allowed collection event</li>
+<li>
+<p>mutate the allowed collection event</p>
+</li>
 <li>increment <code>revision</code></li>
 <li>
 <p>write prior snapshot to <code>movements-history</code></p>
@@ -812,7 +822,9 @@
 <li>
 <p><code>POST /transfers</code></p>
 </li>
-<li>insert one <code>transfers</code> document</li>
+<li>
+<p>insert one <code>transfers</code> document</p>
+</li>
 <li>set <code>revision</code> to <code>1</code></li>
 <li>set <code>movementIds[]</code></li>
 <li>set <code>dropOff</code></li>
@@ -824,7 +836,9 @@
 <li>
 <p><code>POST /transfers/{transferId}/receipt</code></p>
 </li>
-<li>populate <code>receipt</code></li>
+<li>
+<p>populate <code>receipt</code></p>
+</li>
 <li>increment <code>revision</code></li>
 <li>
 <p>write prior snapshot to <code>transfers-history</code></p>
@@ -832,7 +846,9 @@
 <li>
 <p><code>PUT /transfers/{transferId}</code></p>
 </li>
-<li>mutate the allowed drop-off fields, currently soft-delete only</li>
+<li>
+<p>mutate the allowed drop-off fields, currently soft-delete only</p>
+</li>
 <li>increment <code>revision</code></li>
 <li>
 <p>write prior snapshot to <code>transfers-history</code></p>

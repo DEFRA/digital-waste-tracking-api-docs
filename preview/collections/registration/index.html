@@ -540,22 +540,24 @@
 <ol>
 <li>Call <code>PUT /user/{userId}/organisation/{organisationId}</code> on <code>waste-organisation-backend</code> with a JSON body representing the new carrier org:</li>
 </ol>
-<p><div class="highlight"><pre><span></span><code><span class="p">{</span>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
 <span class="w">  </span><span class="nt">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Carrier Ltd (test)"</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">"isWasteReceiver"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span>
 <span class="p">}</span>
 </code></pre></div>
-   - <code>userId</code>: any valid Defra ID user UUID (an admin or test user is fine — this field is used for multi-tenancy lookup, not to set the owner permanently).
-   - <code>organisationId</code>: a fresh UUID for the carrier org.
-   - <code>isWasteReceiver: false</code> is optional but makes intent explicit.</p>
-<ol>
+<ul>
+<li><code>userId</code>: any valid Defra ID user UUID (an admin or test user is fine — this field is used for multi-tenancy lookup, not to set the owner permanently).</li>
+<li><code>organisationId</code>: a fresh UUID for the carrier org.</li>
+<li>
+<p><code>isWasteReceiver: false</code> is optional but makes intent explicit.</p>
+</li>
 <li>
 <p><code>ensureAtLeastOneApiCodeExists</code> fires automatically on first write, creating a UUID <code>apiCode</code> and persisting it alongside the org record.</p>
 </li>
 <li>
 <p>Retrieve the generated code:</p>
 </li>
-</ol>
+</ul>
 <div class="highlight"><pre><span></span><code>GET /organisation/{organisationId}/apiCodes
 </code></pre></div>
 <p>The response lists all <code>apiCode</code> values for the org.</p>
