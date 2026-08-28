@@ -10,9 +10,9 @@ Fix version: beta-1: Contract API Test.
 
 - [Contract shape confirmation for the collect endpoint](collection/contract-shape-confirmation-for-the-collect-endpoint.md)
 
-## Drop-off
+## Delivery
 
-- [Contract shape confirmation for the delivery endpoint](drop-off/contract-shape-confirmation-for-the-delivery-endpoint.md)
+- [Contract shape confirmation for the delivery endpoint](delivery/contract-shape-confirmation-for-the-delivery-endpoint.md)
 
 ## Receipt
 
