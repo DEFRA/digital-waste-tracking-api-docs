@@ -36,13 +36,12 @@ theme:
     scheme: default
 nav:
   - Digital Waste Tracking:
-    - About: README.md
-    - API spec: api-spec.md
-extra_css:
-  - stylesheets/extra.css
+    - About: index.md
+    - API spec: api/openapi.md
 edit_uri: edit/main/docs/
 plugins:
   - material/search
+  - swagger-ui-tag
   #- git-revision-date-localized
 #      type: custom
  #     custom_format: "%d %B %Y"

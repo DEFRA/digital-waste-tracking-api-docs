@@ -1,3 +1,0 @@
-# API spec
-
-Coming soon.

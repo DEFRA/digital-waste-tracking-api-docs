@@ -1,0 +1,454 @@
+openapi: 3.0.3
+
+info:
+  title: Digital Waste Tracking API
+  version: beta-1
+  description: Milestone `beta-1` of the waste-movement journey — creation, collection, delivery and receipt.
+
+servers:
+  - url: https://api.example.defra.gov.uk/dwt/beta-1
+    description: Placeholder server URL — replace with the real environment URL.
+
+tags:
+  - name: Movement
+    description: Create and manage a waste movement record.
+  - name: Collection
+    description: Record a collection event — waste passing from a producer to a driver.
+  - name: Delivery
+    description: Record a delivery event, generating a Delivery ID.
+  - name: Receipt
+    description: Record receipt of waste at a receiver site.
+
+components:
+
+  parameters:
+
+    movementIdPath:
+      name: movementId
+      in: path
+      required: true
+      description: Movement ID minted by `POST /movements`.
+      schema:
+        $ref: '#/components/schemas/movementId'
+
+    deliveryIdPath:
+      name: deliveryId
+      in: path
+      required: true
+      description: Delivery ID minted by `POST /deliveries`.
+      schema:
+        $ref: '#/components/schemas/deliveryId'
+
+  headers:
+
+    RequestId:
+      description: Trace id for this request. Quote it to support if something goes wrong.
+      schema:
+        type: string
+        example: 4c6f9e1a-8f2b-4e3d-9a1c-2b7d5e6f0a3c
+
+  schemas:
+    movementId:
+      type: string
+      description: Unique identifier for a waste movement, minted by the server on `POST /movements`.
+      example: 25HRA0B2
+
+    deliveryId:
+      type: string
+      description: Unique identifier for a delivery, minted by the server on `POST /deliveries`.
+      example: 25KMT4Z9
+
+    createMovementRequest:
+      type: object
+      required: [apiCode]
+      properties:
+        apiCode:
+          type: string
+          format: uuid
+          description: Unique identifier of the submitting organisation.
+          example: 25b14080-5e77-4f91-9957-2482a0cb8775
+
+    recordCollectionRequest:
+      type: object
+      required: [apiCode]
+      properties:
+        apiCode:
+          type: string
+          format: uuid
+          description: Unique identifier of the submitting organisation.
+          example: 25b14080-5e77-4f91-9957-2482a0cb8775
+
+    recordDeliveryRequest:
+      type: object
+      required: [apiCode, movementIds]
+      properties:
+        apiCode:
+          type: string
+          format: uuid
+          description: Unique identifier of the submitting organisation.
+          example: 25b14080-5e77-4f91-9957-2482a0cb8775
+        movementIds:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/movementId'
+          description: One or more Movement IDs delivered together at this delivery.
+
+    recordReceiptRequest:
+      type: object
+      required: [apiCode]
+      properties:
+        apiCode:
+          type: string
+          format: uuid
+          description: Unique identifier of the submitting organisation.
+          example: 25b14080-5e77-4f91-9957-2482a0cb8775
+
+    recordReceiptWithoutDeliveryRequest:
+      type: object
+      required: [apiCode, reason]
+      properties:
+        apiCode:
+          type: string
+          format: uuid
+          description: Unique identifier of the submitting organisation.
+          example: 25b14080-5e77-4f91-9957-2482a0cb8775
+        reason:
+          type: string
+          description: Mandatory explanation for why this receipt is being recorded without a Delivery ID.
+          example: No delivery was recorded prior to receipt; waste received directly from the producer.
+
+    issue:
+      type: object
+      required: [pointer, errorType, message]
+      properties:
+        pointer:
+          type: string
+          description: RFC 6901 JSON Pointer to the field this issue relates to.
+          example: /apiCode
+        errorType:
+          type: string
+          enum:
+            - NotProvided
+            - NotAllowed
+            - InvalidType
+            - InvalidFormat
+            - InvalidValue
+            - OutOfRange
+            - BusinessRuleViolation
+            - UnexpectedError
+          description: The type of issue.
+          example: NotProvided
+        message:
+          type: string
+          description: Human-readable description of the issue.
+          example: apiCode is required.
+
+    validation:
+      type: object
+      required: [warnings]
+      properties:
+        warnings:
+          type: array
+          items:
+            $ref: '#/components/schemas/issue'
+          description: Data-quality warnings. Empty when there are none.
+
+    problemDetails:
+      type: object
+      description: RFC 9457 Problem Details (`application/problem+json`).
+      required: [type, title, detail, instance, requestId]
+      properties:
+        type:
+          type: string
+          format: uri
+          description: Stable URI identifying the problem kind.
+          example: https://waste-tracking.service.gov.uk/problems/validation-error
+        title:
+          type: string
+          description: Short, stable summary for this problem type.
+          example: Request validation failed
+        detail:
+          type: string
+          description: Human-readable detail specific to this occurrence.
+          example: The request could not be stored because 1 field is invalid.
+        instance:
+          type: string
+          description: The request path where the problem occurred.
+          example: /movements
+        requestId:
+          type: string
+          description: Trace id for this request, matching the `x-request-id` header.
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/issue'
+          description: Field-level problems. Present on 400 responses; omitted otherwise.
+
+    createMovementResponse:
+      type: object
+      description: Response returned when a movement is created.
+      required: [data, validation]
+      properties:
+        data:
+          type: object
+          required: [movementId]
+          properties:
+            movementId:
+              $ref: '#/components/schemas/movementId'
+        validation:
+          $ref: '#/components/schemas/validation'
+
+    recordCollectionResponse:
+      type: object
+      description: Response returned when a collection event is recorded.
+      required: [data, validation]
+      properties:
+        data:
+          type: object
+          nullable: true
+          description: No resource id is returned for a collection event; always null.
+          example: null
+        validation:
+          $ref: '#/components/schemas/validation'
+
+    deliveryResponse:
+      type: object
+      description: Response returned when a delivery is recorded.
+      required: [data, validation]
+      properties:
+        data:
+          type: object
+          required: [deliveryId]
+          properties:
+            deliveryId:
+              $ref: '#/components/schemas/deliveryId'
+        validation:
+          $ref: '#/components/schemas/validation'
+
+    recordReceiptResponse:
+      type: object
+      description: Response returned when a receipt is recorded.
+      required: [data, validation]
+      properties:
+        data:
+          type: object
+          nullable: true
+          description: No resource id is returned for a receipt; always null.
+          example: null
+        validation:
+          $ref: '#/components/schemas/validation'
+
+  responses:
+
+    "400":
+      description: The request could not be stored (validation, format or state error).
+      headers:
+        x-request-id:
+          $ref: '#/components/headers/RequestId'
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/problemDetails'
+
+    "401":
+      description: Missing or invalid authentication.
+      headers:
+        x-request-id:
+          $ref: '#/components/headers/RequestId'
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/problemDetails'
+
+    "500":
+      description: Unexpected server error.
+      headers:
+        x-request-id:
+          $ref: '#/components/headers/RequestId'
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/problemDetails'
+
+paths:
+  /movements:
+    post:
+      tags: [Movement]
+      summary: Create a waste movement
+      description: Creates a new waste movement and returns its Movement ID.
+      operationId: createMovement
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/createMovementRequest'
+      responses:
+        "201":
+          description: Movement created. Body carries the new Movement ID and any validation warnings.
+          headers:
+            x-request-id:
+              $ref: '#/components/headers/RequestId'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/createMovementResponse'
+        "400":
+          $ref: '#/components/responses/400'
+        "401":
+          $ref: '#/components/responses/401'
+        "500":
+          $ref: '#/components/responses/500'
+
+  /movements/{movementId}/collection:
+    parameters:
+      - $ref: '#/components/parameters/movementIdPath'
+    post:
+      tags: [Collection]
+      summary: Record the collection for a movement
+      description: Records a collection event for the given movement.
+      operationId: recordCollection
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/recordCollectionRequest'
+      responses:
+        "201":
+          description: Collection recorded. Body carries any validation warnings.
+          headers:
+            x-request-id:
+              $ref: '#/components/headers/RequestId'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/recordCollectionResponse'
+        "400":
+          $ref: '#/components/responses/400'
+        "401":
+          $ref: '#/components/responses/401'
+        "404":
+          description: Movement not found.
+          headers:
+            x-request-id:
+              $ref: '#/components/headers/RequestId'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/problemDetails'
+              example:
+                type: https://waste-tracking.service.gov.uk/problems/movement-not-found
+                title: Waste movement not found
+                detail: No waste movement exists with this Movement ID.
+                instance: /movements/25HRA0B2/collection
+                requestId: 4c6f9e1a-8f2b-4e3d-9a1c-2b7d5e6f0a3c
+        "500":
+          $ref: '#/components/responses/500'
+
+  /deliveries:
+    post:
+      tags: [Delivery]
+      summary: Record a delivery
+      description: Records a delivery event and returns a Delivery ID.
+      operationId: recordDelivery
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/recordDeliveryRequest'
+      responses:
+        "201":
+          description: Delivery recorded. Body carries the new Delivery ID and any validation warnings.
+          headers:
+            x-request-id:
+              $ref: '#/components/headers/RequestId'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/deliveryResponse'
+        "400":
+          $ref: '#/components/responses/400'
+        "401":
+          $ref: '#/components/responses/401'
+        "500":
+          $ref: '#/components/responses/500'
+
+  /deliveries/receipt:
+    post:
+      tags: [Receipt]
+      summary: Record receipt of waste without a Delivery ID
+      description: >-
+        Fallback path for recording receipt when no Delivery ID is available (for example, no delivery
+        was recorded beforehand). Not linked to any Movement or Delivery; `reason` must explain why.
+      operationId: recordReceiptWithoutDelivery
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/recordReceiptWithoutDeliveryRequest'
+      responses:
+        "201":
+          description: Receipt recorded without a Delivery link. Body carries any validation warnings.
+          headers:
+            x-request-id:
+              $ref: '#/components/headers/RequestId'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/recordReceiptResponse'
+        "400":
+          $ref: '#/components/responses/400'
+        "401":
+          $ref: '#/components/responses/401'
+        "500":
+          $ref: '#/components/responses/500'
+
+  /deliveries/{deliveryId}/receipt:
+    parameters:
+      - $ref: '#/components/parameters/deliveryIdPath'
+    post:
+      tags: [Receipt]
+      summary: Record receipt of waste against a delivery
+      description: Records receipt of the waste delivered under the given delivery.
+      operationId: recordReceipt
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/recordReceiptRequest'
+      responses:
+        "201":
+          description: Receipt recorded against the delivery.
+          headers:
+            x-request-id:
+              $ref: '#/components/headers/RequestId'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/recordReceiptResponse'
+        "400":
+          $ref: '#/components/responses/400'
+        "401":
+          $ref: '#/components/responses/401'
+        "404":
+          description: Delivery not found.
+          headers:
+            x-request-id:
+              $ref: '#/components/headers/RequestId'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/problemDetails'
+              example:
+                type: https://waste-tracking.service.gov.uk/problems/delivery-not-found
+                title: Delivery not found
+                detail: No delivery exists with this Delivery ID.
+                instance: /deliveries/25KMT4Z9/receipt
+                requestId: 4c6f9e1a-8f2b-4e3d-9a1c-2b7d5e6f0a3c
+        "500":
+          $ref: '#/components/responses/500'
