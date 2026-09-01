@@ -70,7 +70,7 @@ The API is organised around four stages:
 
 ## 3. API reference
 
-You can see the current API spec at: [Digital Waste Tracking OpenAPI specification](../api/openapi-beta-1.md).
+You can see the current API spec at: [Digital Waste Tracking OpenAPI specification](api/openapi-beta-1.md).
 
 The spec will update with each milestone in the development process – expect some shapes to shift before go-live.
 
@@ -122,7 +122,7 @@ Many Movement IDs can be linked to a single Delivery ID at delivery; a Delivery 
 
 ## 5. Testing and conformance
 
-Sandbox scenarios covering each of the four endpoint groups in [section 3](#3-api-reference) will be updated in our [Scenarios repo](./collections/scenarios/beta-1).
+Sandbox scenarios covering each of the four endpoint groups in [section 3](#3-api-reference) will be updated in our [Scenarios repo](./collections/scenarios/beta-1/index.md).
 
 <br>
 
