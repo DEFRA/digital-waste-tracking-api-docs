@@ -48,7 +48,7 @@ The current domain object in `waste-movement-backend` exposes these top-level fi
 
 ```javascript
 {
-  wasteTrackingId,
+  (wasteTrackingId,
     creation,
     collection,
     receipt,
@@ -57,7 +57,7 @@ The current domain object in `waste-movement-backend` exposes these top-level fi
     lastUpdatedAt,
     orgId,
     traceId,
-    bulkId;
+    bulkId);
 }
 ```
 
