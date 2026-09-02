@@ -476,7 +476,7 @@
 <h2 id="current-persisted-shape">Current persisted shape</h2>
 <p>The current domain object in <code>waste-movement-backend</code> exposes these top-level fields (<a href="C:/Applications/EqualExperts/Defra/WasteTracking/Repos/waste-movement-backend/src/domain/wasteInput.js:1">wasteInput.js</a>):</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="nx">wasteTrackingId</span><span class="p">,</span>
+<span class="w">  </span><span class="p">(</span><span class="nx">wasteTrackingId</span><span class="p">,</span>
 <span class="w">    </span><span class="nx">creation</span><span class="p">,</span>
 <span class="w">    </span><span class="nx">collection</span><span class="p">,</span>
 <span class="w">    </span><span class="nx">receipt</span><span class="p">,</span>
@@ -485,7 +485,7 @@
 <span class="w">    </span><span class="nx">lastUpdatedAt</span><span class="p">,</span>
 <span class="w">    </span><span class="nx">orgId</span><span class="p">,</span>
 <span class="w">    </span><span class="nx">traceId</span><span class="p">,</span>
-<span class="w">    </span><span class="nx">bulkId</span><span class="p">;</span>
+<span class="w">    </span><span class="nx">bulkId</span><span class="p">);</span>
 <span class="p">}</span>
 </code></pre></div>
 <p>In the live Phase 1 receipt flow, the create route currently writes:</p>

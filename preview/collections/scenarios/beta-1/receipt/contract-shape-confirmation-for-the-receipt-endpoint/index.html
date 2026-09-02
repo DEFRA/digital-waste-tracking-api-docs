@@ -450,14 +450,14 @@
 <div class="highlight"><pre><span></span><code><span class="k">Feature:</span><span class="nf"> Contract shape confirmation for the receipt endpoint</span>
 
 <span class="c">  # Milestone 1 version of the Receipt endpoint</span>
-<span class="nf">  </span><span class="k">Scenario:</span><span class="nf"> Submitting a correctly formed payload to the receipt endpoint with valid TransferId</span>
+<span class="nf">  </span><span class="k">Scenario:</span><span class="nf"> Submitting a correctly formed payload to the receipt endpoint with a valid Delivery ID</span>
 <span class="k">    Given </span><span class="nf">a software provider has a payload formed correctly against the receipt endpoint contract with a valid movementId</span>
 <span class="nf">    </span><span class="k">When </span><span class="nf">the payload is submitted</span>
 <span class="nf">    </span><span class="k">Then </span><span class="nf">a successful response is returned</span>
 <span class="nf">    </span><span class="k">And </span><span class="nf">the outcome is logged</span>
 
-<span class="nf">  </span><span class="k">Scenario:</span><span class="nf"> Submitting a correctly formed payload to the receipt endpoint with an invalid TransferId (Movement Error)</span>
-<span class="k">    Given </span><span class="nf">a software provider has a payload formed correctly against the receipt endpoint contract with a valid movementId</span>
+<span class="nf">  </span><span class="k">Scenario:</span><span class="nf"> Submitting a correctly formed payload to the receipt endpoint with an invalid Delivery ID (Movement Error)</span>
+<span class="k">    Given </span><span class="nf">a software provider has a payload formed correctly against the receipt endpoint contract with an invalid Movement ID</span>
 <span class="nf">    </span><span class="k">When </span><span class="nf">the payload is submitted</span>
 <span class="nf">    </span><span class="k">Then </span><span class="nf">the payload is rejected</span>
 <span class="nf">    </span><span class="k">And </span><span class="nf">the outcome is logged</span>
@@ -468,19 +468,19 @@
 <span class="nf">    </span><span class="k">Then </span><span class="nf">the payload is rejected</span>
 <span class="nf">    </span><span class="k">And </span><span class="nf">the outcome is logged</span>
 
-<span class="c">  # Null Transfer ID handling — new in Phase 2</span>
-<span class="nf">  </span><span class="k">Scenario:</span><span class="nf"> Receipt submitted without a transferID but with a reason</span>
+<span class="c">  # Null Delivery ID handling – new in Phase 2</span>
+<span class="nf">  </span><span class="k">Scenario:</span><span class="nf"> Receipt submitted without a Delivery ID but with a reason</span>
 <span class="k">    Given </span><span class="nf">a software provider has a receipt of waste payload</span>
-<span class="nf">    </span><span class="k">When </span><span class="nf">no transferID is provided</span>
-<span class="nf">    </span><span class="k">And </span><span class="nf">a reason for no transferID is provided</span>
+<span class="nf">    </span><span class="k">When </span><span class="nf">no Delivery ID is provided</span>
+<span class="nf">    </span><span class="k">And </span><span class="nf">a reason for no Delivery ID is provided</span>
 <span class="nf">    </span><span class="k">Then </span><span class="nf">a successful response is returned</span>
-<span class="nf">    </span><span class="k">And </span><span class="nf">a TransferId returned in the response</span>
+<span class="nf">    </span><span class="k">And </span><span class="nf">a Delivery ID is returned in the response</span>
 <span class="nf">    </span><span class="k">And </span><span class="nf">the outcome is logged</span>
 
-<span class="nf">  </span><span class="k">Scenario:</span><span class="nf"> Receipt submitted without a transferID and without reason</span>
+<span class="nf">  </span><span class="k">Scenario:</span><span class="nf"> Receipt submitted without a Delivery ID and without a reason</span>
 <span class="k">    Given </span><span class="nf">a software provider has a receipt of waste payload</span>
-<span class="nf">    </span><span class="k">When </span><span class="nf">no transferID is provided</span>
-<span class="nf">    </span><span class="k">And </span><span class="nf">no reason for no transferID is provided</span>
+<span class="nf">    </span><span class="k">When </span><span class="nf">no Delivery ID is provided</span>
+<span class="nf">    </span><span class="k">And </span><span class="nf">no reason for no Delivery ID is provided</span>
 <span class="nf">    </span><span class="k">Then </span><span class="nf">the payload is rejected with a validation error</span>
 <span class="nf">    </span><span class="k">And </span><span class="nf">the outcome is logged</span>
 </code></pre></div>

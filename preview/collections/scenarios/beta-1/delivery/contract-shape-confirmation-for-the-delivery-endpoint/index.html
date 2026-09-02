@@ -450,12 +450,12 @@
 <div class="highlight"><pre><span></span><code><span class="k">Feature:</span><span class="nf"> Contract shape confirmation for the delivery endpoint</span>
 
 <span class="nf">  </span><span class="k">Scenario:</span><span class="nf"> Submitting a correctly formed delivery payload referencing Movement IDs</span>
-<span class="k">    Given </span><span class="nf">a software provider has one or more MovementIDs from prior create submissions</span>
+<span class="k">    Given </span><span class="nf">a software provider has one or more Movement IDs from prior create submissions</span>
 <span class="nf">    </span><span class="k">When </span><span class="nf">a delivery payload is submitted with valid Movement IDs in the movementIds array</span>
 <span class="nf">    </span><span class="k">Then </span><span class="nf">a successful response is returned</span>
-<span class="nf">    </span><span class="k">And </span><span class="nf">a TransferID is returned in the response</span>
-<span class="nf">    </span><span class="k">And </span><span class="nf">the TransferID is stored</span>
-<span class="nf">    </span><span class="k">And </span><span class="nf">the outcome logged</span>
+<span class="nf">    </span><span class="k">And </span><span class="nf">a Delivery ID is returned in the response</span>
+<span class="nf">    </span><span class="k">And </span><span class="nf">the Delivery ID is stored</span>
+<span class="nf">    </span><span class="k">And </span><span class="nf">the outcome is logged</span>
 
 <span class="nf">  </span><span class="k">Scenario:</span><span class="nf"> Submitting a malformed payload to the delivery endpoint</span>
 <span class="k">    Given </span><span class="nf">a software provider has a malformed payload for the delivery endpoint</span>
@@ -463,15 +463,15 @@
 <span class="nf">    </span><span class="k">Then </span><span class="nf">the payload is rejected</span>
 <span class="nf">    </span><span class="k">And </span><span class="nf">the outcome is logged</span>
 
-<span class="nf">   </span><span class="k">Scenario:</span><span class="nf"> Submitting a correctly formed delivery payload referencing an invalid movementId</span>
-<span class="k">    Given </span><span class="nf">a software provider has one or more Movement ID from prior create submissions</span>
+<span class="nf">  </span><span class="k">Scenario:</span><span class="nf"> Submitting a correctly formed delivery payload referencing an invalid Movement ID</span>
+<span class="k">    Given </span><span class="nf">a software provider has one or more Movement IDs from prior create submissions</span>
 <span class="nf">    </span><span class="k">When </span><span class="nf">a delivery payload is submitted with invalid Movement IDs in the movementIds array</span>
 <span class="nf">    </span><span class="k">Then </span><span class="nf">the payload is rejected</span>
 <span class="nf">    </span><span class="k">And </span><span class="nf">the outcome is logged</span>
 
-<span class="nf">  </span><span class="k">Scenario:</span><span class="nf"> Submitting a correctly formed delivery payload referencing no MovementID</span>
-<span class="k">    Given </span><span class="nf">a software provider has no MovementIDs</span>
-<span class="nf">    </span><span class="k">When </span><span class="nf">a delivery payload is submitted with no Movement Ids in the array</span>
+<span class="nf">  </span><span class="k">Scenario:</span><span class="nf"> Submitting a correctly formed delivery payload referencing no Movement ID</span>
+<span class="k">    Given </span><span class="nf">a software provider has no Movement IDs</span>
+<span class="nf">    </span><span class="k">When </span><span class="nf">a delivery payload is submitted with no Movement IDs in the movementIds array</span>
 <span class="nf">    </span><span class="k">Then </span><span class="nf">the payload is rejected</span>
 <span class="nf">    </span><span class="k">And </span><span class="nf">the outcome is logged</span>
 </code></pre></div>
