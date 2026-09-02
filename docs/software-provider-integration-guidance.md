@@ -74,38 +74,6 @@ You can see the current API spec at: [Digital Waste Tracking OpenAPI specificati
 
 The spec will update with each milestone in the development process – expect some shapes to shift before go-live.
 
-### 3.1 Create movement
-
-|  |  |
-| --- | --- |
-| **Endpoints** | `POST /movements/create` |
-| **Input** | Waste classification, producer details, estimated collection details, estimated receiver details, estimated carrier details, broker details |
-| **Output** | Validation result, Waste Movement ID |
-
-### 3.2 Record collection
-
-|  |  |
-| --- | --- |
-| **Endpoints** | `POST /movements/{id}/collection` |
-| **Input** | Waste Movement ID, collection dateTime, carrier details, collection address |
-| **Output** | Validation result |
-
-### 3.3 Record delivery
-
-|  |  |
-| --- | --- |
-| **Endpoints** | `POST /movements/delivery` |
-| **Input** | Delivery dateTime, delivery address, one or more Movement IDs, carrier details |
-| **Output** | Validation result, Waste Delivery ID |
-
-### 3.4 Record receipt
-
-|  |  |
-| --- | --- |
-| **Endpoints** | `POST /movements/{id}/receive` |
-| **Input** | Waste Delivery ID, waste item details, receiver details, carrier details, broker details |
-| **Output** | Validation result |
-
 <br>
 
 ## 4. Business rules and data reconciliation
