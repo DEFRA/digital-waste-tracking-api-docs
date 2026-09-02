@@ -88,12 +88,6 @@ Many Movement IDs can be linked to a single Delivery ID at delivery; a Delivery 
 
 <br>
 
-## 5. Testing and conformance
-
-Sandbox scenarios covering each of the four endpoint groups in [section 3](#3-api-reference) will be updated in our [Scenarios repo](./collections/scenarios/beta-1/index.md).
-
-<br>
-
 ## Appendix A: glossary
 
 | Term | Meaning |
