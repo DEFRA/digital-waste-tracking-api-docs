@@ -12,10 +12,6 @@
   - [2.2 Actors](#22-actors)
   - [2.3 Core identifiers](#23-core-identifiers)
 - [3. API reference](#3-api-reference)
-  - [3.1 Create movement](#31-create-movement)
-  - [3.2 Record collection](#32-record-collection)
-  - [3.3 Record delivery](#33-record-delivery)
-  - [3.4 Record receipt](#34-record-receipt)
 - [4. Business rules and data reconciliation](#4-business-rules-and-data-reconciliation)
   - [4.1 Collection cardinality](#41-collection-cardinality)
   - [4.2 Movement-to-delivery cardinality](#42-movement-to-delivery-cardinality)
@@ -103,9 +99,9 @@ Many Movement IDs can be linked to a single Delivery ID at delivery; a Delivery 
 
 ## Appendix B: endpoint quick reference
 
-| Method | Path                         |
-| ------ | ---------------------------- |
-| POST   | `/movements/create`          |
-| POST   | `/movements/{id}/collection` |
-| POST   | `/movements/delivery`        |
-| POST   | `/movements/{id}/receive`    |
+| Method | Path                                 |
+| ------ | ------------------------------------ |
+| POST   | `/movements`                         |
+| POST   | `/movements/{movementId}/collection` |
+| POST   | `/deliveries`                        |
+| POST   | `/deliveries/{deliveryId}/receipt`   |
