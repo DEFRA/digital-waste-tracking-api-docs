@@ -475,10 +475,6 @@
 <li><a href="#22-actors">2.2 Actors</a></li>
 <li><a href="#23-core-identifiers">2.3 Core identifiers</a></li>
 <li><a href="#3-api-reference">3. API reference</a></li>
-<li><a href="#31-create-movement">3.1 Create movement</a></li>
-<li><a href="#32-record-collection">3.2 Record collection</a></li>
-<li><a href="#33-record-delivery">3.3 Record delivery</a></li>
-<li><a href="#34-record-receipt">3.4 Record receipt</a></li>
 <li><a href="#4-business-rules-and-data-reconciliation">4. Business rules and data reconciliation</a></li>
 <li><a href="#41-collection-cardinality">4.1 Collection cardinality</a></li>
 <li><a href="#42-movement-to-delivery-cardinality">4.2 Movement-to-delivery cardinality</a></li>
@@ -601,19 +597,19 @@
 <tbody>
 <tr>
 <td>POST</td>
-<td><code>/movements/create</code></td>
+<td><code>/movements</code></td>
 </tr>
 <tr>
 <td>POST</td>
-<td><code>/movements/{id}/collection</code></td>
+<td><code>/movements/{movementId}/collection</code></td>
 </tr>
 <tr>
 <td>POST</td>
-<td><code>/movements/delivery</code></td>
+<td><code>/deliveries</code></td>
 </tr>
 <tr>
 <td>POST</td>
-<td><code>/movements/{id}/receive</code></td>
+<td><code>/deliveries/{deliveryId}/receipt</code></td>
 </tr>
 </tbody>
 </table>
