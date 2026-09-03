@@ -231,7 +231,7 @@ For a hazardous delivery, `deliveryId` is not a freshly minted value: it is the 
   ],
 
   carrier: Object,             // captured here for D-006 cross-check at receipt
-  dropOff: {
+  deliverySite: {
     siteName: String,
     exemptionNumber: String,   // optional
     address: {                 // mandatory (D-018)
@@ -474,7 +474,7 @@ Required:
 Conditional / query-driven:
 
 - `{ actualDateTimeDelivery: 1 }`
-- `{ 'dropOff.address.postcode': 1 }`
+- `{ 'deliverySite.address.postcode': 1 }`
 
 ### `deliveries-history`
 

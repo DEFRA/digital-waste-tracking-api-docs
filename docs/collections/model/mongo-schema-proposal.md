@@ -214,7 +214,7 @@ For a hazardous delivery, `deliveryId` is not freshly minted: it is the sole `mo
       }
     ],
     carrier: Object,
-    dropOff: {
+    deliverySite: {
       siteName: String,
       exemptionNumber: String,
       address: Object
@@ -365,7 +365,6 @@ Conditional / query-driven:
 ## Write-path mapping
 
 - `POST /movements`
-
   - insert one `movements` document
   - set `revision` to `1`
   - set `creation`
@@ -373,25 +372,21 @@ Conditional / query-driven:
   - set `deliveryIds` to `[]`
 
 - `POST /movements/{movementId}/collection`
-
   - append one item to `collectionEvents`
   - increment `revision`
   - write prior snapshot to `movements-history`
 
 - `PUT /movements/{movementId}`
-
   - mutate `creation` or movement-level fields
   - increment `revision`
   - write prior snapshot to `movements-history`
 
 - `PUT /movements/{movementId}/collection`
-
   - mutate the allowed collection event
   - increment `revision`
   - write prior snapshot to `movements-history`
 
 - `POST /deliveries`
-
   - insert one `deliveries` document
   - set `revision` to `1`
   - set `movementIds[]`
@@ -401,13 +396,11 @@ Conditional / query-driven:
   - optionally update each referenced Movement to append `deliveryId` to `deliveryIds[]`
 
 - `POST /deliveries/{deliveryId}/receipt`
-
   - populate `receipt`
   - increment `revision`
   - write prior snapshot to `deliveries-history`
 
 - `PUT /deliveries/{deliveryId}`
-
   - mutate the allowed delivery fields, currently soft-delete only
   - increment `revision`
   - write prior snapshot to `deliveries-history`

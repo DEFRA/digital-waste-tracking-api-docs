@@ -85,7 +85,7 @@ The write path for every Phase 2 endpoint follows the same pattern:
 | ---------------------- | ------------------- | --------------- | ------ |
 | `events`               | Event store         | Yes             | 2      |
 | `movements`            | Projection          | No — derived    | 2      |
-| `deliveries`            | Projection          | No — derived    | 2      |
+| `deliveries`           | Projection          | No — derived    | 2      |
 | `invalid-submissions`  | Operational         | Partial         | 1 + 2  |
 | `waste-inputs`         | Aggregate (Phase 1) | Yes             | 1 only |
 | `waste-inputs-history` | Snapshots (Phase 1) | Yes             | 1 only |
@@ -258,7 +258,7 @@ For a hazardous delivery, `deliveryId` is not freshly minted: it is the sole `mo
     yourUniqueReference:   String,    // optional
     otherReferencesForMovement: [{ label: String, reference: String }],
     carrier: Object,
-    dropOff: {
+    deliverySite: {
       siteName:        String,
       exemptionNumber: String,        // optional
       address: {
@@ -437,7 +437,7 @@ One document per `deliveryId`. Built by applying `DeliveryCreated`, `WasteReceiv
     yourUniqueReference:     String,
     otherReferencesForMovement: [{ label: String, reference: String }],
     carrier:  Object,
-    dropOff: {
+    deliverySite: {
       siteName:        String,
       exemptionNumber: String,
       address:         Object

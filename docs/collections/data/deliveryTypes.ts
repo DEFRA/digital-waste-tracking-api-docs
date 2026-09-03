@@ -24,45 +24,45 @@ export type {
   CarrierReasonForNoRegistrationNumber,
   OtherReferenceForMovement,
   CarrierDetails,
-  ValidationResult
-} from './sharedTypes.js'
+  ValidationResult,
+} from "./sharedTypes.js";
 
 import type {
   OtherReferenceForMovement,
   CarrierDetails,
-  ValidationResult
-} from './sharedTypes.js'
+  ValidationResult,
+} from "./sharedTypes.js";
 
 // ---------------------------------------------------------------------------
-// Drop-off site
+// Delivery site
 // ---------------------------------------------------------------------------
 
-export type DropOffAddress = {
-  postcode: string
-  fullAddress: string
-}
+export type DeliverySiteAddress = {
+  postcode: string;
+  fullAddress: string;
+};
 
 /**
- * Drop-off place declared by the carrier.
+ * Delivery place declared by the carrier.
  *
  * This is not necessarily an official receiver site and does not require a
  * receiver authorisation number. Some drop-offs may be to exempt places that
  * store, treat, use or dispose of waste, in which case exemptionNumber may be
  * supplied. A receipt event may not always follow a delivery.
  */
-export type DropOff = {
+export type DeliverySite = {
   /** Name of the carrier-declared site/place where the waste is dropped off or left. */
-  siteName: string
+  siteName: string;
 
   /**
    * Optional exemption number for exempt places that store, treat, use or dispose of waste.
    * For example, a WEX number. Distinct from receiver.authorisationNumber.
    */
-  exemptionNumber?: string
+  exemptionNumber?: string;
 
   /** Mandatory physical address where the waste was dropped off. Both fullAddress and postcode are required. */
-  address: DropOffAddress
-}
+  address: DeliverySiteAddress;
+};
 
 // ---------------------------------------------------------------------------
 // Record Delivery request / response
@@ -70,7 +70,7 @@ export type DropOff = {
 
 export type RecordDelivery = {
   /** Unique identifier of the submitting organisation produced by registration. */
-  apiCode: string
+  apiCode: string;
 
   /**
    * One or more Movement IDs delivered in this delivery.
@@ -78,13 +78,13 @@ export type RecordDelivery = {
    * - Multi-collection runs: all Movement IDs delivered together at the same site.
    * - Hazardous waste (D-010): exactly one Movement ID is allowed per delivery.
    */
-  movementIds: string[]
+  movementIds: string[];
 
   /** Actual date and time of the delivery. ISO 8601. */
-  actualDateTimeDelivery: string
+  actualDateTimeDelivery: string;
 
-  yourUniqueReference?: string
-  otherReferencesForMovement?: OtherReferenceForMovement[]
+  yourUniqueReference?: string;
+  otherReferencesForMovement?: OtherReferenceForMovement[];
 
   /**
    * Soft-delete flag (D-009). Defaults to false on creation.
@@ -92,14 +92,14 @@ export type RecordDelivery = {
    * warning and the value is treated as false by the service layer.
    * Cannot be set to true once a Receipt has been recorded against this Delivery.
    */
-  isDeleted?: boolean
+  isDeleted?: boolean;
 
   /** Carrier performing the delivery. Required and aligned to Collection/Receipt carrier rules. */
-  carrier: CarrierDetails
+  carrier: CarrierDetails;
 
   /** Carrier-declared drop-off place details. This is a lighter site model than the receipt receiver. */
-  dropOff: DropOff
-}
+  deliverySite: DeliverySite;
+};
 
 export type RecordDeliveryResponse = {
   /**
@@ -108,15 +108,15 @@ export type RecordDeliveryResponse = {
    * The driver may pass this value to the receiver so they can record
    * the receipt via POST /deliveries/{deliveryId}/receipt, where applicable.
    */
-  deliveryId: string
+  deliveryId: string;
   /**
    * Optional validation warnings. For now, server-side business-rule checks
    * such as hazardous aggregation may be surfaced as BusinessRuleViolation warnings.
    */
   validation?: {
-    warnings?: ValidationResult[]
-  }
-}
+    warnings?: ValidationResult[];
+  };
+};
 
 // ---------------------------------------------------------------------------
 // Update Delivery — PUT /deliveries/{deliveryId}
@@ -129,19 +129,19 @@ export type RecordDeliveryResponse = {
 
 export type UpdateDelivery = {
   /** Unique identifier of the submitting organisation produced by registration. Caller identity only. */
-  apiCode: string
+  apiCode: string;
 
   /**
    * Soft-delete flag (D-009) — the only property that may change on a recorded
    * delivery (D-017). true soft-deletes the delivery; false restores it. Cannot
    * be set to true once a Receipt has been recorded against this Delivery.
    */
-  isDeleted: boolean
-}
+  isDeleted: boolean;
+};
 
 export type UpdateDeliveryResponse = {
   /** Validation envelope only — the updated record is not echoed (the identifier is in the path). */
   validation?: {
-    warnings?: ValidationResult[]
-  }
-}
+    warnings?: ValidationResult[];
+  };
+};
