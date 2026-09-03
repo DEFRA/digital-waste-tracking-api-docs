@@ -181,7 +181,7 @@ This is a key distinction from the proposed Phase 2 model:
 
 - Phase 1 history is snapshot-based
 - Phase 2 collection is expected to be an ordered event sequence
-- Phase 2 drop-off / receipt introduces Transfer as a separate aggregate
+- Phase 2 drop-off / receipt introduces Delivery as a separate aggregate
 
 ## Role during Phase 1 -> Phase 2 migration
 
@@ -198,7 +198,7 @@ That can mean:
 Until a formal migration decision is made, the safest assumption is:
 
 - Phase 1 endpoints continue to use `waste-inputs` / `waste-inputs-history`
-- Phase 2 endpoints use the proposed `movements` / `transfers` model
+- Phase 2 endpoints use the proposed `movements` / `deliveries` model
 - any bridge between `wasteTrackingId` and new identifiers is handled deliberately rather than inferred implicitly
 
 ## Why this document exists

@@ -1,21 +1,21 @@
 /**
  * TypeScript types for the Record Drop-off event.
- * POST /transfers → 201 with transferId
+ * POST /deliveries → 201 with deliveryId
  *
  * The drop-off event records the carrier-declared place where one or more
- * Movements are dropped off or left. It mints a Transfer ID that may be used
+ * Movements are dropped off or left. It mints a Delivery ID that may be used
  * by an official receiver to record a receipt, but a receipt event may not
  * always follow — for example, when waste is dropped at an exempt place.
  *
  * Key design decisions:
  *   D-007 — drop-off aggregates one or more Movement IDs (movementIds array)
  *   D-010 — hazardous waste: exactly one Movement ID per drop-off
- *   D-012 — Transfer ID is the only public identifier minted here
- *   D-013 — Transfer ID is an 8-character year-prefixed sqid
+ *   D-012 — Delivery ID is the only public identifier minted here
+ *   D-013 — Delivery ID is an 8-character year-prefixed sqid
  *
  * Note: receiver details are NOT on the drop-off. The drop-off place is a
  * lighter site model declared by the carrier and is distinct from the official
- * receiver site used by POST /transfers/{transferId}/receipt. A receipt may
+ * receiver site used by POST /deliveries/{deliveryId}/receipt. A receipt may
  * not always follow a drop-off.
  */
 
@@ -90,7 +90,7 @@ export type RecordDropOff = {
    * Soft-delete flag (D-009). Defaults to false on creation.
    * May be set to true only via PUT. Supplying true on a POST returns a validation
    * warning and the value is treated as false by the service layer.
-   * Cannot be set to true once a Receipt has been recorded against this Transfer.
+   * Cannot be set to true once a Receipt has been recorded against this Delivery.
    */
   isDeleted?: boolean
 
@@ -103,12 +103,12 @@ export type RecordDropOff = {
 
 export type RecordDropOffResponse = {
   /**
-   * The Transfer ID minted by the server.
+   * The Delivery ID minted by the server.
    * 8-character year-prefixed sqid (D-013).
    * The driver may pass this value to the receiver so they can record
-   * the receipt via POST /transfers/{transferId}/receipt, where applicable.
+   * the receipt via POST /deliveries/{deliveryId}/receipt, where applicable.
    */
-  transferId: string
+  deliveryId: string
   /**
    * Optional validation warnings. For now, server-side business-rule checks
    * such as hazardous aggregation may be surfaced as BusinessRuleViolation warnings.
@@ -119,12 +119,12 @@ export type RecordDropOffResponse = {
 }
 
 // ---------------------------------------------------------------------------
-// Update Drop-off — PUT /transfers/{transferId}
+// Update Drop-off — PUT /deliveries/{deliveryId}
 //
 // A recorded drop-off is immutable except for soft-delete (D-017). The PUT body
 // is restricted to apiCode (caller identity) and isDeleted (D-009); any other
 // field is rejected (NotAllowed). To correct a drop-off, soft-delete it and
-// record a fresh one via POST /transfers.
+// record a fresh one via POST /deliveries.
 // ---------------------------------------------------------------------------
 
 export type UpdateDropOff = {
@@ -133,8 +133,8 @@ export type UpdateDropOff = {
 
   /**
    * Soft-delete flag (D-009) — the only property that may change on a recorded
-   * drop-off (D-017). true soft-deletes the transfer; false restores it. Cannot
-   * be set to true once a Receipt has been recorded against this Transfer.
+   * drop-off (D-017). true soft-deletes the delivery; false restores it. Cannot
+   * be set to true once a Receipt has been recorded against this Delivery.
    */
   isDeleted: boolean
 }

@@ -83,7 +83,7 @@ export const HAZARDOUS_PROPERTY_CODES = [
 ]
 
 /**
- * Movement ID and Transfer ID format: two-digit year prefix followed by
+ * Movement ID and Delivery ID format: two-digit year prefix followed by
  * six alphanumeric characters from the A–Z 0–9 alphabet (sqids, D-013).
  * Example: 25HRA0B2
  *

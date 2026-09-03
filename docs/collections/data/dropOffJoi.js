@@ -1,6 +1,6 @@
 /**
  * Joi validation schema for the Record Drop-off event.
- * POST /transfers → 201 with transferId
+ * POST /deliveries → 201 with deliveryId
  *
  * Key behaviours:
  * - apiCode is mandatory, matching the registered submitting organisation.
@@ -116,7 +116,7 @@ export const recordDropOffSchema = Joi.object({
     .default(false)
     .description(
       'Soft-delete flag (D-009). Defaults to false on creation. ' +
-      'May be set to true only via PUT to soft-delete the drop-off (transfer), subject to downstream constraints. ' +
+      'May be set to true only via PUT to soft-delete the drop-off (delivery), subject to downstream constraints. ' +
       'Supplying true on a POST is not permitted — the service layer returns a validation warning and treats the value as false. ' +
       'A drop-off cannot be deleted once a Receipt has been recorded against it.'
     ),
@@ -132,9 +132,9 @@ export const recordDropOffSchema = Joi.object({
   dropOff: dropOffSchema
 }).description(
   'Record Drop-off request payload. ' +
-  'POST /transfers → 201 with transferId. ' +
-  'The Transfer ID may be passed by the driver to the receiver to enable ' +
-  'POST /transfers/{transferId}/receipt, where applicable. ' +
+  'POST /deliveries → 201 with deliveryId. ' +
+  'The Delivery ID may be passed by the driver to the receiver to enable ' +
+  'POST /deliveries/{deliveryId}/receipt, where applicable. ' +
   'A receipt event may not always follow a drop-off.'
 )
 
@@ -152,14 +152,14 @@ export const updateDropOffSchema = Joi.object({
     .required()
     .description(
       'Soft-delete flag (D-009) — the only property that may be changed on a recorded drop-off (D-017). ' +
-      'true soft-deletes the transfer; false restores it. ' +
-      'Cannot be set to true once a Receipt has been recorded against this Transfer — rejected server-side as a BusinessRuleViolation.'
+      'true soft-deletes the delivery; false restores it. ' +
+      'Cannot be set to true once a Receipt has been recorded against this Delivery — rejected server-side as a BusinessRuleViolation.'
     )
 })
   .unknown(false)
   .required()
   .description(
-    'Restricted drop-off update body (D-017). PUT /transfers/{transferId}. ' +
+    'Restricted drop-off update body (D-017). PUT /deliveries/{deliveryId}. ' +
     'A recorded drop-off is immutable except for the isDeleted soft-delete flag; ' +
     'any field other than apiCode and isDeleted is rejected as NotAllowed.'
   )

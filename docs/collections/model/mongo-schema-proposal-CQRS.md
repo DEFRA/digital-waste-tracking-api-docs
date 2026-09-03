@@ -35,13 +35,13 @@ The evaluation (linked above) confirmed the following, which together make CQRS 
 
 CQRS earns its overhead when the read side needs a materially different shape from what the write side naturally produces — different projections for different consumers, denormalised aggregations that would be expensive on the write model, or query patterns the aggregate document cannot serve efficiently.
 
-That is not the case here. The `movements` and `transfers` projection documents produced by this model are structurally identical to the aggregate documents in `mongo-schema-proposal.md`. The projections are not richer; they are a slightly cut-down version of the aggregates with some fields shifted into the event store. No concrete Phase 2 `GET` was identified that the aggregate documents could not serve.
+That is not the case here. The `movements` and `deliveries` projection documents produced by this model are structurally identical to the aggregate documents in `mongo-schema-proposal.md`. The projections are not richer; they are a slightly cut-down version of the aggregates with some fields shifted into the event store. No concrete Phase 2 `GET` was identified that the aggregate documents could not serve.
 
 The reporting and regulatory read models that would genuinely benefit from a shaped read side are already handled by the CDP Audit pipeline. CQRS would add complexity without adding capability for the reads this service owns.
 
 ### CQRS fixes a problem it creates
 
-The projection rebuild capability — often cited as the main CQRS advantage — only has value because CQRS introduced a projection that can fall behind the event store. The aggregate model has no separate projection and therefore no sync risk. The `movements-history` and `transfers-history` snapshot collections in the aggregate model already provide the amendment audit trail at a fraction of the complexity.
+The projection rebuild capability — often cited as the main CQRS advantage — only has value because CQRS introduced a projection that can fall behind the event store. The aggregate model has no separate projection and therefore no sync risk. The `movements-history` and `deliveries-history` snapshot collections in the aggregate model already provide the amendment audit trail at a fraction of the complexity.
 
 ### Governance overhead
 
@@ -49,7 +49,7 @@ An append-only store of personal data (carrier names, addresses, registration nu
 
 ### Build overhead
 
-Aggregate root rehydration on every write request, command handlers, projection handlers, and upcasters (required once event shapes are in production and cannot be changed) represent a significant build and maintenance overhead. The PUT command handlers (`CollectionAmended`, `MovementDeleted`, `ReceiptAmended`, `TransferDeleted`) were not designed in this proposal, and their interaction with the D-009 lifecycle rules and D-036 authorisation checks would add further complexity.
+Aggregate root rehydration on every write request, command handlers, projection handlers, and upcasters (required once event shapes are in production and cannot be changed) represent a significant build and maintenance overhead. The PUT command handlers (`CollectionAmended`, `MovementDeleted`, `ReceiptAmended`, `DeliveryDeleted`) were not designed in this proposal, and their interaction with the D-009 lifecycle rules and D-036 authorisation checks would add further complexity.
 
 ### What would change the calculus
 
@@ -59,12 +59,12 @@ If a concrete Phase 2 read requirement emerges that the aggregate documents cann
 
 ## Core concept
 
-In the aggregate model, the `movements` and `transfers` documents are the source of truth — they are written directly and mutated in place.
+In the aggregate model, the `movements` and `deliveries` documents are the source of truth — they are written directly and mutated in place.
 
 In the CQRS / event-sourcing model:
 
 - An immutable **event store** (`events` collection) is the only source of truth. Nothing is ever updated or deleted from it.
-- **Projections** (`movements` and `transfers` collections) are derived from the event store and rebuilt at any time by replaying events. They are read models — their document shapes are identical to the ones in `mongo-schema-proposal.md`, but they are derived rather than primary.
+- **Projections** (`movements` and `deliveries` collections) are derived from the event store and rebuilt at any time by replaying events. They are read models — their document shapes are identical to the ones in `mongo-schema-proposal.md`, but they are derived rather than primary.
 - **Aggregate roots** are in-memory objects rehydrated by replaying a stream for a single request. They enforce domain invariants before each write. They are never persisted.
 
 The write path for every Phase 2 endpoint follows the same pattern:
@@ -85,7 +85,7 @@ The write path for every Phase 2 endpoint follows the same pattern:
 | ---------------------- | ------------------- | --------------- | ------ |
 | `events`               | Event store         | Yes             | 2      |
 | `movements`            | Projection          | No — derived    | 2      |
-| `transfers`            | Projection          | No — derived    | 2      |
+| `deliveries`            | Projection          | No — derived    | 2      |
 | `invalid-submissions`  | Operational         | Partial         | 1 + 2  |
 | `waste-inputs`         | Aggregate (Phase 1) | Yes             | 1 only |
 | `waste-inputs-history` | Snapshots (Phase 1) | Yes             | 1 only |
@@ -98,7 +98,7 @@ The Phase 1 collections (`waste-inputs`, `waste-inputs-history`) are unchanged. 
 
 ### Purpose
 
-Append-only log of all business facts across both Movement and Transfer aggregates. The only write operation is `insertOne`. Documents are never updated or deleted.
+Append-only log of all business facts across both Movement and Delivery aggregates. The only write operation is `insertOne`. Documents are never updated or deleted.
 
 ### Stream naming
 
@@ -107,7 +107,7 @@ Every event belongs to a named stream. The stream ID encodes both the aggregate 
 | Aggregate | Stream ID format        | Example             |
 | --------- | ----------------------- | ------------------- |
 | Movement  | `movement-{movementId}` | `movement-25ABC123` |
-| Transfer  | `transfer-{transferId}` | `transfer-25XYZ456` |
+| Delivery  | `delivery-{deliveryId}` | `delivery-25XYZ456` |
 
 ### Document shape
 
@@ -139,7 +139,7 @@ This replaces the `{ _id, revision }` filter used in the Phase 1 `updateWasteInp
 
 ## Event types
 
-All events for Phase 2 are listed below. `MovementCreated` and `TransferCreated` each start a new stream (`sequenceNumber: 1`). All others append to an existing stream.
+All events for Phase 2 are listed below. `MovementCreated` and `DeliveryCreated` each start a new stream (`sequenceNumber: 1`). All others append to an existing stream.
 
 ### Movement stream (`movement-{movementId}`)
 
@@ -238,19 +238,19 @@ Appended by `PUT /movements/{movementId}` when `isDeleted: false`.
 
 ---
 
-### Transfer stream (`transfer-{transferId}`)
+### Delivery stream (`delivery-{deliveryId}`)
 
-#### `TransferCreated`
+#### `DeliveryCreated`
 
-Appended by `POST /transfers`. Starts the transfer stream.
+Appended by `POST /deliveries`. Starts the delivery stream.
 
-For a hazardous drop-off, `transferId` is not freshly minted: it is the sole `movementId` referenced in the request ([D-010](../decisions.md#d-010) guarantees there is exactly one). For a non-hazardous drop-off, `transferId` is minted independently as before.
+For a hazardous drop-off, `deliveryId` is not freshly minted: it is the sole `movementId` referenced in the request ([D-010](../decisions.md#d-010) guarantees there is exactly one). For a non-hazardous drop-off, `deliveryId` is minted independently as before.
 
 ```javascript
 {
-  eventType: 'TransferCreated',
+  eventType: 'DeliveryCreated',
   payload: {
-    transferId:            String,    // sqid — e.g. "25XYZ456"; for a
+    deliveryId:            String,    // sqid — e.g. "25XYZ456"; for a
                                        // hazardous drop-off, equals the
                                        // sole movementId below
     movementIds:           [String],  // one or more movementIds linked at this drop-off
@@ -272,13 +272,13 @@ For a hazardous drop-off, `transferId` is not freshly minted: it is the sole `mo
 
 #### `WasteReceived`
 
-Appended by `POST /transfers/{transferId}/receipt`.
+Appended by `POST /deliveries/{deliveryId}/receipt`.
 
 ```javascript
 {
   eventType: 'WasteReceived',
   payload: {
-    transferId:       String,
+    deliveryId:       String,
     dateTimeReceived: Date,
     hazardousWasteConsignmentCode:    String,   // optional
     reasonForNoConsignmentCode:       String,   // optional
@@ -305,13 +305,13 @@ Appended by `POST /transfers/{transferId}/receipt`.
 
 #### `ReceiptAmended`
 
-Appended by `PUT /transfers/{transferId}/receipt`. Only the authoring organisation may append this (D-036).
+Appended by `PUT /deliveries/{deliveryId}/receipt`. Only the authoring organisation may append this (D-036).
 
 ```javascript
 {
   eventType: 'ReceiptAmended',
   payload: {
-    transferId: String,
+    deliveryId: String,
     // amended fields:
     dateTimeReceived: Date,     // optional
     carrier:          Object,   // optional
@@ -325,28 +325,28 @@ Appended by `PUT /transfers/{transferId}/receipt`. Only the authoring organisati
 }
 ```
 
-#### `TransferDeleted`
+#### `DeliveryDeleted`
 
-Appended by `PUT /transfers/{transferId}` when `isDeleted: true`. The aggregate enforces that no `WasteReceived` event exists in the stream.
+Appended by `PUT /deliveries/{deliveryId}` when `isDeleted: true`. The aggregate enforces that no `WasteReceived` event exists in the stream.
 
 ```javascript
 {
-  eventType: 'TransferDeleted',
+  eventType: 'DeliveryDeleted',
   payload: {
-    transferId: String
+    deliveryId: String
   }
 }
 ```
 
-#### `TransferUndeleted`
+#### `DeliveryUndeleted`
 
-Appended by `PUT /transfers/{transferId}` when `isDeleted: false`.
+Appended by `PUT /deliveries/{deliveryId}` when `isDeleted: false`.
 
 ```javascript
 {
-  eventType: 'TransferUndeleted',
+  eventType: 'DeliveryUndeleted',
   payload: {
-    transferId: String
+    deliveryId: String
   }
 }
 ```
@@ -357,7 +357,7 @@ Appended by `PUT /transfers/{transferId}` when `isDeleted: false`.
 
 ### Purpose
 
-`movements` and `transfers` are read models rebuilt from the event store. They exist to serve GET requests without replaying event streams on every read. Their document shapes are identical to the shapes in [mongo-schema-proposal.md](./mongo-schema-proposal.md) — the only difference is that they are derived, not primary.
+`movements` and `deliveries` are read models rebuilt from the event store. They exist to serve GET requests without replaying event streams on every read. Their document shapes are identical to the shapes in [mongo-schema-proposal.md](./mongo-schema-proposal.md) — the only difference is that they are derived, not primary.
 
 If a projection document is lost or corrupted, it is rebuilt by replaying the corresponding stream. If a projection field name needs changing, the fix is to update the projection handler and replay. No data is ever lost because the event store is the source of truth.
 
@@ -408,20 +408,20 @@ One document per `movementId`. Built by applying `MovementCreated`, `CollectionR
     }
   ],
 
-  transferIds: [String]   // denormalised convenience field; pushed by applyTransferCreated
+  deliveryIds: [String]   // denormalised convenience field; pushed by applyDeliveryCreated
 }
 ```
 
 The `revision` field on the projection carries the `sequenceNumber` of the last event applied. It is used by consumers that want to know the current version of a document. It is **not** used as a concurrency guard on writes — that role belongs to the unique index on the `events` collection.
 
-### `transfers` projection
+### `deliveries` projection
 
-One document per `transferId`. Built by applying `TransferCreated`, `WasteReceived`, `ReceiptAmended`, `TransferDeleted`, and `TransferUndeleted` events in sequence order.
+One document per `deliveryId`. Built by applying `DeliveryCreated`, `WasteReceived`, `ReceiptAmended`, `DeliveryDeleted`, and `DeliveryUndeleted` events in sequence order.
 
 ```javascript
 {
-  _id:           String,   // transferId
-  transferId:    String,
+  _id:           String,   // deliveryId
+  deliveryId:    String,
   movementIds:   [String],
   state:         String,   // 'DROPPED_OFF' | 'RECEIVED'
   revision:      Number,   // sequenceNumber of the last applied event
@@ -468,8 +468,8 @@ One document per `transferId`. Built by applying `TransferCreated`, `WasteReceiv
 ### Notes on projections
 
 - The document shapes above match `mongo-schema-proposal.md` except for `revision`: in the aggregate model `revision` is the concurrency guard; here it is informational only.
-- Neither `movements-history` nor `transfers-history` collections are needed. The event store is the history. Corrections appear as `CollectionAmended` / `ReceiptAmended` events alongside their originals; the full amendment trail is always recoverable by reading the stream.
-- `movements.transferIds[]` is denormalised convenience data, pushed by the `applyTransferCreated` projection handler when a new transfer is created. It is not the source of truth for the Movement–Transfer relationship; `transfers.movementIds[]` is.
+- Neither `movements-history` nor `deliveries-history` collections are needed. The event store is the history. Corrections appear as `CollectionAmended` / `ReceiptAmended` events alongside their originals; the full amendment trail is always recoverable by reading the stream.
+- `movements.deliveryIds[]` is denormalised convenience data, pushed by the `applyDeliveryCreated` projection handler when a new delivery is created. It is not the source of truth for the Movement–Delivery relationship; `deliveries.movementIds[]` is.
 
 ---
 
@@ -494,30 +494,30 @@ Key invariants enforced:
 
 - `assertNotDeleted()` — blocks all writes to a deleted movement.
 - `assertCollectionTypeValid(type)` — D-029: first active event must be `STATIC`; subsequent events must be `TRANSIT`.
-- `assertCollectionSequenceNotClosed(db)` — D-029: blocks collection writes once the movement appears in any transfer (cross-projection read on `movements.transferIds`; see known gap below).
+- `assertCollectionSequenceNotClosed(db)` — D-029: blocks collection writes once the movement appears in any delivery (cross-projection read on `movements.deliveryIds`; see known gap below).
 - `assertLatestCollectionDeletable()` — D-009 + D-029: soft-delete is tail-only.
 - `assertDeletionPermitted()` — D-009: movement cannot be deleted once a collection event has been recorded.
 - `assertAmendAuthorisedBy(org)` — D-036: only the creation author may amend.
 
-### `TransferAggregate`
+### `DeliveryAggregate`
 
 | Field | Set by | Purpose |
 | --- | --- | --- |
-| `transferId` | `TransferCreated` | Identity |
+| `deliveryId` | `DeliveryCreated` | Identity |
 | `state` | each event | Lifecycle state |
-| `isDeleted` | `TransferDeleted/Undeleted` | Deletion guard |
+| `isDeleted` | `DeliveryDeleted/Undeleted` | Deletion guard |
 | `sequenceNumber` | every event | Expected position for next append |
-| `movementIds` | `TransferCreated` | Referenced movements |
+| `movementIds` | `DeliveryCreated` | Referenced movements |
 | `hasReceipt` | `WasteReceived` | Blocks duplicate receipts |
-| `dropOffCarrier` | `TransferCreated` | D-006 carrier cross-check at receipt (free — no extra read) |
-| `dropOffAuthor` | `TransferCreated.metadata` | D-036 drop-off amend-authorisation |
+| `dropOffCarrier` | `DeliveryCreated` | D-006 carrier cross-check at receipt (free — no extra read) |
+| `dropOffAuthor` | `DeliveryCreated.metadata` | D-036 drop-off amend-authorisation |
 | `receiptAuthor` | `WasteReceived.metadata` | D-036 receipt amend-authorisation |
 
 Key invariants enforced:
 
-- `assertNotDeleted()` — blocks all writes to a deleted transfer.
-- `assertReceiptNotYetRecorded()` — D-015: only one receipt per transfer.
-- `assertDeletionPermitted()` — D-009: transfer cannot be deleted once a receipt exists.
+- `assertNotDeleted()` — blocks all writes to a deleted delivery.
+- `assertReceiptNotYetRecorded()` — D-015: only one receipt per delivery.
+- `assertDeletionPermitted()` — D-009: delivery cannot be deleted once a receipt exists.
 - `checkCarrierMatch(carrier)` — D-006: compares receipt carrier against `dropOffCarrier`; returns a warning object or `null`. No DB read needed.
 - `assertDropOffAmendAuthorisedBy(org)` / `assertReceiptAmendAuthorisedBy(org)` — D-036.
 
@@ -543,37 +543,37 @@ The four Phase 2 POST endpoints and their CQRS write paths:
 3. `loadStream(db, 'movement-{id}')` — throws `MOVEMENT_NOT_FOUND` if stream does not exist.
 4. `MovementAggregate.rehydrate(events)`.
 5. `agg.assertNotDeleted()`.
-6. Cross-projection check: `movements.transferIds.length > 0` → throw if the collection sequence is closed (D-029).
+6. Cross-projection check: `movements.deliveryIds.length > 0` → throw if the collection sequence is closed (D-029).
 7. `agg.assertCollectionTypeValid(payload.collectionType)` — D-029.
 8. Build `CollectionRecorded` event with `sequence: agg.nextCollectionSequence()`.
 9. `appendEvent(db, 'movement-{id}', agg.sequenceNumber, event)` — concurrent write blocked by unique index.
 10. `applyCollectionRecorded(db, storedEvent)` — `$push` to `collectionEvents[]`, update `state` and `revision`.
 11. Return `HTTP 201`.
 
-### `POST /transfers`
+### `POST /deliveries`
 
 1. Validate Joi schema.
-2. Call `handleCreateTransfer(db, command)`.
+2. Call `handleCreateDelivery(db, command)`.
 3. Cross-projection check: all `movementIds` exist in `movements` with `isDeleted: false`.
 4. Cross-projection check (D-010): if any referenced movement carries hazardous waste items, `movementIds.length` must equal `1`.
-5. Determine `transferId`: if step 4's hazardous check applies, reuse the sole `movementId` as `transferId` — no new identifier is minted. Otherwise, mint `transferId` via `waste-tracking-id-backend` as today.
-6. Build `TransferCreated` event.
-7. `appendEvent(db, 'transfer-{id}', 0, event)` — new stream.
-8. `applyTransferCreated(db, storedEvent)` — `insertOne` into `transfers`; `$push transferId` to each referenced `movements` document.
-9. Return `{ transferId }`.
+5. Determine `deliveryId`: if step 4's hazardous check applies, reuse the sole `movementId` as `deliveryId` — no new identifier is minted. Otherwise, mint `deliveryId` via `waste-tracking-id-backend` as today.
+6. Build `DeliveryCreated` event.
+7. `appendEvent(db, 'delivery-{id}', 0, event)` — new stream.
+8. `applyDeliveryCreated(db, storedEvent)` — `insertOne` into `deliveries`; `$push deliveryId` to each referenced `movements` document.
+9. Return `{ deliveryId }`.
 
-### `POST /transfers/{transferId}/receipt`
+### `POST /deliveries/{deliveryId}/receipt`
 
 1. Validate Joi schema.
 2. Call `handleRecordReceipt(db, command)`.
-3. `loadStream(db, 'transfer-{id}')` — throws `TRANSFER_NOT_FOUND` if stream does not exist.
-4. `TransferAggregate.rehydrate(events)`.
+3. `loadStream(db, 'delivery-{id}')` — throws `DELIVERY_NOT_FOUND` if stream does not exist.
+4. `DeliveryAggregate.rehydrate(events)`.
 5. `agg.assertNotDeleted()`.
 6. `agg.assertReceiptNotYetRecorded()`.
-7. `agg.checkCarrierMatch(payload.carrier)` — D-006 warning (no extra DB read; carrier captured during rehydration from `TransferCreated`).
+7. `agg.checkCarrierMatch(payload.carrier)` — D-006 warning (no extra DB read; carrier captured during rehydration from `DeliveryCreated`).
 8. Build `WasteReceived` event; embed warnings in `payload.validation`.
-9. `appendEvent(db, 'transfer-{id}', agg.sequenceNumber, event)`.
-10. `applyWasteReceived(db, storedEvent)` — `$set receipt` on `transfers`, update `state` and `revision`.
+9. `appendEvent(db, 'delivery-{id}', agg.sequenceNumber, event)`.
+10. `applyWasteReceived(db, storedEvent)` — `$set receipt` on `deliveries`, update `state` and `revision`.
 11. Return `{ warnings }`.
 
 ---
@@ -596,7 +596,7 @@ Required:
 - `{ _id: 1 }` (implicit on `movementId`)
 - `{ movementId: 1 }` unique
 - `{ traceId: 1 }`
-- `{ transferIds: 1 }`
+- `{ deliveryIds: 1 }`
 - `{ state: 1, lastUpdatedAt: -1 }`
 - `{ 'creation.submittingOrganisation.defraCustomerOrganisationId': 1 }`
 
@@ -605,12 +605,12 @@ Conditional / query-driven:
 - `{ 'collectionEvents.submittingOrganisation.defraCustomerOrganisationId': 1 }`
 - `{ 'creation.estimatedDateTimeCollected': 1 }`
 
-### `transfers` (projection)
+### `deliveries` (projection)
 
 Required:
 
-- `{ _id: 1 }` (implicit on `transferId`)
-- `{ transferId: 1 }` unique
+- `{ _id: 1 }` (implicit on `deliveryId`)
+- `{ deliveryId: 1 }` unique
 - `{ movementIds: 1 }`
 - `{ traceId: 1 }`
 - `{ state: 1, lastUpdatedAt: -1 }`
@@ -633,11 +633,11 @@ Because the event store is the source of truth, any projection document can be r
 // Rebuild a single movement projection from its event stream.
 rebuildMovementProjection(db, movementId);
 
-// Rebuild a single transfer projection from its event stream.
-rebuildTransferProjection(db, transferId);
+// Rebuild a single delivery projection from its event stream.
+rebuildDeliveryProjection(db, deliveryId);
 ```
 
-A full replay (all movements or all transfers) iterates every distinct `streamId` prefixed `movement-` or `transfer-` and calls the corresponding rebuild function. This is the recovery path if a projection becomes stale due to a failed write step.
+A full replay (all movements or all deliveries) iterates every distinct `streamId` prefixed `movement-` or `delivery-` and calls the corresponding rebuild function. This is the recovery path if a projection becomes stale due to a failed write step.
 
 ---
 
@@ -657,13 +657,13 @@ A full replay (all movements or all transfers) iterates every distinct `streamId
 
 | Aspect | Aggregate model | CQRS / Event Sourcing |
 | --- | --- | --- |
-| Source of truth | `movements`, `transfers` docs | `events` collection |
+| Source of truth | `movements`, `deliveries` docs | `events` collection |
 | Write path | Direct `insertOne` / `updateOne` | Append event → update projection |
 | History | `-history` snapshot collections | Not needed — event log is the history |
 | Concurrency guard | `revision` field in update filter | Unique `(streamId, sequenceNumber)` index |
 | Correction / amend | Mutate in place; snapshot to history | Append `*Amended` event; projection replays |
 | Rebuild after bug | Not possible without full history | Replay stream → rebuild projection |
-| Collections removed | — | `movements-history`, `transfers-history` |
+| Collections removed | — | `movements-history`, `deliveries-history` |
 
 ---
 
@@ -673,12 +673,12 @@ These items are not yet resolved in this proposal. A full gap analysis against a
 
 - **Two-step write atomicity.** `appendEvent` and the projection update are two separate MongoDB operations. If the projection update fails after a successful append, the projection is behind the event store. Options: wrap both in a MongoDB multi-document transaction (same session, consistent with Phase 1 approach), or accept eventual consistency with a startup reconciliation check and the rebuild functions above. Decision needed before production.
 
-- **Cross-projection check for the closed sequence rule (D-029).** The `MovementAggregate` cannot know that a Movement has been dropped off from its own stream alone (the `TransferCreated` event goes to the transfer stream, not the movement stream). The check is implemented as a cross-projection read (`movements.transferIds.length > 0`) in `handleRecordCollection`. This is correct and efficient but means the command touches both the event stream and the projection. Needs documenting as an explicit design choice.
+- **Cross-projection check for the closed sequence rule (D-029).** The `MovementAggregate` cannot know that a Movement has been dropped off from its own stream alone (the `DeliveryCreated` event goes to the delivery stream, not the movement stream). The check is implemented as a cross-projection read (`movements.deliveryIds.length > 0`) in `handleRecordCollection`. This is correct and efficient but means the command touches both the event stream and the projection. Needs documenting as an explicit design choice.
 
-- **PUT command handlers not yet designed.** The sketch covers the four Phase 2 POST endpoints only. Amendment and soft-delete handlers (`CollectionAmended`, `MovementDeleted`, `ReceiptAmended`, `TransferDeleted`, and their `*Undeleted` counterparts) need designing with the D-009 lifecycle rules and D-036 authorisation checks in place.
+- **PUT command handlers not yet designed.** The sketch covers the four Phase 2 POST endpoints only. Amendment and soft-delete handlers (`CollectionAmended`, `MovementDeleted`, `ReceiptAmended`, `DeliveryDeleted`, and their `*Undeleted` counterparts) need designing with the D-009 lifecycle rules and D-036 authorisation checks in place.
 
-- **D-022 (receipt migration) should be closed as Option 1.** Grafting CQRS logic into the existing Phase 1 `POST /movements/receive` handler would create a handler that switches paradigms on a flag. The new Transfer-scoped endpoint is the clean path.
+- **D-022 (receipt migration) should be closed as Option 1.** Grafting CQRS logic into the existing Phase 1 `POST /movements/receive` handler would create a handler that switches paradigms on a flag. The new Delivery-scoped endpoint is the clean path.
 
 - **`invalid-submissions` collection.** Phase 2 commands that fail after beginning processing (e.g. `movementId` not found, org mismatch) should persist to `invalid-submissions` consistently with Phase 1 behaviour. The shape in `mongo-schema-proposal.md` applies unchanged.
 
-- **Event schema versioning.** Once `MovementCreated` or `TransferCreated` event payloads are in production, their shapes are permanent — or an upcaster function is needed to transform old events before rehydration. Field names should be finalised before the first production write.
+- **Event schema versioning.** Once `MovementCreated` or `DeliveryCreated` event payloads are in production, their shapes are permanent — or an upcaster function is needed to transform old events before rehydration. Field names should be finalised before the first production write.

@@ -32,8 +32,8 @@ tags:
     description: Create and manage a waste movement record.
   - name: Collection
     description: Record a collection event — waste passing from a producer to a driver.
-  - name: Drop-off
-    description: Record a drop-off event, generating a Transfer ID.
+  - name: Delivery
+    description: Record a drop-off event, generating a Delivery ID.
   - name: Receipt
     description: Record receipt of waste at a receiver site (Phase 1).
   - name: Fate of waste
@@ -56,19 +56,19 @@ components:
       schema:
         $ref: '#/components/schemas/movementId'
 
-    transferIdPath:
-      name: transferId
+    deliveryIdPath:
+      name: deliveryId
       in: path
       required: true
-      description: Transfer ID minted by `POST /transfers`.
+      description: Delivery ID minted by `POST /deliveries`.
       schema:
-        $ref: '#/components/schemas/transferId'
+        $ref: '#/components/schemas/deliveryId'
 
   # ----------------------------------------------------------------------
   # Schemas
   #
   # Organised in three layers, smallest first:
-  #   1. Identifiers and primitives (Movement ID, Transfer ID, weights, dates)
+  #   1. Identifiers and primitives (Movement ID, Delivery ID, weights, dates)
   #   2. Common composites (address, organisation, validation envelope)
   #   3. Domain entities (waste classification, hazardous, POPs, party details)
   #   4. Request / response bodies per endpoint
@@ -86,18 +86,18 @@ components:
         https://sqids.org/). Format is opaque to callers; do not parse.
       example: 25HRA0B2
 
-    transferId:
+    deliveryId:
       type: string
       description: |
         Unique identifier for a drop-off, covering one or more Movement IDs
         delivered together at a single receiver site. Minted by the server
-        on `POST /transfers`. Short, externally-shared,
+        on `POST /deliveries`. Short, externally-shared,
         year-prefixed sqids (YY + alphanumerics, see https://sqids.org/).
         Format is opaque to callers; do not parse.
 
         Exception: for a hazardous drop-off, the request contains exactly
         one Movement ID (see the hazardous-waste constraint on
-        `POST /transfers`), and `transferId` is set equal to that Movement
+        `POST /deliveries`), and `deliveryId` is set equal to that Movement
         ID rather than minted.
       example: 25KMT4Z9
 
@@ -106,7 +106,7 @@ components:
     # They are NOT part of the public contract and are never returned in
     # API responses, so they are not modelled here. Public resources are
     # addressed solely by their public identifiers: movementId and
-    # transferId (and, on the deprecated Phase 1 path, wasteTrackingId).
+    # deliveryId (and, on the deprecated Phase 1 path, wasteTrackingId).
 
     wasteTrackingId:
       type: string
@@ -162,10 +162,10 @@ components:
           enum:
             - MOVEMENT_NOT_FOUND
             - COLLECTION_NOT_RECORDED
-            - TRANSFER_NOT_FOUND
+            - DELIVERY_NOT_FOUND
             - RECEIPT_NOT_RECORDED
           description: |
-            `MOVEMENT_NOT_FOUND` / `TRANSFER_NOT_FOUND`: the parent resource
+            `MOVEMENT_NOT_FOUND` / `DELIVERY_NOT_FOUND`: the parent resource
             does not exist. `COLLECTION_NOT_RECORDED` / `RECEIPT_NOT_RECORDED`:
             the parent exists but the event has not been recorded yet.
           example: COLLECTION_NOT_RECORDED
@@ -679,34 +679,34 @@ components:
     dropOffResource:
       description: |
         A drop-off as stored. The request body fields plus the public
-        `transferId`.
+        `deliveryId`.
       allOf:
         - type: object
-          required: [transferId]
+          required: [deliveryId]
           properties:
-            transferId:
-              $ref: '#/components/schemas/transferId'
+            deliveryId:
+              $ref: '#/components/schemas/deliveryId'
         - $ref: '#/components/schemas/dropOffRequest'
 
     receiptResource:
       description: |
         A receipt event as stored. The receipt request body fields (same
-        shape as `receiveMovementRequest`) plus the public `transferId`.
+        shape as `receiveMovementRequest`) plus the public `deliveryId`.
       allOf:
         - type: object
-          required: [transferId]
+          required: [deliveryId]
           properties:
-            transferId:
-              $ref: '#/components/schemas/transferId'
+            deliveryId:
+              $ref: '#/components/schemas/deliveryId'
         - $ref: '#/components/schemas/receiveMovementRequest'
 
-    # Drop-off event — POST /transfers.
+    # Drop-off event — POST /deliveries.
     #
     # A single drop-off can cover one or more Movements delivered together
-    # (multi-collection case). The Transfer ID minted here is the aggregation
-    # point — one Transfer ID, many Movement IDs possible. The drop-off place is
+    # (multi-collection case). The Delivery ID minted here is the aggregation
+    # point — one Delivery ID, many Movement IDs possible. The drop-off place is
     # a lighter, carrier-declared site model (`dropOff`); a receipt may not
-    # always follow. No GET in v1; updates use PUT against the Transfer ID.
+    # always follow. No GET in v1; updates use PUT against the Delivery ID.
 
     dropOffRequest:
       type: object
@@ -762,20 +762,20 @@ components:
           default: false
           description: |
             Soft-delete flag (D-009). Defaults to `false`. Must not be supplied
-            as `true` on create — only `PUT /transfers/{transferId}` may set it
+            as `true` on create — only `PUT /deliveries/{deliveryId}` may set it
             to `true`, and only while no Receipt has been recorded against this
-            Transfer; once a Receipt exists the Transfer can no longer be
+            Delivery; once a Receipt exists the Delivery can no longer be
             deleted. Supplying `true` here is rejected as a `NotAllowed`
             validation error.
 
-    # PUT /transfers/{transferId} — restricted update body (D-017).
+    # PUT /deliveries/{deliveryId} — restricted update body (D-017).
     #
     # A recorded drop-off is immutable under policy; the only property that may
     # change is the soft-delete flag isDeleted (D-009). The drop-off PUT
     # therefore accepts ONLY isDeleted (plus apiCode for caller identity). Every
     # other dropOffRequest field is rejected with a NotAllowed validation error
     # (additionalProperties: false). To correct a recorded drop-off, soft-delete
-    # it (isDeleted: true) and record a fresh drop-off via POST /transfers.
+    # it (isDeleted: true) and record a fresh drop-off via POST /deliveries.
     dropOffUpdateRequest:
       type: object
       additionalProperties: false
@@ -797,19 +797,19 @@ components:
           description: |
             Soft-delete flag for the drop-off (D-009) — the ONLY property that
             may be changed on a recorded drop-off (D-017). Setting true marks the
-            Transfer deleted; false restores it. Cannot be set true once a
-            Receipt has been recorded against the Transfer (BusinessRuleViolation).
+            Delivery deleted; false restores it. Cannot be set true once a
+            Receipt has been recorded against the Delivery (BusinessRuleViolation).
           example: true
 
     dropOffResponse:
       type: object
       description: |
-        Returned on successful drop-off. Carries the new public Transfer ID
+        Returned on successful drop-off. Carries the new public Delivery ID
         (which links all Movement IDs in this drop-off) and a validation
         envelope with any warnings.
       properties:
-        transferId:
-          $ref: '#/components/schemas/transferId'
+        deliveryId:
+          $ref: '#/components/schemas/deliveryId'
         validation:
           type: object
           properties:
@@ -1667,15 +1667,15 @@ paths:
               schema:
                 $ref: '#/components/schemas/notFoundError'
 
-  /transfers:
+  /deliveries:
     post:
-      tags: [Drop-off]
+      tags: [Delivery]
       summary: Record a drop-off
       description: |
         Record a drop-off event, covering one or more Movement IDs delivered
         together (carried in `movementIds`). In a single-collection run
         `movementIds` is an array of one; in a multi-collection run it
-        carries every Movement being delivered. Returns a Transfer ID: a
+        carries every Movement being delivered. Returns a Delivery ID: a
         newly-minted one for a non-hazardous drop-off, or the reused
         Movement ID for a hazardous one (see below).
 
@@ -1691,7 +1691,7 @@ paths:
         carry, so it is enforced server-side and surfaced as a
         BusinessRuleViolation in `validation.warnings` (it may harden to a 400
         in a later revision). For a drop-off that satisfies this constraint,
-        the returned `transferId` is set equal to the single Movement ID
+        the returned `deliveryId` is set equal to the single Movement ID
         rather than minted.
 
         Every Movement named in `movementIds` must be active: a Movement that
@@ -1699,7 +1699,7 @@ paths:
         `isDeleted: true`, must not be referenced here. Either case is
         rejected as a `BusinessRuleViolation` (D-009). `isDeleted` must not be
         supplied as `true` in this request — it can only be set via
-        `PUT /transfers/{transferId}`.
+        `PUT /deliveries/{deliveryId}`.
       operationId: recordDropOff
       requestBody:
         required: true
@@ -1709,7 +1709,7 @@ paths:
               $ref: '#/components/schemas/dropOffRequest'
       responses:
         "201":
-          description: Drop-off recorded. Body carries the new Transfer ID and any validation warnings.
+          description: Drop-off recorded. Body carries the new Delivery ID and any validation warnings.
           content:
             application/json:
               schema:
@@ -1717,11 +1717,11 @@ paths:
         "400":
           $ref: '#/components/responses/400'
 
-  /transfers/{transferId}:
+  /deliveries/{deliveryId}:
     parameters:
-      - $ref: '#/components/parameters/transferIdPath'
+      - $ref: '#/components/parameters/deliveryIdPath'
     put:
-      tags: [Drop-off]
+      tags: [Delivery]
       summary: Soft-delete or restore a drop-off
       description: |
         A recorded drop-off is immutable under policy (D-017): its place,
@@ -1731,17 +1731,17 @@ paths:
         any other field in the body is rejected with a `NotAllowed` validation
         error.
 
-        Setting `isDeleted: true` soft-deletes the Transfer, but only while no
+        Setting `isDeleted: true` soft-deletes the Delivery, but only while no
         Receipt has been recorded against it — once a Receipt exists, attempting
         to set `isDeleted: true` is rejected as a `BusinessRuleViolation`. A
-        deleted Transfer can be restored by a further `PUT` with
-        `isDeleted: false`. While the Transfer is deleted, no Receipt may be
+        deleted Delivery can be restored by a further `PUT` with
+        `isDeleted: false`. While the Delivery is deleted, no Receipt may be
         recorded or updated against it (D-009). Before applying the change the
         current record is snapshotted to a history store and the live record's
         revision counter is incremented (D-034).
 
         To correct a recorded drop-off, soft-delete it (`isDeleted: true`) and
-        record a fresh drop-off via `POST /transfers`.
+        record a fresh drop-off via `POST /deliveries`.
       operationId: updateDropOff
       requestBody:
         required: true
@@ -1759,32 +1759,32 @@ paths:
         "400":
           $ref: '#/components/responses/400'
         "404":
-          description: Transfer not found.
+          description: Delivery not found.
 
   # ----------------------------------------------------------------------
   # Phase 2 receipt endpoint — canonical.
   #
-  # In Phase 2 a receipt is recorded against a Transfer (the drop-off
+  # In Phase 2 a receipt is recorded against a Delivery (the drop-off
   # aggregation point), so one receipt can cover the single or multiple
   # Movements named in that drop-off. The request body is identical to the
   # Phase 1 receiveMovementRequest; the only field captured in addition is
-  # the transferId, taken from the path and persisted on the receipt
+  # the deliveryId, taken from the path and persisted on the receipt
   # record. The receipt identifier returned is the Phase 1 wasteTrackingId
   # (now an 8-char sqid, semantically the receiptId).
   # ----------------------------------------------------------------------
 
-  /transfers/{transferId}/receipt:
+  /deliveries/{deliveryId}/receipt:
     parameters:
-      - $ref: '#/components/parameters/transferIdPath'
+      - $ref: '#/components/parameters/deliveryIdPath'
     post:
       tags: [Receipt]
-      summary: Record receipt of waste against a transfer
+      summary: Record receipt of waste against a delivery
       description: |
-        Records receipt of the waste delivered under the given Transfer.
+        Records receipt of the waste delivered under the given Delivery.
         Because a drop-off can aggregate one or more Movements, a single
-        receipt against the Transfer applies to all of them. The request
+        receipt against the Delivery applies to all of them. The request
         body is the same shape as the Phase 1 `/movements/receive` payload;
-        the `transferId` from the path is persisted on the stored receipt
+        the `deliveryId` from the path is persisted on the stored receipt
         record. Replaces the deprecated `POST /movements/receive`.
 
         Waste details on the receipt may be cross-checked against the linked
@@ -1797,7 +1797,7 @@ paths:
         (including weight tolerance, since creation is an estimate and
         collection an actual) are still being defined (D-021).
 
-        Rejected as a `BusinessRuleViolation` if the Transfer is currently
+        Rejected as a `BusinessRuleViolation` if the Delivery is currently
         `isDeleted: true` (D-009). Receipt itself has no `isDeleted` field —
         once recorded, a receipt is the terminal event in the chain and
         cannot be soft-deleted.
@@ -1808,9 +1808,9 @@ paths:
       responses:
         "201":
           description: |
-            Success — the receipt has been stored against the transfer.
-            The receipt is addressed by its Transfer ID
-            (`/transfers/{transferId}/receipt`); no internal receipt
+            Success — the receipt has been stored against the delivery.
+            The receipt is addressed by its Delivery ID
+            (`/deliveries/{deliveryId}/receipt`); no internal receipt
             identifier is returned.
           content:
             application/json:
@@ -1827,12 +1827,12 @@ paths:
         "400":
           $ref: "#/components/responses/400"
         "404":
-          description: Transfer not found.
+          description: Delivery not found.
     put:
       tags: [Receipt]
-      summary: Update a receipt recorded against a transfer
+      summary: Update a receipt recorded against a delivery
       description: |
-        Updates the receipt previously recorded against the given Transfer.
+        Updates the receipt previously recorded against the given Delivery.
         Same request body as the Phase 1 receipt payload. Before applying
         the update, the current record is snapshotted to a history store
         and the live record's revision counter is incremented (D-034).
@@ -1859,7 +1859,7 @@ paths:
           $ref: "#/components/responses/400"
         "404":
           description: |
-            Either the Transfer does not exist (`TRANSFER_NOT_FOUND`), or it
+            Either the Delivery does not exist (`DELIVERY_NOT_FOUND`), or it
             exists but no receipt has yet been recorded to update
             (`RECEIPT_NOT_RECORDED`). The `code` in the body distinguishes the
             two.
@@ -1872,7 +1872,7 @@ paths:
   # Phase 1 receipt endpoints — DEPRECATED.
   #
   # Retained for backward compatibility only; superseded by
-  # POST/PUT /transfers/{transferId}/receipt. The {wasteTrackingId} path
+  # POST/PUT /deliveries/{deliveryId}/receipt. The {wasteTrackingId} path
   # parameter is the Phase 1 wasteTrackingId (now the receiptId / an 8-char sqid)
   # — it is NOT the Movement ID. Phase 1 schemas under #/components/schemas
   # keep their
@@ -1885,7 +1885,7 @@ paths:
       summary: Record receipt of waste at a receiver site (Phase 1, deprecated)
       deprecated: true
       description: |
-        DEPRECATED — use `POST /transfers/{transferId}/receipt`. Retained
+        DEPRECATED — use `POST /deliveries/{deliveryId}/receipt`. Retained
         for backward compatibility. Endpoint used when waste is received but
         the receiver has not yet recorded the waste movement. Generally at
         this stage, the receiver does not have or use the waste tracking ID.
@@ -1937,7 +1937,7 @@ paths:
       summary: Update a receipt of waste record (Phase 1, deprecated)
       deprecated: true
       description: |
-        DEPRECATED — use `PUT /transfers/{transferId}/receipt`. Retained for
+        DEPRECATED — use `PUT /deliveries/{deliveryId}/receipt`. Retained for
         backward compatibility. Endpoint to be used when waste is received
         and the waste record is to be updated, using the receipt identifier
         (Phase 1 `wasteTrackingId`) in the URL path.

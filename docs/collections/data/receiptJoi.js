@@ -2,9 +2,9 @@ import Joi from 'joi'
 
 /**
  * Single-file Receipt Joi schema.
- * POST /transfers/{transferId}/receipt
+ * POST /deliveries/{deliveryId}/receipt
  *
- * transferId is a path parameter and is not included in this request body schema.
+ * deliveryId is a path parameter and is not included in this request body schema.
  * This file validates only the receipt details recorded by the receiver.
  *
  * This file keeps the Receipt schema, nested schemas, allowed values and field descriptions together.

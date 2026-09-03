@@ -268,14 +268,14 @@ export function collectionMovementInDropOffError() {
 }
 
 /**
- * Error returned when PUT attempts to soft-delete a Drop-off (Transfer) that
+ * Error returned when PUT attempts to soft-delete a Drop-off (Delivery) that
  * already has a Receipt recorded against it.
  */
 export function dropOffHasReceiptError() {
 	return {
 		key: 'isDeleted',
 		errorType: 'BusinessRuleViolation',
-		message: 'Cannot delete this transfer: a receipt has already been recorded against it.'
+		message: 'Cannot delete this delivery: a receipt has already been recorded against it.'
 	}
 }
 
@@ -316,13 +316,13 @@ export function deletedCollectionBlocksDropOffError(movementId) {
 }
 
 /**
- * Error returned when a Receipt is recorded or updated against a Transfer
+ * Error returned when a Receipt is recorded or updated against a Delivery
  * that is currently isDeleted: true.
  */
-export function deletedTransferBlocksReceiptError() {
+export function deletedDeliveryBlocksReceiptError() {
 	return {
-		key: 'transferId',
+		key: 'deliveryId',
 		errorType: 'BusinessRuleViolation',
-		message: 'Cannot record a receipt: this transfer is marked as deleted.'
+		message: 'Cannot record a receipt: this delivery is marked as deleted.'
 	}
 }

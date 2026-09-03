@@ -1,9 +1,9 @@
 /**
  * Example payloads for the Record Drop-off event.
- * POST /transfers → 201 with transferId
+ * POST /deliveries → 201 with deliveryId
  *
- * The Transfer ID returned here may be passed to an official receiver
- * so the receipt can be recorded via POST /transfers/{transferId}/receipt,
+ * The Delivery ID returned here may be passed to an official receiver
+ * so the receipt can be recorded via POST /deliveries/{deliveryId}/receipt,
  * where applicable.
  *
  * Receiver details are NOT on this payload. The drop-off place is a lighter
@@ -89,20 +89,20 @@ export const hazardousSingleMovementPostBody = {
 // Responses
 // ---------------------------------------------------------------------------
 
-// Non-hazardous drop-off: server mints and returns a new Transfer ID (D-012, D-013)
-// The driver may pass this to the receiver to enable POST /transfers/{transferId}/receipt, where applicable.
+// Non-hazardous drop-off: server mints and returns a new Delivery ID (D-012, D-013)
+// The driver may pass this to the receiver to enable POST /deliveries/{deliveryId}/receipt, where applicable.
 export const recordDropOffResponse = {
-  transferId: '25XMN4F7'
+  deliveryId: '25XMN4F7'
 }
 
 // Hazardous drop-off (paired with hazardousSingleMovementPostBody above): the
-// Transfer ID is the sole Movement ID, not a freshly minted value (D-010).
+// Delivery ID is the sole Movement ID, not a freshly minted value (D-010).
 export const hazardousDropOffResponse = {
-  transferId: '25HRA0B2'
+  deliveryId: '25HRA0B2'
 }
 
 export const recordDropOffResponseWithWarnings = {
-  transferId: '25XMN4F7',
+  deliveryId: '25XMN4F7',
   validation: {
     warnings: [
       {
@@ -115,24 +115,24 @@ export const recordDropOffResponseWithWarnings = {
 }
 
 // ---------------------------------------------------------------------------
-// 404 shape — Transfer ID not found
+// 404 shape — Delivery ID not found
 // ---------------------------------------------------------------------------
 
-export const transferNotFoundError = {
-  code: 'TRANSFER_NOT_FOUND',
-  message: 'No transfer found for the provided transferId.'
+export const deliveryNotFoundError = {
+  code: 'DELIVERY_NOT_FOUND',
+  message: 'No delivery found for the provided deliveryId.'
 }
 
 // ---------------------------------------------------------------------------
-// Update Drop-off — PUT /transfers/{transferId}
+// Update Drop-off — PUT /deliveries/{deliveryId}
 //
 // A recorded drop-off is immutable except for soft-delete (D-017). The update
 // body carries ONLY apiCode and isDeleted; every other field is rejected as
 // NotAllowed. To correct a recorded drop-off, soft-delete it and record a fresh
-// one via POST /transfers.
+// one via POST /deliveries.
 // ---------------------------------------------------------------------------
 
-// Soft-delete an existing drop-off (transfer)
+// Soft-delete an existing drop-off (delivery)
 export const updateDropOffSoftDeleteBody = {
   apiCode: '25b14080-5e77-4f91-9957-2482a0cb8775',
   isDeleted: true
