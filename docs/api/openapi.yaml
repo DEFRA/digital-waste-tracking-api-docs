@@ -5,11 +5,11 @@ info:
   version: 0.2.5-alpha
   description: |
     Extension of the Phase 1 Receipt of Waste API toward a fuller
-    waste-movement journey covering creation, collection, drop-off,
+    waste-movement journey covering creation, collection, delivery,
     receipt and producer tracking.
 
     This 0.2.5-alpha revision completes the Phase 2 data layer: the
-    creation, collection and drop-off request bodies are now fully
+    creation, collection and delivery request bodies are now fully
     specified (replacing the earlier placeholders), aligned with the
     documentation-side Joi schemas, TypeScript types and worked examples.
     The Phase 1 receipt schemas are preserved unchanged and extended
@@ -33,7 +33,7 @@ tags:
   - name: Collection
     description: Record a collection event — waste passing from a producer to a driver.
   - name: Delivery
-    description: Record a drop-off event, generating a Delivery ID.
+    description: Record a delivery event, generating a Delivery ID.
   - name: Receipt
     description: Record receipt of waste at a receiver site (Phase 1).
   - name: Fate of waste
@@ -89,19 +89,19 @@ components:
     deliveryId:
       type: string
       description: |
-        Unique identifier for a drop-off, covering one or more Movement IDs
+        Unique identifier for a delivery, covering one or more Movement IDs
         delivered together at a single receiver site. Minted by the server
         on `POST /deliveries`. Short, externally-shared,
         year-prefixed sqids (YY + alphanumerics, see https://sqids.org/).
         Format is opaque to callers; do not parse.
 
-        Exception: for a hazardous drop-off, the request contains exactly
+        Exception: for a hazardous delivery, the request contains exactly
         one Movement ID (see the hazardous-waste constraint on
         `POST /deliveries`), and `deliveryId` is set equal to that Movement
         ID rather than minted.
       example: 25KMT4Z9
 
-    # Internal event identifiers (creationId, collectionId, dropOffId,
+    # Internal event identifiers (creationId, collectionId, deliveryEventId,
     # receiptId) are UUIDs minted per event and used server-side only.
     # They are NOT part of the public contract and are never returned in
     # API responses, so they are not modelled here. Public resources are
@@ -178,7 +178,7 @@ components:
     #
     # Precise Phase 2 entities, aligned with the documentation-side Joi
     # schemas and TypeScript types (creationJoi.js, collectionJoi.js,
-    # dropOffJoi.js, sharedSchemas.js) and the worked examples in the
+    # deliveryJoi.js, sharedSchemas.js) and the worked examples in the
     # *Event.js fixtures.
     #
     # Cross-field rules that OpenAPI 3.0 cannot express (mutual exclusivity,
@@ -293,7 +293,7 @@ components:
           * `registrationNumber` and `reasonForNoRegistrationNumber` are mutually exclusive;
           * `vehicleRegistration` is only valid when `meansOfTransport` is `Road`;
           * `otherMeansOfTransport` is only valid when `meansOfTransport` is `Other`.
-        By collection and drop-off the full Phase 1 `carrier` shape applies
+        By collection and delivery the full Phase 1 `carrier` shape applies
         (registrationNumber/reason and Road vehicleRegistration become required).
       required:
         - meansOfTransport
@@ -380,7 +380,7 @@ components:
         require a receiver authorisation number. Where the place operates under
         an exemption (e.g. a WEX number), `exemptionNumber` may be supplied —
         distinct from `receiver.authorisationNumber`. A receipt event may not
-        always follow a drop-off.
+        always follow a delivery.
       required: [siteName, address]
       properties:
         siteName:
@@ -399,9 +399,9 @@ components:
     driverDetails:
       type: object
       description: |
-        Reserved. Identifies the driver performing a collection or drop-off,
+        Reserved. Identifies the driver performing a collection or delivery,
         distinct from the carrier organisation. Not currently part of any event
-        request body (collection and drop-off do not carry driver details in
+        request body (collection and delivery do not carry driver details in
         this revision); retained for a future revision. Currently carries name
         only.
       properties:
@@ -535,7 +535,7 @@ components:
     updateResponse:
       type: object
       description: |
-        Returned on a successful update (movement, collection or drop-off).
+        Returned on a successful update (movement, collection or delivery).
         Mirrors the Phase 1 Receipt API PUT response — validation envelope
         only, no identifier (it's already in the URL).
       properties:
@@ -591,7 +591,7 @@ components:
             <p><font color="green"><b>Business Rules:</b></font></p>
             <ul>
             <li>A Movement's collection events form one ordered sequence. The first active (non-deleted) event must be `STATIC`; every later active event must be `TRANSIT`.</li>
-            <li>`POST` appends the next event to the sequence. The sequence is closed once this Movement is named in a Drop-off's `movementIds` — a `POST` after that is rejected as a `BusinessRuleViolation`.</li>
+            <li>`POST` appends the next event to the sequence. The sequence is closed once this Movement is named in a Delivery's `movementIds` — a `POST` after that is rejected as a `BusinessRuleViolation`.</li>
             <li>A single Movement is never split or forked across carriers: two loads moving between the same pair of drivers are two Movements, each with its own STATIC→TRANSIT* sequence. There is no cap on the number of TRANSIT events.</li>
             </ul>
           example: STATIC
@@ -638,7 +638,7 @@ components:
             Soft-delete flag (D-009). Defaults to `false`. Must not be supplied
             as `true` on create — only `PUT /movements/{movementId}/collection`
             may set it to `true`, and only while this Movement has not yet been
-            referenced in a Drop-off; once a Drop-off references it the
+            referenced in a Delivery; once a Delivery references it the
             Collection can no longer be deleted. Supplying `true` here is
             rejected as a `NotAllowed` validation error.
             <p><font color="green"><b>Business Rules (transit sequence, D-029):</b></font></p>
@@ -676,9 +676,9 @@ components:
               $ref: '#/components/schemas/movementId'
         - $ref: '#/components/schemas/createMovementRequest'
 
-    dropOffResource:
+    deliveryResource:
       description: |
-        A drop-off as stored. The request body fields plus the public
+        A delivery as stored. The request body fields plus the public
         `deliveryId`.
       allOf:
         - type: object
@@ -686,7 +686,7 @@ components:
           properties:
             deliveryId:
               $ref: '#/components/schemas/deliveryId'
-        - $ref: '#/components/schemas/dropOffRequest'
+        - $ref: '#/components/schemas/deliveryRequest'
 
     receiptResource:
       description: |
@@ -700,20 +700,20 @@ components:
               $ref: '#/components/schemas/deliveryId'
         - $ref: '#/components/schemas/receiveMovementRequest'
 
-    # Drop-off event — POST /deliveries.
+    # Delivery event — POST /deliveries.
     #
-    # A single drop-off can cover one or more Movements delivered together
+    # A single delivery can cover one or more Movements delivered together
     # (multi-collection case). The Delivery ID minted here is the aggregation
     # point — one Delivery ID, many Movement IDs possible. The drop-off place is
     # a lighter, carrier-declared site model (`dropOff`); a receipt may not
     # always follow. No GET in v1; updates use PUT against the Delivery ID.
 
-    dropOffRequest:
+    deliveryRequest:
       type: object
       required:
         - apiCode
         - movementIds
-        - actualDateTimeDropOff
+        - actualDateTimeDelivery
         - carrier
         - dropOff
       properties:
@@ -722,7 +722,7 @@ components:
           format: uuid
           description: |
             Unique identifier of the submitting organisation (the carrier
-            recording the drop-off), produced by Waste Tracking Service
+            recording the delivery), produced by Waste Tracking Service
             registration (D-027).
           example: 25b14080-5e77-4f91-9957-2482a0cb8775
         movementIds:
@@ -738,14 +738,14 @@ components:
             carries hazardous waste, exactly one Movement ID is permitted. This
             depends on properties of the linked Movements not carried in the
             body, so it is enforced server-side (see the endpoint description).
-        actualDateTimeDropOff:
+        actualDateTimeDelivery:
           type: string
           format: date-time
-          description: Actual date and time the drop-off occurred — not the submission time. ISO 8601.
+          description: Actual date and time the delivery occurred — not the submission time. ISO 8601.
           example: 2025-09-15T11:15:00Z
         yourUniqueReference:
           type: string
-          description: Caller's own reference for this drop-off event (e.g. a route sheet number).
+          description: Caller's own reference for this delivery event (e.g. a route sheet number).
           example: DRIVER-RUN-AM-001
         otherReferencesForMovement:
           type: array
@@ -754,9 +754,9 @@ components:
         carrier:
           allOf:
             - $ref: '#/components/schemas/carrier'
-          description: Carrier performing the drop-off. Required (D-008); uses the full Phase 1 carrier shape.
+          description: Carrier performing the delivery. Required (D-008); uses the full Phase 1 carrier shape.
         dropOff:
-          $ref: '#/components/schemas/dropOffSite' 
+          $ref: '#/components/schemas/dropOffSite'
         isDeleted:
           type: boolean
           default: false
@@ -770,13 +770,13 @@ components:
 
     # PUT /deliveries/{deliveryId} — restricted update body (D-017).
     #
-    # A recorded drop-off is immutable under policy; the only property that may
-    # change is the soft-delete flag isDeleted (D-009). The drop-off PUT
+    # A recorded delivery is immutable under policy; the only property that may
+    # change is the soft-delete flag isDeleted (D-009). The delivery PUT
     # therefore accepts ONLY isDeleted (plus apiCode for caller identity). Every
-    # other dropOffRequest field is rejected with a NotAllowed validation error
-    # (additionalProperties: false). To correct a recorded drop-off, soft-delete
-    # it (isDeleted: true) and record a fresh drop-off via POST /deliveries.
-    dropOffUpdateRequest:
+    # other deliveryRequest field is rejected with a NotAllowed validation error
+    # (additionalProperties: false). To correct a recorded delivery, soft-delete
+    # it (isDeleted: true) and record a fresh delivery via POST /deliveries.
+    deliveryUpdateRequest:
       type: object
       additionalProperties: false
       required:
@@ -789,23 +789,23 @@ components:
           description: |
             Unique identifier of the submitting organisation (the carrier),
             produced by Waste Tracking Service registration (D-027). Caller
-            identity only — not a mutable property of the drop-off record, so
-            its presence does not breach drop-off immutability (D-017).
+            identity only — not a mutable property of the delivery record, so
+            its presence does not breach delivery immutability (D-017).
           example: 25b14080-5e77-4f91-9957-2482a0cb8775
         isDeleted:
           type: boolean
           description: |
-            Soft-delete flag for the drop-off (D-009) — the ONLY property that
-            may be changed on a recorded drop-off (D-017). Setting true marks the
+            Soft-delete flag for the delivery (D-009) — the ONLY property that
+            may be changed on a recorded delivery (D-017). Setting true marks the
             Delivery deleted; false restores it. Cannot be set true once a
             Receipt has been recorded against the Delivery (BusinessRuleViolation).
           example: true
 
-    dropOffResponse:
+    deliveryResponse:
       type: object
       description: |
-        Returned on successful drop-off. Carries the new public Delivery ID
-        (which links all Movement IDs in this drop-off) and a validation
+        Returned on successful delivery. Carries the new public Delivery ID
+        (which links all Movement IDs in this delivery) and a validation
         envelope with any warnings.
       properties:
         deliveryId:
@@ -1520,7 +1520,7 @@ paths:
         Broker details are required only when the movement is
         broker-initiated. The Movement ID returned in the response
         should be stored by the caller and used for any subsequent
-        updates or related events (collection, drop-off,
+        updates or related events (collection, delivery,
         fate-of-waste query). `isDeleted` must not be supplied as `true`
         here — it can only be set via `PUT /movements/{movementId}` (D-009).
       operationId: createMovement
@@ -1557,7 +1557,7 @@ paths:
         as a `BusinessRuleViolation`. A deleted Movement can be restored by
         a further `PUT` with `isDeleted: false`. While a Movement is
         deleted, no Collection may be recorded or updated against it, and
-        it may not be named in a Drop-off's `movementIds` (D-009).
+        it may not be named in a Delivery's `movementIds` (D-009).
       operationId: updateMovement
       requestBody:
         required: true
@@ -1592,7 +1592,7 @@ paths:
         by a public per-event id (D-012/D-016). See `collectionType` and
         `receivedFromCarrier` on `collectionRequest` for the per-event rules.
 
-        The sequence is closed once this Movement is named in a Drop-off's
+        The sequence is closed once this Movement is named in a Delivery's
         `movementIds` — a `POST` after that point is rejected as a
         `BusinessRuleViolation`.
 
@@ -1630,15 +1630,15 @@ paths:
         the live record's revision counter is incremented (D-034).
 
         Once the sequence is closed (this Movement has been named in a
-        Drop-off's `movementIds`), `PUT` is blocked entirely — both data
-        correction and soft-delete — for parity with the immutable drop-off
+        Delivery's `movementIds`), `PUT` is blocked entirely — both data
+        correction and soft-delete — for parity with the immutable delivery
         record (D-017); the attempt is rejected as a `BusinessRuleViolation`.
 
         `isDeleted` may be set `true` here to soft-delete the latest active
         event (tail-peel); the `STATIC` head can only be deleted when it is
         the sole remaining event. A deleted event can be restored by a
         further `PUT` with `isDeleted: false`. While the Collection is
-        deleted, this Movement may not be named in a Drop-off's `movementIds`
+        deleted, this Movement may not be named in a Delivery's `movementIds`
         (D-009).
       operationId: updateCollection
       requestBody:
@@ -1670,27 +1670,27 @@ paths:
   /deliveries:
     post:
       tags: [Delivery]
-      summary: Record a drop-off
+      summary: Record a delivery
       description: |
-        Record a drop-off event, covering one or more Movement IDs delivered
+        Record a delivery event, covering one or more Movement IDs delivered
         together (carried in `movementIds`). In a single-collection run
         `movementIds` is an array of one; in a multi-collection run it
         carries every Movement being delivered. Returns a Delivery ID: a
-        newly-minted one for a non-hazardous drop-off, or the reused
+        newly-minted one for a non-hazardous delivery, or the reused
         Movement ID for a hazardous one (see below).
 
         The drop-off place is a lighter, carrier-declared site model (`dropOff`)
         — not necessarily an official receiver site, and possibly an exempt
-        place. A receipt event may not always follow a drop-off.
+        place. A receipt event may not always follow a delivery.
 
         Hazardous waste cannot be aggregated across Movements (D-010): if any
         Movement named in `movementIds` carries hazardous waste, the request
-        must contain exactly one Movement ID. Multi-Movement drop-offs are
+        must contain exactly one Movement ID. Multi-Movement deliveries are
         permitted only when every linked Movement is non-hazardous. This depends
         on properties of the linked Movements that the request body does not
         carry, so it is enforced server-side and surfaced as a
         BusinessRuleViolation in `validation.warnings` (it may harden to a 400
-        in a later revision). For a drop-off that satisfies this constraint,
+        in a later revision). For a delivery that satisfies this constraint,
         the returned `deliveryId` is set equal to the single Movement ID
         rather than minted.
 
@@ -1700,20 +1700,20 @@ paths:
         rejected as a `BusinessRuleViolation` (D-009). `isDeleted` must not be
         supplied as `true` in this request — it can only be set via
         `PUT /deliveries/{deliveryId}`.
-      operationId: recordDropOff
+      operationId: recordDelivery
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/dropOffRequest'
+              $ref: '#/components/schemas/deliveryRequest'
       responses:
         "201":
-          description: Drop-off recorded. Body carries the new Delivery ID and any validation warnings.
+          description: Delivery recorded. Body carries the new Delivery ID and any validation warnings.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/dropOffResponse'
+                $ref: '#/components/schemas/deliveryResponse'
         "400":
           $ref: '#/components/responses/400'
 
@@ -1722,12 +1722,12 @@ paths:
       - $ref: '#/components/parameters/deliveryIdPath'
     put:
       tags: [Delivery]
-      summary: Soft-delete or restore a drop-off
+      summary: Soft-delete or restore a delivery
       description: |
-        A recorded drop-off is immutable under policy (D-017): its place,
+        A recorded delivery is immutable under policy (D-017): its place,
         carrier, timestamp and `movementIds` cannot be edited after the event.
         The only permitted change is the soft-delete flag `isDeleted` (D-009),
-        so this operation accepts the restricted `dropOffUpdateRequest` only —
+        so this operation accepts the restricted `deliveryUpdateRequest` only —
         any other field in the body is rejected with a `NotAllowed` validation
         error.
 
@@ -1740,18 +1740,18 @@ paths:
         current record is snapshotted to a history store and the live record's
         revision counter is incremented (D-034).
 
-        To correct a recorded drop-off, soft-delete it (`isDeleted: true`) and
-        record a fresh drop-off via `POST /deliveries`.
-      operationId: updateDropOff
+        To correct a recorded delivery, soft-delete it (`isDeleted: true`) and
+        record a fresh delivery via `POST /deliveries`.
+      operationId: updateDelivery
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/dropOffUpdateRequest'
+              $ref: '#/components/schemas/deliveryUpdateRequest'
       responses:
         "200":
-          description: Drop-off soft-delete state updated.
+          description: Delivery soft-delete state updated.
           content:
             application/json:
               schema:
@@ -1764,9 +1764,9 @@ paths:
   # ----------------------------------------------------------------------
   # Phase 2 receipt endpoint — canonical.
   #
-  # In Phase 2 a receipt is recorded against a Delivery (the drop-off
+  # In Phase 2 a receipt is recorded against a Delivery (the delivery
   # aggregation point), so one receipt can cover the single or multiple
-  # Movements named in that drop-off. The request body is identical to the
+  # Movements named in that delivery. The request body is identical to the
   # Phase 1 receiveMovementRequest; the only field captured in addition is
   # the deliveryId, taken from the path and persisted on the receipt
   # record. The receipt identifier returned is the Phase 1 wasteTrackingId
@@ -1781,7 +1781,7 @@ paths:
       summary: Record receipt of waste against a delivery
       description: |
         Records receipt of the waste delivered under the given Delivery.
-        Because a drop-off can aggregate one or more Movements, a single
+        Because a delivery can aggregate one or more Movements, a single
         receipt against the Delivery applies to all of them. The request
         body is the same shape as the Phase 1 `/movements/receive` payload;
         the `deliveryId` from the path is persisted on the stored receipt
@@ -1789,7 +1789,7 @@ paths:
 
         Waste details on the receipt may be cross-checked against the linked
         Movement record — the classification declared at creation plus the
-        actual weights recorded at collection (D-006); the drop-off carries no
+        actual weights recorded at collection (D-006); the delivery carries no
         waste details and is not a source for the waste cross-check. Carrier
         details may be cross-checked against the carrier on the Movement chain.
         Where details differ, the difference is returned as an entry in

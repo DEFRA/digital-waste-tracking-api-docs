@@ -90,7 +90,7 @@ export const recordCollectionSchema = Joi.object({
       'Soft-delete flag (D-009). Defaults to false on creation. ' +
       'May be set to true only via PUT to soft-delete the collection, subject to downstream constraints. ' +
       'Supplying true on a POST is not permitted — the service layer returns a validation warning and treats the value as false. ' +
-      'A collection cannot be deleted once its parent Movement has been referenced in a Drop-off.'
+      'A collection cannot be deleted once its parent Movement has been referenced in a Delivery.'
     ),
 
   carrier: carrierSchema

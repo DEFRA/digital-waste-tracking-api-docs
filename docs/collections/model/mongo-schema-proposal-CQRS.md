@@ -244,17 +244,17 @@ Appended by `PUT /movements/{movementId}` when `isDeleted: false`.
 
 Appended by `POST /deliveries`. Starts the delivery stream.
 
-For a hazardous drop-off, `deliveryId` is not freshly minted: it is the sole `movementId` referenced in the request ([D-010](../decisions.md#d-010) guarantees there is exactly one). For a non-hazardous drop-off, `deliveryId` is minted independently as before.
+For a hazardous delivery, `deliveryId` is not freshly minted: it is the sole `movementId` referenced in the request ([D-010](../decisions.md#d-010) guarantees there is exactly one). For a non-hazardous delivery, `deliveryId` is minted independently as before.
 
 ```javascript
 {
   eventType: 'DeliveryCreated',
   payload: {
     deliveryId:            String,    // sqid — e.g. "25XYZ456"; for a
-                                       // hazardous drop-off, equals the
+                                       // hazardous delivery, equals the
                                        // sole movementId below
-    movementIds:           [String],  // one or more movementIds linked at this drop-off
-    actualDateTimeDropOff: Date,
+    movementIds:           [String],  // one or more movementIds linked at this delivery
+    actualDateTimeDelivery: Date,
     yourUniqueReference:   String,    // optional
     otherReferencesForMovement: [{ label: String, reference: String }],
     carrier: Object,
@@ -423,17 +423,17 @@ One document per `deliveryId`. Built by applying `DeliveryCreated`, `WasteReceiv
   _id:           String,   // deliveryId
   deliveryId:    String,
   movementIds:   [String],
-  state:         String,   // 'DROPPED_OFF' | 'RECEIVED'
+  state:         String,   // 'DELIVERED' | 'RECEIVED'
   revision:      Number,   // sequenceNumber of the last applied event
   isDeleted:     Boolean,
   createdAt:     Date,
   lastUpdatedAt: Date,
   traceId:       String,
 
-  dropOff: {
+  delivery: {
     recordedAt:              Date,
     submittingOrganisation:  { defraCustomerOrganisationId: String },
-    actualDateTimeDropOff:   Date,
+    actualDateTimeDelivery:  Date,
     yourUniqueReference:     String,
     otherReferencesForMovement: [{ label: String, reference: String }],
     carrier:  Object,
@@ -509,8 +509,8 @@ Key invariants enforced:
 | `sequenceNumber` | every event | Expected position for next append |
 | `movementIds` | `DeliveryCreated` | Referenced movements |
 | `hasReceipt` | `WasteReceived` | Blocks duplicate receipts |
-| `dropOffCarrier` | `DeliveryCreated` | D-006 carrier cross-check at receipt (free — no extra read) |
-| `dropOffAuthor` | `DeliveryCreated.metadata` | D-036 drop-off amend-authorisation |
+| `deliveryCarrier` | `DeliveryCreated` | D-006 carrier cross-check at receipt (free — no extra read) |
+| `deliveryAuthor` | `DeliveryCreated.metadata` | D-036 delivery amend-authorisation |
 | `receiptAuthor` | `WasteReceived.metadata` | D-036 receipt amend-authorisation |
 
 Key invariants enforced:
@@ -518,8 +518,8 @@ Key invariants enforced:
 - `assertNotDeleted()` — blocks all writes to a deleted delivery.
 - `assertReceiptNotYetRecorded()` — D-015: only one receipt per delivery.
 - `assertDeletionPermitted()` — D-009: delivery cannot be deleted once a receipt exists.
-- `checkCarrierMatch(carrier)` — D-006: compares receipt carrier against `dropOffCarrier`; returns a warning object or `null`. No DB read needed.
-- `assertDropOffAmendAuthorisedBy(org)` / `assertReceiptAmendAuthorisedBy(org)` — D-036.
+- `checkCarrierMatch(carrier)` — D-006: compares receipt carrier against `deliveryCarrier`; returns a warning object or `null`. No DB read needed.
+- `assertDeliveryAmendAuthorisedBy(org)` / `assertReceiptAmendAuthorisedBy(org)` — D-036.
 
 ---
 
@@ -614,12 +614,12 @@ Required:
 - `{ movementIds: 1 }`
 - `{ traceId: 1 }`
 - `{ state: 1, lastUpdatedAt: -1 }`
-- `{ 'dropOff.submittingOrganisation.defraCustomerOrganisationId': 1 }`
+- `{ 'delivery.submittingOrganisation.defraCustomerOrganisationId': 1 }`
 - `{ 'receipt.submittingOrganisation.defraCustomerOrganisationId': 1 }`
 
 Conditional / query-driven:
 
-- `{ 'dropOff.actualDateTimeDropOff': 1 }`
+- `{ 'delivery.actualDateTimeDelivery': 1 }`
 - `{ 'receipt.dateTimeReceived': 1 }`
 - `{ 'receipt.receiver.authorisationNumber': 1 }`
 
@@ -673,7 +673,7 @@ These items are not yet resolved in this proposal. A full gap analysis against a
 
 - **Two-step write atomicity.** `appendEvent` and the projection update are two separate MongoDB operations. If the projection update fails after a successful append, the projection is behind the event store. Options: wrap both in a MongoDB multi-document transaction (same session, consistent with Phase 1 approach), or accept eventual consistency with a startup reconciliation check and the rebuild functions above. Decision needed before production.
 
-- **Cross-projection check for the closed sequence rule (D-029).** The `MovementAggregate` cannot know that a Movement has been dropped off from its own stream alone (the `DeliveryCreated` event goes to the delivery stream, not the movement stream). The check is implemented as a cross-projection read (`movements.deliveryIds.length > 0`) in `handleRecordCollection`. This is correct and efficient but means the command touches both the event stream and the projection. Needs documenting as an explicit design choice.
+- **Cross-projection check for the closed sequence rule (D-029).** The `MovementAggregate` cannot know that a Movement has been delivered from its own stream alone (the `DeliveryCreated` event goes to the delivery stream, not the movement stream). The check is implemented as a cross-projection read (`movements.deliveryIds.length > 0`) in `handleRecordCollection`. This is correct and efficient but means the command touches both the event stream and the projection. Needs documenting as an explicit design choice.
 
 - **PUT command handlers not yet designed.** The sketch covers the four Phase 2 POST endpoints only. Amendment and soft-delete handlers (`CollectionAmended`, `MovementDeleted`, `ReceiptAmended`, `DeliveryDeleted`, and their `*Undeleted` counterparts) need designing with the D-009 lifecycle rules and D-036 authorisation checks in place.
 

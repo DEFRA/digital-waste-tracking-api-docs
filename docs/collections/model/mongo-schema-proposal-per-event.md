@@ -24,7 +24,7 @@ The aggregate model stores all data for a Movement's lifetime in one document (c
 | --- | --- | --- |
 | Movement creation | `POST /movements` | `movement-creations` |
 | Collection recording | `POST /movements/{movementId}/collection` | `collection-events` |
-| Drop-off / Delivery creation | `POST /deliveries` | `deliveries` |
+| Delivery creation | `POST /deliveries` | `deliveries` |
 | Receipt recording | `POST /deliveries/{deliveryId}/receipt` | `receipt-events` |
 
 Each collection is the canonical home for one event type and is indexed independently. Cross-event reads — for GETs and for constraint checking — require joining across collections, either with a MongoDB `$lookup` or multiple sequential reads in the application layer.
@@ -41,7 +41,7 @@ The Phase 1 collections (`waste-inputs`, `waste-inputs-history`) are unchanged. 
 | `movement-creations-history` | Pre-amendment snapshots | 2 | Yes |
 | `collection-events` | Collection events (STATIC + TRANSIT) | 2 | Yes |
 | `collection-events-history` | Pre-amendment snapshots | 2 | Yes |
-| `deliveries` | Drop-off event (Delivery creation) | 2 | Yes |
+| `deliveries` | Delivery event (Delivery creation) | 2 | Yes |
 | `deliveries-history` | Pre-amendment snapshots | 2 | Yes |
 | `receipt-events` | Receipt event | 2 | Yes |
 | `receipt-events-history` | Pre-amendment snapshots | 2 | Yes |
@@ -56,12 +56,12 @@ The Phase 1 collections (`waste-inputs`, `waste-inputs-history`) are unchanged. 
 A Movement transitions through lifecycle states as later events are recorded:
 
 ```
-PLANNED  →  IN_COLLECTION  →  DROPPED_OFF
+PLANNED  →  IN_COLLECTION  →  DELIVERED
 ```
 
 With events in separate collections, state has no natural single home. Two options are viable:
 
-**Option B1 — Denormalised state on `movement-creations`.** The `state` field lives on the creation document and is updated by subsequent event writes (collection recorded → `IN_COLLECTION`; movement referenced in a drop-off → `DROPPED_OFF`). Writes that update state must also update the creation document in the same MongoDB session, making it a multi-document transaction.
+**Option B1 — Denormalised state on `movement-creations`.** The `state` field lives on the creation document and is updated by subsequent event writes (collection recorded → `IN_COLLECTION`; movement referenced in a delivery → `DELIVERED`). Writes that update state must also update the creation document in the same MongoDB session, making it a multi-document transaction.
 
 **Option B2 — Read-time derivation.** No `state` field is stored. Every GET computes state by checking which downstream events exist. Simple to implement; expensive for any query that filters by state across many Movements (requires a multi-collection aggregation pipeline).
 
@@ -92,7 +92,7 @@ One document per `movementId`.
 {
   _id: String,                 // movementId (sqid — e.g. "26ABC123")
   movementId: String,
-  state: String,               // PLANNED | IN_COLLECTION | DROPPED_OFF (B1: denormalised)
+  state: String,               // PLANNED | IN_COLLECTION | DELIVERED (B1: denormalised)
   revision: Number,            // incremented on PUT /movements amendment
   isDeleted: Boolean,
   createdAt: Date,
@@ -203,14 +203,14 @@ Full-document snapshot of a `collection-events` document before each successful 
 
 ### `deliveries`
 
-One document per `deliveryId`. Records the drop-off event (`POST /deliveries`). `isDeleted` is the only mutable field via `PUT /deliveries/{deliveryId}` ([D-017](../decisions.md#d-017)).
+One document per `deliveryId`. Records the delivery event (`POST /deliveries`). `isDeleted` is the only mutable field via `PUT /deliveries/{deliveryId}` ([D-017](../decisions.md#d-017)).
 
-For a hazardous drop-off, `deliveryId` is not a freshly minted value: it is the sole `movementId` referenced in the request (see step 4 of the write path below). For a non-hazardous drop-off, `deliveryId` is minted independently as before.
+For a hazardous delivery, `deliveryId` is not a freshly minted value: it is the sole `movementId` referenced in the request (see step 4 of the write path below). For a non-hazardous delivery, `deliveryId` is minted independently as before.
 
 ```javascript
 {
   _id: String,                 // deliveryId (sqid — e.g. "26XYZ456"; for a
-                                // hazardous drop-off this equals the sole
+                                // hazardous delivery this equals the sole
                                 // referenced movementId)
   deliveryId: String,
   movementIds: [String],       // FK array to movement-creations (D-007)
@@ -224,7 +224,7 @@ For a hazardous drop-off, `deliveryId` is not a freshly minted value: it is the 
   },
   submittedByApiCode: String,  // optional
 
-  actualDateTimeDropOff: Date,
+  actualDateTimeDelivery: Date,
   yourUniqueReference: String, // optional
   otherReferencesForMovement: [
     { label: String, reference: String }
@@ -249,8 +249,8 @@ For a hazardous drop-off, `deliveryId` is not a freshly minted value: it is the 
 Notes:
 
 - `movementIds[]` is the source of truth for the Movement→Delivery relationship ([D-007](../decisions.md#d-007)). The aggregate model stores a denormalised `deliveryIds[]` on each Movement; in this model, that denormalisation is optional — the `deliveries.movementIds` index supports reverse lookups.
-- `carrier` is stored here because the receipt cross-check ([D-006](../decisions.md#d-006)) compares the receipt carrier against the drop-off carrier. Having it here means `handleRecordReceipt` reads one document (`deliveries`) and gets both the existence check and the carrier value — no additional read needed.
-- `isDeleted` guards the drop-off lifecycle. A drop-off cannot be deleted once a receipt exists ([D-009](../decisions.md#d-009)) — checked by querying `receipt-events` for the `deliveryId` before applying the soft-delete.
+- `carrier` is stored here because the receipt cross-check ([D-006](../decisions.md#d-006)) compares the receipt carrier against the delivery carrier. Having it here means `handleRecordReceipt` reads one document (`deliveries`) and gets both the existence check and the carrier value — no additional read needed.
+- `isDeleted` guards the delivery lifecycle. A delivery cannot be deleted once a receipt exists ([D-009](../decisions.md#d-009)) — checked by querying `receipt-events` for the `deliveryId` before applying the soft-delete.
 
 ### `deliveries-history`
 
@@ -258,7 +258,7 @@ Full-document snapshot of `deliveries` before each successful `PUT /deliveries/{
 
 ```javascript
 {
-  ...previousDeliveryDropoffDocument,
+  ...previousDeliveryDocument,
   deliveryId: String,
   timestamp: Date
 }
@@ -367,9 +367,9 @@ Cross-collection reads: `movement-creations` (existence + deleted guard), `deliv
    - Fail if any is absent or `isDeleted: true`.
    - Check `collection-events` for each `movementId`: reject if any has an active (non-deleted) collection event with `isDeleted: true` at the movement level — i.e. a Movement whose Collection is deleted ([D-009](../decisions.md#d-009)).
 3. D-010 hazardous check ([D-010](../decisions.md#d-010)): if any referenced `movement-creations` document has a non-empty `hazardousWasteConsignmentCode` or contains hazardous items in `wasteItems[]`, `movementIds.length` must equal `1`. Reject with `BusinessRuleViolation` if not.
-4. Determine `deliveryId`: if step 3's hazardous check applies (a hazardous drop-off, always exactly one `movementId`), reuse that `movementId` as `deliveryId` — no new identifier is minted. Otherwise, mint `deliveryId` via `waste-tracking-id-backend` as today.
+4. Determine `deliveryId`: if step 3's hazardous check applies (a hazardous delivery, always exactly one `movementId`), reuse that `movementId` as `deliveryId` — no new identifier is minted. Otherwise, mint `deliveryId` via `waste-tracking-id-backend` as today.
 5. `insertOne` into `deliveries` with `revision: 1`, `isDeleted: false`.
-6. In the same MongoDB session, `updateMany` on `movement-creations` for each `movementId`: `{ $set: { state: 'DROPPED_OFF', lastUpdatedAt } }`.
+6. In the same MongoDB session, `updateMany` on `movement-creations` for each `movementId`: `{ $set: { state: 'DELIVERED', lastUpdatedAt } }`.
 7. Return `{ deliveryId }`.
 
 Cross-collection reads: `movement-creations` (existence, deleted, hazardous) and `collection-events` (deleted status per movement). The `movement-creations` state update (step 6) requires a multi-document transaction if atomicity with the `deliveries` insert is required.
@@ -473,7 +473,7 @@ Required:
 
 Conditional / query-driven:
 
-- `{ actualDateTimeDropOff: 1 }`
+- `{ actualDateTimeDelivery: 1 }`
 - `{ 'dropOff.address.postcode': 1 }`
 
 ### `deliveries-history`
@@ -516,13 +516,13 @@ Requires two reads:
 1. `movement-creations.findOne({ _id: movementId })` — creation data, state, `isDeleted`.
 2. `collection-events.find({ movementId }).sort({ sequence: 1 })` — ordered collection event array.
 
-The application assembles the response from both results. If `state` is denormalized (Option B1), step 1 also gives the current lifecycle state without a third read. If using Option B2 (read-time derivation), a third read on `deliveries` is needed to compute `DROPPED_OFF`.
+The application assembles the response from both results. If `state` is denormalized (Option B1), step 1 also gives the current lifecycle state without a third read. If using Option B2 (read-time derivation), a third read on `deliveries` is needed to compute `DELIVERED`.
 
 ### `GET /deliveries/{deliveryId}`
 
 Requires two reads:
 
-1. `deliveries.findOne({ _id: deliveryId })` — drop-off data.
+1. `deliveries.findOne({ _id: deliveryId })` — delivery data.
 2. `receipt-events.findOne({ _id: deliveryId })` — receipt data, or `null` if not yet recorded.
 
 The application assembles the response from both.
@@ -533,7 +533,7 @@ Requires reads across up to all four event collections:
 
 1. `movement-creations` — waste classification, estimated weights, producer.
 2. `collection-events` — collection timestamps and carrier chain.
-3. `deliveries` — drop-off date, site, carrier.
+3. `deliveries` — delivery date, site, carrier.
 4. `receipt-events` — actual weights, treatment codes, outcome.
 
 This is the most complex read in the model. An aggregation pipeline using `$lookup` can serve it in one round trip from the database, but the pipeline is non-trivial. A MongoDB view wrapping this pipeline is the natural implementation, and is what the Data Architect's original proposal meant by "resolve at the view level."
@@ -546,7 +546,7 @@ Phase 1 (`POST /movements/receive` / `PUT /movements/{wasteTrackingId}/receive`)
 
 The Phase 2 receipt (`POST /deliveries/{deliveryId}/receipt`) writes to `receipt-events`. The two receipt handlers share no storage path: the Phase 1 handler continues to use the `waste-inputs` aggregate; the Phase 2 handler uses `receipt-events`. The revision/history pattern ([D-034](../decisions.md#d-034)) applies to both, but through separate collection pairs.
 
-The carrier cross-check ([D-006](../decisions.md#d-006)) is particularly clean in this model at Phase 2 receipt time: the `deliveries` document stores the drop-off carrier directly on the event document. A single read of `deliveries` by `deliveryId` gives both the existence check and the carrier — no aggregate rehydration or separate reads needed. This contrasts with the aggregate model, where the carrier must be extracted from the embedded `dropOff` sub-document on the `deliveries` aggregate.
+The carrier cross-check ([D-006](../decisions.md#d-006)) is particularly clean in this model at Phase 2 receipt time: the `deliveries` document stores the delivery carrier directly on the event document. A single read of `deliveries` by `deliveryId` gives both the existence check and the carrier — no aggregate rehydration or separate reads needed. This contrasts with the aggregate model, where the carrier must be extracted from the embedded `delivery` sub-document on the `deliveries` aggregate.
 
 ---
 
@@ -556,7 +556,7 @@ The carrier cross-check ([D-006](../decisions.md#d-006)) is particularly clean i
 | --- | --- | --- |
 | Collections | 2 (`movements`, `deliveries`) + 2 history | 4 event + 4 history |
 | GET /movements/{id} | 1 read | 2 reads (creation + collection-events) |
-| GET /deliveries/{id} | 1 read | 2 reads (dropoff + receipt) |
+| GET /deliveries/{id} | 1 read | 2 reads (delivery + receipt) |
 | Fate-of-waste GET | 1–2 reads | 4 reads or 1 `$lookup` pipeline |
 | POST collection: concurrency guard | `revision` on `movements` aggregate | Unique index on `{ movementId, sequence }` |
 | Transit collection (D-029) | Array embedded in `movements` document | Separate documents in `collection-events` |
@@ -577,7 +577,7 @@ The carrier cross-check ([D-006](../decisions.md#d-006)) is particularly clean i
 
 **3. Simpler migration unit.** Adding a new Phase 3 event type (for example, a treatment-handover event) means adding a new collection and handler. In the aggregate model, it means adding a new embedded sub-document or array to an existing collection that already has live data.
 
-**4. Natural home for cross-event-type operational queries.** A regulator's query for "all drop-offs for carrier X that have no receipt" is a set difference between `deliveries` and `receipt-events`, joined on `deliveryId`. This is a natural `$lookup` in the per-event model. In the aggregate model, it requires a query on `deliveries` where `receipt: null` and `dropOff.carrier.cbDuNumber: x` — achievable but the carrier is nested inside the `dropOff` sub-document, requiring a deep-path index.
+**4. Natural home for cross-event-type operational queries.** A regulator's query for "all deliveries for carrier X that have no receipt" is a set difference between `deliveries` and `receipt-events`, joined on `deliveryId`. This is a natural `$lookup` in the per-event model. In the aggregate model, it requires a query on `deliveries` where `receipt: null` and `delivery.carrier.cbDuNumber: x` — achievable but the carrier is nested inside the `delivery` sub-document, requiring a deep-path index.
 
 ---
 

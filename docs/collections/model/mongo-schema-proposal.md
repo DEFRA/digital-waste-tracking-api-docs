@@ -14,7 +14,7 @@ Proposed MongoDB storage model for the extended movement journey covering:
 
 - movement creation
 - collection events
-- drop-off / delivery creation
+- delivery creation
 - receipt recording
 
 This is a proposal for the server-side storage shape. It is not yet a decided implementation.
@@ -26,7 +26,7 @@ This is a proposal for the server-side storage shape. It is not yet a decided im
 - Support ordered collection events on a Movement.
 - Support Delivery as the aggregation point for one or more Movement IDs.
 - Keep a revisioned current-state plus history pattern close to the current `waste-inputs` / `waste-inputs-history` approach, while treating `revision` as the current aggregate version after any successful mutation.
-- Preserve write provenance per event so different organisations can record creation, collection, drop-off, and receipt against the same movement journey.
+- Preserve write provenance per event so different organisations can record creation, collection, delivery, and receipt against the same movement journey.
 - Allow optional denormalised `deliveryIds` on Movement for read convenience, while treating `deliveries.movementIds[]` as the primary relationship source of truth.
 
 ## Proposed collections
@@ -61,7 +61,7 @@ Suggested shape:
   _id: ObjectId,
   aggregateType: String, // movement | delivery
   aggregateId: String, // movementId or deliveryId that was targeted
-  submissionType: String, // creation | collection | dropOff | receipt | update
+  submissionType: String, // creation | collection | delivery | receipt | update
   submittingOrganisation: {
     defraCustomerOrganisationId: String
   },
@@ -88,7 +88,7 @@ Owns:
 
 Does not own:
 
-- drop-off as canonical data
+- delivery as canonical data
 - receipt as canonical data
 
 ### Delivery aggregate
@@ -98,7 +98,7 @@ One document per `deliveryId`.
 Owns:
 
 - `movementIds[]`
-- drop-off event data
+- delivery event data
 - receipt event data
 - delivery lifecycle state
 
@@ -109,7 +109,7 @@ Owns:
   _id: String, // movementId
   movementId: String,
   deliveryIds: [String], // optional denormalised convenience field
-  state: String, // e.g. PLANNED, IN_COLLECTION, IN_TRANSIT, DROPPED_OFF
+  state: String, // e.g. PLANNED, IN_COLLECTION, IN_TRANSIT, DELIVERED
   revision: Number,
   isDeleted: Boolean,
   createdAt: Date,
@@ -183,29 +183,29 @@ Owns:
 
 ## Proposed `deliveries` schema
 
-For a hazardous drop-off, `deliveryId` is not freshly minted: it is the sole `movementId` referenced in the request ([D-010](../decisions.md#d-010) guarantees there is exactly one). For a non-hazardous drop-off, `deliveryId` is minted independently as before.
+For a hazardous delivery, `deliveryId` is not freshly minted: it is the sole `movementId` referenced in the request ([D-010](../decisions.md#d-010) guarantees there is exactly one). For a non-hazardous delivery, `deliveryId` is minted independently as before.
 
 ```javascript
 {
-  _id: String, // deliveryId — for a hazardous drop-off, equals the sole
+  _id: String, // deliveryId — for a hazardous delivery, equals the sole
                // referenced movementId
   deliveryId: String,
   movementIds: [String],
-  state: String, // e.g. DROPPED_OFF, RECEIVED, REJECTED, PARTIALLY_ACCEPTED
+  state: String, // e.g. DELIVERED, RECEIVED, REJECTED, PARTIALLY_ACCEPTED
   revision: Number,
   isDeleted: Boolean,
   createdAt: Date,
   lastUpdatedAt: Date,
   traceId: String,
 
-  dropOff: {
+  delivery: {
     eventId: String, // internal UUID
     recordedAt: Date,
     submittingOrganisation: {
       defraCustomerOrganisationId: String
     },
     submittedByApiCode: String, // optional, if exact API key provenance is needed
-    actualDateTimeDropOff: Date,
+    actualDateTimeDelivery: Date,
     yourUniqueReference: String,
     otherReferencesForMovement: [
       {
@@ -264,9 +264,9 @@ For a hazardous drop-off, `deliveryId` is not freshly minted: it is the sole `mo
 ### Notes on `deliveries`
 
 - `movementIds[]` is the canonical relationship from Delivery to Movement.
-- `dropOff` is singular because one Delivery is minted per drop-off event.
+- `delivery` is singular because one Delivery is minted per delivery event.
 - `receipt` is singular because receipt is modelled as one receipt per Delivery.
-- `submittingOrganisation` is stored on both `dropOff` and `receipt`, because those events may be written by different organisations against the same `deliveryId`.
+- `submittingOrganisation` is stored on both `delivery` and `receipt`, because those events may be written by different organisations against the same `deliveryId`.
 - `submittedByApiCode` is optional but useful if one organisation can hold multiple API keys and exact key-level provenance matters for audit.
 - `outcome` is reserved because receipt acceptance / rejection is still an open design point.
 
@@ -330,18 +330,18 @@ Required:
 - `{ _id: 1 }`
 - `{ deliveryId: 1 }` unique
 - `{ movementIds: 1 }`
-- `{ 'dropOff.submittingOrganisation.defraCustomerOrganisationId': 1 }`
+- `{ 'delivery.submittingOrganisation.defraCustomerOrganisationId': 1 }`
 - `{ 'receipt.submittingOrganisation.defraCustomerOrganisationId': 1 }`
 - `{ state: 1, lastUpdatedAt: -1 }`
 - `{ traceId: 1 }`
 
 Conditional / query-driven:
 
-- `{ 'dropOff.actualDateTimeDropOff': 1 }`
+- `{ 'delivery.actualDateTimeDelivery': 1 }`
 - `{ 'receipt.dateTimeReceived': 1 }`
 - `{ 'receipt.receiver.authorisationNumber': 1 }`
 - `{ 'receipt.eventId': 1 }`
-- `{ 'dropOff.eventId': 1 }`
+- `{ 'delivery.eventId': 1 }`
 
 ### `deliveries-history`
 
@@ -352,11 +352,11 @@ Conditional / query-driven:
 ## Source-of-truth rules
 
 - `movements._id` / `movementId` is the durable public identifier for a Movement.
-- `deliveries._id` / `deliveryId` is the durable public identifier for a Delivery. For a hazardous drop-off, `deliveryId` equals the sole `movementId` on the delivery rather than being independently minted (see `POST /deliveries` above and [D-010](../decisions.md#d-010)).
+- `deliveries._id` / `deliveryId` is the durable public identifier for a Delivery. For a hazardous delivery, `deliveryId` equals the sole `movementId` on the delivery rather than being independently minted (see `POST /deliveries` above and [D-010](../decisions.md#d-010)).
 - `revision` is the current version number of the aggregate document, not of an individual nested event.
 - New aggregates are created at `revision: 1`.
 - Every successful mutation of an existing aggregate increments `revision`, regardless of whether the API operation is a `POST` or a `PUT`.
-- Event-level `submittingOrganisation` is the source of truth for who wrote creation, collection, drop-off, and receipt.
+- Event-level `submittingOrganisation` is the source of truth for who wrote creation, collection, delivery, and receipt.
 - Optional event-level `submittedByApiCode` is the source of truth for which API key wrote the event when multiple keys exist for one organisation.
 - `deliveries.movementIds[]` is the source of truth for Movement-to-Delivery membership.
 - `movements.deliveryIds[]` is denormalised convenience data only.
@@ -395,9 +395,9 @@ Conditional / query-driven:
   - insert one `deliveries` document
   - set `revision` to `1`
   - set `movementIds[]`
-  - set `dropOff`
+  - set `delivery`
   - set `receipt` to `null` or omit
-  - determine `deliveryId`: if the request is a hazardous drop-off (always exactly one `movementId`, per [D-010](../decisions.md#d-010)), reuse that `movementId` as `deliveryId` — no new identifier is minted. Otherwise, mint `deliveryId` via `waste-tracking-id-backend` as today.
+  - determine `deliveryId`: if the request is a hazardous delivery (always exactly one `movementId`, per [D-010](../decisions.md#d-010)), reuse that `movementId` as `deliveryId` — no new identifier is minted. Otherwise, mint `deliveryId` via `waste-tracking-id-backend` as today.
   - optionally update each referenced Movement to append `deliveryId` to `deliveryIds[]`
 
 - `POST /deliveries/{deliveryId}/receipt`
@@ -408,7 +408,7 @@ Conditional / query-driven:
 
 - `PUT /deliveries/{deliveryId}`
 
-  - mutate the allowed drop-off fields, currently soft-delete only
+  - mutate the allowed delivery fields, currently soft-delete only
   - increment `revision`
   - write prior snapshot to `deliveries-history`
 
