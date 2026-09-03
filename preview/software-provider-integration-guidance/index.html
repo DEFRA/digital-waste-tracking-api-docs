@@ -540,107 +540,12 @@
 <h2 id="3-api-reference">3. API reference</h2>
 <p>You can see the current API spec at: <a href="../api/openapi-beta-1/">Digital Waste Tracking OpenAPI specification</a>.</p>
 <p>The spec will update with each milestone in the development process – expect some shapes to shift before go-live.</p>
-<h3 id="31-create-movement">3.1 Create movement</h3>
-<table>
-<thead>
-<tr>
-<th></th>
-<th></th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><strong>Endpoints</strong></td>
-<td><code>POST /movements/create</code></td>
-</tr>
-<tr>
-<td><strong>Input</strong></td>
-<td>Waste classification, producer details, estimated collection details, estimated receiver details, estimated carrier details, broker details</td>
-</tr>
-<tr>
-<td><strong>Output</strong></td>
-<td>Validation result, Waste Movement ID</td>
-</tr>
-</tbody>
-</table>
-<h3 id="32-record-collection">3.2 Record collection</h3>
-<table>
-<thead>
-<tr>
-<th></th>
-<th></th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><strong>Endpoints</strong></td>
-<td><code>POST /movements/{id}/collection</code></td>
-</tr>
-<tr>
-<td><strong>Input</strong></td>
-<td>Waste Movement ID, collection dateTime, carrier details, collection address</td>
-</tr>
-<tr>
-<td><strong>Output</strong></td>
-<td>Validation result</td>
-</tr>
-</tbody>
-</table>
-<h3 id="33-record-delivery">3.3 Record delivery</h3>
-<table>
-<thead>
-<tr>
-<th></th>
-<th></th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><strong>Endpoints</strong></td>
-<td><code>POST /movements/delivery</code></td>
-</tr>
-<tr>
-<td><strong>Input</strong></td>
-<td>Delivery dateTime, delivery address, one or more Movement IDs, carrier details</td>
-</tr>
-<tr>
-<td><strong>Output</strong></td>
-<td>Validation result, Waste Delivery ID</td>
-</tr>
-</tbody>
-</table>
-<h3 id="34-record-receipt">3.4 Record receipt</h3>
-<table>
-<thead>
-<tr>
-<th></th>
-<th></th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><strong>Endpoints</strong></td>
-<td><code>POST /movements/{id}/receive</code></td>
-</tr>
-<tr>
-<td><strong>Input</strong></td>
-<td>Waste Delivery ID, waste item details, receiver details, carrier details, broker details</td>
-</tr>
-<tr>
-<td><strong>Output</strong></td>
-<td>Validation result</td>
-</tr>
-</tbody>
-</table>
 <p><br></p>
 <h2 id="4-business-rules-and-data-reconciliation">4. Business rules and data reconciliation</h2>
 <h3 id="41-collection-cardinality">4.1 Collection cardinality</h3>
 <p>One collection entry per physical collection event, even where loads are later combined at delivery.</p>
 <h3 id="42-movement-to-delivery-cardinality">4.2 Movement-to-delivery cardinality</h3>
 <p>Many Movement IDs can be linked to a single Delivery ID at delivery; a Delivery ID always originates from exactly one delivery event.</p>
-<p><br></p>
-<h2 id="5-testing-and-conformance">5. Testing and conformance</h2>
-<p>Sandbox scenarios covering each of the four endpoint groups in <a href="#3-api-reference">section 3</a> will be updated in our <a href="../collections/scenarios/beta-1/">Scenarios repo</a>.</p>
 <p><br></p>
 <h2 id="appendix-a-glossary">Appendix A: glossary</h2>
 <table>
