@@ -541,6 +541,13 @@
 <td><strong>API conventions</strong></td>
 </tr>
 <tr>
+<td>D-041</td>
+<td><a href="#receipt-without-a-prior-delivery-separate-endpoint-an-empty-delivery-created-server-side-to-have-a-reference">Receipt without a prior delivery: separate endpoint, an empty Delivery created server-side to have a reference</a></td>
+<td>✅ Decided</td>
+<td>🔴 High</td>
+<td><strong>Receipt</strong></td>
+</tr>
+<tr>
 <td>D-004</td>
 <td><a href="#receipt-path-parameter-stays-wastetrackingid">Receipt path parameter stays <code>{wasteTrackingId}</code></a></td>
 <td>✅ Decided</td>
@@ -766,13 +773,13 @@
 <p><strong>Consequences.</strong> No <code>{id}</code> placeholder anywhere — every path parameter names the concrete identifier it carries (<code>movementId</code>, <code>deliveryId</code>, <code>wasteTrackingId</code>). Affects only how the deprecated legacy path reads. This entry no longer asserts a permanent identity relationship between <code>wasteTrackingId</code> and <code>movementId</code>; that is left to migration.</p>
 <p><a id="d-005"></a></p>
 <h3 id="receipt-is-linked-to-a-delivery-via-the-delivery-id-path-parameter">Receipt is linked to a delivery via the Delivery ID (path parameter)</h3>
-<p><strong>D-005</strong> · ✅ Decided · Impact: 🔴 High · Area: <strong>Receipt</strong> · Related: <a href="#d-006">D-006</a>, <a href="#d-016">D-016</a>, <a href="#d-022">D-022</a></p>
+<p><strong>D-005</strong> · ✅ Decided · Impact: 🔴 High · Area: <strong>Receipt</strong> · Related: <a href="#d-006">D-006</a>, <a href="#d-016">D-016</a>, <a href="#d-022">D-022</a>, <a href="#d-041">D-041</a></p>
 <p><strong>Context.</strong> A receipt should be linkable to the delivery that preceded it, via the Delivery ID. An earlier decision added <code>deliveryId</code> as an optional field on the <code>POST /movements/receive</code> request body, so Phase 1 receivers could omit it and new flows could supply it.</p>
 <p><strong>Decision.</strong> Superseded by the Level 2 restructure. The canonical receipt is now <code>POST /deliveries/{deliveryId}/receipt</code>, where the Delivery ID is a mandatory path parameter — so every receipt recorded through the new endpoint is linked to its delivery by construction. The deprecated Phase 1 <code>POST /movements/receive</code> keeps its original body unchanged (no <code>deliveryId</code> field), preserving backward compatibility for standalone receipts. The optional-body-field mechanism was not carried forward.</p>
 <p><strong>Consequences.</strong> Linking is structural rather than an optional payload field: a receipt under a Delivery is always associated with that Delivery and, through it, the originating Movement IDs. Receivers not on the new flow continue to use the deprecated endpoint with no Delivery ID. (Contingent on Option 1 of the receipt-migration decision — see Open.)</p>
 <p><a id="d-006"></a></p>
 <h3 id="cross-check-of-receipt-details-against-the-linked-delivery">Cross-check of receipt details against the linked delivery</h3>
-<p><strong>D-006</strong> · ✅ Decided · Impact: 🟠 Medium · Area: <strong>Receipt</strong> · Related: <a href="#d-005">D-005</a>, <a href="#d-021">D-021</a>, <a href="#d-022">D-022</a>, <a href="#d-032">D-032</a></p>
+<p><strong>D-006</strong> · ✅ Decided · Impact: 🟠 Medium · Area: <strong>Receipt</strong> · Related: <a href="#d-005">D-005</a>, <a href="#d-021">D-021</a>, <a href="#d-022">D-022</a>, <a href="#d-032">D-032</a>, <a href="#d-041">D-041</a></p>
 <p><strong>Context.</strong> A receipt recorded against a Delivery carries carrier and waste details that overlap with details declared earlier in the movement journey. These could be required to match exactly, or treated as an opportunity to cross-check. Waste details are declared once, at Creation — the classification plus estimated weights held on the Movement. The operational events that follow, Collection and Delivery, are carrier/site/timing records and carry no waste payload (see <a href="#d-032">D-032</a>, and for the delivery place model <a href="#d-007">D-007</a>). The receipt is therefore the first point in the journey where <em>actual</em> waste weights are recorded, and the only earlier comparison source for waste is the Creation declaration.</p>
 <p><strong>Decision.</strong> Cross-check, surfacing mismatches as validation warnings rather than hard errors. The comparison sources are:</p>
 <ul>
@@ -783,7 +790,7 @@
 <p><strong>Consequences.</strong> Receivers can still record receipts when paperwork has minor inconsistencies; the system surfaces the discrepancy without blocking the record. The <code>recordReceipt</code> endpoint description notes that differences are returned in <code>validation.warnings</code>, without committing to specific comparison rules. Note the nature of the weight comparison: the Creation weights are estimates and the receipt records the actual weight that arrived, so a receipt-vs-Creation weight delta is an expected, estimate-versus-actual signal rather than necessarily an error. The exact granularity of the check (string match, field-by-field, weight tolerance, etc.) is still to be defined — see the <a href="#d-021">cross-check granularity</a> open question. (Contingent on Option 1 of the <a href="#d-022">receipt-migration decision</a> — see Open.)</p>
 <p><a id="d-007"></a></p>
 <h3 id="delivery-is-many-to-one-against-movement-ids">Delivery is many-to-one against Movement IDs</h3>
-<p><strong>D-007</strong> · ✅ Decided · Impact: 🔴 High · Area: <strong>Delivery</strong> · Related: <a href="#d-009">D-009</a>, <a href="#d-015">D-015</a>, <a href="#d-018">D-018</a>, <a href="#d-017">D-017</a></p>
+<p><strong>D-007</strong> · ✅ Decided · Impact: 🔴 High · Area: <strong>Delivery</strong> · Related: <a href="#d-009">D-009</a>, <a href="#d-015">D-015</a>, <a href="#d-018">D-018</a>, <a href="#d-017">D-017</a>, <a href="#d-041">D-041</a></p>
 <p><strong>Context.</strong> A multi-collection run delivers several Movements at once to the same receiver site. The delivery endpoint could either be Movement-scoped (one delivery per Movement, with a "primary" Movement on the URL) or aggregate (one delivery covering many Movements, with the Movement IDs in the body).</p>
 <p><strong>Decision.</strong> Aggregate. <code>POST /deliveries</code> takes a <code>movementIds[]</code> array in the body. Single-collection deliveries supply an array of one. No "primary" Movement is selected.</p>
 <p><strong>Consequences.</strong> The Delivery ID minted by a single delivery is the aggregation point for that event — one Delivery ID, one or more Movement IDs. This is many-to-one <em>per delivery event</em>, not a lifetime constraint on the Movement: nothing in the model stops the same Movement ID from being referenced by more than one delivery, so the overall Movement↔Delivery relationship is many-to-many, not many-to-one. Two cases produce this directly:</p>
@@ -806,15 +813,23 @@
 <p>The rules, applied uniformly across the three deletable events:</p>
 <ul>
 <li><strong>PUT-only.</strong> <code>isDeleted</code> may only be set to <code>true</code> via the event's <code>PUT</code> (update). A <code>POST</code> (create) request that supplies <code>isDeleted: true</code> is rejected with a <code>NotAllowed</code> validation error; <code>POST</code> requests may omit the field or send <code>false</code>.</li>
-<li><strong>No subsequent event.</strong> An event may be marked deleted only while no later event in the chain has been recorded against it:</li>
-<li>A Movement cannot be deleted once its Collection has been recorded.</li>
+<li>
+<p><strong>No subsequent event.</strong> An event may be marked deleted only while no later event in the chain has been recorded against it:</p>
+</li>
+<li>
+<p>A Movement cannot be deleted once its Collection has been recorded.</p>
+</li>
 <li>A Collection cannot be deleted once its Movement has been referenced in a Delivery.</li>
 <li>A Delivery cannot be deleted once a Receipt has been recorded against it.</li>
 </ul>
 <p>This checks whether the later event's record <em>exists</em>, not whether it is itself currently active — once a Collection has been recorded against a Movement, that Movement stays locked from deletion even if the Collection is later deleted too. The chain of what-was-recorded is preserved; deleting a later event does not reopen an earlier one. Violating this returns a <code>BusinessRuleViolation</code> validation error.</p>
 <ul>
-<li><strong>Deleted blocks what comes next.</strong> While an event is <code>isDeleted: true</code>, no event later in the chain may be recorded or updated against it:</li>
-<li>Collection cannot be recorded/updated against a deleted Movement.</li>
+<li>
+<p><strong>Deleted blocks what comes next.</strong> While an event is <code>isDeleted: true</code>, no event later in the chain may be recorded or updated against it:</p>
+</li>
+<li>
+<p>Collection cannot be recorded/updated against a deleted Movement.</p>
+</li>
 <li>A Movement that is deleted (with or without a Collection) cannot be named in a Delivery's <code>movementIds</code>; nor can a Movement whose Collection is deleted.</li>
 <li>Receipt cannot be recorded/updated against a deleted Delivery.</li>
 </ul>
@@ -912,7 +927,7 @@
 <p>This decision also resolves the earlier "Static and transit collection collapsed into a single endpoint" decision in a more elegant way: collection is now a 1:1 sub-resource of a Movement, and what was called multi-collection is now multi-Movement-under-one-Delivery.</p>
 <p><a id="d-017"></a></p>
 <h3 id="delivery-put-restricted-to-soft-delete-only">Delivery PUT restricted to soft-delete only</h3>
-<p><strong>D-017</strong> · ✅ Decided · Impact: 🟠 Medium · Area: <strong>Lifecycle</strong> · Related: <a href="#d-007">D-007</a>, <a href="#d-009">D-009</a>, <a href="#d-016">D-016</a>, <a href="#d-018">D-018</a>, <a href="#d-034">D-034</a></p>
+<p><strong>D-017</strong> · ✅ Decided · Impact: 🟠 Medium · Area: <strong>Lifecycle</strong> · Related: <a href="#d-007">D-007</a>, <a href="#d-009">D-009</a>, <a href="#d-016">D-016</a>, <a href="#d-018">D-018</a>, <a href="#d-034">D-034</a>, <a href="#d-041">D-041</a></p>
 <p><strong>Context.</strong> A delivery is addressed by <code>deliveryId</code> (<code>PUT /deliveries/{deliveryId}</code>), covering all the Movements named in its <code>movementIds</code>; there is no per-Movement view of a delivery — that was settled by the Level 2 restructure (see <a href="#d-016">D-016</a>). A delivery records a physical handover of waste at a place at a point in time: the carrier-declared site, the aggregated Movement IDs, the carrier, and the actual timestamp. As an audit fact about something that has already happened, policy requires it to be immutable once recorded.</p>
 <p><strong>Decision.</strong> The delivery <code>PUT</code> is de-potentiated. Once a delivery is registered, the only property that may change is <code>isDeleted</code> (the soft-delete flag from <a href="#d-009">D-009</a>). <code>PUT /deliveries/{deliveryId}</code> does not accept <code>deliveryRequest</code>; it accepts a restricted <code>deliveryUpdateRequest</code> carrying only <code>isDeleted</code> — plus <code>apiCode</code> for caller identity, which is not a property of the delivery record and so does not breach immutability. Any other field is rejected with a <code>NotAllowed</code> validation error (<code>additionalProperties: false</code>). The history/revision pattern (<a href="#d-034">D-034</a>) still applies to the <code>isDeleted</code> mutation.</p>
 <p>Correcting a recorded delivery is therefore not an in-place edit: soft-delete the erroneous Delivery (<code>isDeleted: true</code>) and record a fresh delivery via <code>POST /deliveries</code> — subject to D-009's rule that a Delivery cannot be deleted once a Receipt has been recorded against it.</p>
@@ -930,7 +945,7 @@
 </ol>
 <p><a id="d-018"></a></p>
 <h3 id="delivery-address-derivability">Delivery address derivability</h3>
-<p><strong>D-018</strong> · ✅ Decided · Impact: 🟠 Medium · Area: <strong>Delivery</strong> · Related: <a href="#d-007">D-007</a>, <a href="#d-017">D-017</a></p>
+<p><strong>D-018</strong> · ✅ Decided · Impact: 🟠 Medium · Area: <strong>Delivery</strong> · Related: <a href="#d-007">D-007</a>, <a href="#d-017">D-017</a>, <a href="#d-041">D-041</a></p>
 <p><strong>Context.</strong> The delivery address (<code>deliverySite.address</code>) was initially optional in the spec. The open question was whether it should be <strong>mandatory</strong>, stay <strong>optional</strong>, or be <strong>removed entirely</strong> (the latter only if always derivable from the linked Movements' planned receiver). Two facts were relevant: the planned receiver is an <em>estimate</em>, not authoritative; and the rejection-retry case can deliver to a different receiver than planned, so the actual delivery location can diverge from the estimate.</p>
 <p><strong>Decision.</strong> The delivery address is <strong>mandatory</strong>. Both <code>fullAddress</code> and <code>postcode</code> are required within <code>deliverySite.address</code>. The address records where waste was physically dropped off — a material audit fact that cannot be reliably derived from the planned receiver, particularly in rejection-retry scenarios. Requiring it at the point of recording prevents gaps in the audit trail.</p>
 <p><strong>Consequences.</strong> <code>deliverySite.address</code> is a required field on <code>POST /deliveries</code> (reflected in the OpenAPI spec as <code>deliverySite</code> <code>required: [siteName, address]</code>); callers must supply it even when the actual delivery location matches their planned receiver estimate. It is not part of the delivery <code>PUT</code> body, which is restricted to <code>isDeleted</code> (<code>deliveryUpdateRequest</code>, see <a href="#d-017">D-017</a>), so the address is captured once at <code>POST</code> and never re-edited.</p>
@@ -1022,7 +1037,7 @@
 <p><strong>Consequences.</strong> New endpoints share one status-code vocabulary, one success envelope and one failure envelope with each other and with the GOV.UK API standards, and every response is traceable. The detail is maintained in <a href="../../api/standards/"><code>../api/standards.md</code></a> — update that document, not this record, when the conventions evolve.</p>
 <p><a id="d-040"></a></p>
 <h3 id="rename-drop-off-and-transfer-id-to-delivery-and-delivery-id">Rename drop-off and Transfer ID to delivery and Delivery ID</h3>
-<p><strong>D-040</strong> · ✅ Decided · Impact: 🟢 Low · Area: <strong>Naming</strong> · Related: <a href="#d-005">D-005</a>, <a href="#d-007">D-007</a>, <a href="#d-013">D-013</a>, <a href="#d-018">D-018</a>, <a href="#d-028">D-028</a>, <a href="#d-036">D-036</a></p>
+<p><strong>D-040</strong> · ✅ Decided · Impact: 🟢 Low · Area: <strong>Naming</strong> · Related: <a href="#d-005">D-005</a>, <a href="#d-007">D-007</a>, <a href="#d-013">D-013</a>, <a href="#d-018">D-018</a>, <a href="#d-028">D-028</a>, <a href="#d-036">D-036</a>, <a href="#d-041">D-041</a></p>
 <p><strong>Context.</strong> The event where a driver hands waste to a receiver, and the identifier it mints, were named "drop-off" and "Transfer ID" (<code>POST /transfers</code>, <code>transferId</code>). This reads awkwardly against the rest of the journey vocabulary (creation, collection, receipt) and "transfer" invites confusion with unrelated senses of the word (e.g. transfer of ownership/duty of care, data transfer).</p>
 <p><strong>Decision.</strong> Rename "drop-off" to "delivery" and "Transfer ID" to "Delivery ID" everywhere in the public contract and documentation, decided by Perry May:</p>
 <ul>
@@ -1034,6 +1049,33 @@
 </ul>
 <p>This is a pure rename. It does not change the resource shape, the many-to-one cardinality against Movement IDs (<a href="#d-007">D-007</a>), the identifier format (<a href="#d-013">D-013</a>), or any other already-decided behaviour.</p>
 <p><strong>Update.</strong> The rename was subsequently applied retroactively across this register: every entry above and below now reads with "delivery"/"Delivery ID" throughout, including in narrative Context/Decision/Consequences prose, rather than being left with the original "drop-off"/"Transfer ID" wording. The bullet list above is the one place that still cites the old terms deliberately, since it is the record of what was renamed from and to.</p>
+<p><a id="d-041"></a></p>
+<h3 id="receipt-without-a-prior-delivery-separate-endpoint-an-empty-delivery-created-server-side-to-have-a-reference">Receipt without a prior delivery: separate endpoint, an empty Delivery created server-side to have a reference</h3>
+<p><strong>D-041</strong> · ✅ Decided · Impact: 🔴 High · Area: <strong>Receipt</strong> · Related: <a href="#d-005">D-005</a>, <a href="#d-006">D-006</a>, <a href="#d-007">D-007</a>, <a href="#d-017">D-017</a>, <a href="#d-018">D-018</a>, <a href="#d-022">D-022</a>, <a href="#d-025">D-025</a>, <a href="#d-040">D-040</a></p>
+<p><strong>Context.</strong> In the Level 2 model a receipt is a sub-resource of a Delivery, addressed as <code>POST /deliveries/{deliveryId}/receipt</code> (<a href="#d-005">D-005</a>, and Option 1 of the still-open <a href="#d-022">D-022</a>). <code>POST /deliveries</code> itself requires <code>movementIds</code> with <code>minItems: 1</code> (<a href="#d-007">D-007</a>) — a Delivery is normally created from one or more Movements. But an exceptional case exists where waste is received with no prior Movement/Collection/Delivery trail at all (e.g. received directly, with none of the earlier journey recorded digitally). A receipt never carries its own exposed id (<a href="#d-012">D-012</a>), so a receipt recorded with no Delivery behind it would have <strong>no addressable identifier at all</strong> — it could never be looked up, corrected, or, once <a href="#d-025">D-025</a> settles the acceptance/rejection model, have an outcome recorded against it. A ticket-derived scenario for this case (DWTC-140/142, <code>scenarios/beta-1/receipt/contract-shape-confirmation-for-the-receipt-endpoint.md</code>) already expects "a Delivery ID is returned in the response" for exactly this case.</p>
+<p><strong>Decision.</strong> Do not ask software providers to create the empty Delivery themselves, and do not add a generic no-Delivery receipt endpoint either. Add a dedicated endpoint, <code>POST /receipts</code>, for recording a receipt with no prior delivery:</p>
+<ul>
+<li>The software provider calls <code>POST /receipts</code> once, with the receipt payload plus a mandatory <code>reason</code> field explaining why there is no prior Movement/Collection/Delivery trail.</li>
+<li>The server creates an empty Delivery behind the scenes (<code>movementIds: []</code>) and records the receipt against it, in one request.</li>
+<li>The response returns <code>deliveryId</code>, so an empty Delivery gets a real, addressable Delivery ID exactly like a normal one — the addressability guarantee (lookup, correction, future acceptance/rejection outcome) is met without the client ever handling a Delivery directly.</li>
+<li>The ordinary receipt flow (<code>POST /deliveries/{deliveryId}/receipt</code> against a Delivery that does carry Movement IDs) is unaffected.</li>
+</ul>
+<p><strong>Consequences.</strong></p>
+<ul>
+<li>Software providers integrating the exceptional case make one call, not two, and never need to understand that a receipt is a Delivery sub-resource to make it — <code>POST /receipts</code> is a normal, self-contained receipt call from their point of view.</li>
+<li><code>recordReceiptResponse.data</code> stays <code>null</code> for every receipt made via the ordinary flow; the exceptional-case <code>deliveryId</code> comes back from <code>POST /receipts</code> itself, not from a receipt sub-resource response.</li>
+<li><code>POST /deliveries</code> stays a pure "create from prior Movements" endpoint; empty Deliveries are an internal detail of <code>POST /receipts</code>'s implementation, not a documented public capability of <code>POST /deliveries</code>.</li>
+<li><a href="#d-007">D-007</a>'s many-to-one-against-Movement-IDs cardinality does not need a documented zero case — that case lives entirely in <code>POST /receipts</code>.</li>
+<li><a href="#d-018">D-018</a>'s mandatory delivery address still applies to the empty Delivery the server creates — it must be supplied on the <code>POST /receipts</code> request so the server can write it through, same audit fact as before.</li>
+<li>Satisfies the DWTC-140/142 scenario's expectation that a Delivery ID is returned for a receipt with no prior delivery trail, and does so as a literal one-call description of <code>POST /receipts</code> — "no Delivery ID, reason supplied" → "a Delivery ID is returned in the response" — with no two-step rewrite needed.</li>
+</ul>
+<p><strong>Open questions — flagged by the proposer, not yet resolved:</strong></p>
+<ol>
+<li><strong>Extra fields at receipt time.</strong> Should <code>POST /receipts</code> require additional fields it would otherwise have sourced from a linked Movement (e.g. the waste classification the <a href="#d-006">D-006</a> cross-check normally compares against)? Shape not decided here.</li>
+<li><strong>Correction of an empty Delivery.</strong> <a href="#d-017">D-017</a> restricts a Delivery's <code>PUT</code> to the <code>isDeleted</code> flag only. If fields from (1) ever need correcting after the fact, that either needs an exception to D-017's immutability for server-created empty Deliveries specifically, or those fields belong on the receipt instead — to be confirmed.</li>
+<li><strong><code>reason</code> scope.</strong> Whether <code>reason</code> is ever meaningful on the ordinary <code>POST /deliveries/{deliveryId}/receipt</code> flow (e.g. to explain a partial delivery), or is strictly reserved for <code>POST /receipts</code>.</li>
+<li><strong>Request/response shape of <code>POST /receipts</code>.</strong> Whether it is the same receipt payload as <code>POST /deliveries/{deliveryId}/receipt</code> plus <code>reason</code>, or a distinct schema — not yet modelled in <code>openapi.yaml</code>.</li>
+</ol>
 <h2 id="open">Open</h2>
 <p><a id="d-019"></a></p>
 <h3 id="fate-of-waste-get-producer-journey-query-proposal">Fate-of-waste GET — producer journey query (proposal)</h3>
@@ -1061,7 +1103,7 @@
 <p>A receipt's waste details are cross-checked against the linked Movement record (Creation classification + Collection weights), and its carrier details against the carrier on the Movement chain — surfacing mismatches as validation warnings (see the decided cross-check entry; the delivery is not a source for the waste check). Whether the check is <strong>unconditional</strong> (Option 1: <code>deliveryId</code> is the receipt's path parameter) or <strong>conditional on a supplied <code>deliveryId</code></strong> (Option 2: optional body field) depends on the open <em>Receipt migration</em> decision. Independent of that, what counts as a mismatch is unspecified: identical strings? same registration number, different address? same EWC code, different quantity? And for weight specifically, what tolerance — given Creation is an estimate, Collection an actual, and the receipt what arrived, some drift is expected by design. The server validates this; the spec needs a clearer statement of the rules once agreed.</p>
 <p><a id="d-022"></a></p>
 <h3 id="receipt-migration-new-endpoint-vs-extend-phase-1">Receipt migration: new endpoint vs extend Phase 1</h3>
-<p><strong>D-022</strong> · ⏳ Open · Impact: 🔴 High · Area: <strong>Receipt</strong> · Related: <a href="#d-005">D-005</a>, <a href="#d-006">D-006</a>, <a href="#d-015">D-015</a>, <a href="#d-016">D-016</a>, <a href="#d-023">D-023</a></p>
+<p><strong>D-022</strong> · ⏳ Open · Impact: 🔴 High · Area: <strong>Receipt</strong> · Related: <a href="#d-005">D-005</a>, <a href="#d-006">D-006</a>, <a href="#d-015">D-015</a>, <a href="#d-016">D-016</a>, <a href="#d-023">D-023</a>, <a href="#d-041">D-041</a></p>
 <p>How receivers move from the Phase 1 receipt to the linked Phase 2 receipt is undecided. Both options share one internal receipt function, and both require a prior delivery to obtain a <code>deliveryId</code>, so implementation cost and the delivery dependency are equivalent either way — the difference is contract shape and migration friction.</p>
 <p><strong>Option 1 (current spec, favoured but not decided).</strong> Implement <code>/deliveries/{deliveryId}/receipt</code> over the same internal receipt function called by <code>/movements/receive</code>, and deprecate <code>/movements/receive</code>. Linking is structural — the <code>deliveryId</code> is a mandatory path parameter, so a new-flow receipt cannot be recorded without a Delivery, and the cross-check against the linked delivery is unconditional. Fits the Level 2 model already adopted: receipt is a 1:1 sub-resource of Delivery with a cacheable, addressable read endpoint (see <a href="#d-033">D-033</a>). Cost: two receipt endpoints coexist through the transition, and Phase 1 can't be fully retired until receivers record deliveries.</p>
 <p><strong>Option 2.</strong> Do not add the new endpoint; keep <code>/movements/receive</code> and add an optional <code>deliveryId</code> to its request body. Lowest URL churn — existing vendors keep the same endpoint and add the field when ready; one receipt endpoint, no "which do I call?". Cost: linking becomes optional-by-convention (a receipt that should be linked can be recorded without the field — a silent gap), the cross-check reverts to conditional ("when <code>deliveryId</code> is supplied"), and it keeps a verb-shaped, non-resource endpoint as the canonical receipt, partially reversing the Level 2 restructure.</p>
@@ -1078,7 +1120,7 @@
 <p>Phase 1 minted <code>wasteTrackingId</code> at receipt; Phase 2 mints <code>movementId</code> at creation. Whether a Phase 1 record maps to a Phase 2 Movement ID (and how), on migration, is undecided — owned by the Phase 1 → Phase 2 migration strategy.</p>
 <p><a id="d-025"></a></p>
 <h3 id="receipt-acceptance-rejection-outcome-new-in-phase-2">Receipt acceptance / rejection outcome (new in Phase 2)</h3>
-<p><strong>D-025</strong> · ⏳ Open · Impact: 🔴 High · Area: <strong>Receipt</strong> · Related: <a href="#d-015">D-015</a></p>
+<p><strong>D-025</strong> · ⏳ Open · Impact: 🔴 High · Area: <strong>Receipt</strong> · Related: <a href="#d-015">D-015</a>, <a href="#d-041">D-041</a></p>
 <p>Phase 1 has no rejection model — recording a receipt means the waste was accepted; there is no way to record a full rejection, a partial acceptance, or waste returned to the producer. Phase 2 must support <code>acceptAll</code> / <code>rejectAll</code> / <code>acceptPart-accepted</code> / <code>acceptPart-rejected</code> as first-class receipt outcomes; Phase 2 must decide whether to introduce a receipt outcome concept and, if so, what it records (outcome indicator, accepted vs rejected quantities, reason, what happens to the rejected portion). Undecided; needs policy-team input. Structurally, whatever is chosen sits on the single Receipt, not on a split Movement (see the 1:1 decision).</p>
 <p><a id="d-028"></a></p>
 <h3 id="pre-generated-delivery-ids-for-offline-drivers">Pre-generated Delivery IDs for offline drivers</h3>
