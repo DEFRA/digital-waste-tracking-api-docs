@@ -1,6 +1,6 @@
 /**
  * Shared types used across all DWT event schemas (Creation, Collection,
- * Drop-off, Receipt). Import from here rather than from individual event
+ * Delivery, Receipt). Import from here rather than from individual event
  * files to avoid duplication.
  *
  * Receipt-specific types (ReceiptAddress, Receipt, Receiver) remain in
@@ -164,7 +164,7 @@ export type BrokerDetails = {
 }
 
 /**
- * Driver performing a collection or drop-off event.
+ * Driver performing a collection or delivery event.
  * Distinct from the carrier organisation. Currently carries name only —
  * full driver model to be defined as the spec matures.
  */

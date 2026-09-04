@@ -478,12 +478,12 @@
 <td><code>POST /movements/{movementId}/collection</code>, <code>GET /movements/{movementId}/collection</code>, <code>PUT /movements/{movementId}/collection</code></td>
 </tr>
 <tr>
-<td>Transfer (drop-off)</td>
-<td><code>POST /transfers</code>, <code>GET /transfers/{transferId}</code>, <code>PUT /transfers/{transferId}</code></td>
+<td>Delivery</td>
+<td><code>POST /deliveries</code>, <code>GET /deliveries/{deliveryId}</code>, <code>PUT /deliveries/{deliveryId}</code></td>
 </tr>
 <tr>
 <td>Receipt</td>
-<td><code>POST /transfers/{transferId}/receipt</code>, <code>GET /transfers/{transferId}/receipt</code>, <code>PUT /transfers/{transferId}/receipt</code></td>
+<td><code>POST /deliveries/{deliveryId}/receipt</code>, <code>GET /deliveries/{deliveryId}/receipt</code>, <code>PUT /deliveries/{deliveryId}/receipt</code></td>
 </tr>
 <tr>
 <td>Receipt (Phase 1, deprecated)</td>
@@ -499,11 +499,11 @@
 </tr>
 </tbody>
 </table>
-<p>The spec follows the Richardson Maturity Model Level 2 — URLs name resources, HTTP methods carry the verbs. Two public identifiers exist in the API contract: Movement ID and Transfer ID. The Movement is the unit of waste being moved (1:1 with its Collection event); the Transfer is the drop-off event at a receiver site (1:1 with its Receipt, but can aggregate multiple Movements). See the <a href="../collections/glossary/#resource-hierarchy">resource hierarchy section in the glossary</a> for more.</p>
-<p>Phase 1 endpoints are kept exactly as published. The single change in their behaviour is an optional <code>transferId</code> field on the receipt request body, which links a receipt to an upstream drop-off when the carrier has recorded one. The Phase 1 receipt endpoints (<code>POST /movements/receive</code>, <code>PUT /movements/{id}/receive</code>) are marked <code>deprecated: true</code> in the spec — new integrations should use the Transfer-scoped endpoints above. A removal timeline is yet to be agreed (see the <a href="../collections/decisions/">decisions register</a>).</p>
+<p>The spec follows the Richardson Maturity Model Level 2 — URLs name resources, HTTP methods carry the verbs. Two public identifiers exist in the API contract: Movement ID and Delivery ID. The Movement is the unit of waste being moved (1:1 with its Collection event); the Delivery is the delivery event at a receiver site (1:1 with its Receipt, but can aggregate multiple Movements). See the <a href="../collections/glossary/#resource-hierarchy">resource hierarchy section in the glossary</a> for more.</p>
+<p>Phase 1 endpoints are kept exactly as published. The single change in their behaviour is an optional <code>deliveryId</code> field on the receipt request body, which links a receipt to an upstream delivery when the carrier has recorded one. The Phase 1 receipt endpoints (<code>POST /movements/receive</code>, <code>PUT /movements/{id}/receive</code>) are marked <code>deprecated: true</code> in the spec — new integrations should use the Delivery-scoped endpoints above. A removal timeline is yet to be agreed (see the <a href="../collections/decisions/">decisions register</a>).</p>
 <h2 id="status">Status</h2>
 <p>The spec is in alpha and being iterated alongside data-model work. Several schemas (waste classification, hazardous codes, POPs codes, party details) are deliberately permissive placeholders pending domain detail from the BA. A number of design points are still open and tracked in the <a href="../collections/decisions/">decisions register</a>.</p>
-<p>The vocabulary used across the spec — Movement ID, Transfer ID, the per-event IDs, what counts as a broker — is documented in the <a href="../collections/glossary/">glossary</a>.</p>
+<p>The vocabulary used across the spec — Movement ID, Delivery ID, the per-event IDs, what counts as a broker — is documented in the <a href="../collections/glossary/">glossary</a>.</p>
 <h2 id="previewing-the-spec">Previewing the spec</h2>
 <p>The YAML can be previewed in any standard OpenAPI tool. Two options:</p>
 <ul>

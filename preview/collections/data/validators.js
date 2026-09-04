@@ -257,25 +257,25 @@ export function movementHasCollectionError() {
 
 /**
  * Error returned when PUT attempts to soft-delete a Collection whose parent
- * Movement has already been referenced in a Drop-off.
+ * Movement has already been referenced in a Delivery.
  */
-export function collectionMovementInDropOffError() {
+export function collectionMovementInDeliveryError() {
 	return {
 		key: 'isDeleted',
 		errorType: 'BusinessRuleViolation',
-		message: 'Cannot delete this collection: this movement has already been included in a drop-off.'
+		message: 'Cannot delete this collection: this movement has already been included in a delivery.'
 	}
 }
 
 /**
- * Error returned when PUT attempts to soft-delete a Drop-off (Transfer) that
+ * Error returned when PUT attempts to soft-delete a Delivery that
  * already has a Receipt recorded against it.
  */
-export function dropOffHasReceiptError() {
+export function deliveryHasReceiptError() {
 	return {
 		key: 'isDeleted',
 		errorType: 'BusinessRuleViolation',
-		message: 'Cannot delete this transfer: a receipt has already been recorded against it.'
+		message: 'Cannot delete this delivery: a receipt has already been recorded against it.'
 	}
 }
 
@@ -292,37 +292,37 @@ export function deletedMovementBlocksCollectionError() {
 }
 
 /**
- * Error returned when a Drop-off includes a movementId whose Movement record
+ * Error returned when a Delivery includes a movementId whose Movement record
  * is currently isDeleted: true.
  */
-export function deletedMovementBlocksDropOffError(movementId) {
+export function deletedMovementBlocksDeliveryError(movementId) {
 	return {
 		key: 'movementIds',
 		errorType: 'BusinessRuleViolation',
-		message: `Cannot include movementId ${movementId} in this drop-off: it is marked as deleted.`
+		message: `Cannot include movementId ${movementId} in this delivery: it is marked as deleted.`
 	}
 }
 
 /**
- * Error returned when a Drop-off includes a movementId whose Collection is
+ * Error returned when a Delivery includes a movementId whose Collection is
  * currently isDeleted: true.
  */
-export function deletedCollectionBlocksDropOffError(movementId) {
+export function deletedCollectionBlocksDeliveryError(movementId) {
 	return {
 		key: 'movementIds',
 		errorType: 'BusinessRuleViolation',
-		message: `Cannot include movementId ${movementId} in this drop-off: its collection is marked as deleted.`
+		message: `Cannot include movementId ${movementId} in this delivery: its collection is marked as deleted.`
 	}
 }
 
 /**
- * Error returned when a Receipt is recorded or updated against a Transfer
+ * Error returned when a Receipt is recorded or updated against a Delivery
  * that is currently isDeleted: true.
  */
-export function deletedTransferBlocksReceiptError() {
+export function deletedDeliveryBlocksReceiptError() {
 	return {
-		key: 'transferId',
+		key: 'deliveryId',
 		errorType: 'BusinessRuleViolation',
-		message: 'Cannot record a receipt: this transfer is marked as deleted.'
+		message: 'Cannot record a receipt: this delivery is marked as deleted.'
 	}
 }

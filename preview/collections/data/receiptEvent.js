@@ -1,8 +1,8 @@
 /**
  * Example payloads for the Record Receipt event.
- * POST /transfers/{transferId}/receipt
+ * POST /deliveries/{deliveryId}/receipt
  *
- * The transferId is a path parameter and is not included in the request body.
+ * The deliveryId is a path parameter and is not included in the request body.
  * The examples below represent the receipt body only.
  */
 

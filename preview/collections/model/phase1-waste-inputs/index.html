@@ -591,7 +591,7 @@
 <ul>
 <li>Phase 1 history is snapshot-based</li>
 <li>Phase 2 collection is expected to be an ordered event sequence</li>
-<li>Phase 2 drop-off / receipt introduces Transfer as a separate aggregate</li>
+<li>Phase 2 drop-off / receipt introduces Delivery as a separate aggregate</li>
 </ul>
 <h2 id="role-during-phase-1-phase-2-migration">Role during Phase 1 -&gt; Phase 2 migration</h2>
 <p>For now, the working proposal is to keep <code>waste-inputs</code> / <code>waste-inputs-history</code> in place during migration.</p>
@@ -605,7 +605,7 @@
 <p>Until a formal migration decision is made, the safest assumption is:</p>
 <ul>
 <li>Phase 1 endpoints continue to use <code>waste-inputs</code> / <code>waste-inputs-history</code></li>
-<li>Phase 2 endpoints use the proposed <code>movements</code> / <code>transfers</code> model</li>
+<li>Phase 2 endpoints use the proposed <code>movements</code> / <code>deliveries</code> model</li>
 <li>any bridge between <code>wasteTrackingId</code> and new identifiers is handled deliberately rather than inferred implicitly</li>
 </ul>
 <h2 id="why-this-document-exists">Why this document exists</h2>

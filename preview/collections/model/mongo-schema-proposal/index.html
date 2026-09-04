@@ -458,53 +458,53 @@
 <ul>
 <li>movement creation</li>
 <li>collection events</li>
-<li>drop-off / transfer creation</li>
+<li>delivery creation</li>
 <li>receipt recording</li>
 </ul>
 <p>This is a proposal for the server-side storage shape. It is not yet a decided implementation.</p>
 <h2 id="design-goals">Design goals</h2>
 <ul>
 <li>Keep one current-state aggregate per durable public identifier.</li>
-<li>Keep Movement and Transfer as separate aggregates because the API and decisions already separate them.</li>
+<li>Keep Movement and Delivery as separate aggregates because the API and decisions already separate them.</li>
 <li>Support ordered collection events on a Movement.</li>
-<li>Support Transfer as the aggregation point for one or more Movement IDs.</li>
+<li>Support Delivery as the aggregation point for one or more Movement IDs.</li>
 <li>Keep a revisioned current-state plus history pattern close to the current <code>waste-inputs</code> / <code>waste-inputs-history</code> approach, while treating <code>revision</code> as the current aggregate version after any successful mutation.</li>
-<li>Preserve write provenance per event so different organisations can record creation, collection, drop-off, and receipt against the same movement journey.</li>
-<li>Allow optional denormalised <code>transferIds</code> on Movement for read convenience, while treating <code>transfers.movementIds[]</code> as the primary relationship source of truth.</li>
+<li>Preserve write provenance per event so different organisations can record creation, collection, delivery, and receipt against the same movement journey.</li>
+<li>Allow optional denormalised <code>deliveryIds</code> on Movement for read convenience, while treating <code>deliveries.movementIds[]</code> as the primary relationship source of truth.</li>
 </ul>
 <h2 id="proposed-collections">Proposed collections</h2>
 <ul>
 <li><code>movements</code></li>
 <li><code>movements-history</code></li>
-<li><code>transfers</code></li>
-<li><code>transfers-history</code></li>
+<li><code>deliveries</code></li>
+<li><code>deliveries-history</code></li>
 <li><code>invalid-submissions</code></li>
 </ul>
 <p>Optional later addition if stronger audit/event replay is needed:</p>
 <ul>
 <li><code>movement-events</code></li>
-<li><code>transfer-events</code></li>
+<li><code>delivery-events</code></li>
 </ul>
 <h3 id="invalid-submissions"><code>invalid-submissions</code></h3>
 <p>Operational holding collection for write attempts that could not be applied because the target aggregate could not be found or matched at write time.</p>
 <p>Examples:</p>
 <ul>
 <li>a collection update for a <code>movementId</code> that does not exist</li>
-<li>a receipt write for a <code>transferId</code> that does not exist</li>
+<li>a receipt write for a <code>deliveryId</code> that does not exist</li>
 <li>an update request that references a valid identifier but fails aggregate ownership / matching checks</li>
 </ul>
 <p>This is not intended to duplicate normal request-validation errors returned to the caller at the API boundary. It is intended for submissions that were accepted far enough into processing to warrant persistence for investigation, replay, support handling, or audit.</p>
 <p>Suggested shape:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
 <span class="w">  </span><span class="nx">_id</span><span class="o">:</span><span class="w"> </span><span class="nx">ObjectId</span><span class="p">,</span>
-<span class="w">  </span><span class="nx">aggregateType</span><span class="o">:</span><span class="w"> </span><span class="nb">String</span><span class="p">,</span><span class="w"> </span><span class="c1">// movement | transfer</span>
-<span class="w">  </span><span class="nx">aggregateId</span><span class="o">:</span><span class="w"> </span><span class="nb">String</span><span class="p">,</span><span class="w"> </span><span class="c1">// movementId or transferId that was targeted</span>
-<span class="w">  </span><span class="nx">submissionType</span><span class="o">:</span><span class="w"> </span><span class="nb">String</span><span class="p">,</span><span class="w"> </span><span class="c1">// creation | collection | dropOff | receipt | update</span>
+<span class="w">  </span><span class="nx">aggregateType</span><span class="o">:</span><span class="w"> </span><span class="nb">String</span><span class="p">,</span><span class="w"> </span><span class="c1">// movement | delivery</span>
+<span class="w">  </span><span class="nx">aggregateId</span><span class="o">:</span><span class="w"> </span><span class="nb">String</span><span class="p">,</span><span class="w"> </span><span class="c1">// movementId or deliveryId that was targeted</span>
+<span class="w">  </span><span class="nx">submissionType</span><span class="o">:</span><span class="w"> </span><span class="nb">String</span><span class="p">,</span><span class="w"> </span><span class="c1">// creation | collection | delivery | receipt | update</span>
 <span class="w">  </span><span class="nx">submittingOrganisation</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="nx">defraCustomerOrganisationId</span><span class="o">:</span><span class="w"> </span><span class="nb">String</span>
 <span class="w">  </span><span class="p">},</span>
 <span class="w">  </span><span class="nx">payload</span><span class="o">:</span><span class="w"> </span><span class="nb">Object</span><span class="p">,</span><span class="w"> </span><span class="c1">// original write payload or transformed internal payload</span>
-<span class="w">  </span><span class="nx">reason</span><span class="o">:</span><span class="w"> </span><span class="nb">String</span><span class="p">,</span><span class="w"> </span><span class="c1">// e.g. MOVEMENT_NOT_FOUND, TRANSFER_NOT_FOUND, ORG_MISMATCH</span>
+<span class="w">  </span><span class="nx">reason</span><span class="o">:</span><span class="w"> </span><span class="nb">String</span><span class="p">,</span><span class="w"> </span><span class="c1">// e.g. MOVEMENT_NOT_FOUND, DELIVERY_NOT_FOUND, ORG_MISMATCH</span>
 <span class="w">  </span><span class="nx">traceId</span><span class="o">:</span><span class="w"> </span><span class="nb">String</span><span class="p">,</span>
 <span class="w">  </span><span class="nx">timestamp</span><span class="o">:</span><span class="w"> </span><span class="nb">Date</span><span class="p">,</span>
 <span class="w">  </span><span class="nx">replayStatus</span><span class="o">:</span><span class="w"> </span><span class="nb">String</span><span class="w"> </span><span class="c1">// optional, e.g. NEW | REPLAYED | DISCARDED</span>
@@ -518,28 +518,28 @@
 <li>creation event data</li>
 <li>ordered collection events</li>
 <li>movement lifecycle state</li>
-<li>convenience <code>transferIds[]</code></li>
+<li>convenience <code>deliveryIds[]</code></li>
 </ul>
 <p>Does not own:</p>
 <ul>
-<li>drop-off as canonical data</li>
+<li>delivery as canonical data</li>
 <li>receipt as canonical data</li>
 </ul>
-<h3 id="transfer-aggregate">Transfer aggregate</h3>
-<p>One document per <code>transferId</code>.</p>
+<h3 id="delivery-aggregate">Delivery aggregate</h3>
+<p>One document per <code>deliveryId</code>.</p>
 <p>Owns:</p>
 <ul>
 <li><code>movementIds[]</code></li>
-<li>drop-off event data</li>
+<li>delivery event data</li>
 <li>receipt event data</li>
-<li>transfer lifecycle state</li>
+<li>delivery lifecycle state</li>
 </ul>
 <h2 id="proposed-movements-schema">Proposed <code>movements</code> schema</h2>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
 <span class="w">  </span><span class="nx">_id</span><span class="o">:</span><span class="w"> </span><span class="nb">String</span><span class="p">,</span><span class="w"> </span><span class="c1">// movementId</span>
 <span class="w">  </span><span class="nx">movementId</span><span class="o">:</span><span class="w"> </span><span class="nb">String</span><span class="p">,</span>
-<span class="w">  </span><span class="nx">transferIds</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="nb">String</span><span class="p">],</span><span class="w"> </span><span class="c1">// optional denormalised convenience field</span>
-<span class="w">  </span><span class="nx">state</span><span class="o">:</span><span class="w"> </span><span class="nb">String</span><span class="p">,</span><span class="w"> </span><span class="c1">// e.g. PLANNED, IN_COLLECTION, IN_TRANSIT, DROPPED_OFF</span>
+<span class="w">  </span><span class="nx">deliveryIds</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="nb">String</span><span class="p">],</span><span class="w"> </span><span class="c1">// optional denormalised convenience field</span>
+<span class="w">  </span><span class="nx">state</span><span class="o">:</span><span class="w"> </span><span class="nb">String</span><span class="p">,</span><span class="w"> </span><span class="c1">// e.g. PLANNED, IN_COLLECTION, IN_TRANSIT, DELIVERED</span>
 <span class="w">  </span><span class="nx">revision</span><span class="o">:</span><span class="w"> </span><span class="nb">Number</span><span class="p">,</span>
 <span class="w">  </span><span class="nx">isDeleted</span><span class="o">:</span><span class="w"> </span><span class="nb">Boolean</span><span class="p">,</span>
 <span class="w">  </span><span class="nx">createdAt</span><span class="o">:</span><span class="w"> </span><span class="nb">Date</span><span class="p">,</span>
@@ -608,30 +608,30 @@
 <li><code>creation</code> is singular because <code>POST /movements</code> creates the Movement.</li>
 <li><code>collectionEvents[]</code> is plural because collection is now an ordered event sequence on the same Movement.</li>
 <li><code>submittingOrganisation</code> is stored on each business event rather than once at Movement level, because creation and later collection events may be recorded by different organisations.</li>
-<li><code>transferIds[]</code> is included for now because it may make read models simpler, but it should be treated as derived from <code>transfers.movementIds[]</code>.</li>
+<li><code>deliveryIds[]</code> is included for now because it may make read models simpler, but it should be treated as derived from <code>deliveries.movementIds[]</code>.</li>
 </ul>
-<h2 id="proposed-transfers-schema">Proposed <code>transfers</code> schema</h2>
-<p>For a hazardous drop-off, <code>transferId</code> is not freshly minted: it is the sole <code>movementId</code> referenced in the request (<a href="../../decisions/#d-010">D-010</a> guarantees there is exactly one). For a non-hazardous drop-off, <code>transferId</code> is minted independently as before.</p>
+<h2 id="proposed-deliveries-schema">Proposed <code>deliveries</code> schema</h2>
+<p>For a hazardous delivery, <code>deliveryId</code> is not freshly minted: it is the sole <code>movementId</code> referenced in the request (<a href="../../decisions/#d-010">D-010</a> guarantees there is exactly one). For a non-hazardous delivery, <code>deliveryId</code> is minted independently as before.</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="nx">_id</span><span class="o">:</span><span class="w"> </span><span class="nb">String</span><span class="p">,</span><span class="w"> </span><span class="c1">// transferId — for a hazardous drop-off, equals the sole</span>
+<span class="w">  </span><span class="nx">_id</span><span class="o">:</span><span class="w"> </span><span class="nb">String</span><span class="p">,</span><span class="w"> </span><span class="c1">// deliveryId — for a hazardous delivery, equals the sole</span>
 <span class="w">               </span><span class="c1">// referenced movementId</span>
-<span class="w">  </span><span class="nx">transferId</span><span class="o">:</span><span class="w"> </span><span class="nb">String</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">deliveryId</span><span class="o">:</span><span class="w"> </span><span class="nb">String</span><span class="p">,</span>
 <span class="w">  </span><span class="nx">movementIds</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="nb">String</span><span class="p">],</span>
-<span class="w">  </span><span class="nx">state</span><span class="o">:</span><span class="w"> </span><span class="nb">String</span><span class="p">,</span><span class="w"> </span><span class="c1">// e.g. DROPPED_OFF, RECEIVED, REJECTED, PARTIALLY_ACCEPTED</span>
+<span class="w">  </span><span class="nx">state</span><span class="o">:</span><span class="w"> </span><span class="nb">String</span><span class="p">,</span><span class="w"> </span><span class="c1">// e.g. DELIVERED, RECEIVED, REJECTED, PARTIALLY_ACCEPTED</span>
 <span class="w">  </span><span class="nx">revision</span><span class="o">:</span><span class="w"> </span><span class="nb">Number</span><span class="p">,</span>
 <span class="w">  </span><span class="nx">isDeleted</span><span class="o">:</span><span class="w"> </span><span class="nb">Boolean</span><span class="p">,</span>
 <span class="w">  </span><span class="nx">createdAt</span><span class="o">:</span><span class="w"> </span><span class="nb">Date</span><span class="p">,</span>
 <span class="w">  </span><span class="nx">lastUpdatedAt</span><span class="o">:</span><span class="w"> </span><span class="nb">Date</span><span class="p">,</span>
 <span class="w">  </span><span class="nx">traceId</span><span class="o">:</span><span class="w"> </span><span class="nb">String</span><span class="p">,</span>
 
-<span class="w">  </span><span class="nx">dropOff</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">delivery</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="nx">eventId</span><span class="o">:</span><span class="w"> </span><span class="nb">String</span><span class="p">,</span><span class="w"> </span><span class="c1">// internal UUID</span>
 <span class="w">    </span><span class="nx">recordedAt</span><span class="o">:</span><span class="w"> </span><span class="nb">Date</span><span class="p">,</span>
 <span class="w">    </span><span class="nx">submittingOrganisation</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">      </span><span class="nx">defraCustomerOrganisationId</span><span class="o">:</span><span class="w"> </span><span class="nb">String</span>
 <span class="w">    </span><span class="p">},</span>
 <span class="w">    </span><span class="nx">submittedByApiCode</span><span class="o">:</span><span class="w"> </span><span class="nb">String</span><span class="p">,</span><span class="w"> </span><span class="c1">// optional, if exact API key provenance is needed</span>
-<span class="w">    </span><span class="nx">actualDateTimeDropOff</span><span class="o">:</span><span class="w"> </span><span class="nb">Date</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">actualDateTimeDelivery</span><span class="o">:</span><span class="w"> </span><span class="nb">Date</span><span class="p">,</span>
 <span class="w">    </span><span class="nx">yourUniqueReference</span><span class="o">:</span><span class="w"> </span><span class="nb">String</span><span class="p">,</span>
 <span class="w">    </span><span class="nx">otherReferencesForMovement</span><span class="o">:</span><span class="w"> </span><span class="p">[</span>
 <span class="w">      </span><span class="p">{</span>
@@ -640,7 +640,7 @@
 <span class="w">      </span><span class="p">}</span>
 <span class="w">    </span><span class="p">],</span>
 <span class="w">    </span><span class="nx">carrier</span><span class="o">:</span><span class="w"> </span><span class="nb">Object</span><span class="p">,</span>
-<span class="w">    </span><span class="nx">dropOff</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">deliverySite</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">      </span><span class="nx">siteName</span><span class="o">:</span><span class="w"> </span><span class="nb">String</span><span class="p">,</span>
 <span class="w">      </span><span class="nx">exemptionNumber</span><span class="o">:</span><span class="w"> </span><span class="nb">String</span><span class="p">,</span>
 <span class="w">      </span><span class="nx">address</span><span class="o">:</span><span class="w"> </span><span class="nb">Object</span>
@@ -686,12 +686,12 @@
 <span class="w">  </span><span class="p">}</span>
 <span class="p">}</span>
 </code></pre></div>
-<h3 id="notes-on-transfers">Notes on <code>transfers</code></h3>
+<h3 id="notes-on-deliveries">Notes on <code>deliveries</code></h3>
 <ul>
-<li><code>movementIds[]</code> is the canonical relationship from Transfer to Movement.</li>
-<li><code>dropOff</code> is singular because one Transfer is minted per drop-off event.</li>
-<li><code>receipt</code> is singular because receipt is modelled as one receipt per Transfer.</li>
-<li><code>submittingOrganisation</code> is stored on both <code>dropOff</code> and <code>receipt</code>, because those events may be written by different organisations against the same <code>transferId</code>.</li>
+<li><code>movementIds[]</code> is the canonical relationship from Delivery to Movement.</li>
+<li><code>delivery</code> is singular because one Delivery is minted per delivery event.</li>
+<li><code>receipt</code> is singular because receipt is modelled as one receipt per Delivery.</li>
+<li><code>submittingOrganisation</code> is stored on both <code>delivery</code> and <code>receipt</code>, because those events may be written by different organisations against the same <code>deliveryId</code>.</li>
 <li><code>submittedByApiCode</code> is optional but useful if one organisation can hold multiple API keys and exact key-level provenance matters for audit.</li>
 <li><code>outcome</code> is reserved because receipt acceptance / rejection is still an open design point.</li>
 </ul>
@@ -704,11 +704,11 @@
 <span class="w">  </span><span class="nx">timestamp</span><span class="o">:</span><span class="w"> </span><span class="nb">Date</span>
 <span class="p">}</span>
 </code></pre></div>
-<h3 id="transfers-history"><code>transfers-history</code></h3>
-<p>Snapshot of the full previous Transfer document before each successful mutation of an existing Transfer aggregate.</p>
+<h3 id="deliveries-history"><code>deliveries-history</code></h3>
+<p>Snapshot of the full previous Delivery document before each successful mutation of an existing Delivery aggregate.</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="p">...</span><span class="nx">previousTransferDocument</span><span class="p">,</span>
-<span class="w">  </span><span class="nx">transferId</span><span class="o">:</span><span class="w"> </span><span class="nb">String</span><span class="p">,</span>
+<span class="w">  </span><span class="p">...</span><span class="nx">previousDeliveryDocument</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">deliveryId</span><span class="o">:</span><span class="w"> </span><span class="nb">String</span><span class="p">,</span>
 <span class="w">  </span><span class="nx">timestamp</span><span class="o">:</span><span class="w"> </span><span class="nb">Date</span>
 <span class="p">}</span>
 </code></pre></div>
@@ -722,7 +722,7 @@
 <li><code>{ 'collectionEvents.submittingOrganisation.defraCustomerOrganisationId': 1 }</code></li>
 <li><code>{ state: 1, lastUpdatedAt: -1 }</code></li>
 <li><code>{ traceId: 1 }</code></li>
-<li><code>{ transferIds: 1 }</code></li>
+<li><code>{ deliveryIds: 1 }</code></li>
 </ul>
 <p>Conditional / query-driven:</p>
 <ul>
@@ -737,64 +737,58 @@
 <li><code>{ movementId: 1, timestamp: -1 }</code></li>
 <li><code>{ traceId: 1 }</code></li>
 </ul>
-<h3 id="transfers"><code>transfers</code></h3>
+<h3 id="deliveries"><code>deliveries</code></h3>
 <p>Required:</p>
 <ul>
 <li><code>{ _id: 1 }</code></li>
-<li><code>{ transferId: 1 }</code> unique</li>
+<li><code>{ deliveryId: 1 }</code> unique</li>
 <li><code>{ movementIds: 1 }</code></li>
-<li><code>{ 'dropOff.submittingOrganisation.defraCustomerOrganisationId': 1 }</code></li>
+<li><code>{ 'delivery.submittingOrganisation.defraCustomerOrganisationId': 1 }</code></li>
 <li><code>{ 'receipt.submittingOrganisation.defraCustomerOrganisationId': 1 }</code></li>
 <li><code>{ state: 1, lastUpdatedAt: -1 }</code></li>
 <li><code>{ traceId: 1 }</code></li>
 </ul>
 <p>Conditional / query-driven:</p>
 <ul>
-<li><code>{ 'dropOff.actualDateTimeDropOff': 1 }</code></li>
+<li><code>{ 'delivery.actualDateTimeDelivery': 1 }</code></li>
 <li><code>{ 'receipt.dateTimeReceived': 1 }</code></li>
 <li><code>{ 'receipt.receiver.authorisationNumber': 1 }</code></li>
 <li><code>{ 'receipt.eventId': 1 }</code></li>
-<li><code>{ 'dropOff.eventId': 1 }</code></li>
+<li><code>{ 'delivery.eventId': 1 }</code></li>
 </ul>
-<h3 id="transfers-history_1"><code>transfers-history</code></h3>
+<h3 id="deliveries-history_1"><code>deliveries-history</code></h3>
 <ul>
-<li><code>{ transferId: 1, revision: -1 }</code></li>
-<li><code>{ transferId: 1, timestamp: -1 }</code></li>
+<li><code>{ deliveryId: 1, revision: -1 }</code></li>
+<li><code>{ deliveryId: 1, timestamp: -1 }</code></li>
 <li><code>{ traceId: 1 }</code></li>
 </ul>
 <h2 id="source-of-truth-rules">Source-of-truth rules</h2>
 <ul>
 <li><code>movements._id</code> / <code>movementId</code> is the durable public identifier for a Movement.</li>
-<li><code>transfers._id</code> / <code>transferId</code> is the durable public identifier for a Transfer. For a hazardous drop-off, <code>transferId</code> equals the sole <code>movementId</code> on the transfer rather than being independently minted (see <code>POST /transfers</code> above and <a href="../../decisions/#d-010">D-010</a>).</li>
+<li><code>deliveries._id</code> / <code>deliveryId</code> is the durable public identifier for a Delivery. For a hazardous delivery, <code>deliveryId</code> equals the sole <code>movementId</code> on the delivery rather than being independently minted (see <code>POST /deliveries</code> above and <a href="../../decisions/#d-010">D-010</a>).</li>
 <li><code>revision</code> is the current version number of the aggregate document, not of an individual nested event.</li>
 <li>New aggregates are created at <code>revision: 1</code>.</li>
 <li>Every successful mutation of an existing aggregate increments <code>revision</code>, regardless of whether the API operation is a <code>POST</code> or a <code>PUT</code>.</li>
-<li>Event-level <code>submittingOrganisation</code> is the source of truth for who wrote creation, collection, drop-off, and receipt.</li>
+<li>Event-level <code>submittingOrganisation</code> is the source of truth for who wrote creation, collection, delivery, and receipt.</li>
 <li>Optional event-level <code>submittedByApiCode</code> is the source of truth for which API key wrote the event when multiple keys exist for one organisation.</li>
-<li><code>transfers.movementIds[]</code> is the source of truth for Movement-to-Transfer membership.</li>
-<li><code>movements.transferIds[]</code> is denormalised convenience data only.</li>
+<li><code>deliveries.movementIds[]</code> is the source of truth for Movement-to-Delivery membership.</li>
+<li><code>movements.deliveryIds[]</code> is denormalised convenience data only.</li>
 <li>History collections are source-of-truth for past snapshots, not for individual business events.</li>
 </ul>
 <h2 id="write-path-mapping">Write-path mapping</h2>
 <ul>
-<li>
-<p><code>POST /movements</code></p>
-</li>
-<li>
-<p>insert one <code>movements</code> document</p>
-</li>
+<li><code>POST /movements</code></li>
+<li>insert one <code>movements</code> document</li>
 <li>set <code>revision</code> to <code>1</code></li>
 <li>set <code>creation</code></li>
 <li>set <code>collectionEvents</code> to <code>[]</code></li>
 <li>
-<p>set <code>transferIds</code> to <code>[]</code></p>
+<p>set <code>deliveryIds</code> to <code>[]</code></p>
 </li>
 <li>
 <p><code>POST /movements/{movementId}/collection</code></p>
 </li>
-<li>
-<p>append one item to <code>collectionEvents</code></p>
-</li>
+<li>append one item to <code>collectionEvents</code></li>
 <li>increment <code>revision</code></li>
 <li>
 <p>write prior snapshot to <code>movements-history</code></p>
@@ -802,9 +796,7 @@
 <li>
 <p><code>PUT /movements/{movementId}</code></p>
 </li>
-<li>
-<p>mutate <code>creation</code> or movement-level fields</p>
-</li>
+<li>mutate <code>creation</code> or movement-level fields</li>
 <li>increment <code>revision</code></li>
 <li>
 <p>write prior snapshot to <code>movements-history</code></p>
@@ -812,53 +804,45 @@
 <li>
 <p><code>PUT /movements/{movementId}/collection</code></p>
 </li>
-<li>
-<p>mutate the allowed collection event</p>
-</li>
+<li>mutate the allowed collection event</li>
 <li>increment <code>revision</code></li>
 <li>
 <p>write prior snapshot to <code>movements-history</code></p>
 </li>
 <li>
-<p><code>POST /transfers</code></p>
+<p><code>POST /deliveries</code></p>
 </li>
-<li>
-<p>insert one <code>transfers</code> document</p>
-</li>
+<li>insert one <code>deliveries</code> document</li>
 <li>set <code>revision</code> to <code>1</code></li>
 <li>set <code>movementIds[]</code></li>
-<li>set <code>dropOff</code></li>
+<li>set <code>delivery</code></li>
 <li>set <code>receipt</code> to <code>null</code> or omit</li>
-<li>determine <code>transferId</code>: if the request is a hazardous drop-off (always exactly one <code>movementId</code>, per <a href="../../decisions/#d-010">D-010</a>), reuse that <code>movementId</code> as <code>transferId</code> — no new identifier is minted. Otherwise, mint <code>transferId</code> via <code>waste-tracking-id-backend</code> as today.</li>
+<li>determine <code>deliveryId</code>: if the request is a hazardous delivery (always exactly one <code>movementId</code>, per <a href="../../decisions/#d-010">D-010</a>), reuse that <code>movementId</code> as <code>deliveryId</code> — no new identifier is minted. Otherwise, mint <code>deliveryId</code> via <code>waste-tracking-id-backend</code> as today.</li>
 <li>
-<p>optionally update each referenced Movement to append <code>transferId</code> to <code>transferIds[]</code></p>
+<p>optionally update each referenced Movement to append <code>deliveryId</code> to <code>deliveryIds[]</code></p>
 </li>
 <li>
-<p><code>POST /transfers/{transferId}/receipt</code></p>
+<p><code>POST /deliveries/{deliveryId}/receipt</code></p>
 </li>
-<li>
-<p>populate <code>receipt</code></p>
-</li>
+<li>populate <code>receipt</code></li>
 <li>increment <code>revision</code></li>
 <li>
-<p>write prior snapshot to <code>transfers-history</code></p>
+<p>write prior snapshot to <code>deliveries-history</code></p>
 </li>
 <li>
-<p><code>PUT /transfers/{transferId}</code></p>
+<p><code>PUT /deliveries/{deliveryId}</code></p>
 </li>
-<li>
-<p>mutate the allowed drop-off fields, currently soft-delete only</p>
-</li>
+<li>mutate the allowed delivery fields, currently soft-delete only</li>
 <li>increment <code>revision</code></li>
 <li>
-<p>write prior snapshot to <code>transfers-history</code></p>
+<p>write prior snapshot to <code>deliveries-history</code></p>
 </li>
 <li>
-<p><code>PUT /transfers/{transferId}/receipt</code></p>
+<p><code>PUT /deliveries/{deliveryId}/receipt</code></p>
 </li>
 <li>mutate <code>receipt</code></li>
 <li>increment <code>revision</code></li>
-<li>write prior snapshot to <code>transfers-history</code></li>
+<li>write prior snapshot to <code>deliveries-history</code></li>
 </ul>
 <h2 id="why-not-keep-everything-in-waste-inputs">Why not keep everything in <code>waste-inputs</code></h2>
 <p>The current <code>waste-inputs</code> model is receipt-first and Phase 1-specific:</p>
@@ -872,14 +856,14 @@
 <ul>
 <li>Movement creation happening before receipt</li>
 <li>ordered <code>collectionEvents[]</code></li>
-<li>Transfer as a first-class aggregate spanning one or more <code>movementIds</code></li>
-<li>receipt belonging to a Transfer rather than directly to a Movement</li>
+<li>Delivery as a first-class aggregate spanning one or more <code>movementIds</code></li>
+<li>receipt belonging to a Delivery rather than directly to a Movement</li>
 </ul>
 <h2 id="open-points">Open points</h2>
 <ul>
 <li>Whether to persist <code>submittedByApiCode</code> in plaintext, hashed form, or as a separate API-key identifier if audit needs exact key provenance without exposing the raw code in operational reads.</li>
 <li>Whether receipt outcome should remain embedded in <code>receipt</code> or become a further nested sub-document with richer status modelling.</li>
-<li>Whether <code>transferIds[]</code> on Movement proves worth the denormalisation cost.</li>
+<li>Whether <code>deliveryIds[]</code> on Movement proves worth the denormalisation cost.</li>
 <li>Whether event-level collections are needed in addition to history snapshots. Three options are under evaluation — aggregate (this document), per-event-type, and CQRS/event-sourcing (see <a href="../mongo-schema-proposal-CQRS/"><code>mongo-schema-proposal-CQRS.md</code></a>) — tracked as <a href="../../decisions/#d-037">D-037</a>.</li>
 <li>Whether soft-delete metadata should be per aggregate only, per event only, or both.</li>
 </ul>

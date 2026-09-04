@@ -1,6 +1,6 @@
 /**
  * Shared Joi sub-schemas, constants, and helpers used across all DWT event
- * schemas (Creation, Collection, Drop-off, Receipt).
+ * schemas (Creation, Collection, Delivery, Receipt).
  *
  * Import from here rather than duplicating across event files.
  * receiptJoi.js defines its own local copies for now; those can be migrated
@@ -83,7 +83,7 @@ export const HAZARDOUS_PROPERTY_CODES = [
 ]
 
 /**
- * Movement ID and Transfer ID format: two-digit year prefix followed by
+ * Movement ID and Delivery ID format: two-digit year prefix followed by
  * six alphanumeric characters from the A–Z 0–9 alphabet (sqids, D-013).
  * Example: 25HRA0B2
  *
@@ -270,7 +270,7 @@ export const carrierRegistrationNumberSchema = Joi.alternatives().try(
 )
 
 /**
- * Carrier schema — shared across Creation, Collection, Drop-off, and Receipt.
+ * Carrier schema — shared across Creation, Collection, Delivery, and Receipt.
  * Required on every event per D-008.
  */
 export const carrierSchema = Joi.object({
@@ -370,5 +370,5 @@ export const brokerSchema = Joi.object({
  */
 export const driverDetailsSchema = Joi.object({
   name: Joi.string()
-    .description('Name of the driver performing the collection or drop-off.')
+    .description('Name of the driver performing the collection or delivery.')
 }).description('Driver details. Currently carries name only.')

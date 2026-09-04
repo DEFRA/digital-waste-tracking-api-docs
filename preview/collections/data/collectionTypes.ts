@@ -6,7 +6,7 @@
  *   - First active event must be STATIC (producer-to-driver pickup).
  *   - Every subsequent active event must be TRANSIT (driver-to-driver handover).
  * POST appends the next event; PUT corrects/soft-deletes the latest active event.
- * The sequence is closed once the Movement appears in a Drop-off's movementIds.
+ * The sequence is closed once the Movement appears in a Delivery's movementIds.
  *
  * actualDateTimeCollected must be the actual time of collection, not the time
  * this record is submitted. For deferred recording, callers back-fill
@@ -75,7 +75,7 @@ export type RecordCollection = {
    * Soft-delete flag (D-009). Defaults to false on creation.
    * Only the latest active event in the sequence may be soft-deleted (tail-peel, D-029).
    * May be set to true only via PUT. Must not be supplied as true on POST.
-   * Cannot be set once the Movement has been referenced in a Drop-off.
+   * Cannot be set once the Movement has been referenced in a Delivery.
    */
   isDeleted?: boolean
 
