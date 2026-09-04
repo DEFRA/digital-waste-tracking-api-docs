@@ -45,6 +45,7 @@ At-a-glance view of every decision, sorted by status, then by impact (structural
 | D-032 | [Waste item weights are not captured at Collection or Delivery](#waste-item-weights-are-not-captured-at-collection-or-delivery) | ✅ Decided | 🟠 Medium | **Collection** |
 | D-034 | [PUT operations use history/revision pattern across all events](#put-operations-use-historyrevision-pattern-across-all-events) | ✅ Decided | 🟠 Medium | **Lifecycle** |
 | D-027 | [Per-organisation vs per-actor API credentials](#per-organisation-vs-per-actor-api-credentials) | ✅ Decided | 🟠 Medium | **Onboarding** |
+| D-041 | [Receipt payload is supplied in full by the software provider, not assembled via server-side lookup](#receipt-payload-is-supplied-in-full-by-the-software-provider-not-assembled-via-server-side-lookup) | ✅ Decided | 🟠 Medium | **Receipt** |
 | D-002 | [Single OpenAPI file, not `$ref`-split](#single-openapi-file-not-ref-split) | ✅ Decided | 🟢 Low | **Spec structure** |
 | D-003 | [OpenAPI 3.0.3, not 3.1](#openapi-303-not-31) | ✅ Decided | 🟢 Low | **Spec structure** |
 | D-011 | [Static and transit collection collapsed into a single endpoint](#static-and-transit-collection-collapsed-into-a-single-endpoint) | ✅ Decided | 🟢 Low | **Collection** |
@@ -129,7 +130,7 @@ At-a-glance view of every decision, sorted by status, then by impact (structural
 
 ### Cross-check of receipt details against the linked delivery
 
-**D-006** · ✅ Decided · Impact: 🟠 Medium · Area: **Receipt** · Related: [D-005](#d-005), [D-021](#d-021), [D-022](#d-022), [D-032](#d-032)
+**D-006** · ✅ Decided · Impact: 🟠 Medium · Area: **Receipt** · Related: [D-005](#d-005), [D-021](#d-021), [D-022](#d-022), [D-032](#d-032), [D-041](#d-041)
 
 **Context.** A receipt recorded against a Delivery carries carrier and waste details that overlap with details declared earlier in the movement journey. These could be required to match exactly, or treated as an opportunity to cross-check. Waste details are declared once, at Creation — the classification plus estimated weights held on the Movement. The operational events that follow, Collection and Delivery, are carrier/site/timing records and carry no waste payload (see [D-032](#d-032), and for the delivery place model [D-007](#d-007)). The receipt is therefore the first point in the journey where _actual_ waste weights are recorded, and the only earlier comparison source for waste is the Creation declaration.
 
@@ -311,7 +312,7 @@ Top-level single resources (`/movements/{movementId}`, `/deliveries/{deliveryId}
 
 ### Level 2 (Richardson Maturity Model) resource model
 
-**D-016** · ✅ Decided · Impact: 🔴 High · Area: **Resource model** · Related: [D-011](#d-011), [D-012](#d-012), [D-015](#d-015), [D-017](#d-017), [D-029](#d-029), [D-035](#d-035)
+**D-016** · ✅ Decided · Impact: 🔴 High · Area: **Resource model** · Related: [D-011](#d-011), [D-012](#d-012), [D-015](#d-015), [D-017](#d-017), [D-029](#d-029), [D-035](#d-035), [D-041](#d-041)
 
 **Context.** The original API spec used verb-shaped URL segments (`/movements/create`, `/movements/collection`, `/movements/delivery`, `/movements/receive`) with every operation as POST. After a sequence of architectural reviews, the team agreed the spec should adopt Richardson Level 2: URLs as resource paths, HTTP methods as the verbs.
 
@@ -451,7 +452,7 @@ D-015's text carries a one-line amendment to its Movement↔Collection clause to
 
 ### PUT operations use history/revision pattern across all events
 
-**D-034** · ✅ Decided · Impact: 🟠 Medium · Area: **Lifecycle** · Related: [D-009](#d-009), [D-014](#d-014), [D-016](#d-016), [D-017](#d-017)
+**D-034** · ✅ Decided · Impact: 🟠 Medium · Area: **Lifecycle** · Related: [D-009](#d-009), [D-014](#d-014), [D-016](#d-016), [D-017](#d-017), [D-041](#d-041)
 
 **Context.** The Phase 1 receipt `PUT /movements/{wasteTrackingId}/receive` is implemented with a history/revision pattern: before applying an update, the current live record is snapshotted into a separate history store, and a server-side revision counter on the live record is incremented. This gives a full audit trail of every mutation without exposing multiple versions through the public API. The revision counter also acts as an optimistic concurrency guard, preventing two concurrent PUTs from silently overwriting each other.
 
@@ -480,7 +481,7 @@ The two credentials are issued through different paths, and Phase 2 changes neit
 
 ### Write authorisation: open append, amend restricted to the authoring organisation
 
-**D-036** · ✅ Decided · Impact: 🔴 High · Area: **Authorisation** · Related: [D-009](#d-009), [D-012](#d-012), [D-013](#d-013), [D-017](#d-017), [D-027](#d-027), [D-029](#d-029), [D-034](#d-034)
+**D-036** · ✅ Decided · Impact: 🔴 High · Area: **Authorisation** · Related: [D-009](#d-009), [D-012](#d-012), [D-013](#d-013), [D-017](#d-017), [D-027](#d-027), [D-029](#d-029), [D-034](#d-034), [D-041](#d-041)
 
 **Context.** The four-event model is multi-actor: a broker may create a Movement, a driver collect against the same `movementId`, a driver perform the delivery, and a receiver register the receipt — four different organisations appending events to one Movement. After creation, no single organisation "owns" the Movement. Authentication is settled (WTS-ADR001: CDP/Amazon Cognito OAuth 2.0 at the gateway, with an Organisation API ID identifying which organisation a call acts for), but the gateway only establishes _who is calling_; it does not decide whether that organisation may append a given event to a given Movement in its current state. The public identifiers are shareable, non-secret handles by design ([D-012](#d-012), [D-013](#d-013)): `movementId` is passed producer↔broker/carrier and driver↔driver on transit collections ([D-029](#d-029)), and `deliveryId` is passed driver↔receiver. Possession of an identifier therefore cannot confer the right to write to it. Phase 1 already constrains the receipt so that the `PUT` (amend) is bound to the _same_ organisation that recorded the `POST`; that behaviour is carried forward.
 
@@ -532,13 +533,28 @@ This is a pure rename. It does not change the resource shape, the many-to-one ca
 
 **Update.** The rename was subsequently applied retroactively across this register: every entry above and below now reads with "delivery"/"Delivery ID" throughout, including in narrative Context/Decision/Consequences prose, rather than being left with the original "drop-off"/"Transfer ID" wording. The bullet list above is the one place that still cites the old terms deliberately, since it is the record of what was renamed from and to.
 
+<a id="d-041"></a>
+
+### Receipt payload is supplied in full by the software provider, not assembled via server-side lookup
+
+**D-041** · ✅ Decided · Impact: 🟠 Medium · Area: **Receipt** · Related: [D-006](#d-006), [D-016](#d-016), [D-019](#d-019), [D-021](#d-021), [D-034](#d-034), [D-036](#d-036)
+
+**Context.** Recording a receipt could work one of two ways: the API looks up the linked Movement/Delivery record by ID server-side and derives or pre-populates the receipt's waste and carrier details for the caller to confirm; or the caller is expected to already know, gather, and submit that detail itself, with the API playing no lookup role beyond validating and cross-checking what is submitted. The choice decides where the integration burden sits and what the receipt request body needs to carry.
+
+**Decision.** DWT does not perform ID-based lookups on a caller's behalf to construct a receipt — there is no "look up by Movement ID / Delivery ID and return what to submit" step in the receipt flow. A software provider that needs to know what was declared earlier in the journey (waste classification, carrier, etc.) is expected to call the relevant GET endpoints itself and assemble a **complete** receipt payload from that, then submit it. The API trusts the values it is given: it does not require them to be re-derived from, or byte-identical to, the stored Movement/Delivery record. Two things make that trust workable rather than reckless:
+
+- The payload is not a one-shot commitment — per [D-034](#d-034)/[D-036](#d-036), the authoring organisation can amend a recorded event later, so an honest transcription error at receipt time is correctable.
+- Every Phase 2 event is recorded as part of the regulator-facing audit trail (see `regulatory-events-proposal.md`). The [D-006](#d-006) cross-check already surfaces receipt-vs-Movement mismatches as validation warnings rather than blocking the write; on top of that, because the raw events themselves are retained and visible to regulators, a mismatch that slips past the warning (or is knowingly ignored) remains inspectable after the fact and can be flagged for follow-up. The API is not the only, or the last, line of defence against a bad payload.
+
+**Consequences.** The receipt request body stays a full, self-contained record rather than a thin "confirm/accept" call — this is already how the spec is shaped ([D-006](#d-006)), and this decision is the rationale for keeping it that way rather than adding server-side pre-population later. It also means the API must give software providers something to call to gather that upstream detail. Adding read (`GET`) endpoints for Movement and Delivery resources is therefore a consequence of this decision, not yet specified — tracked as a follow-up rather than decided here. Data-quality risk is deliberately carried by the [D-006](#d-006)/[D-021](#d-021) cross-check and the regulatory audit trail, not by rejecting or auto-correcting the write.
+
 ## Open
 
 <a id="d-019"></a>
 
 ### Fate-of-waste GET — producer journey query (proposal)
 
-**D-019** · ⏳ Open · Impact: 🟠 Medium · Area: **Fate-of-waste**
+**D-019** · ⏳ Open · Impact: 🟠 Medium · Area: **Fate-of-waste** · Related: [D-041](#d-041)
 
 **Context.** A producer passes their Movement ID to a carrier and cannot record any of the four journey events themselves. A fate-of-waste endpoint gives producers a read-only window onto what happened to their waste: what was collected, when, where it ended up, and how it was treated. The Movement ID is the natural and unique key for this query — it is the producer's only persistent reference to the journey, and uniquely identifies a single waste movement across all four events.
 
@@ -558,7 +574,7 @@ This is a pure rename. It does not change the resource shape, the many-to-one ca
 
 ### Cross-check granularity
 
-**D-021** · ⏳ Open · Impact: 🟠 Medium · Area: **Receipt** · Related: [D-006](#d-006), [D-022](#d-022)
+**D-021** · ⏳ Open · Impact: 🟠 Medium · Area: **Receipt** · Related: [D-006](#d-006), [D-022](#d-022), [D-041](#d-041)
 
 A receipt's waste details are cross-checked against the linked Movement record (Creation classification + Collection weights), and its carrier details against the carrier on the Movement chain — surfacing mismatches as validation warnings (see the decided cross-check entry; the delivery is not a source for the waste check). Whether the check is **unconditional** (Option 1: `deliveryId` is the receipt's path parameter) or **conditional on a supplied `deliveryId`** (Option 2: optional body field) depends on the open _Receipt migration_ decision. Independent of that, what counts as a mismatch is unspecified: identical strings? same registration number, different address? same EWC code, different quantity? And for weight specifically, what tolerance — given Creation is an estimate, Collection an actual, and the receipt what arrived, some drift is expected by design. The server validates this; the spec needs a clearer statement of the rules once agreed.
 
