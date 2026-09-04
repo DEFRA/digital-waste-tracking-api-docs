@@ -16,7 +16,7 @@ Version the API **during beta** (path-based milestones, `/beta-N`, e.g. `/beta-1
 
 ## Baseline
 
-There is no versioning of any kind today — no path prefix, no version header, no query parameter. The spec's `info.version` (`0.2.5-alpha`) is a documentation label, not a runtime version, and the server URL carries no `/v1`. The only existing statement is a terms-of-service line telling integrators to keep their software compatible with "the latest version" — a single-track policy with no technical scheme.
+There is no versioning of any kind today — no path prefix, no version header, no query parameter. The spec's `info.version` (`0.3-alpha`) is a documentation label, not a runtime version, and the server URL carries no `/v1`. The only existing statement is a terms-of-service line telling integrators to keep their software compatible with "the latest version" — a single-track policy with no technical scheme.
 
 Only the **Receipt of Waste** endpoints are live; the rest of the waste-movement journey is still to be built. This scheme applies to those **new** endpoints — the already-live endpoints keep their current unversioned paths.
 

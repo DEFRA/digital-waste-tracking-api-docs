@@ -1,8 +1,8 @@
 /**
  * TypeScript types for the Record Receipt event.
- * POST /transfers/{transferId}/receipt
+ * POST /deliveries/{deliveryId}/receipt
  *
- * The transferId is a path parameter and is not included in the request body.
+ * The deliveryId is a path parameter and is not included in the request body.
  * The request body below contains only the receipt details recorded by the receiver.
  */
 

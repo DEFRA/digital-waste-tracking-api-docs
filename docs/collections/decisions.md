@@ -23,32 +23,32 @@ At-a-glance view of every decision, sorted by status, then by impact (structural
 | ID | Decision | Status | Impact | Area |
 | --- | --- | --- | --- | --- |
 | D-001 | [Extend the Phase 1 Receipt API into one end-to-end spec](#extend-the-phase-1-receipt-api-into-one-end-to-end-spec) | ✅ Decided | 🔴 High | **Spec scope** |
-| D-005 | [Receipt is linked to a drop-off via the Transfer ID (path parameter)](#receipt-is-linked-to-a-drop-off-via-the-transfer-id-path-parameter) | ✅ Decided | 🔴 High | **Receipt** |
-| D-007 | [Drop-off is many-to-one against Movement IDs](#drop-off-is-many-to-one-against-movement-ids) | ✅ Decided | 🔴 High | **Drop-off** |
+| D-005 | [Receipt is linked to a delivery via the Delivery ID (path parameter)](#receipt-is-linked-to-a-delivery-via-the-delivery-id-path-parameter) | ✅ Decided | 🔴 High | **Receipt** |
+| D-007 | [Delivery is many-to-one against Movement IDs](#delivery-is-many-to-one-against-movement-ids) | ✅ Decided | 🔴 High | **Delivery** |
 | D-012 | [Per-event IDs not exposed in the public API](#per-event-ids-not-exposed-in-the-public-api) | ✅ Decided | 🔴 High | **Identifiers** |
 | D-013 | [Identifier format and capacity (year-prefixed sqids)](#identifier-format-and-capacity-year-prefixed-sqids) | ✅ Decided | 🔴 High | **Identifiers** |
-| D-015 | [Movement ↔ Collection and Transfer ↔ Receipt are 1:1](#movement-collection-and-transfer-receipt-are-11) | ✅ Decided | 🔴 High | **Resource model** |
+| D-015 | [Movement ↔ Collection and Delivery ↔ Receipt are 1:1](#movement-collection-and-delivery-receipt-are-11) | ✅ Decided | 🔴 High | **Resource model** |
 | D-016 | [Level 2 (Richardson Maturity Model) resource model](#level-2-richardson-maturity-model-resource-model) | ✅ Decided | 🔴 High | **Resource model** |
 | D-036 | [Write authorisation: open append, amend restricted to the authoring organisation](#write-authorisation-open-append-amend-restricted-to-the-authoring-organisation) | ✅ Decided | 🔴 High | **Authorisation** |
 | D-038 | [API versioning: versioned during beta, unversioned at GA](#api-versioning-versioned-during-beta-unversioned-at-ga) | ✅ Decided | 🔴 High | **Versioning** |
 | D-039 | [Cross-cutting API standards for new endpoints](#cross-cutting-api-standards-for-new-endpoints) | ✅ Decided | 🔴 High | **API conventions** |
 | D-004 | [Receipt path parameter stays `{wasteTrackingId}`](#receipt-path-parameter-stays-wastetrackingid) | ✅ Decided | 🟠 Medium | **Identifiers** |
-| D-006 | [Cross-check of receipt details against the linked drop-off](#cross-check-of-receipt-details-against-the-linked-drop-off) | ✅ Decided | 🟠 Medium | **Receipt** |
+| D-006 | [Cross-check of receipt details against the linked delivery](#cross-check-of-receipt-details-against-the-linked-delivery) | ✅ Decided | 🟠 Medium | **Receipt** |
 | D-008 | [Carrier always required; broker or dealer optional, at every stage](#carrier-always-required-broker-or-dealer-optional-at-every-stage) | ✅ Decided | 🟠 Medium | **Actors** |
 | D-009 | [Soft-delete via `isDeleted`, set only on PUT](#soft-delete-via-isdeleted-set-only-on-put) | ✅ Decided | 🟠 Medium | **Lifecycle** |
-| D-010 | [Hazardous waste cannot be merged across Movements at drop-off](#hazardous-waste-cannot-be-merged-across-movements-at-drop-off) | ✅ Decided | 🟠 Medium | **Drop-off** |
+| D-010 | [Hazardous waste cannot be merged across Movements at delivery](#hazardous-waste-cannot-be-merged-across-movements-at-delivery) | ✅ Decided | 🟠 Medium | **Delivery** |
 | D-014 | [Sub-resource 404 shape: parent-not-found vs event-not-recorded](#sub-resource-404-shape-parent-not-found-vs-event-not-recorded) | ✅ Decided | 🟠 Medium | **Lifecycle** |
-| D-017 | [Drop-off PUT restricted to soft-delete only](#drop-off-put-restricted-to-soft-delete-only) | ✅ Decided | 🟠 Medium | **Lifecycle** |
-| D-018 | [Drop-off address derivability](#drop-off-address-derivability) | ✅ Decided | 🟠 Medium | **Drop-off** |
+| D-017 | [Delivery PUT restricted to soft-delete only](#delivery-put-restricted-to-soft-delete-only) | ✅ Decided | 🟠 Medium | **Lifecycle** |
+| D-018 | [Delivery address derivability](#delivery-address-derivability) | ✅ Decided | 🟠 Medium | **Delivery** |
 | D-029 | [Transit collection (driver-to-driver) recorded as a sequence of collection events](#transit-collection-driver-to-driver-recorded-as-a-sequence-of-collection-events) | ✅ Decided | 🟠 Medium | **Collection** |
 | D-031 | [Disposal/recovery codes: mandatory Intended Treatment at Creation, Actual Treatment at Receipt](#disposalrecovery-codes-mandatory-intended-treatment-at-creation-actual-treatment-at-receipt) | ✅ Decided | 🟠 Medium | **Collection** |
-| D-032 | [Waste item weights are not captured at Collection or Drop-off](#waste-item-weights-are-not-captured-at-collection-or-drop-off) | ✅ Decided | 🟠 Medium | **Collection** |
+| D-032 | [Waste item weights are not captured at Collection or Delivery](#waste-item-weights-are-not-captured-at-collection-or-delivery) | ✅ Decided | 🟠 Medium | **Collection** |
 | D-034 | [PUT operations use history/revision pattern across all events](#put-operations-use-historyrevision-pattern-across-all-events) | ✅ Decided | 🟠 Medium | **Lifecycle** |
 | D-027 | [Per-organisation vs per-actor API credentials](#per-organisation-vs-per-actor-api-credentials) | ✅ Decided | 🟠 Medium | **Onboarding** |
 | D-002 | [Single OpenAPI file, not `$ref`-split](#single-openapi-file-not-ref-split) | ✅ Decided | 🟢 Low | **Spec structure** |
 | D-003 | [OpenAPI 3.0.3, not 3.1](#openapi-303-not-31) | ✅ Decided | 🟢 Low | **Spec structure** |
 | D-011 | [Static and transit collection collapsed into a single endpoint](#static-and-transit-collection-collapsed-into-a-single-endpoint) | ✅ Decided | 🟢 Low | **Collection** |
-| D-040 | [Rename drop-off and Transfer ID to delivery and Delivery ID](#rename-drop-off-and-transfer-id-to-delivery-and-delivery-id) | ✅ Decided | 🟢 Low | **Naming** |
+| D-040 | [Rename drop-off and Transfer ID to delivery and Delivery ID](#rename-drop-off-and-transfer-id-to-delivery-and-delivery-id) | ✅ Decided · Applied register-wide | 🟢 Low | **Naming** |
 | D-022 | [Receipt migration: new endpoint vs extend Phase 1](#receipt-migration-new-endpoint-vs-extend-phase-1) | ⏳ Open | 🔴 High | **Receipt** |
 | D-025 | [Receipt acceptance / rejection outcome (new in Phase 2)](#receipt-acceptance-rejection-outcome-new-in-phase-2) | ⏳ Open | 🔴 High | **Receipt** |
 | D-037 | [Phase 2 MongoDB storage model — three options under evaluation](#phase-2-mongodb-storage-model-three-options-under-evaluation) | ⏳ Open | 🔴 High | **Data model** |
@@ -56,7 +56,7 @@ At-a-glance view of every decision, sorted by status, then by impact (structural
 | D-021 | [Cross-check granularity](#cross-check-granularity) | ⏳ Open | 🟠 Medium | **Receipt** |
 | D-023 | [Phase 1 receipt endpoint deprecation timeline](#phase-1-receipt-endpoint-deprecation-timeline) | ⏳ Open | 🟠 Medium | **Receipt** |
 | D-024 | [`wasteTrackingId` ↔ `movementId` reconciliation](#wastetrackingid-movementid-reconciliation) | ⏳ Open | 🟠 Medium | **Identifiers** |
-| D-028 | [Pre-generated Transfer IDs for offline drivers](#pre-generated-transfer-ids-for-offline-drivers) | ⏳ Open | 🟠 Medium | **Identifiers** |
+| D-028 | [Pre-generated Delivery IDs for offline drivers](#pre-generated-delivery-ids-for-offline-drivers) | ⏳ Open | 🟠 Medium | **Identifiers** |
 | D-035 | [Addressing an individual collection event for correction](#addressing-an-individual-collection-event-for-correction) | ⏳ Open | 🟠 Medium | **Lifecycle** |
 | D-030 | [Carrier-vs-broker discriminated union on `POST /movements`](#carrier-vs-broker-discriminated-union-on-post-movements) | ⏸️ Parked | 🟢 Low | **Actors** |
 | D-033 | [Per-event GET endpoints — parked](#per-event-get-endpoints-parked) | ⏸️ Parked | 🟢 Low | **Lifecycle** |
@@ -69,7 +69,7 @@ At-a-glance view of every decision, sorted by status, then by impact (structural
 
 **D-001** · ✅ Decided · Impact: 🔴 High · Area: **Spec scope** · Related: [D-016](#d-016), [D-022](#d-022)
 
-**Context.** Phase 1 delivered a receiver-first Receipt of Waste API (live/public beta). Phase 2 adds the rest of the journey — create movement, collection, drop-off, and producer fate-of-waste tracking. This could be built as a separate Phase 2 API alongside Phase 1, or as an extension of the existing contract.
+**Context.** Phase 1 delivered a receiver-first Receipt of Waste API (live/public beta). Phase 2 adds the rest of the journey — create movement, collection, delivery, and producer fate-of-waste tracking. This could be built as a separate Phase 2 API alongside Phase 1, or as an extension of the existing contract.
 
 **Decision.** Extend Phase 1 into a single Digital Waste Tracking spec (`api/openapi.yaml`) covering the movement end to end. The new endpoints are added alongside the Phase 1 receipt endpoints, which are retained as `deprecated: true` for backward compatibility, and the Phase 1 validation envelope and reference-data lookups are reused unchanged rather than reinvented. The standalone Phase 1 spec (`Receipt_API.yml`) and the extended spec coexist during alpha, so vendors can see the difference between the current contract and the extended one ahead of Phase 2 reaching public beta and production.
 
@@ -105,57 +105,57 @@ At-a-glance view of every decision, sorted by status, then by impact (structural
 
 **D-004** · ✅ Decided · Impact: 🟠 Medium · Area: **Identifiers** · Related: [D-024](#d-024)
 
-**Context.** An earlier decision renamed the Phase 1 receipt path parameter to `{id}`. The Level 2 restructure reversed this: with `{movementId}` and `{transferId}` now used on the new resources, a bare `{id}` on the receipt endpoints would be ambiguous — and the value is the Phase 1 `wasteTrackingId`, a receipt-time identifier, not a Phase 2 `movementId`.
+**Context.** An earlier decision renamed the Phase 1 receipt path parameter to `{id}`. The Level 2 restructure reversed this: with `{movementId}` and `{deliveryId}` now used on the new resources, a bare `{id}` on the receipt endpoints would be ambiguous — and the value is the Phase 1 `wasteTrackingId`, a receipt-time identifier, not a Phase 2 `movementId`.
 
 **Decision.** Keep the path parameter as `{wasteTrackingId}` on the deprecated receipt endpoints. The parameter description states it is the Phase 1 `wasteTrackingId` returned by `POST /movements/receive`, minted at receipt, and that a Phase 2 Movement ID must not be substituted here. Supersedes the earlier rename-to-`{id}` decision.
 
-`wasteTrackingId` was Phase 1's only identifier because a movement was then known only at receipt time. Phase 2 adds `movementId` (creation) and `transferId` (drop-off) to track creation→receipt; all three use sqids (sqids.org). Whether and how a Phase 1 `wasteTrackingId` reconciles to a Phase 2 `movementId` is **not decided here** — it belongs to the Phase 1 → Phase 2 migration strategy (see Open).
+`wasteTrackingId` was Phase 1's only identifier because a movement was then known only at receipt time. Phase 2 adds `movementId` (creation) and `deliveryId` (delivery) to track creation→receipt; all three use sqids (sqids.org). Whether and how a Phase 1 `wasteTrackingId` reconciles to a Phase 2 `movementId` is **not decided here** — it belongs to the Phase 1 → Phase 2 migration strategy (see Open).
 
-**Consequences.** No `{id}` placeholder anywhere — every path parameter names the concrete identifier it carries (`movementId`, `transferId`, `wasteTrackingId`). Affects only how the deprecated legacy path reads. This entry no longer asserts a permanent identity relationship between `wasteTrackingId` and `movementId`; that is left to migration.
+**Consequences.** No `{id}` placeholder anywhere — every path parameter names the concrete identifier it carries (`movementId`, `deliveryId`, `wasteTrackingId`). Affects only how the deprecated legacy path reads. This entry no longer asserts a permanent identity relationship between `wasteTrackingId` and `movementId`; that is left to migration.
 
 <a id="d-005"></a>
 
-### Receipt is linked to a drop-off via the Transfer ID (path parameter)
+### Receipt is linked to a delivery via the Delivery ID (path parameter)
 
 **D-005** · ✅ Decided · Impact: 🔴 High · Area: **Receipt** · Related: [D-006](#d-006), [D-016](#d-016), [D-022](#d-022)
 
-**Context.** A receipt should be linkable to the drop-off that preceded it, via the Transfer ID. An earlier decision added `transferId` as an optional field on the `POST /movements/receive` request body, so Phase 1 receivers could omit it and new flows could supply it.
+**Context.** A receipt should be linkable to the delivery that preceded it, via the Delivery ID. An earlier decision added `deliveryId` as an optional field on the `POST /movements/receive` request body, so Phase 1 receivers could omit it and new flows could supply it.
 
-**Decision.** Superseded by the Level 2 restructure. The canonical receipt is now `POST /transfers/{transferId}/receipt`, where the Transfer ID is a mandatory path parameter — so every receipt recorded through the new endpoint is linked to its drop-off by construction. The deprecated Phase 1 `POST /movements/receive` keeps its original body unchanged (no `transferId` field), preserving backward compatibility for standalone receipts. The optional-body-field mechanism was not carried forward.
+**Decision.** Superseded by the Level 2 restructure. The canonical receipt is now `POST /deliveries/{deliveryId}/receipt`, where the Delivery ID is a mandatory path parameter — so every receipt recorded through the new endpoint is linked to its delivery by construction. The deprecated Phase 1 `POST /movements/receive` keeps its original body unchanged (no `deliveryId` field), preserving backward compatibility for standalone receipts. The optional-body-field mechanism was not carried forward.
 
-**Consequences.** Linking is structural rather than an optional payload field: a receipt under a Transfer is always associated with that Transfer and, through it, the originating Movement IDs. Receivers not on the new flow continue to use the deprecated endpoint with no Transfer ID. (Contingent on Option 1 of the receipt-migration decision — see Open.)
+**Consequences.** Linking is structural rather than an optional payload field: a receipt under a Delivery is always associated with that Delivery and, through it, the originating Movement IDs. Receivers not on the new flow continue to use the deprecated endpoint with no Delivery ID. (Contingent on Option 1 of the receipt-migration decision — see Open.)
 
 <a id="d-006"></a>
 
-### Cross-check of receipt details against the linked drop-off
+### Cross-check of receipt details against the linked delivery
 
 **D-006** · ✅ Decided · Impact: 🟠 Medium · Area: **Receipt** · Related: [D-005](#d-005), [D-021](#d-021), [D-022](#d-022), [D-032](#d-032)
 
-**Context.** A receipt recorded against a Transfer carries carrier and waste details that overlap with details declared earlier in the movement journey. These could be required to match exactly, or treated as an opportunity to cross-check. Waste details are declared once, at Creation — the classification plus estimated weights held on the Movement. The operational events that follow, Collection and Drop-off, are carrier/site/timing records and carry no waste payload (see [D-032](#d-032), and for the drop-off place model [D-007](#d-007)). The receipt is therefore the first point in the journey where _actual_ waste weights are recorded, and the only earlier comparison source for waste is the Creation declaration.
+**Context.** A receipt recorded against a Delivery carries carrier and waste details that overlap with details declared earlier in the movement journey. These could be required to match exactly, or treated as an opportunity to cross-check. Waste details are declared once, at Creation — the classification plus estimated weights held on the Movement. The operational events that follow, Collection and Delivery, are carrier/site/timing records and carry no waste payload (see [D-032](#d-032), and for the delivery place model [D-007](#d-007)). The receipt is therefore the first point in the journey where _actual_ waste weights are recorded, and the only earlier comparison source for waste is the Creation declaration.
 
 **Decision.** Cross-check, surfacing mismatches as validation warnings rather than hard errors. The comparison sources are:
 
-- **Waste details** — compared against the _Movement record_: the waste classification and estimated weights declared at **Creation**. The receipt reaches these via the Transfer → Movement IDs link (see [D-007](#d-007)). Collection and Drop-off are **excluded** from the waste cross-check because neither carries waste details.
-- **Carrier details** — compared against the carrier recorded on the linked Movement chain (creation / collection / drop-off all carry a carrier block).
+- **Waste details** — compared against the _Movement record_: the waste classification and estimated weights declared at **Creation**. The receipt reaches these via the Delivery → Movement IDs link (see [D-007](#d-007)). Collection and Delivery are **excluded** from the waste cross-check because neither carries waste details.
+- **Carrier details** — compared against the carrier recorded on the linked Movement chain (creation / collection / delivery all carry a carrier block).
 
-Because the Transfer ID is the path parameter on `POST /transfers/{transferId}/receipt` (see [D-005](#d-005)), the cross-check is unconditional for every receipt recorded through the new endpoint — there is no "when `transferId` is supplied" branch. It does not apply to the deprecated `POST /movements/receive`, which carries no Transfer ID.
+Because the Delivery ID is the path parameter on `POST /deliveries/{deliveryId}/receipt` (see [D-005](#d-005)), the cross-check is unconditional for every receipt recorded through the new endpoint — there is no "when `deliveryId` is supplied" branch. It does not apply to the deprecated `POST /movements/receive`, which carries no Delivery ID.
 
 **Consequences.** Receivers can still record receipts when paperwork has minor inconsistencies; the system surfaces the discrepancy without blocking the record. The `recordReceipt` endpoint description notes that differences are returned in `validation.warnings`, without committing to specific comparison rules. Note the nature of the weight comparison: the Creation weights are estimates and the receipt records the actual weight that arrived, so a receipt-vs-Creation weight delta is an expected, estimate-versus-actual signal rather than necessarily an error. The exact granularity of the check (string match, field-by-field, weight tolerance, etc.) is still to be defined — see the [cross-check granularity](#d-021) open question. (Contingent on Option 1 of the [receipt-migration decision](#d-022) — see Open.)
 
 <a id="d-007"></a>
 
-### Drop-off is many-to-one against Movement IDs
+### Delivery is many-to-one against Movement IDs
 
-**D-007** · ✅ Decided · Impact: 🔴 High · Area: **Drop-off** · Related: [D-009](#d-009), [D-015](#d-015), [D-018](#d-018), [D-017](#d-017)
+**D-007** · ✅ Decided · Impact: 🔴 High · Area: **Delivery** · Related: [D-009](#d-009), [D-015](#d-015), [D-018](#d-018), [D-017](#d-017)
 
-**Context.** A multi-collection run delivers several Movements at once to the same receiver site. The drop-off endpoint could either be Movement-scoped (one drop-off per Movement, with a "primary" Movement on the URL) or aggregate (one drop-off covering many Movements, with the Movement IDs in the body).
+**Context.** A multi-collection run delivers several Movements at once to the same receiver site. The delivery endpoint could either be Movement-scoped (one delivery per Movement, with a "primary" Movement on the URL) or aggregate (one delivery covering many Movements, with the Movement IDs in the body).
 
-**Decision.** Aggregate. `POST /transfers` takes a `movementIds[]` array in the body. Single-collection drop-offs supply an array of one. No "primary" Movement is selected.
+**Decision.** Aggregate. `POST /deliveries` takes a `movementIds[]` array in the body. Single-collection deliveries supply an array of one. No "primary" Movement is selected.
 
-**Consequences.** The Transfer ID minted by a single drop-off is the aggregation point for that event — one Transfer ID, one or more Movement IDs. This is many-to-one _per drop-off event_, not a lifetime constraint on the Movement: nothing in the model stops the same Movement ID from being referenced by more than one drop-off, so the overall Movement↔Transfer relationship is many-to-many, not many-to-one. Two cases produce this directly:
+**Consequences.** The Delivery ID minted by a single delivery is the aggregation point for that event — one Delivery ID, one or more Movement IDs. This is many-to-one _per delivery event_, not a lifetime constraint on the Movement: nothing in the model stops the same Movement ID from being referenced by more than one delivery, so the overall Movement↔Delivery relationship is many-to-many, not many-to-one. Two cases produce this directly:
 
-- A single collection spanning more than one EWC code/waste stream is delivered to different specialist receivers — each delivery is its own drop-off, same Movement ID referenced in both.
-- A load is partially rejected at the first receiver: the accepted portion rides on one drop-off/Transfer, and the rejected portion is redirected to a second receiver on a different drop-off/Transfer. Whether the redirected portion keeps the original Movement ID or is minted a new one is **not decided here** — see [drop-off address derivability](#d-018), which already touches the same rejection-retry path from the address side.
+- A single collection spanning more than one EWC code/waste stream is delivered to different specialist receivers — each delivery is its own delivery event, same Movement ID referenced in both.
+- A load is partially rejected at the first receiver: the accepted portion rides on one delivery, and the rejected portion is redirected to a second receiver on a different delivery. Whether the redirected portion keeps the original Movement ID or is minted a new one is **not decided here** — see [delivery address derivability](#d-018), which already touches the same rejection-retry path from the address side.
 
 The shape of the receipt and producer-query downstream both work cleanly off this model either way.
 
@@ -177,26 +177,24 @@ The shape of the receipt and producer-query downstream both work cleanly off thi
 
 **D-009** · ✅ Decided · Impact: 🟠 Medium · Area: **Lifecycle** · Related: [D-007](#d-007), [D-014](#d-014), [D-015](#d-015), [D-017](#d-017), [D-029](#d-029), [D-034](#d-034)
 
-**Context.** An earlier decision deferred deletion entirely ("no deletion endpoint in this version"), then a later pass added `DELETE` endpoints at each stage (`DELETE /movements/{movementId}`, `DELETE /movements/{movementId}/collection`, `DELETE /transfers/{transferId}`, `DELETE /transfers/{transferId}/receipt`), each marked `x-stability: proposal` and non-binding, pending a substantive decision on deletion rules (soft vs. hard, audit, authorisation). Those proposal endpoints have since been removed from the spec; no `DELETE` operation exists today. This entry replaces that proposal with the decided mechanism.
+**Context.** An earlier decision deferred deletion entirely ("no deletion endpoint in this version"), then a later pass added `DELETE` endpoints at each stage (`DELETE /movements/{movementId}`, `DELETE /movements/{movementId}/collection`, `DELETE /deliveries/{deliveryId}`, `DELETE /deliveries/{deliveryId}/receipt`), each marked `x-stability: proposal` and non-binding, pending a substantive decision on deletion rules (soft vs. hard, audit, authorisation). Those proposal endpoints have since been removed from the spec; no `DELETE` operation exists today. This entry replaces that proposal with the decided mechanism.
 
-**Decision.** No hard deletion and no `DELETE` endpoint, on any event. Instead, `Movement`, `Collection` and `Drop-off` each carry a boolean `isDeleted` field (default `false`) on their existing request/resource schema. `Receipt` does not get this field at all — once recorded, a receipt cannot be marked deleted, full stop, because it is the terminal event in the chain.
+**Decision.** No hard deletion and no `DELETE` endpoint, on any event. Instead, `Movement`, `Collection` and `Delivery` each carry a boolean `isDeleted` field (default `false`) on their existing request/resource schema. `Receipt` does not get this field at all — once recorded, a receipt cannot be marked deleted, full stop, because it is the terminal event in the chain.
 
 The rules, applied uniformly across the three deletable events:
 
 - **PUT-only.** `isDeleted` may only be set to `true` via the event's `PUT` (update). A `POST` (create) request that supplies `isDeleted: true` is rejected with a `NotAllowed` validation error; `POST` requests may omit the field or send `false`.
 - **No subsequent event.** An event may be marked deleted only while no later event in the chain has been recorded against it:
-
   - A Movement cannot be deleted once its Collection has been recorded.
-  - A Collection cannot be deleted once its Movement has been referenced in a Drop-off.
-  - A Drop-off (Transfer) cannot be deleted once a Receipt has been recorded against it.
+  - A Collection cannot be deleted once its Movement has been referenced in a Delivery.
+  - A Delivery cannot be deleted once a Receipt has been recorded against it.
 
   This checks whether the later event's record _exists_, not whether it is itself currently active — once a Collection has been recorded against a Movement, that Movement stays locked from deletion even if the Collection is later deleted too. The chain of what-was-recorded is preserved; deleting a later event does not reopen an earlier one. Violating this returns a `BusinessRuleViolation` validation error.
 
 - **Deleted blocks what comes next.** While an event is `isDeleted: true`, no event later in the chain may be recorded or updated against it:
-
   - Collection cannot be recorded/updated against a deleted Movement.
-  - A Movement that is deleted (with or without a Collection) cannot be named in a Drop-off's `movementIds`; nor can a Movement whose Collection is deleted.
-  - Receipt cannot be recorded/updated against a deleted Transfer.
+  - A Movement that is deleted (with or without a Collection) cannot be named in a Delivery's `movementIds`; nor can a Movement whose Collection is deleted.
+  - Receipt cannot be recorded/updated against a deleted Delivery.
 
   Each of these is a `BusinessRuleViolation` validation error, not a warning — the operation is rejected (400), consistent with how the user framed this: a "not permitted" operation, not an advisory.
 
@@ -204,25 +202,25 @@ The rules, applied uniformly across the three deletable events:
 
 **Open sub-question, flagged rather than assumed.** "No subsequent event" is read here as _no record of that event exists_, regardless of whether that record is itself later deleted (the stricter reading — see the bullet above). The looser reading — deleting a Collection frees its Movement to be deleted too — was considered and rejected for this entry, on the basis that it could let two soft-deletes in sequence quietly erase the fact that a Collection ever happened. Worth a sense-check with the BA if a vendor scenario surfaces where the stricter reading is unworkable in practice.
 
-**Consequences.** Vendors get a single, symmetric mechanism across Movement, Collection and Drop-off rather than four bespoke proposal endpoints. No new public identifiers or endpoints are introduced — the field lives on the schemas already used by the existing `POST`/`PUT` operations. Server-side validation grows: every `POST`/`PUT` on Collection and Drop-off must now also check the deletion state of what it references, in addition to the existence checks already in place ([D-014](#d-014)). Supersedes the earlier "non-binding DELETE proposal" decision; the malformed `DELETE /movements/create` from the original deferred-deletion decision remains gone.
+**Consequences.** Vendors get a single, symmetric mechanism across Movement, Collection and Delivery rather than four bespoke proposal endpoints. No new public identifiers or endpoints are introduced — the field lives on the schemas already used by the existing `POST`/`PUT` operations. Server-side validation grows: every `POST`/`PUT` on Collection and Delivery must now also check the deletion state of what it references, in addition to the existence checks already in place ([D-014](#d-014)). Supersedes the earlier "non-binding DELETE proposal" decision; the malformed `DELETE /movements/create` from the original deferred-deletion decision remains gone.
 
-For collection specifically, [D-029](#d-029) adds a further restriction once a Movement carries a sequence of collection events: only the _latest active_ event may be soft-deleted (tail-peel), so the `STATIC` head cannot be removed while active `TRANSIT` events still follow it. The "no subsequent event" rule above still applies unchanged at the chain boundary — no collection event may be deleted once the Movement has been referenced in a Drop-off.
+For collection specifically, [D-029](#d-029) adds a further restriction once a Movement carries a sequence of collection events: only the _latest active_ event may be soft-deleted (tail-peel), so the `STATIC` head cannot be removed while active `TRANSIT` events still follow it. The "no subsequent event" rule above still applies unchanged at the chain boundary — no collection event may be deleted once the Movement has been referenced in a Delivery.
 
 <a id="d-010"></a>
 
-### Hazardous waste cannot be merged across Movements at drop-off
+### Hazardous waste cannot be merged across Movements at delivery
 
-**D-010** · ✅ Decided · Impact: 🟠 Medium · Area: **Drop-off** · Related: [D-007](#d-007)
+**D-010** · ✅ Decided · Impact: 🟠 Medium · Area: **Delivery** · Related: [D-007](#d-007)
 
-**Context.** A drop-off can cover one or more Movements delivered together at the same receiver site (multi-collection runs). For hazardous waste, regulatory and audit constraints make merging multiple Movements under a single Transfer ID inappropriate — each hazardous Movement needs its own Transfer ID for traceability.
+**Context.** A delivery can cover one or more Movements delivered together at the same receiver site (multi-collection runs). For hazardous waste, regulatory and audit constraints make merging multiple Movements under a single Delivery ID inappropriate — each hazardous Movement needs its own Delivery ID for traceability.
 
-**Decision.** When any of the Movements named in a `POST /transfers` request carries hazardous waste, the request must contain exactly one Movement ID. Multi-Movement drop-offs are permitted only when all linked Movements are non-hazardous.
+**Decision.** When any of the Movements named in a `POST /deliveries` request carries hazardous waste, the request must contain exactly one Movement ID. Multi-Movement deliveries are permitted only when all linked Movements are non-hazardous.
 
 The constraint is data-dependent (depends on properties of the linked Movements that the request body does not carry). It is therefore not expressed in the OpenAPI schema, but documented on the endpoint and validated server-side. Violations return a 400 with a clear validation error.
 
-For a drop-off that satisfies this constraint (hazardous, exactly one Movement ID), the server does not mint a new Transfer ID: `transferId` is set equal to that Movement ID. Non-hazardous drop-offs continue to mint a fresh Transfer ID via `waste-tracking-id-backend` as before, whether single- or multi-Movement.
+For a delivery that satisfies this constraint (hazardous, exactly one Movement ID), the server does not mint a new Delivery ID: `deliveryId` is set equal to that Movement ID. Non-hazardous deliveries continue to mint a fresh Delivery ID via `waste-tracking-id-backend` as before, whether single- or multi-Movement.
 
-**Consequences.** Multi-collection runs remain a first-class concept for non-hazardous waste. Carriers handling hazardous waste record one drop-off per Movement, even if the loads physically arrive together. The Transfer ID returned for a hazardous drop-off is predictable ahead of the call — it is the Movement ID already known to the caller — rather than a newly-minted value.
+**Consequences.** Multi-collection runs remain a first-class concept for non-hazardous waste. Carriers handling hazardous waste record one delivery per Movement, even if the loads physically arrive together. The Delivery ID returned for a hazardous delivery is predictable ahead of the call — it is the Movement ID already known to the caller — rather than a newly-minted value.
 
 <a id="d-011"></a>
 
@@ -240,19 +238,19 @@ For a drop-off that satisfies this constraint (hazardous, exactly one Movement I
 
 **D-012** · ✅ Decided · Impact: 🔴 High · Area: **Identifiers** · Related: [D-016](#d-016)
 
-**Context.** Earlier conversations specified per-event identifiers (creation, collection, drop-off, plus the legacy receive ID) returned alongside Movement ID and Transfer ID in API responses. On review this was identified as a conflation of two concerns: server-side storage identifiers (every event needs a unique row internally) and public API contract identifiers (values vendors store and pass around).
+**Context.** Earlier conversations specified per-event identifiers (creation, collection, delivery, plus the legacy receive ID) returned alongside Movement ID and Delivery ID in API responses. On review this was identified as a conflation of two concerns: server-side storage identifiers (every event needs a unique row internally) and public API contract identifiers (values vendors store and pass around).
 
-**Decision.** Only Movement ID and Transfer ID are exposed in the API contract. The per-event identifiers — for creation, collection, drop-off, and receipt — remain in the server's storage layer (internal UUIDs) but are not returned in API responses. The deprecated Phase 1 receipt path additionally exposes `wasteTrackingId`, Phase 1's receipt-time identifier — distinct from the Movement ID, with reconciliation between the two deferred to the migration strategy (see Open).
+**Decision.** Only Movement ID and Delivery ID are exposed in the API contract. The per-event identifiers — for creation, collection, delivery, and receipt — remain in the server's storage layer (internal UUIDs) but are not returned in API responses. The deprecated Phase 1 receipt path additionally exposes `wasteTrackingId`, Phase 1's receipt-time identifier — distinct from the Movement ID, with reconciliation between the two deferred to the migration strategy (see Open).
 
 **Consequences.** Three response schemas slim down:
 
 - `createMovementResponse` returns `movementId` and `validation` only.
 - `recordCollectionResponse` returns `validation` only.
-- `dropOffResponse` returns `transferId` and `validation` only.
+- `deliveryResponse` returns `deliveryId` and `validation` only.
 
 The four placeholder ID schemas are removed from `components.schemas`; internal event IDs survive only as a documentation comment. There is no dedicated collection resource schema and no public collection ID — the collection is addressed through its parent Movement via the sub-resource path defined in [D-033](#d-033).
 
-Vendors track two values per journey: Movement ID (durable, addresses a Movement) and Transfer ID (addresses a drop-off across one or more Movements). On the deprecated Phase 1 path, `wasteTrackingId` is a third. Anything else is the server's business.
+Vendors track two values per journey: Movement ID (durable, addresses a Movement) and Delivery ID (addresses a delivery across one or more Movements). On the deprecated Phase 1 path, `wasteTrackingId` is a third. Anything else is the server's business.
 
 <a id="d-013"></a>
 
@@ -260,18 +258,18 @@ Vendors track two values per journey: Movement ID (durable, addresses a Movement
 
 **D-013** · ✅ Decided · Impact: 🔴 High · Area: **Identifiers** · Related: [D-024](#d-024), [D-028](#d-028)
 
-**Context.** Movement ID and Transfer ID are the public identifiers vendors store and pass around. They must be short, externally shareable, opaque, and collision-free at national volume (the service is estimated at >100,000 transactions/year).
+**Context.** Movement ID and Delivery ID are the public identifiers vendors store and pass around. They must be short, externally shareable, opaque, and collision-free at national volume (the service is estimated at >100,000 transactions/year).
 
 **Decision.** Both are generated with sqids (https://sqids.org/) in a fixed 8-character format: a two-character year prefix (`YY`) followed by six characters from the 36-symbol alphabet A–Z and 0–9. The deprecated Phase 1 `wasteTrackingId` uses the same format.
 
 Capacity per year: the six-character suffix over a 36-symbol alphabet gives 36^6 = **2,176,782,336** (~2.18 billion) unique IDs. The `YY` prefix partitions the space by year, so each year opens a fresh ~2.18 billion namespace and total capacity across years is effectively unbounded. (sqids reserves a small set of combinations for its profanity blocklist, so the usable count is marginally below the theoretical maximum.)
 
-**Consequences.** ~2.18 billion IDs per year exceeds the national volume estimate by roughly four orders of magnitude — ample headroom. IDs are opaque; callers must not parse them (the schema descriptions say so). Movement ID and Transfer ID share the same format and are disambiguated by the endpoint/path they appear on, not by the string itself — except for a hazardous drop-off, where the two are the same string by design (see [D-010](#d-010)).
+**Consequences.** ~2.18 billion IDs per year exceeds the national volume estimate by roughly four orders of magnitude — ample headroom. IDs are opaque; callers must not parse them (the schema descriptions say so). Movement ID and Delivery ID share the same format and are disambiguated by the endpoint/path they appear on, not by the string itself — except for a hazardous delivery, where the two are the same string by design (see [D-010](#d-010)).
 
 Two follow-ups this surfaces, for the data/spec pass:
 
 - The current spec is inconsistent about the prefix: `movementId`'s example is numeric (`25HRA0B2`, year "25") while the `wasteTrackingId` pattern requires two letters (`^[A-Z]{2}[A-Z0-9]{6}$`, example `YY...`). If the prefix is a numeric year, that regex is wrong; the canonical format above needs a single agreed prefix definition and matching patterns on all three identifier schemas.
-- Whether the two ID types are minted from a shared sequence or partitioned per type (so a `movementId` and a `transferId` can never be the same string) is a server concern to confirm.
+- Whether the two ID types are minted from a shared sequence or partitioned per type (so a `movementId` and a `deliveryId` can never be the same string) is a server concern to confirm.
 
 <a id="d-014"></a>
 
@@ -279,35 +277,35 @@ Two follow-ups this surfaces, for the data/spec pass:
 
 **D-014** · ✅ Decided · Impact: 🟠 Medium · Area: **Lifecycle** · Related: [D-009](#d-009), [D-015](#d-015), [D-033](#d-033)
 
-**Context.** Collection and receipt are 1:1 sub-resources that come into existence later than their parent: a Movement exists from creation but has no collection until one is recorded, and a Transfer is minted at drop-off but has no receipt until one is recorded. `POST` and `PUT` operations on these sub-resource paths can fail with a 404 for two distinct reasons: the parent identifier is wrong (the parent record does not exist), or the parent exists but the event has not been recorded yet (relevant to `PUT`, which requires a prior `POST`).
+**Context.** Collection and receipt are 1:1 sub-resources that come into existence later than their parent: a Movement exists from creation but has no collection until one is recorded, and a Delivery is minted at delivery but has no receipt until one is recorded. `POST` and `PUT` operations on these sub-resource paths can fail with a 404 for two distinct reasons: the parent identifier is wrong (the parent record does not exist), or the parent exists but the event has not been recorded yet (relevant to `PUT`, which requires a prior `POST`).
 
 **Decision.** Sub-resource operations return a `notFoundError` body on 404, whose `code` field distinguishes the two cases:
 
-- `MOVEMENT_NOT_FOUND` / `TRANSFER_NOT_FOUND` — the parent does not exist. Applies to `POST` and `PUT` on sub-resource paths (and to `GET` when reinstated — see [D-033](#d-033)).
+- `MOVEMENT_NOT_FOUND` / `DELIVERY_NOT_FOUND` — the parent does not exist. Applies to `POST` and `PUT` on sub-resource paths (and to `GET` when reinstated — see [D-033](#d-033)).
 - `COLLECTION_NOT_RECORDED` / `RECEIPT_NOT_RECORDED` — the parent exists but the event has not been recorded yet. Applies to `PUT` only (call `POST` first); also to `GET` when reinstated.
 
-Top-level single resources (`/movements/{movementId}`, `/transfers/{transferId}`) have only one way to be missing and keep a plain `404` with no distinguishing code.
+Top-level single resources (`/movements/{movementId}`, `/deliveries/{deliveryId}`) have only one way to be missing and keep a plain `404` with no distinguishing code.
 
 **Consequences.** Callers can tell a wrong identifier (stop, fix the ID) from a missing sub-event (for `POST` callers: the parent does not exist; for `PUT` callers: record the event with `POST` first). The `notFoundError` schema is shared across all four event sub-resource paths.
 
 <a id="d-015"></a>
 
-### Movement ↔ Collection and Transfer ↔ Receipt are 1:1
+### Movement ↔ Collection and Delivery ↔ Receipt are 1:1
 
 **D-015** · ✅ Decided · Impact: 🔴 High · Area: **Resource model** · Related: [D-009](#d-009), [D-016](#d-016), [D-025](#d-025), [D-029](#d-029)
 
-**Context.** While working through the Level 2 restructure (see next entry), it became important to be precise about the relationships between the four core concepts: Movement, Collection, Transfer, Receipt.
+**Context.** While working through the Level 2 restructure (see next entry), it became important to be precise about the relationships between the four core concepts: Movement, Collection, Delivery, Receipt.
 
-**Decision.** Each Movement has exactly one Collection event, and each Transfer has exactly one Receipt event. The relationships are 1:1, not 1:many.
+**Decision.** Each Movement has exactly one Collection event, and each Delivery has exactly one Receipt event. The relationships are 1:1, not 1:many.
 
 - A driver picking up from multiple producers on a run creates _multiple Movements_ — each pickup is its own Movement, with its own Movement ID.
-- A driver dropping at multiple receivers in a run mints _multiple Transfer IDs_ — each drop-off event is its own Transfer.
-- A Movement is on exactly one Transfer (Movement ↔ Transfer is many-to-one: many Movements aggregated under one Transfer at a single drop-off, but each Movement only ever appears on one Transfer).
-- Whether a load is accepted in full, rejected, or partially accepted, the receipt stays 1:1 with its Transfer and the Movement is **not** split or duplicated; the Movement and its 1:1 Collection are unchanged. Phase 1 has no rejection concept (recording a receipt _is_ acceptance); how Phase 2 represents acceptance/rejection outcomes is an open decision (see Open).
+- A driver dropping at multiple receivers in a run mints _multiple Delivery IDs_ — each delivery event is its own Delivery.
+- A Movement is on exactly one Delivery (Movement ↔ Delivery is many-to-one: many Movements aggregated under one Delivery at a single delivery, but each Movement only ever appears on one Delivery).
+- Whether a load is accepted in full, rejected, or partially accepted, the receipt stays 1:1 with its Delivery and the Movement is **not** split or duplicated; the Movement and its 1:1 Collection are unchanged. Phase 1 has no rejection concept (recording a receipt _is_ acceptance); how Phase 2 represents acceptance/rejection outcomes is an open decision (see Open).
 
-**Amended by [D-029](#d-029).** The Movement↔Collection half is now one _or more_ ordered collection events: a driver-to-driver transit handover appends a further collection event to the same Movement rather than minting a new one. The Transfer↔Receipt half, the Movement↔Transfer many-to-one relationship, and the "multiple producers on a run → multiple Movements" rule above are all unchanged — the amendment is specific to transit handovers on a single Movement.
+**Amended by [D-029](#d-029).** The Movement↔Collection half is now one _or more_ ordered collection events: a driver-to-driver transit handover appends a further collection event to the same Movement rather than minting a new one. The Delivery↔Receipt half, the Movement↔Delivery many-to-one relationship, and the "multiple producers on a run → multiple Movements" rule above are all unchanged — the amendment is specific to transit handovers on a single Movement.
 
-**Consequences.** This is the structural assumption underlying the Level 2 restructure. Each sub-resource endpoint addresses a single event record, not a list — see [D-033](#d-033) for the parked read definitions. Multi-collection journeys correspond to multiple Movements aggregated at the drop-off; multi-drop-off journeys correspond to a driver minting multiple Transfer IDs in one run.
+**Consequences.** This is the structural assumption underlying the Level 2 restructure. Each sub-resource endpoint addresses a single event record, not a list — see [D-033](#d-033) for the parked read definitions. Multi-collection journeys correspond to multiple Movements aggregated at the delivery; multi-delivery journeys correspond to a driver minting multiple Delivery IDs in one run.
 
 <a id="d-016"></a>
 
@@ -315,67 +313,67 @@ Top-level single resources (`/movements/{movementId}`, `/transfers/{transferId}`
 
 **D-016** · ✅ Decided · Impact: 🔴 High · Area: **Resource model** · Related: [D-011](#d-011), [D-012](#d-012), [D-015](#d-015), [D-017](#d-017), [D-029](#d-029), [D-035](#d-035)
 
-**Context.** The original API spec used verb-shaped URL segments (`/movements/create`, `/movements/collection`, `/movements/drop-off`, `/movements/receive`) with every operation as POST. After a sequence of architectural reviews, the team agreed the spec should adopt Richardson Level 2: URLs as resource paths, HTTP methods as the verbs.
+**Context.** The original API spec used verb-shaped URL segments (`/movements/create`, `/movements/collection`, `/movements/delivery`, `/movements/receive`) with every operation as POST. After a sequence of architectural reviews, the team agreed the spec should adopt Richardson Level 2: URLs as resource paths, HTTP methods as the verbs.
 
 The journey was:
 
-- A colleague raised that the `/movements/` vs `/transfers/` split was the natural Level 2 instinct.
+- A colleague raised that the `/movements/` vs `/deliveries/` split was the natural Level 2 instinct.
 - Another colleague pointed out that going further — events as first-class addressable resources — would unlock cacheable GETs and make the contract cleaner.
 - The 1:1 cardinality (see previous decision) made it possible to adopt Level 2 without introducing additional public IDs for `collectionId` and `receiptId` — each sub-resource is uniquely addressed by its parent.
 
 **Decision.** Adopt Level 2:
 
-- Resources are plural collections: `/movements`, `/transfers`.
-- Individual resources: `/movements/{movementId}`, `/transfers/{transferId}`.
-- Sub-resources are singular (1:1): `/movements/{movementId}/collection`, `/transfers/{transferId}/receipt`.
+- Resources are plural collections: `/movements`, `/deliveries`.
+- Individual resources: `/movements/{movementId}`, `/deliveries/{deliveryId}`.
+- Sub-resources are singular (1:1): `/movements/{movementId}/collection`, `/deliveries/{deliveryId}/receipt`.
 - HTTP methods carry the action: `POST` creates, `PUT` updates.
-- `operationId`s stay verb-shaped (`createMovement`, `recordCollection`, `recordDropOff`, `recordReceipt`, etc.) — they describe the business event and remain stable across URL changes.
+- `operationId`s stay verb-shaped (`createMovement`, `recordCollection`, `recordDelivery`, `recordReceipt`, etc.) — they describe the business event and remain stable across URL changes.
 
 **Consequences.** Substantial spec restructure (all path keys changed except the reference data endpoints).
 
-Movement ID and Transfer ID remain the only public IDs. Per-event IDs (`creationId`, `collectionId`, etc.) stay internal to the server. The "Per-event IDs not exposed in the public API" decision is unchanged by this; the Level 2 adoption _would_ have required them as URL parameters if the cardinality were 1:many, but at 1:1 the parent ID is sufficient.
+Movement ID and Delivery ID remain the only public IDs. Per-event IDs (`creationId`, `collectionId`, etc.) stay internal to the server. The "Per-event IDs not exposed in the public API" decision is unchanged by this; the Level 2 adoption _would_ have required them as URL parameters if the cardinality were 1:many, but at 1:1 the parent ID is sufficient.
 
 **Amended by [D-029](#d-029).** This holds for every sub-resource except collection, which D-029 makes 1:N. A collection event is addressed by its _position_ in the Movement's ordered sequence — the parent Movement ID plus position is sufficient, so D-029 still introduces no public per-event id. Whether to expose the internal Collection ID after all, for correcting an arbitrary earlier event, is the open question [D-035](#d-035).
 
-The Phase 1 receipt endpoints (`POST /movements/receive`, `PUT /movements/{wasteTrackingId}/receive`) remain in the spec marked `deprecated: true`. Their operationIds were renamed to `createReceiptMovementLegacy` and `updateReceiptMovementLegacy` to free up the canonical names for the new Transfer-scoped endpoints. A removal date for the deprecated endpoints is an open question — see below.
+The Phase 1 receipt endpoints (`POST /movements/receive`, `PUT /movements/{wasteTrackingId}/receive`) remain in the spec marked `deprecated: true`. Their operationIds were renamed to `createReceiptMovementLegacy` and `updateReceiptMovementLegacy` to free up the canonical names for the new Delivery-scoped endpoints. A removal date for the deprecated endpoints is an open question — see below.
 
-This decision also resolves the earlier "Static and transit collection collapsed into a single endpoint" decision in a more elegant way: collection is now a 1:1 sub-resource of a Movement, and what was called multi-collection is now multi-Movement-under-one-Transfer.
+This decision also resolves the earlier "Static and transit collection collapsed into a single endpoint" decision in a more elegant way: collection is now a 1:1 sub-resource of a Movement, and what was called multi-collection is now multi-Movement-under-one-Delivery.
 
 <a id="d-017"></a>
 
-### Drop-off PUT restricted to soft-delete only
+### Delivery PUT restricted to soft-delete only
 
 **D-017** · ✅ Decided · Impact: 🟠 Medium · Area: **Lifecycle** · Related: [D-007](#d-007), [D-009](#d-009), [D-016](#d-016), [D-018](#d-018), [D-034](#d-034)
 
-**Context.** A drop-off is a Transfer addressed by `transferId` (`PUT /transfers/{transferId}`), covering all the Movements named in its `movementIds`; there is no per-Movement view of a drop-off — that was settled by the Level 2 restructure (see [D-016](#d-016)). A drop-off records a physical handover of waste at a place at a point in time: the carrier-declared site, the aggregated Movement IDs, the carrier, and the actual timestamp. As an audit fact about something that has already happened, policy requires it to be immutable once recorded.
+**Context.** A delivery is addressed by `deliveryId` (`PUT /deliveries/{deliveryId}`), covering all the Movements named in its `movementIds`; there is no per-Movement view of a delivery — that was settled by the Level 2 restructure (see [D-016](#d-016)). A delivery records a physical handover of waste at a place at a point in time: the carrier-declared site, the aggregated Movement IDs, the carrier, and the actual timestamp. As an audit fact about something that has already happened, policy requires it to be immutable once recorded.
 
-**Decision.** The drop-off `PUT` is de-potentiated. Once a drop-off is registered, the only property that may change is `isDeleted` (the soft-delete flag from [D-009](#d-009)). `PUT /transfers/{transferId}` does not accept `dropOffRequest`; it accepts a restricted `dropOffUpdateRequest` carrying only `isDeleted` — plus `apiCode` for caller identity, which is not a property of the drop-off record and so does not breach immutability. Any other field is rejected with a `NotAllowed` validation error (`additionalProperties: false`). The history/revision pattern ([D-034](#d-034)) still applies to the `isDeleted` mutation.
+**Decision.** The delivery `PUT` is de-potentiated. Once a delivery is registered, the only property that may change is `isDeleted` (the soft-delete flag from [D-009](#d-009)). `PUT /deliveries/{deliveryId}` does not accept `deliveryRequest`; it accepts a restricted `deliveryUpdateRequest` carrying only `isDeleted` — plus `apiCode` for caller identity, which is not a property of the delivery record and so does not breach immutability. Any other field is rejected with a `NotAllowed` validation error (`additionalProperties: false`). The history/revision pattern ([D-034](#d-034)) still applies to the `isDeleted` mutation.
 
-Correcting a recorded drop-off is therefore not an in-place edit: soft-delete the erroneous Transfer (`isDeleted: true`) and record a fresh drop-off via `POST /transfers` — subject to D-009's rule that a Transfer cannot be deleted once a Receipt has been recorded against it.
+Correcting a recorded delivery is therefore not an in-place edit: soft-delete the erroneous Delivery (`isDeleted: true`) and record a fresh delivery via `POST /deliveries` — subject to D-009's rule that a Delivery cannot be deleted once a Receipt has been recorded against it.
 
 **Consequences.**
 
-- `PUT /transfers/{transferId}` (`updateDropOff`) is a soft-delete toggle only; its body is `dropOffUpdateRequest`, not `dropOffRequest`. Movement and Collection `PUT`s are unchanged and still accept full updates, so drop-off is asymmetric with them (see open question).
-- [D-018](#d-018) follows from this: `dropOff.address` is required on `POST /transfers` only, since it is not part of the `PUT` body.
-- [D-007](#d-007): the many-to-many Movement↔Transfer relationship is fixed at `POST` and cannot be altered by a later `PUT`; re-aggregation means delete + re-create.
+- `PUT /deliveries/{deliveryId}` (`updateDelivery`) is a soft-delete toggle only; its body is `deliveryUpdateRequest`, not `deliveryRequest`. Movement and Collection `PUT`s are unchanged and still accept full updates, so delivery is asymmetric with them (see open question).
+- [D-018](#d-018) follows from this: `deliverySite.address` is required on `POST /deliveries` only, since it is not part of the `PUT` body.
+- [D-007](#d-007): the many-to-many Movement↔Delivery relationship is fixed at `POST` and cannot be altered by a later `PUT`; re-aggregation means delete + re-create.
 
 **Open questions — for BA / policy:**
 
-1. **Cross-event symmetry.** Should the same immutability apply to Movement and Collection `PUT`s, or is drop-off deliberately the only immutable event? The asymmetry should be intentional, not incidental.
-2. **Correction after receipt.** Under D-009 a Transfer cannot be soft-deleted once a Receipt exists. With in-place edit also removed, a drop-off with a recorded receipt has no correction path. Acceptable, or is an exception needed?
+1. **Cross-event symmetry.** Should the same immutability apply to Movement and Collection `PUT`s, or is delivery deliberately the only immutable event? The asymmetry should be intentional, not incidental.
+2. **Correction after receipt.** Under D-009 a Delivery cannot be soft-deleted once a Receipt exists. With in-place edit also removed, a delivery with a recorded receipt has no correction path. Acceptable, or is an exception needed?
 3. **`apiCode` in the restricted body.** Confirm `apiCode` stays as caller identity (vs. relying solely on the Bearer token). If auth is token-only, `isDeleted` is the entire body.
 
 <a id="d-018"></a>
 
-### Drop-off address derivability
+### Delivery address derivability
 
-**D-018** · ✅ Decided · Impact: 🟠 Medium · Area: **Drop-off** · Related: [D-007](#d-007), [D-017](#d-017)
+**D-018** · ✅ Decided · Impact: 🟠 Medium · Area: **Delivery** · Related: [D-007](#d-007), [D-017](#d-017)
 
-**Context.** The drop-off address (`dropOff.address`) was initially optional in the spec. The open question was whether it should be **mandatory**, stay **optional**, or be **removed entirely** (the latter only if always derivable from the linked Movements' planned receiver). Two facts were relevant: the planned receiver is an _estimate_, not authoritative; and the rejection-retry case can deliver to a different receiver than planned, so the actual drop-off location can diverge from the estimate.
+**Context.** The delivery address (`deliverySite.address`) was initially optional in the spec. The open question was whether it should be **mandatory**, stay **optional**, or be **removed entirely** (the latter only if always derivable from the linked Movements' planned receiver). Two facts were relevant: the planned receiver is an _estimate_, not authoritative; and the rejection-retry case can deliver to a different receiver than planned, so the actual delivery location can diverge from the estimate.
 
-**Decision.** The drop-off address is **mandatory**. Both `fullAddress` and `postcode` are required within `dropOff.address`. The address records where waste was physically dropped off — a material audit fact that cannot be reliably derived from the planned receiver, particularly in rejection-retry scenarios. Requiring it at the point of recording prevents gaps in the audit trail.
+**Decision.** The delivery address is **mandatory**. Both `fullAddress` and `postcode` are required within `deliverySite.address`. The address records where waste was physically dropped off — a material audit fact that cannot be reliably derived from the planned receiver, particularly in rejection-retry scenarios. Requiring it at the point of recording prevents gaps in the audit trail.
 
-**Consequences.** `dropOff.address` is a required field on `POST /transfers` (reflected in the OpenAPI spec as `dropOffSite` `required: [siteName, address]`); callers must supply it even when the actual drop-off location matches their planned receiver estimate. It is not part of the drop-off `PUT` body, which is restricted to `isDeleted` (`dropOffUpdateRequest`, see [D-017](#d-017)), so the address is captured once at `POST` and never re-edited.
+**Consequences.** `deliverySite.address` is a required field on `POST /deliveries` (reflected in the OpenAPI spec as `deliverySite` `required: [siteName, address]`); callers must supply it even when the actual delivery location matches their planned receiver estimate. It is not part of the delivery `PUT` body, which is restricted to `isDeleted` (`deliveryUpdateRequest`, see [D-017](#d-017)), so the address is captured once at `POST` and never re-edited.
 
 <a id="d-029"></a>
 
@@ -383,11 +381,11 @@ Correcting a recorded drop-off is therefore not an in-place edit: soft-delete th
 
 **D-029** · ✅ Decided · Impact: 🟠 Medium · Area: **Collection** · Related: [D-006](#d-006), [D-007](#d-007), [D-009](#d-009), [D-010](#d-010), [D-011](#d-011), [D-012](#d-012), [D-015](#d-015), [D-019](#d-019), [D-021](#d-021), [D-032](#d-032), [D-033](#d-033), [D-034](#d-034), [D-035](#d-035)
 
-**Context.** Originally parked with a one-line working assumption: a driver-to-driver handover decomposes into a new Movement at the next pickup, since the 1:1 Movement↔Collection model (D-015) gave no other place to put it. That assumption was incomplete on its own — a fresh, unlinked Movement gives a regulator no way to distinguish a legitimate handover from a load that was collected and never reached a drop-off, which is the same signature as a non-compliant trajectory. It also breaks the producer's fate-of-waste query, since the only id a producer ever holds is the Movement ID of the leg they were originally given.
+**Context.** Originally parked with a one-line working assumption: a driver-to-driver handover decomposes into a new Movement at the next pickup, since the 1:1 Movement↔Collection model (D-015) gave no other place to put it. That assumption was incomplete on its own — a fresh, unlinked Movement gives a regulator no way to distinguish a legitimate handover from a load that was collected and never reached a delivery, which is the same signature as a non-compliant trajectory. It also breaks the producer's fate-of-waste query, since the only id a producer ever holds is the Movement ID of the leg they were originally given.
 
 A chained alternative was considered: keep Movements 1:1 with Collection as today, and link each new leg back to the one before it via a `precedingMovementId` field on `createMovementRequest`. That leaves D-015 untouched, but means both fate-of-waste and any regulator audit query have to walk a reference chain backward through however many hops occurred, rather than querying one stable id. Rejected in favour of keeping the Movement ID as the single durable handle for the whole journey, consistent with how producers and regulators actually use it.
 
-**Decision.** A transit handover is recorded as an additional collection event on the _same_ Movement, not a new Movement. This amends the Movement↔Collection half of [D-015](#d-015) from exactly one event to one or more ordered events; the Transfer↔Receipt half of D-015 is unchanged.
+**Decision.** A transit handover is recorded as an additional collection event on the _same_ Movement, not a new Movement. This amends the Movement↔Collection half of [D-015](#d-015) from exactly one event to one or more ordered events; the Delivery↔Receipt half of D-015 is unchanged.
 
 No new endpoint and no path change. `POST /movements/{movementId}/collection` changes meaning from "create the one collection" to "append the next collection event"; `PUT /movements/{movementId}/collection` corrects or soft-deletes the _latest active_ event in the sequence only (see the soft-delete and closed-sequence rules below). Correcting an arbitrary _earlier_ event is out of scope for v1 and is spun out as its own decision, [D-035](#d-035). `GET /movements/{movementId}/collection` returns the ordered array of events recorded so far rather than a single object — noting that this GET is itself currently parked ([D-033](#d-033)); the array shape is the form it takes if and when the per-event GETs are reinstated.
 
@@ -396,17 +394,17 @@ Two additions to `collectionRequest`:
 - `collectionType` — enum `STATIC` / `TRANSIT`. Optional, defaults to `STATIC` when omitted, so existing draft callers are unaffected.
 - `receivedFromCarrier` — same shape as the existing `carrier` schema. Required when `collectionType` is `TRANSIT`; forbidden when it is `STATIC` (mirrors the existing `registrationNumber` / `reasonForNoRegistrationNumber` mutual-exclusivity pattern).
 
-Server-enforced ordering: across the _active_ (non-soft-deleted) events, the first must be `STATIC` and every event after it must be `TRANSIT`. A Movement's collection record is therefore one strictly linear chain — a single load handed from carrier to carrier in sequence. A Movement is never split or forked across two onward carriers: where two loads pass between the same pair of drivers, that is two Movements, each with its own `STATIC` → `TRANSIT`\* chain, not one Movement divided. This is a policy constraint, not a field. There is no cap on the number of `TRANSIT` events a Movement may carry. No further collection events are accepted once the Movement has appeared in any Transfer's `movementIds[]` — once dropped off, that Movement's collection sequence is closed.
+Server-enforced ordering: across the _active_ (non-soft-deleted) events, the first must be `STATIC` and every event after it must be `TRANSIT`. A Movement's collection record is therefore one strictly linear chain — a single load handed from carrier to carrier in sequence. A Movement is never split or forked across two onward carriers: where two loads pass between the same pair of drivers, that is two Movements, each with its own `STATIC` → `TRANSIT`\* chain, not one Movement divided. This is a policy constraint, not a field. There is no cap on the number of `TRANSIT` events a Movement may carry. No further collection events are accepted once the Movement has appeared in any Delivery's `movementIds[]` — once delivered, that Movement's collection sequence is closed.
 
 Soft-delete ([D-009](#d-009)) of a collection event is restricted to the _latest active_ event in the sequence; an event with any active event after it cannot be soft-deleted. The effect is tail-peel: soft-deleting the latest `TRANSIT` makes the prior event the new latest, which is then itself deletable, unwinding the sequence tail-first. A `STATIC` head can only be soft-deleted when it is the sole remaining event; deleting it empties the sequence, and the next appended event is first-in-chain and so `STATIC` again. The "first active event is `STATIC`" invariant and this latest-only rule are the same constraint viewed from two ends — together they guarantee the active sequence never has a gap and never loses its `STATIC` anchor while `TRANSIT` events still depend on it.
 
-Once the sequence is closed (the Movement appears in a Transfer's `movementIds[]`), `PUT` is blocked entirely — both data correction and soft-delete of the latest event — for parity with the immutable drop-off record ([D-017](#d-017)): once a Movement is dropped off, its collection record is frozen.
+Once the sequence is closed (the Movement appears in a Delivery's `movementIds[]`), `PUT` is blocked entirely — both data correction and soft-delete of the latest event — for parity with the immutable delivery record ([D-017](#d-017)): once a Movement is delivered, its collection record is frozen.
 
 The order of events is the server-assigned order of submission, not a sort on the caller-declared `actualDateTimeCollected` — deferred and retrospective recording are already accepted patterns (the timestamp can be back-filled), so submission order is the only reliable sequencing signal. A check that each event's declared timestamp is not earlier than the previous event's runs as a secondary, warning-level consistency check, not the ordering mechanism itself.
 
-`receivedFromCarrier` is captured as a recorded field but is **not** cross-checked against the `carrier` on the preceding event: per BA/policy direction, a mismatch between the declared receiving and handing-over carrier is left for regulators to pick up from the data rather than surfaced as a system warning. This removal is scoped to the handover carrier on a transit collection only; it does not touch the receipt cross-checks against creation/collection ([D-006](#d-006)) or against drop-off ([D-021](#d-021)), which remain validation warnings as before.
+`receivedFromCarrier` is captured as a recorded field but is **not** cross-checked against the `carrier` on the preceding event: per BA/policy direction, a mismatch between the declared receiving and handing-over carrier is left for regulators to pick up from the data rather than surfaced as a system warning. This removal is scoped to the handover carrier on a transit collection only; it does not touch the receipt cross-checks against creation/collection ([D-006](#d-006)) or against delivery ([D-021](#d-021)), which remain validation warnings as before.
 
-**Consequences.** D-007 and D-010 need no change to their _validation_ rules: a Transfer still names exactly one Movement ID, hazardous or not, so there is nothing new to check at drop-off. D-010 separately governs `transferId` assignment for the hazardous case (the Movement ID is reused rather than minted); that assignment behaviour is unaffected by this decision. [D-012](#d-012) is preserved: collection events still carry no public per-event id, addressed by position in the sequence rather than by the 1:1 parent relationship the decision originally relied on — same outcome, different mechanism (and see [D-016](#d-016), amended to say so). [D-032](#d-032) needs no rewording: it already applies generically to "the Collection wasteItems array," and now applies to every event in the sequence — meaning every transit collection re-declares actual weights positionally, the same way the first static one does. That's a deliberate audit benefit, not overhead: an unexpected weight delta between two consecutive collection events on the same Movement is a meaningful signal (in-transit loss, damage, or misdeclaration), in the same spirit as the existing estimate-vs-actual reasoning in D-006.
+**Consequences.** D-007 and D-010 need no change to their _validation_ rules: a Delivery still names exactly one Movement ID, hazardous or not, so there is nothing new to check at delivery. D-010 separately governs `deliveryId` assignment for the hazardous case (the Movement ID is reused rather than minted); that assignment behaviour is unaffected by this decision. [D-012](#d-012) is preserved: collection events still carry no public per-event id, addressed by position in the sequence rather than by the 1:1 parent relationship the decision originally relied on — same outcome, different mechanism (and see [D-016](#d-016), amended to say so). [D-032](#d-032) needs no rewording: it already applies generically to "the Collection wasteItems array," and now applies to every event in the sequence — meaning every transit collection re-declares actual weights positionally, the same way the first static one does. That's a deliberate audit benefit, not overhead: an unexpected weight delta between two consecutive collection events on the same Movement is a meaningful signal (in-transit loss, damage, or misdeclaration), in the same spirit as the existing estimate-vs-actual reasoning in D-006.
 
 D-009 (soft-delete) is constrained, not extended, by this decision: the per-event `isDeleted` flag still applies to collection events, but only the latest active event is eligible. That tail-only restriction is exactly what keeps the positional addressing above sound — because no middle event can ever be removed, the active sequence never develops a gap, so an event's position stays stable for as long as position is the handle. The moment a future decision needs to correct an _arbitrary_ older event, that stability is no longer enough on its own and a stable per-event handle is needed instead of position — which is the subject of [D-035](#d-035).
 
@@ -419,7 +417,7 @@ D-015's text carries a one-line amendment to its Movement↔Collection clause to
 - **Split / fork (Q1).** No split. A single Movement cannot be divided between two onward carriers; two loads between the same pair of drivers are two Movements. Encoded as a policy constraint above.
 - **Cap on transit hops (Q2).** No cap. Abuse prevention, if needed, is a monitoring concern rather than a contract limit.
 - **`receivedFromCarrier` mismatch (Q4).** No check. Captured but not cross-checked; scoped to the handover carrier only (D-006/D-021 receipt cross-checks unaffected).
-- **Closed-sequence PUT scope (Q5).** `PUT` is blocked once the Movement is on a Transfer — correction and soft-delete alike — for parity with the immutable drop-off record (D-017).
+- **Closed-sequence PUT scope (Q5).** `PUT` is blocked once the Movement is on a Delivery — correction and soft-delete alike — for parity with the immutable delivery record (D-017).
 
 **Spun out as a follow-up:**
 
@@ -439,15 +437,15 @@ D-015's text carries a one-line amendment to its Movement↔Collection clause to
 
 <a id="d-032"></a>
 
-### Waste item weights are not captured at Collection or Drop-off
+### Waste item weights are not captured at Collection or Delivery
 
 **D-032** · ✅ Decided · Impact: 🟠 Medium · Area: **Collection** · Related: [D-006](#d-006)
 
-**Context.** Waste is described once, at Creation: the classification (EWC codes, description, containers, haz/POPs) and the estimated weights are declared on the Movement. The operational events that follow — Collection and Drop-off — are carrier/site/timing records; they capture _when_, _who_ and _where_, not waste data. Actual weights are a property of what arrives, so they belong to the Receipt event.
+**Context.** Waste is described once, at Creation: the classification (EWC codes, description, containers, haz/POPs) and the estimated weights are declared on the Movement. The operational events that follow — Collection and Delivery — are carrier/site/timing records; they capture _when_, _who_ and _where_, not waste data. Actual weights are a property of what arrives, so they belong to the Receipt event.
 
-**Decision.** Neither the Collection nor the Drop-off event carries waste item weight information. `collectionRequest` and `dropOffRequest` have no `wasteItems` payload. Waste classification and estimated weights are declared at Creation; actual per-item weights are recorded at Receipt (`wasteItems[].weight`).
+**Decision.** Neither the Collection nor the Delivery event carries waste item weight information. `collectionRequest` and `deliveryRequest` have no `wasteItems` payload. Waste classification and estimated weights are declared at Creation; actual per-item weights are recorded at Receipt (`wasteItems[].weight`).
 
-**Consequences.** A waste item is observed at two fidelities: an estimate at Creation and an actual at Receipt. Vendors send no per-item weight data when recording Collection or Drop-off, keeping both payloads lean. The only point where declared and actual weights meet is the receipt-vs-Creation comparison ([D-006](#d-006)).
+**Consequences.** A waste item is observed at two fidelities: an estimate at Creation and an actual at Receipt. Vendors send no per-item weight data when recording Collection or Delivery, keeping both payloads lean. The only point where declared and actual weights meet is the receipt-vs-Creation comparison ([D-006](#d-006)).
 
 <a id="d-034"></a>
 
@@ -457,7 +455,7 @@ D-015's text carries a one-line amendment to its Movement↔Collection clause to
 
 **Context.** The Phase 1 receipt `PUT /movements/{wasteTrackingId}/receive` is implemented with a history/revision pattern: before applying an update, the current live record is snapshotted into a separate history store, and a server-side revision counter on the live record is incremented. This gives a full audit trail of every mutation without exposing multiple versions through the public API. The revision counter also acts as an optimistic concurrency guard, preventing two concurrent PUTs from silently overwriting each other.
 
-**Decision.** Extend the same pattern to all Phase 2 PUT operations: `updateMovement`, `updateCollection`, `updateDropOff`, and `updateReceipt`. Every PUT snapshots the current state to a history store before writing the new state, and increments the revision counter on the live record. The history store and revision counter are server-side implementation details — they are not part of the public API contract.
+**Decision.** Extend the same pattern to all Phase 2 PUT operations: `updateMovement`, `updateCollection`, `updateDelivery`, and `updateReceipt`. Every PUT snapshots the current state to a history store before writing the new state, and increments the revision counter on the live record. The history store and revision counter are server-side implementation details — they are not part of the public API contract.
 
 **Consequences.** Every mutation across all four events is fully auditable at the server level. The public API contract is unchanged: each PUT returns the updated record (or a validation envelope), not a version list. Clients see a single live record per resource, identical to the pre-decision behaviour.
 
@@ -484,12 +482,12 @@ The two credentials are issued through different paths, and Phase 2 changes neit
 
 **D-036** · ✅ Decided · Impact: 🔴 High · Area: **Authorisation** · Related: [D-009](#d-009), [D-012](#d-012), [D-013](#d-013), [D-017](#d-017), [D-027](#d-027), [D-029](#d-029), [D-034](#d-034)
 
-**Context.** The four-event model is multi-actor: a broker may create a Movement, a driver collect against the same `movementId`, a driver perform the drop-off, and a receiver register the receipt — four different organisations appending events to one Movement. After creation, no single organisation "owns" the Movement. Authentication is settled (WTS-ADR001: CDP/Amazon Cognito OAuth 2.0 at the gateway, with an Organisation API ID identifying which organisation a call acts for), but the gateway only establishes _who is calling_; it does not decide whether that organisation may append a given event to a given Movement in its current state. The public identifiers are shareable, non-secret handles by design ([D-012](#d-012), [D-013](#d-013)): `movementId` is passed producer↔broker/carrier and driver↔driver on transit collections ([D-029](#d-029)), and `transferId` is passed driver↔receiver. Possession of an identifier therefore cannot confer the right to write to it. Phase 1 already constrains the receipt so that the `PUT` (amend) is bound to the _same_ organisation that recorded the `POST`; that behaviour is carried forward.
+**Context.** The four-event model is multi-actor: a broker may create a Movement, a driver collect against the same `movementId`, a driver perform the delivery, and a receiver register the receipt — four different organisations appending events to one Movement. After creation, no single organisation "owns" the Movement. Authentication is settled (WTS-ADR001: CDP/Amazon Cognito OAuth 2.0 at the gateway, with an Organisation API ID identifying which organisation a call acts for), but the gateway only establishes _who is calling_; it does not decide whether that organisation may append a given event to a given Movement in its current state. The public identifiers are shareable, non-secret handles by design ([D-012](#d-012), [D-013](#d-013)): `movementId` is passed producer↔broker/carrier and driver↔driver on transit collections ([D-029](#d-029)), and `deliveryId` is passed driver↔receiver. Possession of an identifier therefore cannot confer the right to write to it. Phase 1 already constrains the receipt so that the `PUT` (amend) is bound to the _same_ organisation that recorded the `POST`; that behaviour is carried forward.
 
 **Decision (technical half).**
 
-- **Append (`POST`) is open.** Any authenticated, onboarded organisation may record any event. Possession of `movementId`/`transferId` is not an authorisation control.
-- **Amend (`PUT`) is restricted to the authoring organisation** — the organisation whose identity (`apiCode`) recorded the event. This carries forward the Phase 1 receipt POST/PUT-same-organisation rule and composes with the existing PUT mechanics: soft-delete only, tail-only ([D-009](#d-009)); drop-off PUT de-potentiated to soft-delete ([D-017](#d-017)); history/revision with optimistic concurrency ([D-034](#d-034)).
+- **Append (`POST`) is open.** Any authenticated, onboarded organisation may record any event. Possession of `movementId`/`deliveryId` is not an authorisation control.
+- **Amend (`PUT`) is restricted to the authoring organisation** — the organisation whose identity (`apiCode`) recorded the event. This carries forward the Phase 1 receipt POST/PUT-same-organisation rule and composes with the existing PUT mechanics: soft-delete only, tail-only ([D-009](#d-009)); delivery PUT de-potentiated to soft-delete ([D-017](#d-017)); history/revision with optimistic concurrency ([D-034](#d-034)).
 - **Integrity is by attribution, not prevention.** Every `POST` and `PUT` is stamped server-side with the authenticated writing organisation (`apiCode`) as immutable provenance, so an incorrect or bad-faith write is recorded against its author and is traceable by regulators. These are licensed, identified operators writing under their own credentials in a waste-crime-enforcement system, so accountability is a real deterrent, not only an audit trail.
 
 **Deferred to policy (not decided here).** Whether write access to an event should be _restricted by actor role or relationship_ — for example whether only a permitted receiving site may record a Receipt, or only a declared carrier may record a Collection — is a business/regulatory rule, not a technical one. The service provides the authenticated-identity mechanism to enforce such rules if and when policy defines them; Phase 2 does not pre-empt them. Tracked alongside the credentials/identity question in [D-027](#d-027).
@@ -530,7 +528,9 @@ The two credentials are issued through different paths, and Phase 2 changes neit
 - `transferId` → `deliveryId`
 - The "Drop-off" tag/operation wording → "Delivery"
 
-This is a pure rename. It does not change the resource shape, the many-to-one cardinality against Movement IDs ([D-007](#d-007)), the identifier format ([D-013](#d-013)), or any other already-decided behaviour — those entries are left as originally written and now read with the old "drop-off"/"Transfer ID" terms; they are not being retroactively edited.
+This is a pure rename. It does not change the resource shape, the many-to-one cardinality against Movement IDs ([D-007](#d-007)), the identifier format ([D-013](#d-013)), or any other already-decided behaviour.
+
+**Update.** The rename was subsequently applied retroactively across this register: every entry above and below now reads with "delivery"/"Delivery ID" throughout, including in narrative Context/Decision/Consequences prose, rather than being left with the original "drop-off"/"Transfer ID" wording. The bullet list above is the one place that still cites the old terms deliberately, since it is the record of what was renamed from and to.
 
 ## Open
 
@@ -546,7 +546,7 @@ This is a pure rename. It does not change the resource shape, the many-to-one ca
 
 **Open questions — to confirm with BA and policy team:**
 
-1. **Timestamp cardinality.** Does the producer see a single `collectionDateTime` (e.g. earliest collection across multi-collection runs) and a single `receiptDateTime` (e.g. final receipt across multi-drop-off scenarios)? Or arrays of timestamps? The provisional model was scalar-with-a-rule; needs BA confirmation.
+1. **Timestamp cardinality.** Does the producer see a single `collectionDateTime` (e.g. earliest collection across multi-collection runs) and a single `receiptDateTime` (e.g. final receipt across multi-delivery scenarios)? Or arrays of timestamps? The provisional model was scalar-with-a-rule; needs BA confirmation.
 
 2. **Treatment code source and shape.** `startTreatmentCode` can be derived from the receipt's `wasteItems[].disposalOrRecoveryCodes` array. `finalTreatmentCode` has no source in the current model — it implies onward movement (see question 3). Confirm: is treatment outcome a single derivable code, a summary across the weighted list, or not surfaced until onward movement is in scope?
 
@@ -560,7 +560,7 @@ This is a pure rename. It does not change the resource shape, the many-to-one ca
 
 **D-021** · ⏳ Open · Impact: 🟠 Medium · Area: **Receipt** · Related: [D-006](#d-006), [D-022](#d-022)
 
-A receipt's waste details are cross-checked against the linked Movement record (Creation classification + Collection weights), and its carrier details against the carrier on the Movement chain — surfacing mismatches as validation warnings (see the decided cross-check entry; the drop-off is not a source for the waste check). Whether the check is **unconditional** (Option 1: `transferId` is the receipt's path parameter) or **conditional on a supplied `transferId`** (Option 2: optional body field) depends on the open _Receipt migration_ decision. Independent of that, what counts as a mismatch is unspecified: identical strings? same registration number, different address? same EWC code, different quantity? And for weight specifically, what tolerance — given Creation is an estimate, Collection an actual, and the receipt what arrived, some drift is expected by design. The server validates this; the spec needs a clearer statement of the rules once agreed.
+A receipt's waste details are cross-checked against the linked Movement record (Creation classification + Collection weights), and its carrier details against the carrier on the Movement chain — surfacing mismatches as validation warnings (see the decided cross-check entry; the delivery is not a source for the waste check). Whether the check is **unconditional** (Option 1: `deliveryId` is the receipt's path parameter) or **conditional on a supplied `deliveryId`** (Option 2: optional body field) depends on the open _Receipt migration_ decision. Independent of that, what counts as a mismatch is unspecified: identical strings? same registration number, different address? same EWC code, different quantity? And for weight specifically, what tolerance — given Creation is an estimate, Collection an actual, and the receipt what arrived, some drift is expected by design. The server validates this; the spec needs a clearer statement of the rules once agreed.
 
 <a id="d-022"></a>
 
@@ -568,15 +568,15 @@ A receipt's waste details are cross-checked against the linked Movement record (
 
 **D-022** · ⏳ Open · Impact: 🔴 High · Area: **Receipt** · Related: [D-005](#d-005), [D-006](#d-006), [D-015](#d-015), [D-016](#d-016), [D-023](#d-023)
 
-How receivers move from the Phase 1 receipt to the linked Phase 2 receipt is undecided. Both options share one internal receipt function, and both require a prior drop-off to obtain a `transferId`, so implementation cost and the drop-off dependency are equivalent either way — the difference is contract shape and migration friction.
+How receivers move from the Phase 1 receipt to the linked Phase 2 receipt is undecided. Both options share one internal receipt function, and both require a prior delivery to obtain a `deliveryId`, so implementation cost and the delivery dependency are equivalent either way — the difference is contract shape and migration friction.
 
-**Option 1 (current spec, favoured but not decided).** Implement `/transfers/{transferId}/receipt` over the same internal receipt function called by `/movements/receive`, and deprecate `/movements/receive`. Linking is structural — the `transferId` is a mandatory path parameter, so a new-flow receipt cannot be recorded without a Transfer, and the cross-check against the linked drop-off is unconditional. Fits the Level 2 model already adopted: receipt is a 1:1 sub-resource of Transfer with a cacheable, addressable read endpoint (see [D-033](#d-033)). Cost: two receipt endpoints coexist through the transition, and Phase 1 can't be fully retired until receivers record drop-offs.
+**Option 1 (current spec, favoured but not decided).** Implement `/deliveries/{deliveryId}/receipt` over the same internal receipt function called by `/movements/receive`, and deprecate `/movements/receive`. Linking is structural — the `deliveryId` is a mandatory path parameter, so a new-flow receipt cannot be recorded without a Delivery, and the cross-check against the linked delivery is unconditional. Fits the Level 2 model already adopted: receipt is a 1:1 sub-resource of Delivery with a cacheable, addressable read endpoint (see [D-033](#d-033)). Cost: two receipt endpoints coexist through the transition, and Phase 1 can't be fully retired until receivers record deliveries.
 
-**Option 2.** Do not add the new endpoint; keep `/movements/receive` and add an optional `transferId` to its request body. Lowest URL churn — existing vendors keep the same endpoint and add the field when ready; one receipt endpoint, no "which do I call?". Cost: linking becomes optional-by-convention (a receipt that should be linked can be recorded without the field — a silent gap), the cross-check reverts to conditional ("when `transferId` is supplied"), and it keeps a verb-shaped, non-resource endpoint as the canonical receipt, partially reversing the Level 2 restructure.
+**Option 2.** Do not add the new endpoint; keep `/movements/receive` and add an optional `deliveryId` to its request body. Lowest URL churn — existing vendors keep the same endpoint and add the field when ready; one receipt endpoint, no "which do I call?". Cost: linking becomes optional-by-convention (a receipt that should be linked can be recorded without the field — a silent gap), the cross-check reverts to conditional ("when `deliveryId` is supplied"), and it keeps a verb-shaped, non-resource endpoint as the canonical receipt, partially reversing the Level 2 restructure.
 
 **Current lean: Option 1**, on consistency with the Level 2 decisions and because it makes linking a guarantee rather than a convention. Decision still open.
 
-**If Option 2 is chosen**, these entries need revisiting: _Receipt is linked to a drop-off via the Transfer ID_, _Cross-check of receipt details against the linked drop-off_, _Level 2 (Richardson Maturity Model) resource model_, and _Movement ↔ Collection and Transfer ↔ Receipt are 1:1_.
+**If Option 2 is chosen**, these entries need revisiting: _Receipt is linked to a delivery via the Delivery ID_, _Cross-check of receipt details against the linked delivery_, _Level 2 (Richardson Maturity Model) resource model_, and _Movement ↔ Collection and Delivery ↔ Receipt are 1:1_.
 
 <a id="d-023"></a>
 
@@ -584,9 +584,9 @@ How receivers move from the Phase 1 receipt to the linked Phase 2 receipt is und
 
 **D-023** · ⏳ Open · Impact: 🟠 Medium · Area: **Receipt** · Related: [D-022](#d-022)
 
-The Level 2 restructure superseded `POST /movements/receive` and `PUT /movements/{wasteTrackingId}/receive` with `POST /transfers/{transferId}/receipt` and `PUT /transfers/{transferId}/receipt`. The Phase 1 endpoints remain in the spec marked `deprecated: true` for backward compatibility, but no removal date has been set. Open: when do existing Phase 1 clients need to migrate, and how is that communicated to them? Options range from indefinite deprecation (Phase 1 endpoints stay forever) to a scheduled cutover with a removal window. A migration-by-redirect was considered but has known issues with non-GET methods across different HTTP client libraries.
+The Level 2 restructure superseded `POST /movements/receive` and `PUT /movements/{wasteTrackingId}/receive` with `POST /deliveries/{deliveryId}/receipt` and `PUT /deliveries/{deliveryId}/receipt`. The Phase 1 endpoints remain in the spec marked `deprecated: true` for backward compatibility, but no removal date has been set. Open: when do existing Phase 1 clients need to migrate, and how is that communicated to them? Options range from indefinite deprecation (Phase 1 endpoints stay forever) to a scheduled cutover with a removal window. A migration-by-redirect was considered but has known issues with non-GET methods across different HTTP client libraries.
 
-**Contingent on the _Receipt migration_ decision.** This timeline question only arises under Option 1 (a separate `/transfers/{transferId}/receipt` that deprecates `/movements/receive`). Under Option 2 there is no superseded endpoint to retire and this question falls away. The identifier side of migration is tracked separately under _`wasteTrackingId` ↔ `movementId` reconciliation_.
+**Contingent on the _Receipt migration_ decision.** This timeline question only arises under Option 1 (a separate `/deliveries/{deliveryId}/receipt` that deprecates `/movements/receive`). Under Option 2 there is no superseded endpoint to retire and this question falls away. The identifier side of migration is tracked separately under _`wasteTrackingId` ↔ `movementId` reconciliation_.
 
 <a id="d-024"></a>
 
@@ -606,11 +606,11 @@ Phase 1 has no rejection model — recording a receipt means the waste was accep
 
 <a id="d-028"></a>
 
-### Pre-generated Transfer IDs for offline drivers
+### Pre-generated Delivery IDs for offline drivers
 
 **D-028** · ⏳ Open · Impact: 🟠 Medium · Area: **Identifiers** · Related: [D-013](#d-013)
 
-If a driver has no signal at the drop-off, they cannot call `POST /transfers` to mint a Transfer ID in the moment — yet they need one to hand to the receiver (typically on paper) so the receipt can be recorded against it. Open: can software vendors be issued a pool of pre-generated Transfer IDs that a driver's app assigns offline and reconciles/POSTs when signal returns? Sub-questions: how are pre-generated IDs reserved without collision; do they draw from the same per-year sqids space (see _Identifier format and capacity_); how long does a reservation stay valid; what happens to a reserved ID that is never used; and does the same need apply to Movement IDs (created earlier, usually with signal) or only to Transfer IDs (minted at the drop-off moment, the most likely offline point)? Connects to the deferred/retrospective collection-recording scenarios, which are the offline case generally.
+If a driver has no signal at the delivery, they cannot call `POST /deliveries` to mint a Delivery ID in the moment — yet they need one to hand to the receiver (typically on paper) so the receipt can be recorded against it. Open: can software vendors be issued a pool of pre-generated Delivery IDs that a driver's app assigns offline and reconciles/POSTs when signal returns? Sub-questions: how are pre-generated IDs reserved without collision; do they draw from the same per-year sqids space (see _Identifier format and capacity_); how long does a reservation stay valid; what happens to a reserved ID that is never used; and does the same need apply to Movement IDs (created earlier, usually with signal) or only to Delivery IDs (minted at the delivery moment, the most likely offline point)? Connects to the deferred/retrospective collection-recording scenarios, which are the offline case generally.
 
 <a id="d-035"></a>
 
@@ -635,11 +635,11 @@ Out of scope for v1: v1 records transit sequences and corrects the latest event,
 
 **Context.** Three MongoDB storage models have been considered for Phase 2.
 
-The **aggregate model** ([`model/mongo-schema-proposal.md`](model/mongo-schema-proposal.md)) stores one document per public identifier: a `movements` aggregate embedding `creation` (singular) and an ordered `collectionEvents[]` array, and a `transfers` aggregate embedding `movementIds[]`, `dropOff`, and `receipt`. Each aggregate has a `-history` companion collection using the existing full-document-snapshot pattern from `waste-inputs-history`, and a `revision` field as the optimistic concurrency guard in `updateOne({ _id, revision })`.
+The **aggregate model** ([`model/mongo-schema-proposal.md`](model/mongo-schema-proposal.md)) stores one document per public identifier: a `movements` aggregate embedding `creation` (singular) and an ordered `collectionEvents[]` array, and a `deliveries` aggregate embedding `movementIds[]`, `delivery`, and `receipt`. Each aggregate has a `-history` companion collection using the existing full-document-snapshot pattern from `waste-inputs-history`, and a `revision` field as the optimistic concurrency guard in `updateOne({ _id, revision })`.
 
-The **per-event-collection model** (proposed by the Data Architect) stores one MongoDB collection per event type — creation, collection, drop-off, and receipt — deferring cross-event reads to a view layer defined later.
+The **per-event-collection model** (proposed by the Data Architect) stores one MongoDB collection per event type — creation, collection, delivery, and receipt — deferring cross-event reads to a view layer defined later.
 
-The **CQRS / event-sourcing model** ([`model/mongo-schema-proposal-CQRS.md`](model/mongo-schema-proposal-CQRS.md)) uses an append-only `events` collection as the sole source of truth, with `movements` and `transfers` as derived projection collections rebuilt from events. A unique compound index on `{ streamId, sequenceNumber }` replaces the `revision` concurrency guard. No `-history` collections are needed: the event log is the history. Aggregate root objects are rehydrated in memory from the event stream on each write to enforce domain invariants before appending.
+The **CQRS / event-sourcing model** ([`model/mongo-schema-proposal-CQRS.md`](model/mongo-schema-proposal-CQRS.md)) uses an append-only `events` collection as the sole source of truth, with `movements` and `deliveries` as derived projection collections rebuilt from events. A unique compound index on `{ streamId, sequenceNumber }` replaces the `revision` concurrency guard. No `-history` collections are needed: the event log is the history. Aggregate root objects are rehydrated in memory from the event stream on each write to enforce domain invariants before appending.
 
 **Previous position.** This entry was previously marked ✅ Decided in favour of the aggregate model, on five grounds: (1) per-event-collection had an undefined and costly read/view layer; (2) it conflicted with the `revision`-based concurrency pattern ([D-034](#d-034)); (3) the state machine had no home in a per-event model; (4) D-029 ordering enforcement was harder across a separate collection; (5) it would introduce a second, irreconcilable persistence paradigm alongside the Phase 1 pattern.
 
@@ -676,13 +676,13 @@ Full rationale in the [versioning pitch](../api/versioning.md).
 
 **Option A — Aggregate model.** Implement as described in `model/mongo-schema-proposal.md`. Closest to Phase 1 conventions; lowest learning curve. Mutation-based writes; `-history` snapshot collections; `revision` as concurrency guard. Does not support projection rebuild or event replay without additional work. Previously decided; not yet implemented.
 
-**Option B — Per-event-type collections.** Described in [`model/mongo-schema-proposal-per-event.md`](model/mongo-schema-proposal-per-event.md). One collection per business event (`movement-creations`, `collection-events`, `transfer-dropoffs`, `receipt-events`), each with a `-history` companion. GET requests require two-collection reads; fate-of-waste requires up to four. State must either be denormalised onto the creation document (requiring multi-document transactions on collection-event writes) or computed at read time. The unique compound index on `{ movementId, sequence }` in `collection-events` handles concurrency for collection-event appends in place of the aggregate `revision` guard. Independent event-type queries and bounded document growth are the genuine advantages over Option A.
+**Option B — Per-event-type collections.** Described in [`model/mongo-schema-proposal-per-event.md`](model/mongo-schema-proposal-per-event.md). One collection per business event (`movement-creations`, `collection-events`, `deliveries`, `receipt-events`), each with a `-history` companion. GET requests require two-collection reads; fate-of-waste requires up to four. State must either be denormalised onto the creation document (requiring multi-document transactions on collection-event writes) or computed at read time. The unique compound index on `{ movementId, sequence }` in `collection-events` handles concurrency for collection-event appends in place of the aggregate `revision` guard. Independent event-type queries and bounded document growth are the genuine advantages over Option A.
 
-**Option C — CQRS / Event Sourcing.** Implement as described in `model/mongo-schema-proposal-CQRS.md`. Append-only `events` collection; `movements` and `transfers` as projections rebuilt from events. Higher upfront complexity (aggregate root classes, command handlers, projection handlers, two-step write path); significant long-term benefits (immutable audit trail, projection rebuild on demand, amendments as first-class facts, no `-history` collections). An annotated code sketch of all four Phase 2 write paths is available as an [interactive architecture sketch](https://claude.ai/code/artifact/65564a71-55db-4329-9910-b7b5e07b3133).
+**Option C — CQRS / Event Sourcing.** Implement as described in `model/mongo-schema-proposal-CQRS.md`. Append-only `events` collection; `movements` and `deliveries` as projections rebuilt from events. Higher upfront complexity (aggregate root classes, command handlers, projection handlers, two-step write path); significant long-term benefits (immutable audit trail, projection rebuild on demand, amendments as first-class facts, no `-history` collections). An annotated code sketch of all four Phase 2 write paths is available as an [interactive architecture sketch](https://claude.ai/code/artifact/65564a71-55db-4329-9910-b7b5e07b3133).
 
 **What needs resolving before a decision can be made.**
 
-- **Spike (Option C only).** Implement all four Phase 2 POST endpoints end-to-end — `POST /movements`, `POST /movements/{id}/collection`, `POST /transfers`, `POST /transfers/{id}/receipt` — plus the corresponding GET reads from projections, using the CQRS model. If the team is comfortable with the pattern after the spike, proceed with Option C and record the new decision. If not, fall back to Option A.
+- **Spike (Option C only).** Implement all four Phase 2 POST endpoints end-to-end — `POST /movements`, `POST /movements/{id}/collection`, `POST /deliveries`, `POST /deliveries/{id}/receipt` — plus the corresponding GET reads from projections, using the CQRS model. If the team is comfortable with the pattern after the spike, proceed with Option C and record the new decision. If not, fall back to Option A.
 - **PUT handlers (Option C only).** The sketch covers POST happy paths only. Amendment and soft-delete handlers ([D-009](#d-009), [D-036](#d-036)) must be designed before committing to Option C.
 - **Two-step write atomicity (Option C only).** Whether to wrap `appendEvent` + projection update in a MongoDB session transaction needs deciding before the first production write.
 - **Team alignment.** The Tech Architect and Data Architect should be aligned on the CQRS pattern and its trade-offs before a decision is recorded.
@@ -709,11 +709,11 @@ Following BA discussion, the four per-event GET operations have been removed fro
 
 - `GET /movements/{movementId}` (`getMovement`)
 - `GET /movements/{movementId}/collection` (`getCollection`)
-- `GET /transfers/{transferId}` (`getDropOff`)
-- `GET /transfers/{transferId}/receipt` (`getReceipt`)
+- `GET /deliveries/{deliveryId}` (`getDelivery`)
+- `GET /deliveries/{deliveryId}/receipt` (`getReceipt`)
 
 The Level 2 resource paths and HTTP method structure ([D-016](#d-016)) are unchanged — `POST` and `PUT` operations on all four event paths remain. The GETs are absent because their response schemas and projection scope are not yet agreed; they will be defined in a future iteration.
 
-The `notFoundError` shape and distinguishing error codes (`MOVEMENT_NOT_FOUND`, `COLLECTION_NOT_RECORDED`, `TRANSFER_NOT_FOUND`, `RECEIPT_NOT_RECORDED`) from [D-014](#d-014) remain active in the spec for `POST` and `PUT` responses on sub-resource paths.
+The `notFoundError` shape and distinguishing error codes (`MOVEMENT_NOT_FOUND`, `COLLECTION_NOT_RECORDED`, `DELIVERY_NOT_FOUND`, `RECEIPT_NOT_RECORDED`) from [D-014](#d-014) remain active in the spec for `POST` and `PUT` responses on sub-resource paths.
 
 **Note.** `GET /movements/{movementId}/fate-of-waste` (`getFateOfWaste`) is the producer-facing read-only projection — it is a separate concern and is **not** parked.
