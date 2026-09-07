@@ -240,7 +240,7 @@ components:
           description: >-
             The Delivery the receipt is recorded against — echoed from the path on
             `POST /deliveries/{deliveryId}/receipt`, or a new empty Delivery minted by
-            `POST /deliveries/receipt`.
+            `POST /receipts`.
         validation:
           $ref: '#/components/schemas/validation'
 
@@ -381,7 +381,7 @@ paths:
         "500":
           $ref: '#/components/responses/500'
 
-  /deliveries/receipt:
+  /receipts:
     post:
       tags: [Receipt]
       summary: Record receipt of waste without a Delivery ID
