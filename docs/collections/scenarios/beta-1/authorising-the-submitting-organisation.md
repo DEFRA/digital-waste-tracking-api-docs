@@ -22,7 +22,21 @@ Feature: Authorising the submitting organisation
       | Delivery   |
       | Receipt    |
 
-  Scenario Outline: A <record> isn't created when no API Code is provided
+  Scenario Outline: A <record> isn't created when an API Code is invalid
+    Given they have valid <record> data
+    And they have an invalid API Code
+    When they submit the <record>
+    Then the <record> isn't created
+    And they should be informed that the API Code is unrecognised
+
+    Examples:
+      | record     |
+      | Movement   |
+      | Collection |
+      | Delivery   |
+      | Receipt    |
+
+  Scenario Outline: A <record> isn't created when an API Code is not provided
     Given they have valid <record> data
     And they have no API Code
     When they submit the <record>
