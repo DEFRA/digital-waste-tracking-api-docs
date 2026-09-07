@@ -460,7 +460,7 @@
 <li><code>openapi.yaml</code> — the specification. A single OpenAPI 3.0.3 file covering the new endpoints alongside the Phase 1 receipt and reference data endpoints, preserved verbatim.</li>
 </ul>
 <h2 id="surface-area">Surface area</h2>
-<p>The current draft covers fifteen paths:</p>
+<p>The current draft covers sixteen paths:</p>
 <table>
 <thead>
 <tr>
@@ -484,6 +484,10 @@
 <tr>
 <td>Receipt</td>
 <td><code>POST /deliveries/{deliveryId}/receipt</code>, <code>GET /deliveries/{deliveryId}/receipt</code>, <code>PUT /deliveries/{deliveryId}/receipt</code></td>
+</tr>
+<tr>
+<td>Receipt without a prior delivery</td>
+<td><code>POST /receipts</code></td>
 </tr>
 <tr>
 <td>Receipt (Phase 1, deprecated)</td>

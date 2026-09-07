@@ -675,6 +675,10 @@
 <td><code>PUT /deliveries/{deliveryId}/receipt</code></td>
 <td>Receipt update; history/revision pattern (<a href="../decisions/#d-034">D-034</a>)</td>
 </tr>
+<tr>
+<td><code>POST /receipts</code></td>
+<td>Receipt with no prior delivery (<a href="../decisions/#d-041">D-041</a>, proposal); mandatory <code>reasonForNoDeliveryId</code>; server creates an empty Delivery (<code>movementIds: []</code>) and returns <code>deliveryId</code>; request/response shape not yet finalised — open questions in the register</td>
+</tr>
 </tbody>
 </table>
 <p>The Phase 1 receipt endpoints (<code>POST /movements/receive</code>, <code>PUT /movements/{wasteTrackingId}/receive</code>) remain in the spec marked <code>deprecated: true</code>. No removal date is set — see <a href="../decisions/#d-023">D-023</a>.</p>

@@ -468,19 +468,20 @@
 <span class="nf">    </span><span class="k">Then </span><span class="nf">the payload is rejected</span>
 <span class="nf">    </span><span class="k">And </span><span class="nf">the outcome is logged</span>
 
-<span class="c">  # Null Delivery ID handling – new in Phase 2</span>
-<span class="nf">  </span><span class="k">Scenario:</span><span class="nf"> Receipt submitted without a Delivery ID but with a reason</span>
-<span class="k">    Given </span><span class="nf">a software provider has a receipt of waste payload</span>
-<span class="nf">    </span><span class="k">When </span><span class="nf">no Delivery ID is provided</span>
-<span class="nf">    </span><span class="k">And </span><span class="nf">a reason for no Delivery ID is provided</span>
+<span class="c">  # Receipt without a prior delivery – new in Phase 2</span>
+<span class="c">  # A dedicated POST /receipts endpoint, not an optional field on the</span>
+<span class="c">  # canonical receipt endpoint above: the server creates an empty Delivery</span>
+<span class="c">  # server-side and returns its Delivery ID in the same response.</span>
+<span class="nf">  </span><span class="k">Scenario:</span><span class="nf"> Receipt submitted to POST /receipts with a reasonForNoDeliveryId</span>
+<span class="k">    Given </span><span class="nf">a software provider has a receipt of waste payload with no prior delivery</span>
+<span class="nf">    </span><span class="k">When </span><span class="nf">the payload is submitted to POST /receipts with a reasonForNoDeliveryId</span>
 <span class="nf">    </span><span class="k">Then </span><span class="nf">a successful response is returned</span>
-<span class="nf">    </span><span class="k">And </span><span class="nf">a Delivery ID is returned in the response</span>
+<span class="nf">    </span><span class="k">And </span><span class="nf">a Delivery ID is returned in the response for the empty Delivery created server-side</span>
 <span class="nf">    </span><span class="k">And </span><span class="nf">the outcome is logged</span>
 
-<span class="nf">  </span><span class="k">Scenario:</span><span class="nf"> Receipt submitted without a Delivery ID and without a reason</span>
-<span class="k">    Given </span><span class="nf">a software provider has a receipt of waste payload</span>
-<span class="nf">    </span><span class="k">When </span><span class="nf">no Delivery ID is provided</span>
-<span class="nf">    </span><span class="k">And </span><span class="nf">no reason for no Delivery ID is provided</span>
+<span class="nf">  </span><span class="k">Scenario:</span><span class="nf"> Receipt submitted to POST /receipts without a reasonForNoDeliveryId</span>
+<span class="k">    Given </span><span class="nf">a software provider has a receipt of waste payload with no prior delivery</span>
+<span class="nf">    </span><span class="k">When </span><span class="nf">the payload is submitted to POST /receipts without a reasonForNoDeliveryId</span>
 <span class="nf">    </span><span class="k">Then </span><span class="nf">the payload is rejected with a validation error</span>
 <span class="nf">    </span><span class="k">And </span><span class="nf">the outcome is logged</span>
 </code></pre></div>
