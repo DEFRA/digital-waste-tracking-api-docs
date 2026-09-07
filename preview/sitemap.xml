@@ -93,19 +93,27 @@
          <lastmod>2026-09-07</lastmod>
     </url>
     <url>
-         <loc>https://defra.github.io/digital-waste-tracking-api-docs/preview/collections/scenarios/beta-1/collection/contract-shape-confirmation-for-the-collect-endpoint/</loc>
+         <loc>https://defra.github.io/digital-waste-tracking-api-docs/preview/collections/scenarios/beta-1/authenticating-a-software-provider/</loc>
          <lastmod>2026-09-07</lastmod>
     </url>
     <url>
-         <loc>https://defra.github.io/digital-waste-tracking-api-docs/preview/collections/scenarios/beta-1/creation/contract-shape-confirmation-for-the-create-endpoint/</loc>
+         <loc>https://defra.github.io/digital-waste-tracking-api-docs/preview/collections/scenarios/beta-1/authorising-the-submitting-organisation/</loc>
          <lastmod>2026-09-07</lastmod>
     </url>
     <url>
-         <loc>https://defra.github.io/digital-waste-tracking-api-docs/preview/collections/scenarios/beta-1/delivery/contract-shape-confirmation-for-the-delivery-endpoint/</loc>
+         <loc>https://defra.github.io/digital-waste-tracking-api-docs/preview/collections/scenarios/beta-1/collection/creating-a-collection/</loc>
          <lastmod>2026-09-07</lastmod>
     </url>
     <url>
-         <loc>https://defra.github.io/digital-waste-tracking-api-docs/preview/collections/scenarios/beta-1/receipt/contract-shape-confirmation-for-the-receipt-endpoint/</loc>
+         <loc>https://defra.github.io/digital-waste-tracking-api-docs/preview/collections/scenarios/beta-1/delivery/creating-a-delivery/</loc>
+         <lastmod>2026-09-07</lastmod>
+    </url>
+    <url>
+         <loc>https://defra.github.io/digital-waste-tracking-api-docs/preview/collections/scenarios/beta-1/movement/creating-a-movement/</loc>
+         <lastmod>2026-09-07</lastmod>
+    </url>
+    <url>
+         <loc>https://defra.github.io/digital-waste-tracking-api-docs/preview/collections/scenarios/beta-1/receipt/creating-a-receipt/</loc>
          <lastmod>2026-09-07</lastmod>
     </url>
 </urlset>
