@@ -21,10 +21,24 @@ Feature: Authenticating a software provider
 
   Scenario Outline: A <record> isn't created when authentication is invalid
     Given they have valid <record> data
-    And they aren't authenticated
+    And they have invalid authentication
     When they submit the <record>
     Then the <record> isn't created
     And they should be informed that authentication has failed
+
+    Examples:
+      | record     |
+      | Movement   |
+      | Collection |
+      | Delivery   |
+      | Receipt    |
+
+  Scenario Outline: A <record> isn't created when authentication is not provided
+    Given they have valid <record> data
+    And they have no authentication
+    When they submit the <record>
+    Then the <record> isn't created
+    And they should be informed that authentication is required
 
     Examples:
       | record     |

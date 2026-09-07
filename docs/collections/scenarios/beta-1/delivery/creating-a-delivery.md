@@ -16,19 +16,19 @@ Feature: Creating a Delivery
 
   Scenario: A Delivery is successfully created
     Given they have one or more Movement IDs from prior Movements
-    When they submit the Delivery with those Movement IDs
+    When they submit the Delivery
     Then the Delivery is created
     And a Delivery ID is provided
 
   Scenario: A Delivery isn't created when a Movement ID is invalid
-    Given they have one or more Movement IDs from prior Movements
-    When they submit the Delivery with an invalid Movement ID
+    Given they have an invalid Movement ID
+    When they submit the Delivery
     Then the Delivery isn't created
     And they should be informed of each unrecognised Movement ID
 
   Scenario: A Delivery isn't created when a Movement ID is not provided
     Given they have no Movement IDs
-    When they submit the Delivery with no Movement IDs
+    When they submit the Delivery
     Then the Delivery isn't created
     And they should be informed that a Movement ID is required
 
