@@ -24,7 +24,7 @@ Feature: Authenticating a software provider
     And they aren't authenticated
     When they submit the <record>
     Then the <record> isn't created
-    And a reason for the failed authentication is provided
+    And they should be informed that authentication has failed
 
     Examples:
       | record     |

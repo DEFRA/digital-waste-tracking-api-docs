@@ -24,5 +24,5 @@ Feature: Creating a Movement
     Given they have malformed Movement data
     When they submit the Movement
     Then the Movement isn't created
-    And a reason for each invalid field is provided
+    And they should be informed of each invalid field
 ```

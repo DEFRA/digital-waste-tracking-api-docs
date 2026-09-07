@@ -27,15 +27,9 @@ Feature: Creating a Receipt
     And they have an invalid Delivery ID
     When they submit the Receipt
     Then the Receipt isn't created
-    And a reason for the unrecognised Delivery ID is provided
+    And they should be informed that the Delivery ID is unrecognised
 
-  Scenario: A Receipt isn't created when malformed data is provided
-    Given they have malformed Receipt data
-    When they submit the Receipt
-    Then the Receipt isn't created
-    And a reason for each invalid field is provided
-
-  Scenario: A Receipt is successfully created when no Delivery ID is provided but a reason is given
+  Scenario: A Receipt is successfully created when a Delivery ID is not provided but a reason is given
     Given they have valid Receipt data
     And they have no Delivery ID
     And they have a reason for no Delivery ID
@@ -43,11 +37,17 @@ Feature: Creating a Receipt
     Then the Receipt is created
     And a Delivery ID is provided
 
-  Scenario: A Receipt isn't created when no Delivery ID is provided and no reason is given
+  Scenario: A Receipt isn't created when a Delivery ID is not provided and no reason is given
     Given they have valid Receipt data
     And they have no Delivery ID
     And they have no reason for no Delivery ID
     When they submit the Receipt
     Then the Receipt isn't created
-    And a reason for the rejection is provided
+    And they should be informed that a reason is required
+
+  Scenario: A Receipt isn't created when malformed data is provided
+    Given they have malformed Receipt data
+    When they submit the Receipt
+    Then the Receipt isn't created
+    And they should be informed of each invalid field
 ```

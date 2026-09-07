@@ -25,11 +25,18 @@ Feature: Creating a Collection
     And they have an invalid Movement ID
     When they submit the Collection
     Then the Collection isn't created
-    And a reason for the unrecognised Movement ID is provided
+    And they should be informed that the Movement ID is unrecognised
+
+  Scenario: A Collection isn't created when a Movement ID is not provided
+    Given they have valid Collection data
+    And they have no Movement ID
+    When they submit the Collection
+    Then the Collection isn't created
+    And they should be informed that a Movement ID is required
 
   Scenario: A Collection isn't created when malformed data is provided
     Given they have malformed Collection data
     When they submit the Collection
     Then the Collection isn't created
-    And a reason for each invalid field is provided
+    And they should be informed of each invalid field
 ```

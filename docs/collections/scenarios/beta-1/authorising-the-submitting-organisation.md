@@ -27,7 +27,7 @@ Feature: Authorising the submitting organisation
     And they have no API Code
     When they submit the <record>
     Then the <record> isn't created
-    And a reason for the missing API Code is provided
+    And they should be informed that an API Code is required
 
     Examples:
       | record     |
