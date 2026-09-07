@@ -30,6 +30,8 @@ The identifier of a delivery event, minted when the carrier records a delivery v
 
 The driver passes the Delivery ID on to the receiver — typically on paper, sometimes digitally — and the receiver records the receipt against it via `POST /deliveries/{deliveryId}/receipt`.
 
+For the exceptional case where waste is received with no prior Movement/Collection/Delivery trail at all, `POST /receipts` records the receipt and has the server mint an empty Delivery (`movementIds: []`) behind the scenes, returning its Delivery ID in the same response — so even a receipt with no prior journey gets a real, addressable Delivery ID. See [D-041](decisions.md#d-041).
+
 ### Creation ID, Collection ID, Delivery Event ID, Receive ID
 
 Per-event identifiers, distinct from the Movement ID and Delivery ID. Each event of a given type has its own ID. They are useful for audit purposes and for referring to specific events without conflating the event with the entity it acts on.
@@ -57,6 +59,7 @@ This shape has two practical consequences worth knowing:
 - **Multi-collection runs are multi-Movement.** A driver picking up from three producers in a single run creates three Movements, each with its own Movement ID and its own Collection event. The Movements are then aggregated under a single Delivery ID at the delivery.
 - **Multi-delivery runs are multi-Delivery.** A driver dropping at two receivers in a single run mints two Delivery IDs — one per delivery event. The Movements being delivered are split across the two Deliveries.
 - **Hazardous deliveries reuse the Movement ID.** Hazardous waste cannot be aggregated under a shared Delivery ([D-010](decisions.md#d-010)), so a hazardous delivery always covers exactly one Movement — and instead of minting a new Delivery ID, the server sets it equal to that Movement ID.
+- **A Delivery can exist with zero Movement IDs.** The one exception to "a Movement is on exactly one Delivery" above: `POST /receipts` ([D-041](decisions.md#d-041)) creates an empty Delivery (`movementIds: []`) server-side for a receipt with no prior Movement at all.
 
 If a load is partially rejected at the receiver, that is recorded on the single Receipt, not by creating new Movements — the Movement is unchanged. How the partial outcome is represented on the receipt is a data-model question still being worked through and is not yet in the API spec.
 

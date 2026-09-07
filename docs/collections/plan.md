@@ -124,6 +124,7 @@ Provision a carrier org and `apiCode` for the first software integrator. No code
 | `PUT /deliveries/{deliveryId}` | Soft-delete only via `isDeleted` — no field edits ([D-017](decisions.md#d-017)) |
 | `POST /deliveries/{deliveryId}/receipt` | New Phase 2 receipt (contingent on [D-022](decisions.md#d-022) Option 1); cross-checks waste vs Creation and carrier vs Movement chain ([D-006](decisions.md#d-006)); mismatches are warnings, not hard errors |
 | `PUT /deliveries/{deliveryId}/receipt` | Receipt update; history/revision pattern ([D-034](decisions.md#d-034)) |
+| `POST /receipts` | Receipt with no prior delivery ([D-041](decisions.md#d-041), proposal); mandatory `reasonForNoDeliveryId`; server creates an empty Delivery (`movementIds: []`) and returns `deliveryId`; request/response shape not yet finalised — open questions in the register |
 
 The Phase 1 receipt endpoints (`POST /movements/receive`, `PUT /movements/{wasteTrackingId}/receive`) remain in the spec marked `deprecated: true`. No removal date is set — see [D-023](decisions.md#d-023).
 

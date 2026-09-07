@@ -813,6 +813,45 @@ components:
                 $ref: "#/components/schemas/validationResult"
 
     # ------------------------------------------------------------------
+    # Receipt without a prior delivery (D-041) — proposal. See the
+    # /receipts path above; shape not yet finalised (open questions 1-4).
+    # ------------------------------------------------------------------
+    receiptWithoutDeliveryRequest:
+      allOf:
+        - $ref: "#/components/schemas/receiveMovementRequest"
+        - type: object
+          required:
+            - reasonForNoDeliveryId
+          properties:
+            reasonForNoDeliveryId:
+              type: string
+              description: |
+                Mandatory explanation of why there is no prior
+                Movement/Collection/Delivery trail for this receipt (D-041).
+                Free text pending confirmation of whether this should be a
+                constrained enum, as elsewhere in the spec
+                (e.g. reasonForNoRegistrationNumber).
+              example: Waste received directly with no digital record of an earlier journey.
+
+    receiptWithoutDeliveryResponse:
+      type: object
+      description: |
+        Returned when a receipt is recorded with no prior delivery (D-041).
+        Carries the new public Delivery ID for the empty Delivery the
+        server created (`movementIds: []`) and a validation envelope with
+        any warnings, mirroring deliveryResponse above.
+      properties:
+        deliveryId:
+          $ref: "#/components/schemas/deliveryId"
+        validation:
+          type: object
+          properties:
+            warnings:
+              type: array
+              items:
+                $ref: "#/components/schemas/validationResult"
+
+    # ------------------------------------------------------------------
     # Phase 1 schemas, preserved verbatim.
     # Lowercase naming distinguishes them from the PascalCase schemas
     # introduced for the new endpoints. They are referenced by Phase 1
@@ -1796,6 +1835,74 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/notFoundError"
+
+  # ----------------------------------------------------------------------
+  # Receipt without a prior delivery (D-041) — proposal.
+  #
+  # Exceptional case: waste received with no prior Movement/Collection/
+  # Delivery trail at all. Rather than exposing a generic no-Delivery
+  # receipt option on the canonical endpoint above, D-041 adds this
+  # dedicated endpoint: the caller supplies the receipt payload plus a
+  # mandatory reasonForNoDeliveryId, and the server creates an empty
+  # Delivery (movementIds: []) behind the scenes and records the receipt
+  # against it in one request, returning the new deliveryId. The ordinary
+  # flow (POST /deliveries/{deliveryId}/receipt against a Delivery that
+  # does carry Movement IDs) is unaffected.
+  #
+  # Marked x-stability: proposal because D-041 leaves the exact
+  # request/response shape open (see decisions.md#d-041, open questions
+  # 1-4) — modelled here as the existing receipt payload plus
+  # reasonForNoDeliveryId, as a working assumption pending BA confirmation.
+  # ----------------------------------------------------------------------
+
+  /receipts:
+    post:
+      tags: [Receipt]
+      x-stability: proposal
+      summary: Record a receipt with no prior delivery (proposal)
+      description: |
+        For the exceptional case where waste is received with no prior
+        Movement, Collection, or Delivery recorded at all (D-041). The
+        caller supplies the same receipt payload as
+        `POST /deliveries/{deliveryId}/receipt`, plus a mandatory
+        `reasonForNoDeliveryId` explaining why there is no prior trail.
+
+        The server creates an empty Delivery (`movementIds: []`) and
+        records the receipt against it in a single request, returning the
+        new `deliveryId` — giving the empty Delivery a real, addressable
+        identifier (lookup, correction, future acceptance/rejection
+        outcome) without the caller ever handling a Delivery directly.
+
+        `POST /deliveries` remains a pure "create from prior Movements"
+        endpoint; empty Deliveries are an internal detail of this
+        endpoint's implementation, not a documented capability of
+        `POST /deliveries`.
+
+        Open questions not yet resolved (see D-041): whether additional
+        fields are required here that would otherwise be sourced from a
+        linked Movement; how an empty Delivery's fields are corrected
+        after the fact, given D-017's immutability; and whether
+        `reasonForNoDeliveryId` is ever meaningful on the ordinary receipt
+        flow. The request/response shape below should be treated as
+        provisional until those are settled.
+      operationId: recordReceiptWithoutDelivery
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/receiptWithoutDeliveryRequest"
+      responses:
+        "201":
+          description: |
+            Receipt recorded and an empty Delivery created to hold it.
+            Body carries the new Delivery ID and any validation warnings.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/receiptWithoutDeliveryResponse"
+        "400":
+          $ref: "#/components/responses/400"
 
   # ----------------------------------------------------------------------
   # Phase 1 receipt endpoints — DEPRECATED.
