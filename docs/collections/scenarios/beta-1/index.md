@@ -2,18 +2,23 @@
 
 Fix version: beta-1: Contract API Test.
 
-## Creation
+## Movement
 
-- [Contract shape confirmation for the create endpoint](creation/contract-shape-confirmation-for-the-create-endpoint.md)
+- [Creating a Movement](movement/creating-a-movement.md)
 
 ## Collection
 
-- [Contract shape confirmation for the collect endpoint](collection/contract-shape-confirmation-for-the-collect-endpoint.md)
+- [Creating a Collection](collection/creating-a-collection.md)
 
 ## Delivery
 
-- [Contract shape confirmation for the delivery endpoint](delivery/contract-shape-confirmation-for-the-delivery-endpoint.md)
+- [Creating a Delivery](delivery/creating-a-delivery.md)
 
 ## Receipt
 
-- [Contract shape confirmation for the receipt endpoint](receipt/contract-shape-confirmation-for-the-receipt-endpoint.md)
+- [Creating a Receipt](receipt/creating-a-receipt.md)
+
+## All submissions
+
+- [Authenticating a software provider](authenticating-a-software-provider.md)
+- [Authorising the submitting organisation](authorising-the-submitting-organisation.md)
