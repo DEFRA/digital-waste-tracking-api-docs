@@ -28,19 +28,20 @@ Feature: Contract shape confirmation for the receipt endpoint
     Then the payload is rejected
     And the outcome is logged
 
-  # Null Delivery ID handling – new in Phase 2
-  Scenario: Receipt submitted without a Delivery ID but with a reason
-    Given a software provider has a receipt of waste payload
-    When no Delivery ID is provided
-    And a reason for no Delivery ID is provided
+  # Receipt without a prior delivery – new in Phase 2
+  # A dedicated POST /receipts endpoint, not an optional field on the
+  # canonical receipt endpoint above: the server creates an empty Delivery
+  # server-side and returns its Delivery ID in the same response.
+  Scenario: Receipt submitted to POST /receipts with a reasonForNoDeliveryId
+    Given a software provider has a receipt of waste payload with no prior delivery
+    When the payload is submitted to POST /receipts with a reasonForNoDeliveryId
     Then a successful response is returned
-    And a Delivery ID is returned in the response
+    And a Delivery ID is returned in the response for the empty Delivery created server-side
     And the outcome is logged
 
-  Scenario: Receipt submitted without a Delivery ID and without a reason
-    Given a software provider has a receipt of waste payload
-    When no Delivery ID is provided
-    And no reason for no Delivery ID is provided
+  Scenario: Receipt submitted to POST /receipts without a reasonForNoDeliveryId
+    Given a software provider has a receipt of waste payload with no prior delivery
+    When the payload is submitted to POST /receipts without a reasonForNoDeliveryId
     Then the payload is rejected with a validation error
     And the outcome is logged
 ```

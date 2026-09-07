@@ -21,7 +21,7 @@ The current production capability — covered by the [Receipt of Waste API](http
 - **Create Movement** — a producer, broker, or carrier registers an intended waste movement and is given a Movement ID.
 - **Record Collection** — the driver records that waste has been picked up.
 - **Record Delivery** — the driver records that waste has been delivered, and is given a Delivery ID covering one or more Movements delivered together.
-- **Record Receipt** — the receiver records what they have accepted, optionally linked back to the upstream delivery via the Delivery ID. This is the existing Phase 1 capability, now part of a longer chain.
+- **Record Receipt** — the receiver records what they have accepted, linked to the upstream delivery via the Delivery ID (`POST /deliveries/{deliveryId}/receipt`). This is the existing Phase 1 capability, now part of a longer chain. For the exceptional case where no delivery was recorded at all, a dedicated `POST /receipts` endpoint records the receipt and creates an empty Delivery server-side to give it a reference ([D-041](decisions.md#d-041)).
 
 A separate read-only flow lets the producer query the fate of their waste once a movement has reached a terminal state.
 
@@ -31,7 +31,7 @@ The work is split into two workstreams, plus cross-cutting reference material.
 
 [**Data model.**](model/README.md) The entities, identifiers, and state transitions that underlie the API. Currently a placeholder; the model will be developed once the API spec stabilises.
 
-[**API.**](../api/README.md) The OpenAPI specification for the extended service. Covers fourteen paths across creation, collection, delivery, receipt, fate-of-waste, and reference data. Includes Phase 1 receipt endpoints preserved verbatim.
+[**API.**](../api/README.md) The OpenAPI specification for the extended service. Covers sixteen paths across creation, collection, delivery, receipt, fate-of-waste, and reference data. Includes Phase 1 receipt endpoints preserved verbatim.
 
 [**Decisions.**](decisions.md) A running register of design decisions, open questions, and parked items.
 
