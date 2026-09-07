@@ -26,7 +26,7 @@ The current draft covers sixteen paths:
 | Collection | `POST /movements/{movementId}/collection`, `GET /movements/{movementId}/collection`, `PUT /movements/{movementId}/collection` |
 | Delivery | `POST /deliveries`, `GET /deliveries/{deliveryId}`, `PUT /deliveries/{deliveryId}` |
 | Receipt | `POST /deliveries/{deliveryId}/receipt`, `GET /deliveries/{deliveryId}/receipt`, `PUT /deliveries/{deliveryId}/receipt` |
-| Receipt without a prior delivery (D-041, proposal) | `POST /receipts` |
+| Receipt without a prior delivery | `POST /receipts` |
 | Receipt (Phase 1, deprecated) | `POST /movements/receive`, `PUT /movements/{id}/receive` |
 | Producer query | `GET /movements/{movementId}/fate-of-waste` |
 | Reference data (Phase 1) | `GET /reference-data/ewc-codes`, `GET /reference-data/hazardous-property-codes`, `GET /reference-data/disposal-or-recovery-codes`, `GET /reference-data/container-types`, `GET /reference-data/pop-names` |

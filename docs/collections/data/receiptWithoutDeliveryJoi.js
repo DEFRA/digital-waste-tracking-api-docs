@@ -1,4 +1,4 @@
-import Joi from 'joi'
+import Joi from "joi";
 
 /**
  * Speculative Joi schema for the D-041 "receipt without a prior delivery" endpoint.
@@ -13,18 +13,19 @@ import Joi from 'joi'
  * a constrained enum rather than free text (open question 1 may also add
  * further required fields here).
  */
-import { receiptMovementSchema } from './receiptJoi.js'
+import { receiptMovementSchema } from "./receiptJoi.js";
 
-export const receiptWithoutDeliverySchema = receiptMovementSchema.keys({
-  reasonForNoDeliveryId: Joi.string()
-    .min(1)
-    .required()
-    .description(
-      'Mandatory explanation of why there is no prior Movement/Collection/Delivery ' +
-      'trail for this receipt (D-041). Free text pending confirmation of whether ' +
-      'this should instead be a constrained enum, as with carrier.reasonForNoRegistrationNumber.'
-    )
-})
-  .description('Receipt-without-a-prior-delivery payload (D-041, proposal).')
+export const receiptWithoutDeliverySchema = receiptMovementSchema
+  .keys({
+    reasonForNoDeliveryId: Joi.string()
+      .min(1)
+      .required()
+      .description(
+        "Mandatory explanation of why there is no prior Movement/Collection/Delivery " +
+          "trail for this receipt (D-041). Free text pending confirmation of whether " +
+          "this should instead be a constrained enum, as with carrier.reasonForNoRegistrationNumber.",
+      ),
+  })
+  .description("Receipt-without-a-prior-delivery payload.");
 
-export default receiptWithoutDeliverySchema
+export default receiptWithoutDeliverySchema;
