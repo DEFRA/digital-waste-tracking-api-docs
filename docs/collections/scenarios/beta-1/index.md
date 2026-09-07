@@ -4,19 +4,19 @@ Fix version: beta-1: Contract API Test.
 
 ## Movement
 
-- [Creating a movement](movement/creating-a-movement.md)
+- [Creating a Movement](movement/creating-a-movement.md)
 
 ## Collection
 
-- [Creating a collection](collection/creating-a-collection.md)
+- [Creating a Collection](collection/creating-a-collection.md)
 
 ## Delivery
 
-- [Creating a delivery](delivery/creating-a-delivery.md)
+- [Creating a Delivery](delivery/creating-a-delivery.md)
 
 ## Receipt
 
-- [Creating a receipt](receipt/creating-a-receipt.md)
+- [Creating a Receipt](receipt/creating-a-receipt.md)
 
 ## All submissions
 

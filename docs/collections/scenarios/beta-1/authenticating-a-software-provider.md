@@ -2,31 +2,34 @@
 
 ```gherkin
 Feature: Authenticating a software provider
+  As a software provider
+  I want every submission to be authenticated
+  So that only onboarded organisations can record waste tracking events
 
-  Scenario Outline: A <record> is successfully created when the software provider is authenticated
-    Given a software provider has valid <record> data
-    And the software provider is authenticated
-    When the <record> is submitted
+  Scenario Outline: A <record> is successfully created when authentication is valid
+    Given they have valid <record> data
+    And they are authenticated
+    When they submit the <record>
     Then the <record> is created
 
     Examples:
       | record     |
-      | movement   |
-      | collection |
-      | delivery   |
-      | receipt    |
+      | Movement   |
+      | Collection |
+      | Delivery   |
+      | Receipt    |
 
-  Scenario Outline: A <record> isn't created when the software provider isn't authenticated
-    Given a software provider has valid <record> data
-    And the software provider isn't authenticated
-    When the <record> is submitted
+  Scenario Outline: A <record> isn't created when authentication is invalid
+    Given they have valid <record> data
+    And they aren't authenticated
+    When they submit the <record>
     Then the <record> isn't created
-    And the software provider is told they aren't authenticated
+    And a reason for the failed authentication is provided
 
     Examples:
       | record     |
-      | movement   |
-      | collection |
-      | delivery   |
-      | receipt    |
+      | Movement   |
+      | Collection |
+      | Delivery   |
+      | Receipt    |
 ```

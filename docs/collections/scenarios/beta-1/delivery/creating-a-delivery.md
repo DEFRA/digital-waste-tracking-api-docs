@@ -2,36 +2,39 @@
 source_ticket: DWTC-119
 ---
 
-# Creating a delivery
+# Creating a Delivery
 
 ```gherkin
-Feature: Creating a delivery
+Feature: Creating a Delivery
+  As a software provider
+  I want to record that one or more Movements have been delivered to a receiver
+  So that the receiver can record the waste accepted against a single Delivery ID
 
   Background:
-    Given an authenticated software provider
-    And a valid API Code
+    Given they are authenticated
+    And they have a valid API Code
 
-  Scenario: A delivery is successfully created
-    Given a software provider has one or more Movement IDs from prior movements
-    When a delivery is submitted with those Movement IDs
-    Then the delivery is created
+  Scenario: A Delivery is successfully created
+    Given they have one or more Movement IDs from prior Movements
+    When they submit the Delivery with those Movement IDs
+    Then the Delivery is created
     And a Delivery ID is provided
 
-  Scenario: A delivery isn't created when malformed data is provided
-    Given a software provider has malformed delivery data
-    When the delivery is submitted
-    Then the delivery isn't created
-    And the software provider is told which fields are invalid
+  Scenario: A Delivery isn't created when malformed data is provided
+    Given they have malformed Delivery data
+    When they submit the Delivery
+    Then the Delivery isn't created
+    And a reason for each invalid field is provided
 
-  Scenario: A delivery isn't created when a Movement ID is invalid
-    Given a software provider has one or more Movement IDs from prior movements
-    When a delivery is submitted with an invalid Movement ID
-    Then the delivery isn't created
-    And the software provider is told which Movement ID isn't recognised
+  Scenario: A Delivery isn't created when a Movement ID is invalid
+    Given they have one or more Movement IDs from prior Movements
+    When they submit the Delivery with an invalid Movement ID
+    Then the Delivery isn't created
+    And a reason for each unrecognised Movement ID is provided
 
-  Scenario: A delivery isn't created when no Movement ID is provided
-    Given a software provider has no Movement IDs
-    When a delivery is submitted with no Movement IDs
-    Then the delivery isn't created
-    And the software provider is told a Movement ID is required
+  Scenario: A Delivery isn't created when no Movement ID is provided
+    Given they have no Movement IDs
+    When they submit the Delivery with no Movement IDs
+    Then the Delivery isn't created
+    And a reason for the missing Movement ID is provided
 ```

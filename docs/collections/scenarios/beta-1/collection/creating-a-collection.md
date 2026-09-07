@@ -2,31 +2,34 @@
 source_ticket: DWTC-118
 ---
 
-# Creating a collection
+# Creating a Collection
 
 ```gherkin
-Feature: Creating a collection
+Feature: Creating a Collection
+  As a software provider
+  I want to record that waste has been collected from a producer
+  So that the Movement reflects what was actually picked up
 
   Background:
-    Given an authenticated software provider
-    And a valid API Code
+    Given they are authenticated
+    And they have a valid API Code
 
-  Scenario: A collection is successfully created
-    Given a software provider has valid collection data
-    And a valid Movement ID
-    When the collection is submitted
-    Then the collection is created
+  Scenario: A Collection is successfully created
+    Given they have valid Collection data
+    And they have a valid Movement ID
+    When they submit the Collection
+    Then the Collection is created
 
-  Scenario: A collection isn't created when a Movement ID is invalid
-    Given a software provider has valid collection data
-    And an invalid Movement ID
-    When the collection is submitted
-    Then the collection isn't created
-    And the software provider is told the Movement ID isn't recognised
+  Scenario: A Collection isn't created when a Movement ID is invalid
+    Given they have valid Collection data
+    And they have an invalid Movement ID
+    When they submit the Collection
+    Then the Collection isn't created
+    And a reason for the unrecognised Movement ID is provided
 
-  Scenario: A collection isn't created when malformed data is provided
-    Given a software provider has malformed collection data
-    When the collection is submitted
-    Then the collection isn't created
-    And the software provider is told which fields are invalid
+  Scenario: A Collection isn't created when malformed data is provided
+    Given they have malformed Collection data
+    When they submit the Collection
+    Then the Collection isn't created
+    And a reason for each invalid field is provided
 ```
