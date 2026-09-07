@@ -468,7 +468,21 @@
 <span class="k">      |</span><span class="s"> Delivery</span><span class="k">   |</span>
 <span class="k">      |</span><span class="s"> Receipt</span><span class="k">    |</span>
 
-<span class="nf">  </span><span class="k">Scenario Outline:</span><span class="nf"> A &lt;record&gt; isn't created when no API Code is provided</span>
+<span class="nf">  </span><span class="k">Scenario Outline:</span><span class="nf"> A &lt;record&gt; isn't created when an API Code is invalid</span>
+<span class="k">    Given </span><span class="nf">they have valid </span><span class="nv">&lt;record&gt;</span><span class="nf"> data</span>
+<span class="nf">    </span><span class="k">And </span><span class="nf">they have an invalid API Code</span>
+<span class="nf">    </span><span class="k">When </span><span class="nf">they submit the </span><span class="nv">&lt;record&gt;</span>
+<span class="nf">    </span><span class="k">Then </span><span class="nf">the </span><span class="nv">&lt;record&gt;</span><span class="nf"> isn't created</span>
+<span class="nf">    </span><span class="k">And </span><span class="nf">they should be informed that the API Code is unrecognised</span>
+
+<span class="nf">    </span><span class="k">Examples:</span>
+<span class="k">      |</span><span class="nv"> record</span><span class="k">     |</span>
+<span class="k">      |</span><span class="s"> Movement</span><span class="k">   |</span>
+<span class="k">      |</span><span class="s"> Collection</span><span class="k"> |</span>
+<span class="k">      |</span><span class="s"> Delivery</span><span class="k">   |</span>
+<span class="k">      |</span><span class="s"> Receipt</span><span class="k">    |</span>
+
+<span class="nf">  </span><span class="k">Scenario Outline:</span><span class="nf"> A &lt;record&gt; isn't created when an API Code is not provided</span>
 <span class="k">    Given </span><span class="nf">they have valid </span><span class="nv">&lt;record&gt;</span><span class="nf"> data</span>
 <span class="nf">    </span><span class="k">And </span><span class="nf">they have no API Code</span>
 <span class="nf">    </span><span class="k">When </span><span class="nf">they submit the </span><span class="nv">&lt;record&gt;</span>

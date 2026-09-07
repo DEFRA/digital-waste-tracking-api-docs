@@ -458,19 +458,19 @@
 
 <span class="nf">  </span><span class="k">Scenario:</span><span class="nf"> A Delivery is successfully created</span>
 <span class="k">    Given </span><span class="nf">they have one or more Movement IDs from prior Movements</span>
-<span class="nf">    </span><span class="k">When </span><span class="nf">they submit the Delivery with those Movement IDs</span>
+<span class="nf">    </span><span class="k">When </span><span class="nf">they submit the Delivery</span>
 <span class="nf">    </span><span class="k">Then </span><span class="nf">the Delivery is created</span>
 <span class="nf">    </span><span class="k">And </span><span class="nf">a Delivery ID is provided</span>
 
 <span class="nf">  </span><span class="k">Scenario:</span><span class="nf"> A Delivery isn't created when a Movement ID is invalid</span>
-<span class="k">    Given </span><span class="nf">they have one or more Movement IDs from prior Movements</span>
-<span class="nf">    </span><span class="k">When </span><span class="nf">they submit the Delivery with an invalid Movement ID</span>
+<span class="k">    Given </span><span class="nf">they have an invalid Movement ID</span>
+<span class="nf">    </span><span class="k">When </span><span class="nf">they submit the Delivery</span>
 <span class="nf">    </span><span class="k">Then </span><span class="nf">the Delivery isn't created</span>
 <span class="nf">    </span><span class="k">And </span><span class="nf">they should be informed of each unrecognised Movement ID</span>
 
 <span class="nf">  </span><span class="k">Scenario:</span><span class="nf"> A Delivery isn't created when a Movement ID is not provided</span>
 <span class="k">    Given </span><span class="nf">they have no Movement IDs</span>
-<span class="nf">    </span><span class="k">When </span><span class="nf">they submit the Delivery with no Movement IDs</span>
+<span class="nf">    </span><span class="k">When </span><span class="nf">they submit the Delivery</span>
 <span class="nf">    </span><span class="k">Then </span><span class="nf">the Delivery isn't created</span>
 <span class="nf">    </span><span class="k">And </span><span class="nf">they should be informed that a Movement ID is required</span>
 
