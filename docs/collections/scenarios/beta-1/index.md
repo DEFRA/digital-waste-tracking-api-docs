@@ -1,7 +1,5 @@
 # beta-1 scenarios
 
-Fix version: beta-1: Contract API Test.
-
 ## Movement
 
 - [Creating a Movement](movement/creating-a-movement.md)
