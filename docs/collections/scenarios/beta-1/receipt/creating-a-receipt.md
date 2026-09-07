@@ -35,7 +35,6 @@ Feature: Creating a Receipt
     Then the Receipt isn't created
     And a reason for each invalid field is provided
 
-  # Null Delivery ID handling – new in Phase 2
   Scenario: A Receipt is successfully created when no Delivery ID is provided but a reason is given
     Given they have valid Receipt data
     And they have no Delivery ID
