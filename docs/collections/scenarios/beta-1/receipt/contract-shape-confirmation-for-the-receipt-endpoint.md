@@ -28,7 +28,7 @@ Feature: Contract shape confirmation for the receipt endpoint
     Then the payload is rejected
     And the outcome is logged
 
-  # Receipt without a prior delivery – new in Phase 2 (D-041)
+  # Receipt without a prior delivery – new in Phase 2
   # A dedicated POST /receipts endpoint, not an optional field on the
   # canonical receipt endpoint above: the server creates an empty Delivery
   # server-side and returns its Delivery ID in the same response.
