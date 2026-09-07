@@ -233,9 +233,14 @@ components:
       properties:
         data:
           type: object
-          nullable: true
-          description: No resource id is returned for a receipt; always null.
-          example: null
+          required: [deliveryId]
+          properties:
+            deliveryId:
+              $ref: '#/components/schemas/deliveryId'
+          description: >-
+            The Delivery the receipt is recorded against — echoed from the path on
+            `POST /deliveries/{deliveryId}/receipt`, or a new empty Delivery minted by
+            `POST /deliveries/receipt`.
         validation:
           $ref: '#/components/schemas/validation'
 
@@ -381,8 +386,9 @@ paths:
       tags: [Receipt]
       summary: Record receipt of waste without a Delivery ID
       description: >-
-        Fallback path for recording receipt when no Delivery ID is available (for example, no delivery
-        was recorded beforehand). Not linked to any Movement or Delivery; `reason` must explain why.
+        Fallback for recording receipt with no prior Delivery, e.g. waste received with no movement
+        trail. Not linked to any Movement; `reason` must explain why. The server creates an empty
+        Delivery behind the scenes and returns its `deliveryId`, so the receipt stays addressable.
       operationId: recordReceiptWithoutDelivery
       requestBody:
         required: true
@@ -392,7 +398,9 @@ paths:
               $ref: '#/components/schemas/recordReceiptWithoutDeliveryRequest'
       responses:
         "201":
-          description: Receipt recorded without a Delivery link. Body carries any validation warnings.
+          description: >-
+            Receipt recorded against a server-created empty Delivery. Body carries the new Delivery ID
+            and any validation warnings.
           headers:
             x-request-id:
               $ref: '#/components/headers/RequestId'
@@ -423,7 +431,7 @@ paths:
               $ref: '#/components/schemas/recordReceiptRequest'
       responses:
         "201":
-          description: Receipt recorded against the delivery.
+          description: Receipt recorded against the delivery. Body carries the Delivery ID and any validation warnings.
           headers:
             x-request-id:
               $ref: '#/components/headers/RequestId'
