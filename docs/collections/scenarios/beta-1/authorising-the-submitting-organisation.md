@@ -49,4 +49,14 @@ Feature: Authorising the submitting organisation
       | Collection |
       | Delivery   |
       | Receipt    |
+
+  Scenario Outline: An API Code cannot be used for a different phase of Digital Waste Tracking
+    Given they have a <phase> API Code
+    When they make a request that requires an API Code for <other_phase>
+    Then they should be informed that the API Code is unrecognised
+
+    Examples:
+      | phase                                              | other_phase                                        |
+      | Digital Waste Tracking Phase 2 Collection of Waste | Digital Waste Tracking Phase 1 Receipt of Waste    |
+      | Digital Waste Tracking Phase 1 Receipt of Waste    | Digital Waste Tracking Phase 2 Collection of Waste |
 ```
