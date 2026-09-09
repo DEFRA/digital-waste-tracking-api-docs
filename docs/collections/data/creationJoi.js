@@ -260,7 +260,7 @@ const receiverSchema = Joi.object({
 
 const SIC_CODE_REGEX = /^\d{5}$/
 
-const producerSchema = Joi.object({
+export const producerSchema = Joi.object({
   wasteSource: Joi.string()
     .valid('Household', 'Commercial', 'Municipal')
     .required()
