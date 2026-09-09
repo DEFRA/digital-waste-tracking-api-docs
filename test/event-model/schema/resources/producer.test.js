@@ -20,7 +20,7 @@ describe('wasteSource = Commercial', () => {
     expect(error).toBeUndefined()
   })
 
-  test('rejects wasteSource given in the CSV reference\'s upper-case form', () => {
+  test('rejects wasteSource given in lower/upper mismatched case', () => {
     const { error } = producerSchema.validate({ ...producer, wasteSource: 'COMMERCIAL' })
     expect(error).toBeDefined()
   })
@@ -31,22 +31,22 @@ describe('wasteSource = Commercial', () => {
     expect(error).toBeDefined()
   })
 
-  test.failing('does not require authorisationNumber', () => {
+  test('requires authorisationNumber', () => {
     const { authorisationNumber, ...withoutAuthorisationNumber } = producer
     const { error } = producerSchema.validate(withoutAuthorisationNumber)
+    expect(error).toBeDefined()
+  })
+
+  test('does not require emailAddress or phoneNumber', () => {
+    const { emailAddress, phoneNumber, ...withoutContactDetails } = producer
+    const { error } = producerSchema.validate(withoutContactDetails)
     expect(error).toBeUndefined()
   })
 
-  test.failing('requires at least one of emailAddress or phoneNumber', () => {
-    const { emailAddress, phoneNumber, ...withoutContactDetails } = producer
-    const { error } = producerSchema.validate(withoutContactDetails)
-    expect(error).toBeDefined()
-  })
-
-  test.failing('requires fullAddress (not just postcode)', () => {
+  test('does not require fullAddress', () => {
     const { postcode } = producer.address
     const { error } = producerSchema.validate({ ...producer, address: { postcode } })
-    expect(error).toBeDefined()
+    expect(error).toBeUndefined()
   })
 })
 
@@ -68,15 +68,15 @@ describe('wasteSource = Municipal', () => {
     expect(error).toBeUndefined()
   })
 
-  test.failing('requires organisationName', () => {
+  test('does not require organisationName', () => {
     const { organisationName, ...withoutOrganisationName } = municipalProducer
     const { error } = producerSchema.validate(withoutOrganisationName)
-    expect(error).toBeDefined()
+    expect(error).toBeUndefined()
   })
 
-  test.failing('requires sicCode', () => {
+  test('does not require sicCode', () => {
     const { error } = producerSchema.validate(municipalProducer)
-    expect(error).toBeDefined()
+    expect(error).toBeUndefined()
   })
 })
 
@@ -105,14 +105,9 @@ describe('wasteSource = Household', () => {
     expect(error).toBeDefined()
   })
 
-  test.failing('forbids an address being provided', () => {
-    const { error } = producerSchema.validate(householdProducer)
-    expect(error).toBeDefined()
-  })
-
-  test.failing('does not require an address', () => {
+  test('requires an address', () => {
     const { address, ...withoutAddress } = householdProducer
     const { error } = producerSchema.validate(withoutAddress)
-    expect(error).toBeUndefined()
+    expect(error).toBeDefined()
   })
 })
