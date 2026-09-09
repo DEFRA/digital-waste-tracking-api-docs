@@ -1,0 +1,41 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "producer-commercial.schema.json",
+  "title": "Producer (Commercial)",
+  "description": "Producer fields specific to commercial waste. organisationName, authorisationNumber and sicCode are required.",
+  "allOf": [
+    { "$ref": "producer-base.schema.json" },
+    {
+      "type": "object",
+      "properties": {
+        "wasteSource": {
+          "const": "Commercial",
+          "description": "Waste originates from a commercial source."
+        },
+        "organisationName": {
+          "type": "string",
+          "description": "Producer organisation name."
+        },
+        "authorisationNumber": {
+          "type": "string",
+          "description": "Producer environmental permit or exemption number, in a valid UK format."
+        },
+        "sicCode": {
+          "type": "string",
+          "pattern": "^\\d{5}$",
+          "description": "Five-digit Standard Industrial Classification code."
+        },
+        "emailAddress": {
+          "type": "string",
+          "format": "email",
+          "description": "Producer contact email address."
+        },
+        "phoneNumber": {
+          "type": "string",
+          "description": "Producer contact phone number, in a valid format."
+        }
+      },
+      "required": ["wasteSource", "organisationName", "authorisationNumber", "sicCode"]
+    }
+  ]
+}
