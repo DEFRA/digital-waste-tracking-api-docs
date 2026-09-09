@@ -115,7 +115,7 @@ const disposalOrRecoveryCodeSchema = Joi.object({
  * is mandatory at Creation — it represents the Intended Treatment, a planning
  * figure; the receiver confirms the authoritative Actual Treatment at Receipt (D-031).
  */
-const createWasteItemSchema = Joi.object({
+export const createWasteItemSchema = Joi.object({
   weight: weightSchema
     .required()
     .description('Total weight of the waste item.'),
@@ -207,7 +207,7 @@ const receiverAddressSchema = businessAddressSchema.keys({
     .description('Receiver site postcode.')
 }).description('Receiver site address. Required with fullAddress and postcode when receiver.siteName is populated.')
 
-const receiverSchema = Joi.object({
+export const receiverSchema = Joi.object({
   siteName: Joi.string()
     .description('Name of the intended receiving site.'),
 
@@ -340,7 +340,7 @@ export const producerSchema = Joi.object({
 // Carrier at creation
 // ---------------------------------------------------------------------------
 
-const creationCarrierSchema = Joi.object({
+export const creationCarrierSchema = Joi.object({
   meansOfTransport: Joi.string()
     .valid(...MEANS_OF_TRANSPORT)
     .required()
