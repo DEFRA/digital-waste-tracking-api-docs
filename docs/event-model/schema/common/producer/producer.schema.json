@@ -1,0 +1,11 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "producer.schema.json",
+  "title": "Producer",
+  "description": "The organisation or party the waste originates from. Required fields vary by wasteSource — see the variants below.",
+  "oneOf": [
+    { "$ref": "producer-household.schema.json" },
+    { "$ref": "producer-commercial.schema.json" },
+    { "$ref": "producer-municipal.schema.json" }
+  ]
+}
