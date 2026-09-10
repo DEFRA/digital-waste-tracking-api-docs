@@ -8,10 +8,10 @@ theme:
   logo: logos/moj.png
   favicon: favicons/moj.ico
   features:
-    - announce.dismiss  
+    - announce.dismiss
     - navigation.tabs
     - navigation.tabs.sticky
-    - navigation.indexes 
+    - navigation.indexes
     - content.code.copy
     - search.suggest
     - search.share
@@ -36,17 +36,17 @@ theme:
     scheme: default
 nav:
   - Digital Waste Tracking:
-    - About: index.md
-    - API spec: api/openapi.md
+      - About: index.md
+      - API spec: api/openapi.md
 edit_uri: edit/main/docs/
 plugins:
   - material/search
   - swagger-ui-tag
   #- git-revision-date-localized
 #      type: custom
- #     custom_format: "%d %B %Y"
-  #- document-dates:
-   #   type: date
+#     custom_format: "%d %B %Y"
+#- document-dates:
+#   type: date
 markdown_extensions:
   - admonition
   - pymdownx.details
@@ -61,12 +61,12 @@ extra:
     provider: mike
     default: production
   social:
-    - icon: fontawesome/solid/paper-plane 
+    - icon: fontawesome/solid/paper-plane
       link: mailto:wasteuserresearch@defra.gov.uk
-      name: "Contact us here"
+      name: 'Contact us here'
     - icon: fontawesome/brands/github
       link: https://github.com/defra/waste-tracking-service
-      name: "Our DWT service is available here"
+      name: 'Our DWT service is available here'
   tags:
     Draft: draft
     Accepted: accepted
@@ -78,5 +78,4 @@ extra:
 #    provider: google
 
 #    property: G-SKK1DY4NVV
-
 

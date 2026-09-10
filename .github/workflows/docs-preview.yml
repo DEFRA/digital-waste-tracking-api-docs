@@ -15,7 +15,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Required for mike
+          fetch-depth: 0 # Required for mike
 
       - name: Configure Git credentials
         run: |
