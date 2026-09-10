@@ -1,18 +1,11 @@
 name: Test
 
 on:
+  # No `paths:` filter on pull_request, on purpose. `test` is a required status
+  # check, so it must report on every PR. A PR whose changed files matched no
+  # path filter (e.g. docs- or image-only) would leave the check pending forever
+  # and could never be merged.
   pull_request:
-    paths:
-      - 'docs/collections/data/**'
-      - 'docs/event-model/**'
-      - 'test/**'
-      - 'package.json'
-      - 'package-lock.json'
-      - 'jest.config.js'
-      # Any workflow change: `test` is a required status check, so it must
-      # report on every PR that touches CI config or such a PR can never merge
-      # (a workflow skipped by path filter leaves the check pending forever).
-      - '.github/workflows/**'
   push:
     branches:
       - main
