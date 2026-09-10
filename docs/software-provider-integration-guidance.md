@@ -18,7 +18,7 @@
 - [5. Testing and conformance](#5-testing-and-conformance)
 - [Appendix A: glossary](#appendix-a-glossary)
 - [Appendix B: endpoint quick reference](#appendix-b-endpoint-quick-reference)
-
+ 
 ---
 
 ## 1. Introduction
