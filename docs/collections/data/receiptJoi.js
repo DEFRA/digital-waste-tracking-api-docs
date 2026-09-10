@@ -9,95 +9,34 @@ import Joi from 'joi'
  *
  * This file keeps the Receipt schema, nested schemas, allowed values and field descriptions together.
  * Replace the import path below with the location of your existing shared validators/reference-data helpers.
+ *
+ * Shared sub-schemas (weight, address, references, POPs, hazardous, carrier, broker/dealer, etc.)
+ * are imported from sharedSchemas.js, like the other three event files. Only genuinely
+ * Receipt-specific shapes — wasteItem, receiver, the receipt site/address, and the
+ * disposal/recovery code entry — are defined locally here, and exported for testing.
  */
 import {
   UK_POSTCODE_REGEX,
-  IRL_POSTCODE_REGEX,
   isValidAuthorisationNumber,
-  isValidCarrierRegistrationNumber,
   isValidContainerType,
   isValidDisposalOrRecoveryCode,
   isValidEwcCode,
   isHazardousEwcCode,
   isValidHazardousWasteConsignmentCode,
-  isValidPhoneNumber,
-  isValidPopCode
+  isValidPhoneNumber
 } from './validators.js'
-
-const MEANS_OF_TRANSPORT = [
-  'Road',
-  'Rail',
-  'Air',
-  'Sea',
-  'Inland Waterway',
-  'Piped',
-  'Other'
-]
-
-const REASONS_FOR_NO_REGISTRATION_NUMBER = [
-  'ON_SITE',
-  'HOUSEHOLD',
-  'ONE_OFF',
-  'MARINE'
-]
-
-const NO_CONSIGNMENT_REASONS = [
-  'NON_HAZ_WASTE_TRANSFER',
-  'NO_DOC_WITH_WASTE',
-  'HWRC_RECEIPT'
-]
-
-const SOURCE_OF_COMPONENTS = [
-  'NOT_PROVIDED',
-  'PROVIDED_WITH_WASTE',
-  'GUIDANCE',
-  'OWN_TESTING'
-]
-
-const PHYSICAL_FORMS = [
-  'Gas',
-  'Liquid',
-  'Solid',
-  'Powder',
-  'Sludge',
-  'Mixed'
-]
-
-const WEIGHT_METRICS = [
-  'Grams',
-  'Kilograms',
-  'Tonnes'
-]
-
-const HAZARDOUS_PROPERTY_CODES = [
-  'HP_1',
-  'HP_2',
-  'HP_3',
-  'HP_4',
-  'HP_5',
-  'HP_6',
-  'HP_7',
-  'HP_8',
-  'HP_9',
-  'HP_10',
-  'HP_11',
-  'HP_12',
-  'HP_13',
-  'HP_14',
-  'HP_15'
-]
-
-const validateWithBooleanHelper = (predicate, message) => (value, helpers) => {
-  if (!predicate(value)) {
-    return helpers.message(message)
-  }
-
-  return value
-}
-
-const isProvided = (value) => value !== undefined && value !== null && value !== ''
-
-const uniqueValues = (values) => [...new Set(values)]
+import {
+  PHYSICAL_FORMS,
+  NO_CONSIGNMENT_REASONS,
+  weightSchema,
+  otherReferenceSchema,
+  popsSchema,
+  hazardousSchema,
+  carrierSchema,
+  brokerSchema,
+  validateWithBooleanHelper,
+  isProvided
+} from './sharedSchemas.js'
 
 const validateReceiptConsignmentRules = (movement, helpers) => {
   const hasHazardousEwcCode = movement.wasteItems?.some((wasteItem) =>
@@ -122,42 +61,7 @@ const validateReceiptConsignmentRules = (movement, helpers) => {
   return movement
 }
 
-const weightSchema = Joi.object({
-  metric: Joi.string()
-    .valid(...WEIGHT_METRICS)
-    .required()
-    .description(
-      'Used on both wasteItem.weight and disposalOrRecoveryCode.weight sub-objects.'
-    ),
-
-  isEstimate: Joi.boolean()
-    .strict()
-    .required()
-    .description('Flags whether the weight value is an estimate.'),
-
-  amount: Joi.number()
-    .strict()
-    .positive()
-    .required()
-    .description(
-      'For wasteItem, this is the total weight of waste received. For disposalOrRecoveryCode, this is the total weight of waste being disposed of or recovered for final treatment.'
-    )
-}).description('Weight object containing metric, amount and estimate flag.')
-
-const businessAddressSchema = Joi.object({
-  fullAddress: Joi.string()
-    .description('Business location address.'),
-
-  postcode: Joi.alternatives()
-    .try(
-      Joi.string().pattern(UK_POSTCODE_REGEX),
-      Joi.string().pattern(IRL_POSTCODE_REGEX)
-    )
-    .required()
-    .description('Accepts UK and Irish postcodes.')
-}).description('Business address object.')
-
-const receiptAddressSchema = Joi.object({
+export const receiptAddressSchema = Joi.object({
   postcode: Joi.string()
     .pattern(UK_POSTCODE_REGEX)
     .required()
@@ -170,120 +74,7 @@ const receiptAddressSchema = Joi.object({
     .description('The address where the waste is physically received.')
 }).description('Address where the waste is physically received.')
 
-const otherReferenceSchema = Joi.object({
-  reference: Joi.string()
-    .min(1)
-    .required()
-    .description('Both label and reference must be provided together as a pair.'),
-
-  label: Joi.string()
-    .min(1)
-    .required()
-    .description(
-      'Array of label/reference pairs. If the object is included, both label and reference are required together.'
-    )
-}).description('Additional movement reference label/reference pair.')
-
-const popComponentSchema = Joi.object({
-  concentration: Joi.number()
-    .strict()
-    .positive()
-    .allow(null)
-    .description('If provided, must be greater than 0.'),
-
-  code: Joi.string()
-    .empty('')
-    .empty(null)
-    .custom(
-      validateWithBooleanHelper(
-        isValidPopCode,
-        'pops.components[].code must be a valid code from the POP reference list.'
-      )
-    )
-    .description('If provided, must be a valid code from the POP reference list.')
-}).description('Persistent Organic Pollutant component.')
-
-const popsSchema = Joi.object({
-  sourceOfComponents: Joi.string()
-    .valid(...SOURCE_OF_COMPONENTS)
-    .required()
-    .description('Required when containsPops is true.'),
-
-  components: Joi.array()
-    .items(popComponentSchema)
-    .empty(null)
-    .when('sourceOfComponents', {
-      switch: [
-        {
-          is: Joi.valid('GUIDANCE', 'OWN_TESTING'),
-          then: Joi.required()
-        },
-        {
-          is: 'NOT_PROVIDED',
-          then: Joi.forbidden()
-        }
-      ],
-      otherwise: Joi.optional()
-    })
-    .description(
-      'Required when containsPops is true and sourceOfComponents is GUIDANCE or OWN_TESTING. Not allowed when sourceOfComponents is NOT_PROVIDED. May be omitted when sourceOfComponents is PROVIDED_WITH_WASTE.'
-    )
-}).description(
-  'Required when containsPops is true. Must not be provided when containsPops is false.'
-)
-
-const hazardousComponentSchema = Joi.object({
-  name: Joi.string()
-    .empty('')
-    .empty(null)
-    .description('Name of a hazardous chemical or biological component.'),
-
-  concentration: Joi.number()
-    .strict()
-    .positive()
-    .allow(null)
-    .description('If provided, must be greater than 0.')
-}).description('Hazardous chemical or biological component.')
-
-const hazardousSchema = Joi.object({
-  sourceOfComponents: Joi.string()
-    .valid(...SOURCE_OF_COMPONENTS)
-    .required()
-    .description('Required when containsHazardous is true.'),
-
-  hazCodes: Joi.array()
-    .items(Joi.string().valid(...HAZARDOUS_PROPERTY_CODES))
-    .min(1)
-    .custom((values) => uniqueValues(values))
-    .required()
-    .description(
-      'Required when containsHazardous is true. Must be valid codes from GET /reference-data/hazardous-property-codes.'
-    ),
-
-  components: Joi.array()
-    .items(hazardousComponentSchema)
-    .empty(null)
-    .when('sourceOfComponents', {
-      switch: [
-        {
-          is: Joi.valid('GUIDANCE', 'OWN_TESTING'),
-          then: Joi.required()
-        },
-        {
-          is: 'NOT_PROVIDED',
-          then: Joi.forbidden()
-        }
-      ],
-      otherwise: Joi.optional()
-    })
-    .description(
-      'Required when containsHazardous is true and sourceOfComponents is GUIDANCE or OWN_TESTING. Not allowed when sourceOfComponents is NOT_PROVIDED. May be omitted when sourceOfComponents is PROVIDED_WITH_WASTE.'
-    )
-}).description(
-  'Required when containsHazardous is true. Must not be provided when containsHazardous is false.'
-)
-
-const disposalOrRecoveryCodeSchema = Joi.object({
+export const disposalOrRecoveryCodeSchema = Joi.object({
   weight: weightSchema
     .required()
     .description(
@@ -305,7 +96,7 @@ const disposalOrRecoveryCodeSchema = Joi.object({
   'Each disposal or recovery code entry must include both a valid code and a weight.'
 )
 
-const wasteItemSchema = Joi.object({
+export const wasteItemSchema = Joi.object({
   weight: weightSchema
     .required()
     .description('Total weight of the waste item received.'),
@@ -397,117 +188,7 @@ const wasteItemSchema = Joi.object({
   )
 }).description('Waste item received as part of the receipt movement.')
 
-const carrierRegistrationNumberSchema = Joi.alternatives().try(
-  Joi.valid(null, ''),
-  Joi.string().custom(
-    validateWithBooleanHelper(
-      isValidCarrierRegistrationNumber,
-      'carrier.registrationNumber must be in a valid carrier registration number format.'
-    )
-  )
-)
-
-const carrierSchema = Joi.object({
-  vehicleRegistration: Joi.when('meansOfTransport', {
-    is: 'Road',
-    then: Joi.string().max(10).required(),
-    otherwise: Joi.forbidden()
-  }).description(
-    "Required if meansOfTransport is 'Road'. Must not be provided if meansOfTransport is any other value."
-  ),
-
-  registrationNumber: carrierRegistrationNumberSchema
-    .required()
-    .description(
-      'If null or empty, carrier.reasonForNoRegistrationNumber is required. If a valid value is provided, reasonForNoRegistrationNumber must not be provided. The two fields are mutually exclusive.'
-    ),
-
-  reasonForNoRegistrationNumber: Joi.string()
-    .valid(...REASONS_FOR_NO_REGISTRATION_NUMBER)
-    .empty('')
-    .empty(null)
-    .when('registrationNumber', {
-      switch: [
-        {
-          is: null,
-          then: Joi.required()
-        },
-        {
-          is: '',
-          then: Joi.required()
-        }
-      ],
-      otherwise: Joi.forbidden()
-    })
-    .description(
-      'Required if registrationNumber is null or empty. Must not be provided if a valid registrationNumber is given.'
-    ),
-
-  phoneNumber: Joi.string()
-    .custom(
-      validateWithBooleanHelper(
-        isValidPhoneNumber,
-        'carrier.phoneNumber must be a valid UK or international phone number.'
-      )
-    )
-    .description('Phone number of the carrier.'),
-
-  organisationName: Joi.string()
-    .required()
-    .description('Name of the carrier business.'),
-
-  meansOfTransport: Joi.string()
-    .valid(...MEANS_OF_TRANSPORT)
-    .required()
-    .description(
-      "Drives conditionality of vehicleRegistration. 'Inland Waterway' includes a space; use exact case."
-    ),
-
-  emailAddress: Joi.string()
-    .email()
-    .description('Email address of the carrier.'),
-
-  address: businessAddressSchema
-    .description(
-      'Carrier business address. If the address object is provided, postcode is mandatory.'
-    ),
-
-  otherMeansOfTransport: Joi.string()
-    .description('Optional description when the transport method is Other.')
-}).description('Carrier details for the waste movement.')
-
-const brokerOrDealerSchema = Joi.object({
-  registrationNumber: carrierRegistrationNumberSchema
-    .description(
-      'Optional. If provided, must follow the same format rules as carrier.registrationNumber.'
-    ),
-
-  phoneNumber: Joi.string()
-    .custom(
-      validateWithBooleanHelper(
-        isValidPhoneNumber,
-        'brokerOrDealer.phoneNumber must be a valid UK or international phone number.'
-      )
-    )
-    .description('Broker/dealer phone number.'),
-
-  organisationName: Joi.string()
-    .required()
-    .description(
-      'Name of the broker or dealer who arranged the transfer. Required if the brokerOrDealer object is included.'
-    ),
-
-  emailAddress: Joi.string()
-    .email()
-    .description('Broker/dealer email address.'),
-
-  address: businessAddressSchema
-    .description(
-      'Broker or dealer business address. If the address object is provided, postcode is mandatory.'
-    )
-}).description('Broker or dealer details, if one arranged the transfer.')
-
-const receiverSchema = Joi.object({
+export const receiverSchema = Joi.object({
   siteName: Joi.string()
     .required()
     .description('Name of the site receiving the waste.'),
@@ -545,7 +226,7 @@ const receiverSchema = Joi.object({
     )
 }).description('Receiving organisation and site details.')
 
-const receiptSiteSchema = Joi.object({
+export const receiptSiteSchema = Joi.object({
   address: receiptAddressSchema
     .required()
     .description('Address where the waste is physically received.')
@@ -616,7 +297,7 @@ export const receiptMovementSchema = Joi.object({
 
   carrier: carrierSchema.required(),
 
-  brokerOrDealer: brokerOrDealerSchema.optional()
+  brokerOrDealer: brokerSchema.optional()
 })
   .custom(validateReceiptConsignmentRules, 'receipt movement consignment business rules')
   .description('Receipt movement event payload.')

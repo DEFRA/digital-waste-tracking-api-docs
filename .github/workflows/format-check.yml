@@ -1,0 +1,35 @@
+name: Format Check
+
+on:
+  pull_request:
+    paths:
+      - '**/*.js'
+      - '**/*.json'
+      - '**/*.md'
+      - '**/*.yaml'
+      - '**/*.yml'
+  push:
+    branches:
+      - main
+    paths:
+      - '**/*.js'
+      - '**/*.json'
+      - '**/*.md'
+      - '**/*.yaml'
+      - '**/*.yml'
+
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - run: npm ci
+
+      - name: Check formatting
+        run: npm run format:check
