@@ -26,7 +26,10 @@ describe('registrationNumber', () => {
 
 describe('reasonForNoRegistrationNumber', () => {
   test('is not required when registrationNumber is null or empty', () => {
-    const { error } = brokerSchema.validate({ ...brokerOrDealer, registrationNumber: '' })
+    const { error } = brokerSchema.validate({
+      ...brokerOrDealer,
+      registrationNumber: ''
+    })
     expect(error).toBeUndefined()
   })
 })
@@ -41,7 +44,8 @@ describe('organisationName', () => {
 
 describe('emailAddress and phoneNumber', () => {
   test('does not require at least one of the two', () => {
-    const { emailAddress, phoneNumber, ...withoutContactDetails } = brokerOrDealer
+    const { emailAddress, phoneNumber, ...withoutContactDetails } =
+      brokerOrDealer
     const { error } = brokerSchema.validate(withoutContactDetails)
     expect(error).toBeUndefined()
   })
@@ -50,7 +54,10 @@ describe('emailAddress and phoneNumber', () => {
 describe('address', () => {
   test('requires postcode when fullAddress is provided', () => {
     const { fullAddress } = brokerOrDealer.address
-    const { error } = brokerSchema.validate({ ...brokerOrDealer, address: { fullAddress } })
+    const { error } = brokerSchema.validate({
+      ...brokerOrDealer,
+      address: { fullAddress }
+    })
     expect(error).toBeDefined()
   })
 
