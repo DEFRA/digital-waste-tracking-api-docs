@@ -64,7 +64,9 @@ const nonHazardousWasteItem = {
 }
 
 test('accepts a valid waste item with pops and hazardous properties', () => {
-  const { error } = createWasteItemSchema.validate(wasteItemWithHazardousAndPops)
+  const { error } = createWasteItemSchema.validate(
+    wasteItemWithHazardousAndPops
+  )
   expect(error).toBeUndefined()
 })
 

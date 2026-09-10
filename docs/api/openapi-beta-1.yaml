@@ -20,9 +20,7 @@ tags:
     description: Record receipt of waste at a receiver site.
 
 components:
-
   parameters:
-
     movementIdPath:
       name: movementId
       in: path
@@ -40,7 +38,6 @@ components:
         $ref: '#/components/schemas/deliveryId'
 
   headers:
-
     RequestId:
       description: Trace id for this request. Quote it to support if something goes wrong.
       schema:
@@ -238,15 +235,13 @@ components:
             deliveryId:
               $ref: '#/components/schemas/deliveryId'
           description: >-
-            The Delivery the receipt is recorded against — echoed from the path on
-            `POST /deliveries/{deliveryId}/receipt`, or a new empty Delivery minted by
-            `POST /receipts`.
+            The Delivery the receipt is recorded against — echoed from the path on `POST /deliveries/{deliveryId}/receipt`, or a new empty Delivery minted by `POST /receipts`.
+
         validation:
           $ref: '#/components/schemas/validation'
 
   responses:
-
-    "400":
+    '400':
       description: The request could not be stored (validation, format or state error).
       headers:
         x-request-id:
@@ -256,7 +251,7 @@ components:
           schema:
             $ref: '#/components/schemas/problemDetails'
 
-    "401":
+    '401':
       description: Missing or invalid authentication.
       headers:
         x-request-id:
@@ -266,7 +261,7 @@ components:
           schema:
             $ref: '#/components/schemas/problemDetails'
 
-    "500":
+    '500':
       description: Unexpected server error.
       headers:
         x-request-id:
@@ -290,7 +285,7 @@ paths:
             schema:
               $ref: '#/components/schemas/createMovementRequest'
       responses:
-        "201":
+        '201':
           description: Movement created. Body carries the new Movement ID and any validation warnings.
           headers:
             x-request-id:
@@ -299,11 +294,11 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/createMovementResponse'
-        "400":
+        '400':
           $ref: '#/components/responses/400'
-        "401":
+        '401':
           $ref: '#/components/responses/401'
-        "500":
+        '500':
           $ref: '#/components/responses/500'
 
   /movements/{movementId}/collection:
@@ -321,7 +316,7 @@ paths:
             schema:
               $ref: '#/components/schemas/recordCollectionRequest'
       responses:
-        "201":
+        '201':
           description: Collection recorded. Body carries any validation warnings.
           headers:
             x-request-id:
@@ -330,11 +325,11 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/recordCollectionResponse'
-        "400":
+        '400':
           $ref: '#/components/responses/400'
-        "401":
+        '401':
           $ref: '#/components/responses/401'
-        "404":
+        '404':
           description: Movement not found.
           headers:
             x-request-id:
@@ -349,7 +344,7 @@ paths:
                 detail: No waste movement exists with this Movement ID.
                 instance: /movements/25HRA0B2/collection
                 requestId: 4c6f9e1a-8f2b-4e3d-9a1c-2b7d5e6f0a3c
-        "500":
+        '500':
           $ref: '#/components/responses/500'
 
   /deliveries:
@@ -365,7 +360,7 @@ paths:
             schema:
               $ref: '#/components/schemas/recordDeliveryRequest'
       responses:
-        "201":
+        '201':
           description: Delivery recorded. Body carries the new Delivery ID and any validation warnings.
           headers:
             x-request-id:
@@ -374,11 +369,11 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/deliveryResponse'
-        "400":
+        '400':
           $ref: '#/components/responses/400'
-        "401":
+        '401':
           $ref: '#/components/responses/401'
-        "500":
+        '500':
           $ref: '#/components/responses/500'
 
   /receipts:
@@ -386,9 +381,8 @@ paths:
       tags: [Receipt]
       summary: Record receipt of waste without a Delivery ID
       description: >-
-        Fallback for recording receipt with no prior Delivery, e.g. waste received with no movement
-        trail. Not linked to any Movement; `reason` must explain why. The server creates an empty
-        Delivery behind the scenes and returns its `deliveryId`, so the receipt stays addressable.
+        Fallback for recording receipt with no prior Delivery, e.g. waste received with no movement trail. Not linked to any Movement; `reason` must explain why. The server creates an empty Delivery behind the scenes and returns its `deliveryId`, so the receipt stays addressable.
+
       operationId: recordReceiptWithoutDelivery
       requestBody:
         required: true
@@ -397,10 +391,10 @@ paths:
             schema:
               $ref: '#/components/schemas/recordReceiptWithoutDeliveryRequest'
       responses:
-        "201":
+        '201':
           description: >-
-            Receipt recorded against a server-created empty Delivery. Body carries the new Delivery ID
-            and any validation warnings.
+            Receipt recorded against a server-created empty Delivery. Body carries the new Delivery ID and any validation warnings.
+
           headers:
             x-request-id:
               $ref: '#/components/headers/RequestId'
@@ -408,11 +402,11 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/recordReceiptResponse'
-        "400":
+        '400':
           $ref: '#/components/responses/400'
-        "401":
+        '401':
           $ref: '#/components/responses/401'
-        "500":
+        '500':
           $ref: '#/components/responses/500'
 
   /deliveries/{deliveryId}/receipt:
@@ -430,7 +424,7 @@ paths:
             schema:
               $ref: '#/components/schemas/recordReceiptRequest'
       responses:
-        "201":
+        '201':
           description: Receipt recorded against the delivery. Body carries the Delivery ID and any validation warnings.
           headers:
             x-request-id:
@@ -439,11 +433,11 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/recordReceiptResponse'
-        "400":
+        '400':
           $ref: '#/components/responses/400'
-        "401":
+        '401':
           $ref: '#/components/responses/401'
-        "404":
+        '404':
           description: Delivery not found.
           headers:
             x-request-id:
@@ -458,5 +452,5 @@ paths:
                 detail: No delivery exists with this Delivery ID.
                 instance: /deliveries/25KMT4Z9/receipt
                 requestId: 4c6f9e1a-8f2b-4e3d-9a1c-2b7d5e6f0a3c
-        "500":
+        '500':
           $ref: '#/components/responses/500'

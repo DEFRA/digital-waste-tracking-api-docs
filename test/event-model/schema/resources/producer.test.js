@@ -21,7 +21,10 @@ describe('wasteSource = Commercial', () => {
   })
 
   test('rejects wasteSource given in lower/upper mismatched case', () => {
-    const { error } = producerSchema.validate({ ...producer, wasteSource: 'COMMERCIAL' })
+    const { error } = producerSchema.validate({
+      ...producer,
+      wasteSource: 'COMMERCIAL'
+    })
     expect(error).toBeDefined()
   })
 
@@ -45,7 +48,10 @@ describe('wasteSource = Commercial', () => {
 
   test('does not require fullAddress', () => {
     const { postcode } = producer.address
-    const { error } = producerSchema.validate({ ...producer, address: { postcode } })
+    const { error } = producerSchema.validate({
+      ...producer,
+      address: { postcode }
+    })
     expect(error).toBeUndefined()
   })
 })
@@ -96,12 +102,18 @@ describe('wasteSource = Household', () => {
   })
 
   test('rejects organisationName', () => {
-    const { error } = producerSchema.validate({ ...householdProducer, organisationName: 'Acme' })
+    const { error } = producerSchema.validate({
+      ...householdProducer,
+      organisationName: 'Acme'
+    })
     expect(error).toBeDefined()
   })
 
   test('forbids authorisationNumber', () => {
-    const { error } = producerSchema.validate({ ...householdProducer, authorisationNumber: 'EAS/P/123456' })
+    const { error } = producerSchema.validate({
+      ...householdProducer,
+      authorisationNumber: 'EAS/P/123456'
+    })
     expect(error).toBeDefined()
   })
 

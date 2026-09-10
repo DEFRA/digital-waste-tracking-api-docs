@@ -34,7 +34,9 @@ test('accepts a fully populated valid carrier', () => {
 })
 
 test('accepts a carrier without a registration number', () => {
-  const { error } = creationCarrierSchema.validate(carrierWithoutRegistrationNumber)
+  const { error } = creationCarrierSchema.validate(
+    carrierWithoutRegistrationNumber
+  )
   expect(error).toBeUndefined()
 })
 
