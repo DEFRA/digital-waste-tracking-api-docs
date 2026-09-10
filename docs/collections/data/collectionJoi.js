@@ -26,7 +26,8 @@ import {
 // Collection site
 // ---------------------------------------------------------------------------
 
-const collectionAddressSchema = businessAddressSchema
+// Exported for testing (see test/event-model/schema/collection/).
+export const collectionAddressSchema = businessAddressSchema
   .keys({
     fullAddress: Joi.string()
       .required()
@@ -35,7 +36,7 @@ const collectionAddressSchema = businessAddressSchema
   .required()
   .description('Collection address. Both postcode and fullAddress are required.')
 
-const collectionSchema = Joi.object({
+export const collectionSchema = Joi.object({
   address: collectionAddressSchema
     .required()
     .description('Address where the waste was physically collected.')
