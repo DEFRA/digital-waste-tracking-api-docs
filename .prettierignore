@@ -1,2 +1,5 @@
 .venv/
 site/
+node_modules
+coverage
+package-lock.json
