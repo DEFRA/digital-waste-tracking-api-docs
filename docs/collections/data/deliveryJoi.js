@@ -32,7 +32,8 @@ import {
 // Delivery site
 // ---------------------------------------------------------------------------
 
-const deliverySiteAddressSchema = businessAddressSchema
+// Exported for testing (see test/event-model/schema/delivery/).
+export const deliverySiteAddressSchema = businessAddressSchema
   .keys({
     fullAddress: Joi.string()
       .required()
@@ -41,7 +42,7 @@ const deliverySiteAddressSchema = businessAddressSchema
   .required()
   .description("Delivery address. Both postcode and fullAddress are required.");
 
-const deliverySiteSchema = Joi.object({
+export const deliverySiteSchema = Joi.object({
   siteName: Joi.string()
     .required()
     .description(

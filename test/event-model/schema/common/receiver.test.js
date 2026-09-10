@@ -1,3 +1,17 @@
+/**
+ * receiver is treated as one resource, identical across all events that use
+ * it (creation, receipt) — this is creationJoi.js's receiverSchema: siteName
+ * optional; authorisationNumber and the nested address both become required
+ * only when siteName is populated.
+ *
+ * receiptJoi.js does NOT import this schema yet — it still defines its own
+ * receiverSchema, a genuinely different shape: siteName and
+ * authorisationNumber are unconditionally required, it adds
+ * regulatoryPositionStatements, and it has no nested address at all (address
+ * lives separately on receipt.address / receiptSiteSchema). That split is
+ * pending a schema-side change to make receiptJoi.js import this same
+ * receiverSchema instead. See phase2-payload-resource-analysis.md §2.
+ */
 import { receiverSchema } from '../../../../docs/collections/data/creationJoi.js'
 
 const receiver = {
@@ -45,3 +59,10 @@ describe('address', () => {
     expect(error).toBeDefined()
   })
 })
+
+test.todo(
+  'receiptJoi.js imports this receiverSchema directly instead of its own ' +
+    'receiverSchema, once Receipt is updated to match this shape (unconditional ' +
+    'siteName/authorisationNumber, regulatoryPositionStatements, no nested address) — ' +
+    'reconcile the two and delete whichever definition loses out'
+)
