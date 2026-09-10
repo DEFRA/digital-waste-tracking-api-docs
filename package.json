@@ -8,12 +8,15 @@
   },
   "scripts": {
     "test": "node --no-experimental-require-module ./node_modules/jest/bin/jest.js --coverage --verbose --runInBand",
-    "test:watch": "node --no-experimental-require-module ./node_modules/jest/bin/jest.js --watch"
+    "test:watch": "node --no-experimental-require-module ./node_modules/jest/bin/jest.js --watch",
+    "format": "prettier --write \"**/*.{js,json,md,yaml,yml}\"",
+    "format:check": "prettier --check \"**/*.{js,json,md,yaml,yml}\""
   },
   "devDependencies": {
     "@babel/preset-env": "^7.29.7",
     "babel-jest": "^29.7.0",
     "jest": "^29.7.0",
-    "joi": "^17.13.3"
+    "joi": "^17.13.3",
+    "prettier": "3.8.4"
   }
 }
