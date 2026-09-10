@@ -42,10 +42,11 @@ At-a-glance view of every decision, sorted by status, then by impact (structural
 | D-017 | [Delivery PUT restricted to soft-delete only](#delivery-put-restricted-to-soft-delete-only) | ✅ Decided | 🟠 Medium | **Lifecycle** |
 | D-018 | [Delivery address derivability](#delivery-address-derivability) | ✅ Decided | 🟠 Medium | **Delivery** |
 | D-029 | [Transit collection (driver-to-driver) recorded as a sequence of collection events](#transit-collection-driver-to-driver-recorded-as-a-sequence-of-collection-events) | ✅ Decided | 🟠 Medium | **Collection** |
-| D-031 | [Disposal/recovery codes: mandatory Intended Treatment at Creation, Actual Treatment at Receipt](#disposalrecovery-codes-mandatory-intended-treatment-at-creation-actual-treatment-at-receipt) | ✅ Decided | 🟠 Medium | **Collection** |
+| D-031 | [Treatment renamed from disposal/recovery codes: mandatory Intended Treatments at Creation, Actual Treatments at Receipt](#treatment-renamed-from-disposalrecovery-codes-mandatory-intended-treatments-at-creation-actual-treatments-at-receipt) | ✅ Decided | 🟠 Medium | **Collection** |
 | D-032 | [Waste item weights are not captured at Collection or Delivery](#waste-item-weights-are-not-captured-at-collection-or-delivery) | ✅ Decided | 🟠 Medium | **Collection** |
 | D-034 | [PUT operations use history/revision pattern across all events](#put-operations-use-historyrevision-pattern-across-all-events) | ✅ Decided | 🟠 Medium | **Lifecycle** |
 | D-027 | [Per-organisation vs per-actor API credentials](#per-organisation-vs-per-actor-api-credentials) | ✅ Decided | 🟠 Medium | **Onboarding** |
+| D-042 | [Waste item classification separated from logistics fields at Creation](#waste-item-classification-separated-from-logistics-fields-at-creation) | ✅ Decided | 🟠 Medium | **Creation** |
 | D-002 | [Single OpenAPI file, not `$ref`-split](#single-openapi-file-not-ref-split) | ✅ Decided | 🟢 Low | **Spec structure** |
 | D-003 | [OpenAPI 3.0.3, not 3.1](#openapi-303-not-31) | ✅ Decided | 🟢 Low | **Spec structure** |
 | D-011 | [Static and transit collection collapsed into a single endpoint](#static-and-transit-collection-collapsed-into-a-single-endpoint) | ✅ Decided | 🟢 Low | **Collection** |
@@ -428,15 +429,18 @@ D-015's text carries a one-line amendment to its Movement↔Collection clause to
 
 <a id="d-031"></a>
 
-### Disposal/recovery codes: mandatory Intended Treatment at Creation, Actual Treatment at Receipt
+### Treatment renamed from disposal/recovery codes: mandatory Intended Treatments at Creation, Actual Treatments at Receipt
 
-**D-031** · ✅ Decided · Impact: 🟠 Medium · Area: **Collection** · Related: [D-006](#d-006), [D-019](#d-019)
+**D-031** · ✅ Decided (amended) · Impact: 🟠 Medium · Area: **Collection** · Related: [D-006](#d-006), [D-019](#d-019), [D-042](#d-042)
 
-**Context.** `wasteItems[].disposalOrRecoveryCodes` is the treatment outcome — what the receiver does with the waste (R-codes for recovery, D-codes for disposal). It's captured at both Creation and Receipt, but represents a different thing at each stage.
+**Context.** `wasteItems[].disposalOrRecoveryCodes` was the treatment outcome — what the receiver does with the waste (R-codes for recovery, D-codes for disposal) — captured at both Creation and Receipt but representing a different thing at each stage: a planned figure at Creation, the confirmed outcome at Receipt. The original decision made it mandatory (Intended Treatment) at Creation and kept it optional (Actual Treatment) at Receipt, same shape, label-only difference. Beta-2 payload work goes further and changes the field itself, not just its label.
 
-**Decision.** At Creation, the field is the **Intended Treatment** — the planned outcome, and is now mandatory (at least one code required). At Receipt, the field is the **Actual Treatment** — the confirmed, authoritative outcome as determined by the receiver, and stays optional, unchanged. Both use the same underlying shape; only the label, description, and Creation's requiredness change.
+**Decision.** A shared `Treatment` type replaces the old array entries: `{ disposalOrRecoveryCode: string, weight: Weight }` — same per-entry shape as before, just the code field renamed from `code` to `disposalOrRecoveryCode`. The wasteItem-level field is renamed per event and stays an array (a waste item can still split across more than one treatment code, e.g. part recovered under R3, part disposed under D1, each with its own weight):
 
-**Consequences.** A Movement's intended treatment is now always known from Creation onward. Receipt remains the source of truth for the actual outcome, which may differ from what was intended. Feeds the treatment-code split question ([D-019](#d-019)): Intended Treatment at Creation is not the same as `startTreatmentCode`/`finalTreatmentCode` derived at Receipt.
+- `intendedTreatments: Treatment[]` — mandatory, min 1, at Creation.
+- `actualTreatments: Treatment[]` — optional, at Receipt. Within a supplied entry, `disposalOrRecoveryCode` itself is optional — a receiving site may need to inspect or weigh before confirming the code — with `weight` conditional on the code being present. Omitting the code produces a warning, not a rejection.
+
+**Consequences.** `disposalOrRecoveryCodes` no longer exists as a field name anywhere in the Phase 2 contract. The original mandatory-at-creation/optional-at-receipt conditionality is preserved; only the field names and the internal optionality at Receipt change. Feeds the treatment-code split question ([D-019](#d-019)): Intended Treatment at Creation is not the same as `startTreatmentCode`/`finalTreatmentCode` derived at Receipt.
 
 <a id="d-032"></a>
 
@@ -565,6 +569,18 @@ This is a pure rename. It does not change the resource shape, the many-to-one ca
 2. **Correction of an empty Delivery.** [D-017](#d-017) restricts a Delivery's `PUT` to the `isDeleted` flag only. If fields from (1) ever need correcting after the fact, that either needs an exception to D-017's immutability for server-created empty Deliveries specifically, or those fields belong on the receipt instead — to be confirmed.
 3. **`reason` scope.** Whether `reason` is ever meaningful on the ordinary `POST /deliveries/{deliveryId}/receipt` flow (e.g. to explain a partial delivery), or is strictly reserved for `POST /receipts`.
 4. **Request/response shape of `POST /receipts`.** Whether it is the same receipt payload as `POST /deliveries/{deliveryId}/receipt` plus `reason`, or a distinct schema — not yet modelled in `openapi.yaml`.
+
+<a id="d-042"></a>
+
+### Waste item classification separated from logistics fields at Creation
+
+**D-042** · ✅ Decided · Impact: 🟠 Medium · Area: **Creation** · Related: [D-031](#d-031), [D-032](#d-032)
+
+**Context.** `wasteItem` today is flat: `ewcCodes`, `wasteDescription`, `physicalForm`, `numberOfContainers`, `typeOfContainers`, `weight`, `containsPops`/`pops`, `containsHazardous`/`hazardous` all sit as siblings. Policy/regulator feedback on the Creation payload flagged that this misrepresents which fields can change after Creation — `physicalForm`, container details and `weight` are updatable at Receipt (D-032 already keeps weight out of Collection/Delivery), but what the waste actually *is* — its classification — can only be changed by rejecting and re-creating, never edited in place.
+
+**Decision.** Introduce a `classification` object nested within `wasteItem`, at Creation only: `{ ewcCodes, wasteDescription, containsPops, pops, containsHazardous, hazardous }`. One `classification` per waste item (not an array). `weight`, `numberOfContainers`, `typeOfContainers` remain top-level siblings of `classification`, unchanged. This is forked as a Creation-specific `wasteItem` shape rather than a change to the shared component, so it doesn't pre-empt the Receipt beta-2 work, which defines its own lighter waste item with no classification fields at all (reclassification there happens only via reject).
+
+**Consequences.** Creation's `wasteItem` gains a nesting level; Receipt's waste item and Creation's diverge in shape by design, not by accident — Receipt carries only the logistics fields, and the one exception (a no-Delivery-ID receipt re-supplying full classification because there's no upstream Movement to inherit it from) is consistent with this split, not a contradiction of it.
 
 ## Open
 
