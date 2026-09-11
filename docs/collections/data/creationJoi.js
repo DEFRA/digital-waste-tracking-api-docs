@@ -93,7 +93,8 @@ const validateCreationRules = (movement, helpers) => {
 // ordinary Receipt endpoint's wasteItem, which drops classification entirely).
 // ---------------------------------------------------------------------------
 
-const createWasteItemSchema = wasteItemBaseSchema.keys({
+// Exported for testing (see test/event-model/schema/creation/).
+export const createWasteItemSchema = wasteItemBaseSchema.keys({
   intendedTreatments: Joi.array()
     .items(intendedTreatmentSchema)
     .min(1)
@@ -134,7 +135,8 @@ const collectionSiteSchema = businessAddressSchema.keys({
     .description('Collection site postcode.')
 }).description('Address where the waste is planned to be collected, when different from producer.address. Both fullAddress and postcode are required.')
 
-const receiverSchema = Joi.object({
+// Exported for testing (see test/event-model/schema/common/receiver.test.js).
+export const receiverSchema = Joi.object({
   siteName: Joi.string()
     .required()
     .description('Name of the intended receiving site. Required whenever the receiver object is supplied.'),
@@ -189,7 +191,7 @@ const receiverSchema = Joi.object({
 
 const SIC_CODE_REGEX = /^\d{5}$/
 
-const producerSchema = Joi.object({
+export const producerSchema = Joi.object({
   wasteSource: Joi.string()
     .valid('Household', 'Commercial', 'Municipal')
     .required()
@@ -257,7 +259,7 @@ const producerSchema = Joi.object({
 // Carrier at creation
 // ---------------------------------------------------------------------------
 
-const creationCarrierSchema = Joi.object({
+export const creationCarrierSchema = Joi.object({
   meansOfTransport: Joi.string()
     .valid(...MEANS_OF_TRANSPORT)
     .required()

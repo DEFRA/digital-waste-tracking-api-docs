@@ -8,21 +8,23 @@ import Joi from 'joi'
  * This file validates only the receipt details recorded by the receiver.
  *
  * This file keeps the Receipt schema, nested schemas, allowed values and field descriptions together.
+ * Shared sub-schemas (weight, other-reference, carrier, broker/dealer, treatments, etc.) are imported
+ * from sharedSchemas.js, like the other three event files. Only genuinely Receipt-specific shapes —
+ * receiptWasteItem, receiverSite, the receipt site/address — are defined locally here, and exported
+ * for testing (see test/event-model/schema/receipt/).
  *
- * carrier and brokerOrDealer use the shared carrierSchema/brokerSchema (sharedSchemas.js)
- * rather than local duplicates, so this endpoint picks up the same
- * registrationNumber/reasonForNoRegistrationNumber rules and reduced
- * ON_SITE/ONE_OFF/MARINE enum as Creation and Collection.
+ * carrier and brokerOrDealer use the shared carrierSchema/brokerSchema (sharedSchemas.js) rather than
+ * local duplicates, so this endpoint picks up the same registrationNumber/reasonForNoRegistrationNumber
+ * rules and reduced ON_SITE/ONE_OFF/MARINE enum as Creation and Collection.
  *
- * wasteItems drops classification entirely (D-042) — a prior Creation record
- * already carries ewcCodes, wasteDescription, pops and hazardous detail;
- * only weight/physicalForm/typeOfContainers/numberOfContainers plus
- * actualTreatments (renamed from disposalOrRecoveryCodes, D-031 amended)
- * remain. POST /receipts (the no-prior-delivery endpoint, D-041/D-042) keeps
- * the full classification, since it has no Creation record to source it from.
+ * wasteItems drops classification entirely (D-042) — a prior Creation record already carries ewcCodes,
+ * wasteDescription, pops and hazardous detail; only weight/physicalForm/typeOfContainers/
+ * numberOfContainers plus actualTreatments (renamed from disposalOrRecoveryCodes, D-031 amended)
+ * remain. POST /receipts (the no-prior-delivery endpoint, D-041/D-042) keeps the full classification,
+ * since it has no Creation record to source it from.
  *
- * receiverSite (renamed from receiver, pure rename — no shape change) is the
- * receiving organisation and site details.
+ * receiverSite (renamed from receiver, pure rename — no shape change) is the receiving organisation
+ * and site details.
  */
 import {
   UK_POSTCODE_REGEX,
@@ -32,41 +34,16 @@ import {
   isValidPhoneNumber
 } from './validators.js'
 import {
+  PHYSICAL_FORMS,
+  NO_CONSIGNMENT_REASONS,
+  weightSchema,
+  otherReferenceSchema,
   carrierSchema,
   brokerSchema,
-  actualTreatmentSchema
+  actualTreatmentSchema,
+  validateWithBooleanHelper,
+  isProvided
 } from './sharedSchemas.js'
-
-const NO_CONSIGNMENT_REASONS = [
-  'NON_HAZ_WASTE_TRANSFER',
-  'NO_DOC_WITH_WASTE',
-  'HWRC_RECEIPT'
-]
-
-const PHYSICAL_FORMS = [
-  'Gas',
-  'Liquid',
-  'Solid',
-  'Powder',
-  'Sludge',
-  'Mixed'
-]
-
-const WEIGHT_METRICS = [
-  'Grams',
-  'Kilograms',
-  'Tonnes'
-]
-
-const validateWithBooleanHelper = (predicate, message) => (value, helpers) => {
-  if (!predicate(value)) {
-    return helpers.message(message)
-  }
-
-  return value
-}
-
-const isProvided = (value) => value !== undefined && value !== null && value !== ''
 
 /**
  * D-042 note: wasteItems on this endpoint no longer carry ewcCodes (classification
@@ -88,29 +65,9 @@ const validateReceiptConsignmentRules = (movement, helpers) => {
   return movement
 }
 
-const weightSchema = Joi.object({
-  metric: Joi.string()
-    .valid(...WEIGHT_METRICS)
-    .required()
-    .description(
-      'Used on both wasteItem.weight and actualTreatments[].weight sub-objects.'
-    ),
-
-  isEstimate: Joi.boolean()
-    .strict()
-    .required()
-    .description('Flags whether the weight value is an estimate.'),
-
-  amount: Joi.number()
-    .strict()
-    .positive()
-    .required()
-    .description(
-      'For wasteItem, this is the total weight of waste received. For actualTreatments[], this is the total weight of waste being disposed of or recovered for final treatment.'
-    )
-}).description('Weight object containing metric, amount and estimate flag.')
-
-const receiptAddressSchema = Joi.object({
+// Exported for testing (see test/event-model/schema/common/address.test.js) —
+// receiptAddress is the pending outlier still to converge on the shared address shape.
+export const receiptAddressSchema = Joi.object({
   postcode: Joi.string()
     .pattern(UK_POSTCODE_REGEX)
     .required()
@@ -123,26 +80,13 @@ const receiptAddressSchema = Joi.object({
     .description('The address where the waste is physically received.')
 }).description('Address where the waste is physically received.')
 
-const otherReferenceSchema = Joi.object({
-  reference: Joi.string()
-    .min(1)
-    .required()
-    .description('Both label and reference must be provided together as a pair.'),
-
-  label: Joi.string()
-    .min(1)
-    .required()
-    .description(
-      'Array of label/reference pairs. If the object is included, both label and reference are required together.'
-    )
-}).description('Additional movement reference label/reference pair.')
-
 /**
  * Waste item received (D-042) — classification dropped entirely; a prior
  * Creation record already carries ewcCodes, wasteDescription, pops and
  * hazardous detail. Only the logistics fields plus actualTreatments remain.
  */
-const receiptWasteItemSchema = Joi.object({
+// Exported for testing (see test/event-model/schema/receipt/).
+export const receiptWasteItemSchema = Joi.object({
   weight: weightSchema
     .required()
     .description('Total weight of the waste item received.'),
@@ -189,7 +133,8 @@ const receiptWasteItemSchema = Joi.object({
 // registrationNumber/reasonForNoRegistrationNumber rules and reduced
 // ON_SITE/ONE_OFF/MARINE enum as Creation and Collection.
 
-const receiverSiteSchema = Joi.object({
+// Exported for testing (see test/event-model/schema/common/receiver.test.js).
+export const receiverSiteSchema = Joi.object({
   siteName: Joi.string()
     .required()
     .description('Name of the site receiving the waste.'),
@@ -227,7 +172,7 @@ const receiverSiteSchema = Joi.object({
     )
 }).description('Receiving organisation and site details.')
 
-const receiptSiteSchema = Joi.object({
+export const receiptSiteSchema = Joi.object({
   address: receiptAddressSchema
     .required()
     .description('Address where the waste is physically received.')

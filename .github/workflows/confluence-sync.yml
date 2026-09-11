@@ -3,7 +3,7 @@ name: Sync integration guidance to Confluence
 on:
   push:
     branches:
-      - Software-provider-guidance
+      - main
     paths:
       - 'docs/software-provider-integration-guidance.md'
       - 'docs/images/**'

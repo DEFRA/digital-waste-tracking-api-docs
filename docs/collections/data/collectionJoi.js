@@ -34,23 +34,28 @@ import {
 // Collection site
 // ---------------------------------------------------------------------------
 
-const collectionAddressSchema = businessAddressSchema
+// Exported for testing (see test/event-model/schema/collection/).
+export const collectionAddressSchema = businessAddressSchema
   .keys({
     fullAddress: Joi.string()
       .required()
       .description('Full address where the waste was physically collected.')
   })
   .required()
-  .description('Collection address. Both postcode and fullAddress are required.')
+  .description(
+    'Collection address. Both postcode and fullAddress are required.'
+  )
 
-const collectionSiteSchema = Joi.object({
+export const collectionSiteSchema = Joi.object({
   address: collectionAddressSchema
     .required()
     .description('Address where the waste was physically collected.'),
 
   emailAddress: Joi.string()
     .email()
-    .description('Email address of the site where the waste was physically collected.'),
+    .description(
+      'Email address of the site where the waste was physically collected.'
+    ),
 
   phoneNumber: Joi.string()
     .custom(
@@ -59,7 +64,9 @@ const collectionSiteSchema = Joi.object({
         'collectionSite.phoneNumber must be a valid UK or international phone number.'
       )
     )
-    .description('Phone number of the site where the waste was physically collected.')
+    .description(
+      'Phone number of the site where the waste was physically collected.'
+    )
 })
   .required()
   .description('Collection site details.')
@@ -81,8 +88,8 @@ export const recordCollectionSchema = Joi.object({
     .required()
     .description(
       'Actual date and time waste was collected. ' +
-      'For deferred or retrospective recording, use the real collection time — ' +
-      'not the time this request is submitted.'
+        'For deferred or retrospective recording, use the real collection time — ' +
+        'not the time this request is submitted.'
     ),
 
   collectionType: Joi.string()
@@ -90,15 +97,14 @@ export const recordCollectionSchema = Joi.object({
     .default('STATIC')
     .description(
       'Whether this event is a STATIC producer-to-driver pickup or a TRANSIT driver-to-driver handover (D-029). ' +
-      'Optional; defaults to STATIC when omitted. ' +
-      'Server enforces ordering: the first active event must be STATIC; every subsequent active event must be TRANSIT.'
+        'Optional; defaults to STATIC when omitted. ' +
+        'Server enforces ordering: the first active event must be STATIC; every subsequent active event must be TRANSIT.'
     ),
 
-  yourUniqueReference: Joi.string()
-    .description(
-      "Caller's own reference for this collection event. " +
+  yourUniqueReference: Joi.string().description(
+    "Caller's own reference for this collection event. " +
       'For example, a weighbridge ticket number or trip sheet reference.'
-    ),
+  ),
 
   otherReferencesForMovement: Joi.array()
     .items(otherReferenceSchema)
@@ -106,24 +112,26 @@ export const recordCollectionSchema = Joi.object({
 
   specialHandlingRequirements: Joi.string()
     .max(5000)
-    .description('Special handling instructions (e.g. fragile, hazardous, temperature-sensitive).'),
+    .description(
+      'Special handling instructions (e.g. fragile, hazardous, temperature-sensitive).'
+    ),
 
   isDeleted: Joi.boolean()
     .strict()
     .default(false)
     .description(
       'Soft-delete flag (D-009). Defaults to false on creation. ' +
-      'May be set to true only via PUT to soft-delete the collection, subject to downstream constraints. ' +
-      'Supplying true on a POST is not permitted — the service layer returns a validation warning and treats the value as false. ' +
-      'A collection cannot be deleted once its parent Movement has been referenced in a Delivery.'
+        'May be set to true only via PUT to soft-delete the collection, subject to downstream constraints. ' +
+        'Supplying true on a POST is not permitted — the service layer returns a validation warning and treats the value as false. ' +
+        'A collection cannot be deleted once its parent Movement has been referenced in a Delivery.'
     ),
 
   carrier: carrierSchema
     .required()
     .description(
       'Carrier details confirmed at collection. ' +
-      'Required even if unchanged from creation (D-008). ' +
-      'Provides the authoritative carrier record for this event.'
+        'Required even if unchanged from creation (D-008). ' +
+        'Provides the authoritative carrier record for this event.'
     ),
 
   dutyOfCareConfirmed: Joi.boolean()
@@ -131,25 +139,26 @@ export const recordCollectionSchema = Joi.object({
     .required()
     .description(
       'Carrier confirms they have inspected the waste, that it is as described, ' +
-      'and that they are content to transport it.'
+        'and that they are content to transport it.'
     ),
 
-  receivedFromCarrier: carrierSchema
-    .description(
-      'The carrier this Movement was received from on a TRANSIT handover (D-029). ' +
+  receivedFromCarrier: carrierSchema.description(
+    'The carrier this Movement was received from on a TRANSIT handover (D-029). ' +
       'Same shape as carrier. ' +
       'Required when collectionType is TRANSIT; must not be provided when collectionType is STATIC. ' +
       'Enforced server-side. Captured for the record only — not cross-checked against the preceding event.'
-    ),
+  ),
 
   brokerOrDealer: brokerSchema
     .optional()
-    .description('Optional broker/dealer details, matching the Creation and Receipt shape (D-008).'),
+    .description(
+      'Optional broker/dealer details, matching the Creation and Receipt shape (D-008).'
+    ),
 
   collectionSite: collectionSiteSchema
 }).description(
   'Record Collection request payload. ' +
-  'POST /movements/{movementId}/collection → 201 with optional validation warnings.'
+    'POST /movements/{movementId}/collection → 201 with optional validation warnings.'
 )
 
 export default recordCollectionSchema
