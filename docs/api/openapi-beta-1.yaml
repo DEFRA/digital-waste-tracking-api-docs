@@ -251,6 +251,7 @@ components:
               description: >-
                 One Delivery per distinct waste type represented in the submitted Movement IDs. Most requests produce a single-item list.
 
+
         validation:
           $ref: '#/components/schemas/validation'
 
@@ -386,6 +387,7 @@ paths:
       description: >-
         Records a delivery event and returns one Delivery ID per distinct waste type among the submitted Movements.
 
+
       operationId: recordDelivery
       requestBody:
         required: true
@@ -397,6 +399,7 @@ paths:
         '201':
           description: >-
             Delivery recorded. Body carries a list of the new Delivery(ies) — one per distinct waste type — and any validation warnings.
+
 
           headers:
             x-request-id:
