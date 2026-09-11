@@ -1,6 +1,6 @@
 /**
  * Placeholder — otherReferenceSchema (otherReferencesForMovement items) is
- * identical across all four events. See phase2-payload-resource-analysis.md §2.
+ * identical across all four events.
  */
 import { otherReferenceSchema } from '../../../../docs/collections/data/sharedSchemas.js'
 

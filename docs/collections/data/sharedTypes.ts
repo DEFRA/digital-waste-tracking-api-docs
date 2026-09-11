@@ -32,7 +32,6 @@ export type MeansOfTransport =
 
 export type CarrierReasonForNoRegistrationNumber =
   | 'ON_SITE'
-  | 'HOUSEHOLD'
   | 'ONE_OFF'
   | 'MARINE'
 
@@ -51,11 +50,36 @@ export type Weight = {
   amount: number
 }
 
-export type DisposalOrRecoveryCode = {
+/**
+ * Intended Treatment entry — replaces the old DisposalOrRecoveryCode shape
+ * (D-031 amended). Renamed field: code → disposalOrRecoveryCode; same
+ * validation. Used as intendedTreatments (Creation, mandatory, min 1) — both
+ * fields always required. Distinct from ActualTreatment (Receipt, optional),
+ * where disposalOrRecoveryCode itself is optional and weight is conditional
+ * on the code being present — a receiving site may need to inspect or weigh
+ * before confirming the code (D-031 amended).
+ */
+export type IntendedTreatment = {
   /** Valid code from GET /reference-data/disposal-or-recovery-codes. */
-  code: string
+  disposalOrRecoveryCode: string
   /** Weight of waste being disposed of or recovered under this code. */
   weight: Weight
+}
+
+/**
+ * Actual Treatment entry (D-031 amended) — used as actualTreatments at
+ * Receipt (POST /deliveries/{deliveryId}/receipt and POST /receipts), where
+ * the confirmed outcome may not be known yet at the point of receipt.
+ * disposalOrRecoveryCode is optional (omitting it produces a warning, not a
+ * rejection); weight is required only when disposalOrRecoveryCode is
+ * supplied. Distinct from IntendedTreatment (Creation, mandatory), where
+ * both fields are always required.
+ */
+export type ActualTreatment = {
+  /** Valid code from GET /reference-data/disposal-or-recovery-codes. Optional — omitting it produces a warning, not a rejection. */
+  disposalOrRecoveryCode?: string
+  /** Weight of waste being disposed of or recovered under this code. Required when disposalOrRecoveryCode is supplied. */
+  weight?: Weight
 }
 
 /**
@@ -86,10 +110,23 @@ export type ValidationResult = {
 // Waste classification sub-types
 // ---------------------------------------------------------------------------
 
+export type PopConcentrationThresholdOperator =
+  | 'LESS_THAN'
+  | 'EQUAL_TO'
+  | 'GREATER_THAN_OR_EQUAL'
+
 export type PopComponent = {
   /** Must be a valid code from GET /reference-data/pop-names */
   code?: string
+  /** Mutually exclusive with concentrationThresholdOperator — a component may state one or neither, never both. */
   concentration?: number | null
+  /**
+   * States that concentration is above/below/at the WM3-defined threshold for
+   * this component, without an exact figure — the threshold value itself is
+   * not carried here; it is resolved from WM3 guidance against code.
+   * Mutually exclusive with concentration.
+   */
+  concentrationThresholdOperator?: PopConcentrationThresholdOperator
 }
 
 export type Pops = {
@@ -102,9 +139,30 @@ export type Pops = {
   components?: PopComponent[]
 }
 
+export type HazardousConcentrationThresholdOperator =
+  | 'EQUAL_TO'
+  | 'GREATER_THAN_OR_EQUAL'
+
+/**
+ * name is currently free text — unlike PopComponent's code, there is no
+ * hazardous-component-name reference list/endpoint yet, so a future WM3
+ * threshold lookup against name is not resolvable from the API alone today.
+ */
 export type HazardousComponent = {
   name?: string
+  /**
+   * One of concentration or concentrationThresholdOperator is required when
+   * name is supplied. Mutually exclusive with concentrationThresholdOperator
+   * — a component may state one or neither, never both.
+   */
   concentration?: number | null
+  /**
+   * States that concentration is above/at the WM3-defined threshold for this
+   * component, without an exact figure — the threshold value itself is not
+   * carried here; it is resolved from WM3 guidance against name. Mutually
+   * exclusive with concentration.
+   */
+  concentrationThresholdOperator?: HazardousConcentrationThresholdOperator
 }
 
 export type Hazardous = {
@@ -116,6 +174,39 @@ export type Hazardous = {
    * Forbidden when sourceOfComponents is NOT_PROVIDED.
    */
   components?: HazardousComponent[]
+}
+
+// ---------------------------------------------------------------------------
+// Waste item classification and base (D-042)
+//
+// Shared by Creation and POST /receipts (the no-prior-delivery Receipt
+// endpoint) — both need the full classification since neither can source it
+// from elsewhere. POST /deliveries/{deliveryId}/receipt (the ordinary
+// Receipt endpoint) does NOT extend WasteItemBase — a Creation record
+// already exists, so it drops classification and defines its own light
+// waste item (logistics fields + actualTreatments only).
+// ---------------------------------------------------------------------------
+
+export type WasteItemClassification = {
+  ewcCodes: string[]
+  wasteDescription: string
+  containsPops: boolean
+  pops?: Pops
+  containsHazardous: boolean
+  hazardous?: Hazardous
+}
+
+/**
+ * Field order matches the live createWasteItemSchema/CreateWasteItem
+ * (weight, numberOfContainers, typeOfContainers, physicalForm), not the
+ * order in decisions.md's D-042 prose.
+ */
+export type WasteItemBase = {
+  classification: WasteItemClassification
+  weight: Weight
+  numberOfContainers: number
+  typeOfContainers: string
+  physicalForm: PhysicalForm
 }
 
 // ---------------------------------------------------------------------------
@@ -154,10 +245,16 @@ export type CarrierDetails = {
 /**
  * Broker or dealer who arranged the movement.
  * Required only when the movement is broker/dealer initiated.
+ *
+ * registrationNumber is required whenever this object is supplied (may be
+ * null or empty, in which case reasonForNoRegistrationNumber is required in
+ * its place — mutually exclusive with a valid registrationNumber, same
+ * pattern as CarrierDetails).
  */
 export type BrokerDetails = {
   organisationName: string
-  registrationNumber?: string | null
+  registrationNumber: string | null
+  reasonForNoRegistrationNumber?: CarrierReasonForNoRegistrationNumber
   emailAddress?: string
   phoneNumber?: string
   address?: BusinessAddress

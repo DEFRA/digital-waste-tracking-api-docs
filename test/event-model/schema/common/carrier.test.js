@@ -9,8 +9,7 @@
  * more relaxed creationCarrierSchema (only meansOfTransport required), kept
  * around solely for Creation's current, deliberately looser rules. That
  * split is pending a schema-side change to make creationJoi.js import this
- * same carrierSchema; see phase2-payload-resource-analysis.md §3 for the
- * full comparison, including a flagged inconsistency: otherMeansOfTransport
+ * same carrierSchema — including a flagged inconsistency: otherMeansOfTransport
  * is unconstrained here (allowed regardless of meansOfTransport), whereas
  * creationCarrierSchema forbids it unless meansOfTransport is 'Other'.
  */
@@ -104,7 +103,7 @@ describe('registrationNumber and reasonForNoRegistrationNumber', () => {
 describe('otherMeansOfTransport', () => {
   test.todo(
     'documents whether otherMeansOfTransport should stay unconstrained here, ' +
-      'or be forbidden-unless-Other to match creationCarrierSchema (flagged inconsistency, analysis §3)'
+      'or be forbidden-unless-Other to match creationCarrierSchema (flagged inconsistency)'
   )
 })
 

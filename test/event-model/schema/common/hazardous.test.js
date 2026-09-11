@@ -2,7 +2,7 @@
  * Placeholder — hazardousSchema/hazardousComponentSchema, required on a
  * wasteItem when containsHazardous is true (creation, receipt only). The
  * containsHazardous wiring itself is tested alongside each event's
- * wasteItem, not here. See phase2-payload-resource-analysis.md §2 and §4.
+ * wasteItem, not here.
  */
 import {
   hazardousSchema,
@@ -68,4 +68,26 @@ describe('components', () => {
 
 describe('hazardousComponent', () => {
   test.todo('accepts a null concentration')
+
+  test('accepts concentrationThresholdOperator instead of concentration when name is supplied', () => {
+    const { error } = hazardousComponentSchema.validate({
+      name: 'Cadmium',
+      concentrationThresholdOperator: 'GREATER_THAN_OR_EQUAL'
+    })
+    expect(error).toBeUndefined()
+  })
+
+  test('requires one of concentration or concentrationThresholdOperator when name is supplied', () => {
+    const { error } = hazardousComponentSchema.validate({ name: 'Cadmium' })
+    expect(error).toBeDefined()
+  })
+
+  test('rejects concentration and concentrationThresholdOperator together', () => {
+    const { error } = hazardousComponentSchema.validate({
+      name: 'Cadmium',
+      concentration: 5,
+      concentrationThresholdOperator: 'EQUAL_TO'
+    })
+    expect(error).toBeDefined()
+  })
 })

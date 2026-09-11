@@ -17,20 +17,29 @@ test('accepts a valid brokerOrDealer', () => {
 })
 
 describe('registrationNumber', () => {
-  test('is not required', () => {
+  test('is required', () => {
     const { registrationNumber, ...withoutRegistrationNumber } = brokerOrDealer
     const { error } = brokerSchema.validate(withoutRegistrationNumber)
+    expect(error).toBeDefined()
+  })
+
+  test('accepts an empty string paired with reasonForNoRegistrationNumber', () => {
+    const { error } = brokerSchema.validate({
+      ...brokerOrDealer,
+      registrationNumber: '',
+      reasonForNoRegistrationNumber: 'ONE_OFF'
+    })
     expect(error).toBeUndefined()
   })
 })
 
 describe('reasonForNoRegistrationNumber', () => {
-  test('is not required when registrationNumber is null or empty', () => {
+  test('is required when registrationNumber is null or empty', () => {
     const { error } = brokerSchema.validate({
       ...brokerOrDealer,
       registrationNumber: ''
     })
-    expect(error).toBeUndefined()
+    expect(error).toBeDefined()
   })
 })
 

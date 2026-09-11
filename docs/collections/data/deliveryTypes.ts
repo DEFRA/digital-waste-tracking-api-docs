@@ -1,6 +1,6 @@
 /**
  * TypeScript types for the Record Delivery event.
- * POST /deliveries → 201 with deliveryId
+ * POST /deliveries → 201 with an array of delivery entries (D-010)
  *
  * The delivery event records the carrier-declared place where one or more
  * Movements are dropped off or left. It mints a Delivery ID that may be used
@@ -9,7 +9,8 @@
  *
  * Key design decisions:
  *   D-007 — delivery aggregates one or more Movement IDs (movementIds array)
- *   D-010 — hazardous waste: exactly one Movement ID per delivery
+ *   D-010 — hazardous Movements always split into their own delivery entry;
+ *           non-hazardous Movements aggregate into one; a single request may mix both
  *   D-012 — Delivery ID is the only public identifier minted here
  *   D-013 — Delivery ID is an 8-character year-prefixed sqid
  *
@@ -76,12 +77,13 @@ export type RecordDelivery = {
    * One or more Movement IDs delivered in this delivery.
    * - Single-collection runs: array of one.
    * - Multi-collection runs: all Movement IDs delivered together at the same site.
-   * - Hazardous waste (D-010): exactly one Movement ID is allowed per delivery.
+   * - May mix hazardous and non-hazardous Movement IDs (D-010) — the server
+   *   splits them into separate delivery entries in the response.
    */
   movementIds: string[];
 
   /** Actual date and time of the delivery. ISO 8601. */
-  actualDateTimeDelivery: string;
+  actualDateTimeDelivered: string;
 
   yourUniqueReference?: string;
   otherReferencesForMovement?: OtherReferenceForMovement[];
@@ -101,18 +103,31 @@ export type RecordDelivery = {
   deliverySite: DeliverySite;
 };
 
-export type RecordDeliveryResponse = {
+export type DeliveryResult = {
   /**
-   * The Delivery ID minted by the server.
-   * 8-character year-prefixed sqid (D-013).
-   * The driver may pass this value to the receiver so they can record
-   * the receipt via POST /deliveries/{deliveryId}/receipt, where applicable.
+   * The Delivery ID for this entry.
+   * Freshly minted (8-character year-prefixed sqid, D-013) for the
+   * aggregated non-hazardous entry; equal to the submitted Movement ID
+   * for a hazardous entry (D-010).
    */
   deliveryId: string;
+  /** Movement IDs covered by this delivery entry (D-010). */
+  movementIds: string[];
   /**
-   * Optional validation warnings. For now, server-side business-rule checks
-   * such as hazardous aggregation may be surfaced as BusinessRuleViolation warnings.
+   * Whether this entry is the aggregated non-hazardous delivery or one
+   * of the per-Movement hazardous deliveries (D-010).
    */
+  wasteType: "HAZARDOUS" | "NON_HAZARDOUS";
+};
+
+export type RecordDeliveryResponse = {
+  /**
+   * One entry per resulting delivery. Hazardous Movements are never
+   * aggregated — each returns its own entry; non-hazardous Movements
+   * are aggregated under one entry (D-010).
+   */
+  deliveries: DeliveryResult[];
+  /** Optional validation warnings. */
   validation?: {
     warnings?: ValidationResult[];
   };

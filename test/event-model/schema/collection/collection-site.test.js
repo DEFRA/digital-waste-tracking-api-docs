@@ -1,12 +1,15 @@
 /**
- * Placeholder — collectionSchema (collection.address), exported from
- * collectionJoi.js for testing. Its address overlay requires fullAddress,
- * unlike the base businessAddressSchema (common/address.test.js). See
- * phase2-payload-resource-analysis.md §2.
+ * Placeholder — collectionSiteSchema (collectionSite), exported from
+ * collectionJoi.js for testing. Its address overlay (collectionAddressSchema,
+ * also exported for testing) requires fullAddress, unlike the base
+ * businessAddressSchema (common/address.test.js).
  */
-import { collectionSchema } from '../../../../docs/collections/data/collectionJoi.js'
+import {
+  collectionSiteSchema,
+  collectionAddressSchema
+} from '../../../../docs/collections/data/collectionJoi.js'
 
-const collection = {
+const collectionSite = {
   address: {
     fullAddress: '1 Collection Yard, Test City',
     postcode: 'TE1 1ST'
@@ -14,25 +17,37 @@ const collection = {
 }
 
 test('accepts a valid collection site', () => {
-  const { error } = collectionSchema.validate(collection)
+  const { error } = collectionSiteSchema.validate(collectionSite)
   expect(error).toBeUndefined()
 })
 
 describe('address', () => {
   test('is required', () => {
-    const { error } = collectionSchema.validate({})
+    const { error } = collectionSiteSchema.validate({})
     expect(error).toBeDefined()
   })
 
+  test('accepts a valid address', () => {
+    const { error } = collectionAddressSchema.validate(collectionSite.address)
+    expect(error).toBeUndefined()
+  })
+
   test('requires fullAddress, unlike the base business address', () => {
-    const { postcode } = collection.address
-    const { error } = collectionSchema.validate({ address: { postcode } })
+    const { postcode } = collectionSite.address
+    const { error } = collectionAddressSchema.validate({ postcode })
     expect(error).toBeDefined()
   })
 
   test('requires postcode', () => {
-    const { fullAddress } = collection.address
-    const { error } = collectionSchema.validate({ address: { fullAddress } })
+    const { fullAddress } = collectionSite.address
+    const { error } = collectionAddressSchema.validate({ fullAddress })
     expect(error).toBeDefined()
+  })
+})
+
+describe('emailAddress and phoneNumber', () => {
+  test('does not require at least one of the two', () => {
+    const { error } = collectionSiteSchema.validate(collectionSite)
+    expect(error).toBeUndefined()
   })
 })

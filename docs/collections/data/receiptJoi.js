@@ -8,20 +8,28 @@ import Joi from 'joi'
  * This file validates only the receipt details recorded by the receiver.
  *
  * This file keeps the Receipt schema, nested schemas, allowed values and field descriptions together.
- * Replace the import path below with the location of your existing shared validators/reference-data helpers.
+ * Shared sub-schemas (weight, other-reference, carrier, broker/dealer, treatments, etc.) are imported
+ * from sharedSchemas.js, like the other three event files. Only genuinely Receipt-specific shapes —
+ * receiptWasteItem, receiverSite, the receipt site/address — are defined locally here, and exported
+ * for testing (see test/event-model/schema/receipt/).
  *
- * Shared sub-schemas (weight, address, references, POPs, hazardous, carrier, broker/dealer, etc.)
- * are imported from sharedSchemas.js, like the other three event files. Only genuinely
- * Receipt-specific shapes — wasteItem, receiver, the receipt site/address, and the
- * disposal/recovery code entry — are defined locally here, and exported for testing.
+ * carrier and brokerOrDealer use the shared carrierSchema/brokerSchema (sharedSchemas.js) rather than
+ * local duplicates, so this endpoint picks up the same registrationNumber/reasonForNoRegistrationNumber
+ * rules and reduced ON_SITE/ONE_OFF/MARINE enum as Creation and Collection.
+ *
+ * wasteItems drops classification entirely (D-042) — a prior Creation record already carries ewcCodes,
+ * wasteDescription, pops and hazardous detail; only weight/physicalForm/typeOfContainers/
+ * numberOfContainers plus actualTreatments (renamed from disposalOrRecoveryCodes, D-031 amended)
+ * remain. POST /receipts (the no-prior-delivery endpoint, D-041/D-042) keeps the full classification,
+ * since it has no Creation record to source it from.
+ *
+ * receiverSite (renamed from receiver, pure rename — no shape change) is the receiving organisation
+ * and site details.
  */
 import {
   UK_POSTCODE_REGEX,
   isValidAuthorisationNumber,
   isValidContainerType,
-  isValidDisposalOrRecoveryCode,
-  isValidEwcCode,
-  isHazardousEwcCode,
   isValidHazardousWasteConsignmentCode,
   isValidPhoneNumber
 } from './validators.js'
@@ -30,21 +38,25 @@ import {
   NO_CONSIGNMENT_REASONS,
   weightSchema,
   otherReferenceSchema,
-  popsSchema,
-  hazardousSchema,
   carrierSchema,
   brokerSchema,
+  actualTreatmentSchema,
   validateWithBooleanHelper,
   isProvided
 } from './sharedSchemas.js'
 
+/**
+ * D-042 note: wasteItems on this endpoint no longer carry ewcCodes (classification
+ * is dropped — a prior Creation record already has it), so "reasonForNoConsignmentCode
+ * required when hazardous" can no longer be checked from the request body alone.
+ * That half of the rule is now enforced server-side against the linked Movement's
+ * classification. Only the mutual-exclusivity half is checkable here.
+ */
 const validateReceiptConsignmentRules = (movement, helpers) => {
-  const hasHazardousEwcCode = movement.wasteItems?.some((wasteItem) =>
-    wasteItem.ewcCodes?.some((ewcCode) => isHazardousEwcCode(ewcCode))
-  )
-
   const hasConsignmentCode = isProvided(movement.hazardousWasteConsignmentCode)
-  const hasReasonForNoConsignmentCode = isProvided(movement.reasonForNoConsignmentCode)
+  const hasReasonForNoConsignmentCode = isProvided(
+    movement.reasonForNoConsignmentCode
+  )
 
   if (hasConsignmentCode && hasReasonForNoConsignmentCode) {
     return helpers.message(
@@ -52,15 +64,11 @@ const validateReceiptConsignmentRules = (movement, helpers) => {
     )
   }
 
-  if (hasHazardousEwcCode && !hasConsignmentCode && !hasReasonForNoConsignmentCode) {
-    return helpers.message(
-      'reasonForNoConsignmentCode is required when the movement contains hazardous waste and no hazardousWasteConsignmentCode is provided.'
-    )
-  }
-
   return movement
 }
 
+// Exported for testing (see test/event-model/schema/common/address.test.js) —
+// receiptAddress is the pending outlier still to converge on the shared address shape.
 export const receiptAddressSchema = Joi.object({
   postcode: Joi.string()
     .pattern(UK_POSTCODE_REGEX)
@@ -74,36 +82,23 @@ export const receiptAddressSchema = Joi.object({
     .description('The address where the waste is physically received.')
 }).description('Address where the waste is physically received.')
 
-export const disposalOrRecoveryCodeSchema = Joi.object({
-  weight: weightSchema
-    .required()
-    .description(
-      'Represents the weight of waste being disposed of or recovered for final treatment under this specific code.'
-    ),
-
-  code: Joi.string()
-    .required()
-    .custom(
-      validateWithBooleanHelper(
-        isValidDisposalOrRecoveryCode,
-        'disposalOrRecoveryCode.code must be a valid disposal or recovery code.'
-      )
-    )
-    .description(
-      'Must be a valid code from GET /reference-data/disposal-or-recovery-codes.'
-    )
-}).description(
-  'Each disposal or recovery code entry must include both a valid code and a weight.'
-)
-
-export const wasteItemSchema = Joi.object({
+/**
+ * Waste item received (D-042) — classification dropped entirely; a prior
+ * Creation record already carries ewcCodes, wasteDescription, pops and
+ * hazardous detail. Only the logistics fields plus actualTreatments remain.
+ */
+// Exported for testing (see test/event-model/schema/receipt/).
+export const receiptWasteItemSchema = Joi.object({
   weight: weightSchema
     .required()
     .description('Total weight of the waste item received.'),
 
-  wasteDescription: Joi.string()
+  physicalForm: Joi.string()
+    .valid(...PHYSICAL_FORMS)
     .required()
-    .description('Detailed description of the specific waste material.'),
+    .description(
+      'Must be exactly one of the six permitted values. Case-sensitive; use exact case shown.'
+    ),
 
   typeOfContainers: Joi.string()
     .required()
@@ -117,13 +112,6 @@ export const wasteItemSchema = Joi.object({
       'Must match a valid code from GET /reference-data/container-types. Use exact case returned by the GET method.'
     ),
 
-  physicalForm: Joi.string()
-    .valid(...PHYSICAL_FORMS)
-    .required()
-    .description(
-      'Must be exactly one of the six permitted values. Case-sensitive; use exact case shown.'
-    ),
-
   numberOfContainers: Joi.number()
     .strict()
     .integer()
@@ -133,62 +121,24 @@ export const wasteItemSchema = Joi.object({
       'Must be 0 or greater. Represents the number of containers for storing, transporting, or disposing of the waste.'
     ),
 
-  ewcCodes: Joi.array()
-    .items(
-      Joi.string().custom(
-        validateWithBooleanHelper(
-          isValidEwcCode,
-          'ewcCodes must contain valid EWC codes from the official reference list.'
-        )
-      )
+  actualTreatments: Joi.array()
+    .items(actualTreatmentSchema)
+    .description(
+      "Actual Treatment (D-031 amended, D-042). Optional. Each entry's disposalOrRecoveryCode is itself " +
+        'optional — a receiving site may need to inspect or weigh before confirming the code. Omitting it ' +
+        'produces a warning, not a rejection; weight is required only when the code is supplied.'
     )
-    .min(1)
-    .max(5)
-    .required()
-    .description(
-      'Must be valid codes from the official EWC catalogue. Use GET /reference-data/ewc-codes for the full reference list. POPs can exist in both hazardous and non-hazardous waste.'
-    ),
+}).description(
+  'Waste item received as part of the receipt movement (D-042 — classification dropped).'
+)
 
-  disposalOrRecoveryCodes: Joi.array()
-    .items(disposalOrRecoveryCodeSchema)
-    .description(
-      'Actual Treatment (D-031). The confirmed treatment, as determined by the receiver — ' +
-      'the authoritative treatment outcome. Optional, unchanged from Phase 1. ' +
-      'Each disposal or recovery code entry must include both a valid code and a weight.'
-    ),
+// carrier and brokerOrDealer use the shared carrierSchema/brokerSchema (sharedSchemas.js)
+// rather than local duplicates, so this endpoint picks up the same
+// registrationNumber/reasonForNoRegistrationNumber rules and reduced
+// ON_SITE/ONE_OFF/MARINE enum as Creation and Collection.
 
-  containsPops: Joi.boolean()
-    .strict()
-    .required()
-    .description(
-      'Flags whether the waste contains Persistent Organic Pollutants. Drives conditionality of the entire pops sub-object.'
-    ),
-
-  pops: Joi.when('containsPops', {
-    is: true,
-    then: popsSchema.required(),
-    otherwise: Joi.forbidden()
-  }).description(
-    'Required when containsPops is true. Must not be provided when containsPops is false.'
-  ),
-
-  containsHazardous: Joi.boolean()
-    .strict()
-    .required()
-    .description(
-      'Flags whether the waste contains hazardous properties. Drives conditionality of the entire hazardous sub-object.'
-    ),
-
-  hazardous: Joi.when('containsHazardous', {
-    is: true,
-    then: hazardousSchema.required(),
-    otherwise: Joi.forbidden()
-  }).description(
-    'Required when containsHazardous is true. Must not be provided when containsHazardous is false.'
-  )
-}).description('Waste item received as part of the receipt movement.')
-
-export const receiverSchema = Joi.object({
+// Exported for testing (see test/event-model/schema/common/receiver.test.js).
+export const receiverSiteSchema = Joi.object({
   siteName: Joi.string()
     .required()
     .description('Name of the site receiving the waste.'),
@@ -203,7 +153,7 @@ export const receiverSchema = Joi.object({
     .custom(
       validateWithBooleanHelper(
         isValidPhoneNumber,
-        'receiver.phoneNumber must be a valid UK or Irish phone number.'
+        'receiverSite.phoneNumber must be a valid UK or Irish phone number.'
       )
     )
     .description('Phone number of the receiving organisation.'),
@@ -233,16 +183,9 @@ export const receiptSiteSchema = Joi.object({
 }).description('Physical receipt site details.')
 
 export const receiptMovementSchema = Joi.object({
-  yourUniqueReference: Joi.string()
-    .description(
-      "No specific business rules. For operator's own reference purposes."
-    ),
-
-  specialHandlingRequirements: Joi.string()
-    .max(5000)
-    .description(
-      'Required for abnormal hazardous waste or non-hazardous waste with harmful chemical, biological or physical characteristics.'
-    ),
+  yourUniqueReference: Joi.string().description(
+    "No specific business rules. For operator's own reference purposes."
+  ),
 
   otherReferencesForMovement: Joi.array()
     .items(otherReferenceSchema)
@@ -286,12 +229,12 @@ export const receiptMovementSchema = Joi.object({
     ),
 
   wasteItems: Joi.array()
-    .items(wasteItemSchema)
+    .items(receiptWasteItemSchema)
     .min(1)
     .required()
     .description('At least one waste item is required.'),
 
-  receiver: receiverSchema.required(),
+  receiverSite: receiverSiteSchema.required(),
 
   receipt: receiptSiteSchema.required(),
 
@@ -299,7 +242,10 @@ export const receiptMovementSchema = Joi.object({
 
   brokerOrDealer: brokerSchema.optional()
 })
-  .custom(validateReceiptConsignmentRules, 'receipt movement consignment business rules')
+  .custom(
+    validateReceiptConsignmentRules,
+    'receipt movement consignment business rules'
+  )
   .description('Receipt movement event payload.')
 
 // Alias retained for projects that currently import receiptJoi.

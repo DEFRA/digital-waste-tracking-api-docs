@@ -1,7 +1,6 @@
 /**
  * Placeholder — weightSchema is used identically by wasteItem (creation,
- * receipt) and disposalOrRecoveryCode (creation, receipt). See
- * phase2-payload-resource-analysis.md §2.
+ * receipt) and disposalOrRecoveryCode (creation, receipt).
  */
 import { weightSchema } from '../../../../docs/collections/data/sharedSchemas.js'
 

@@ -34,10 +34,10 @@ describe('wasteSource = Commercial', () => {
     expect(error).toBeDefined()
   })
 
-  test('requires authorisationNumber', () => {
+  test('does not require authorisationNumber', () => {
     const { authorisationNumber, ...withoutAuthorisationNumber } = producer
     const { error } = producerSchema.validate(withoutAuthorisationNumber)
-    expect(error).toBeDefined()
+    expect(error).toBeUndefined()
   })
 
   test('does not require emailAddress or phoneNumber', () => {
@@ -74,10 +74,10 @@ describe('wasteSource = Municipal', () => {
     expect(error).toBeUndefined()
   })
 
-  test('does not require organisationName', () => {
+  test('requires organisationName', () => {
     const { organisationName, ...withoutOrganisationName } = municipalProducer
     const { error } = producerSchema.validate(withoutOrganisationName)
-    expect(error).toBeUndefined()
+    expect(error).toBeDefined()
   })
 
   test('does not require sicCode', () => {
@@ -89,10 +89,6 @@ describe('wasteSource = Municipal', () => {
 describe('wasteSource = Household', () => {
   const householdProducer = {
     wasteSource: 'Household',
-    address: {
-      fullAddress: '5 Elm Street, Test Town',
-      postcode: 'TE2 4HH'
-    },
     councilMovement: true
   }
 
@@ -117,9 +113,14 @@ describe('wasteSource = Household', () => {
     expect(error).toBeDefined()
   })
 
-  test('requires an address', () => {
-    const { address, ...withoutAddress } = householdProducer
-    const { error } = producerSchema.validate(withoutAddress)
+  test('forbids an address', () => {
+    const { error } = producerSchema.validate({
+      ...householdProducer,
+      address: {
+        fullAddress: '5 Elm Street, Test Town',
+        postcode: 'TE2 4HH'
+      }
+    })
     expect(error).toBeDefined()
   })
 })

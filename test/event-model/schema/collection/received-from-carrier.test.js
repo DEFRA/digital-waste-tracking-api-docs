@@ -1,8 +1,8 @@
 /**
  * Placeholder — receivedFromCarrier only carries meaning as part of the
  * recordCollectionSchema root, in relation to collectionType. Per
- * phase2-payload-resource-analysis.md §4, api/openapi.yaml and this file's
- * own header comment in collectionJoi.js describe:
+ * api/openapi.yaml and this file's own header comment in collectionJoi.js
+ * describe:
  *   collectionType === 'TRANSIT' -> receivedFromCarrier required
  *   collectionType === 'STATIC'  -> receivedFromCarrier forbidden
  * but collectionJoi.js does not actually enforce this today — receivedFromCarrier
@@ -22,7 +22,8 @@ const baseCollection = {
     organisationName: 'Test Carrier Ltd',
     vehicleRegistration: 'AB12 CDE'
   },
-  collection: {
+  dutyOfCareConfirmed: true,
+  collectionSite: {
     address: {
       fullAddress: '1 Collection Yard, Test City',
       postcode: 'TE1 1ST'

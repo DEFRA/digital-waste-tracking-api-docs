@@ -6,10 +6,12 @@
  * POST appends the next event in the Movement's ordered collection sequence (D-029):
  *   - First active event must be STATIC (producer-to-driver pickup).
  *   - Subsequent active events must be TRANSIT (driver-to-driver handover).
- * Carrier is required at collection time.
+ * Carrier and dutyOfCareConfirmed are required at collection time (DWTC-153).
  */
 
 // Re-export carrier and broker/dealer fixtures so tests can reuse them.
+// brokerOrDealer already carries registrationNumber (required whenever supplied,
+// per the shared brokerSchema in sharedSchemas.js).
 export { carrier, brokerOrDealer } from './creationEvent.js'
 
 import { carrier, brokerOrDealer } from './creationEvent.js'
@@ -26,11 +28,21 @@ export const receivedFromCarrier = {
 // Sub-objects
 // ---------------------------------------------------------------------------
 
-export const collection = {
+export const collectionSite = {
   address: {
     fullAddress: '10 Industrial Way, Test City',
     postcode: 'TE1 2PQ'
   }
+}
+
+// collectionSite with the optional emailAddress/phoneNumber fields populated.
+export const collectionSiteWithContactDetails = {
+  address: {
+    fullAddress: '10 Industrial Way, Test City',
+    postcode: 'TE1 2PQ'
+  },
+  emailAddress: 'siteoffice@example.com',
+  phoneNumber: '01234567890'
 }
 
 // ---------------------------------------------------------------------------
@@ -48,10 +60,12 @@ export const publicPostBody = {
       reference: 'WB-20250915-001'
     }
   ],
+  specialHandlingRequirements: 'Handle with care and keep upright.',
   isDeleted: false,
   carrier,
+  dutyOfCareConfirmed: true,
   brokerOrDealer,
-  collection
+  collectionSite: collectionSiteWithContactDetails
 }
 
 // Deferred recording — driver couldn't record at the time (no signal, paper-only site)
@@ -62,7 +76,8 @@ export const deferredPostBody = {
   yourUniqueReference: 'DRIVER-TRIP-001-DEFERRED',
   isDeleted: false,
   carrier,
-  collection
+  dutyOfCareConfirmed: true,
+  collectionSite
 }
 
 // Minimal valid payload — only required fields
@@ -71,7 +86,8 @@ export const minimalPostBody = {
   actualDateTimeCollected: '2025-09-15T08:34:00Z',
   isDeleted: false,
   carrier,
-  collection
+  dutyOfCareConfirmed: true,
+  collectionSite
 }
 
 // ---------------------------------------------------------------------------
@@ -92,8 +108,9 @@ export const transitPostBody = {
     meansOfTransport: 'Road',
     vehicleRegistration: 'SL21 DEF'
   },
+  dutyOfCareConfirmed: true,
   receivedFromCarrier,
-  collection
+  collectionSite
 }
 
 // ---------------------------------------------------------------------------

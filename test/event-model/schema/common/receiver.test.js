@@ -1,8 +1,8 @@
 /**
  * receiver is treated as one resource, identical across all events that use
  * it (creation, receipt) — this is creationJoi.js's receiverSchema: siteName
- * optional; authorisationNumber and the nested address both become required
- * only when siteName is populated.
+ * is unconditionally required, and authorisationNumber and the nested
+ * address are required as a result.
  *
  * receiptJoi.js does NOT import this schema yet — it still defines its own
  * receiverSchema, a genuinely different shape: siteName and
@@ -10,7 +10,7 @@
  * regulatoryPositionStatements, and it has no nested address at all (address
  * lives separately on receipt.address / receiptSiteSchema). That split is
  * pending a schema-side change to make receiptJoi.js import this same
- * receiverSchema instead. See phase2-payload-resource-analysis.md §2.
+ * receiverSchema instead.
  */
 import { receiverSchema } from '../../../../docs/collections/data/creationJoi.js'
 
@@ -31,10 +31,10 @@ test('accepts a valid receiver', () => {
 })
 
 describe('siteName', () => {
-  test('is not required', () => {
+  test('is required', () => {
     const { siteName, ...withoutSiteName } = receiver
     const { error } = receiverSchema.validate(withoutSiteName)
-    expect(error).toBeUndefined()
+    expect(error).toBeDefined()
   })
 })
 
@@ -43,12 +43,6 @@ describe('authorisationNumber', () => {
     const { authorisationNumber, ...withoutAuthorisationNumber } = receiver
     const { error } = receiverSchema.validate(withoutAuthorisationNumber)
     expect(error).toBeDefined()
-  })
-
-  test('is not required when siteName is not populated', () => {
-    const { siteName, authorisationNumber, ...withoutEither } = receiver
-    const { error } = receiverSchema.validate(withoutEither)
-    expect(error).toBeUndefined()
   })
 })
 

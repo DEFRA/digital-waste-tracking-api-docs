@@ -52,7 +52,7 @@ components:
       required: true
       description: Movement ID minted by `POST /movements`.
       schema:
-        $ref: "#/components/schemas/movementId"
+        $ref: '#/components/schemas/movementId'
 
     deliveryIdPath:
       name: deliveryId
@@ -60,7 +60,7 @@ components:
       required: true
       description: Delivery ID minted by `POST /deliveries`.
       schema:
-        $ref: "#/components/schemas/deliveryId"
+        $ref: '#/components/schemas/deliveryId'
 
   # ----------------------------------------------------------------------
   # Schemas
@@ -107,7 +107,7 @@ components:
 
     wasteTrackingId:
       type: string
-      pattern: "^[A-Z]{2}[A-Z0-9]{6}$"
+      pattern: '^[A-Z]{2}[A-Z0-9]{6}$'
       description: |
         Public Phase 1 tracking identifier returned by the deprecated
         `POST /movements/receive` and used to address the deprecated
@@ -124,10 +124,12 @@ components:
 
     organisation:
       type: object
+      description: An organisation party (producer, carrier, broker/dealer or receiver).
       required: [organisationName]
       properties:
         organisationName:
           type: string
+          description: Name of the organisation.
         registrationNumber:
           type: string
           description: |
@@ -141,7 +143,7 @@ components:
             Required for waste receivers; not applicable to producers,
             carriers or brokers.
         address:
-          $ref: "#/components/schemas/address"
+          $ref: '#/components/schemas/address'
 
     notFoundError:
       type: object
@@ -167,6 +169,7 @@ components:
           example: COLLECTION_NOT_RECORDED
         message:
           type: string
+          description: Human-readable explanation of the 404.
           example: No collection has been recorded for this movement yet.
 
     # --- 3. Domain entities ---------------------------------------------
@@ -181,13 +184,17 @@ components:
     # aggregation rule or the collection/creation length match) are stated in
     # the field descriptions and enforced server-side.
     #
-    # Shared primitives (weight, address, validationResult) and the full
-    # waste classification (wasteItem, with its nested pops/hazardous and
-    # optional disposalOrRecoveryCodes) are reused from the Phase 1 block
-    # further down rather than redefined.
+    # Shared primitives (weight, address, validationResult) are reused
+    # rather than redefined. Waste item shapes are no longer shared with the
+    # Phase 1 block further down (D-042): Creation uses createWasteItem, the
+    # ordinary Receipt endpoint uses receiptWasteItem, and POST /receipts
+    # uses receiptWithoutDeliveryWasteItem — each with its own classification
+    # and treatment conditionality. The legacy `wasteItem` component is
+    # preserved verbatim but no longer referenced by any path.
 
     otherReferenceForMovement:
       type: object
+      description: A single label/reference pair. Both fields must be supplied together.
       required: [label, reference]
       properties:
         label:
@@ -205,12 +212,13 @@ components:
       type: object
       description: |
         Address where both fullAddress and postcode are required. Used by the
-        collection site and drop-off place. Accepts UK postcodes and Irish
+        collection site and deliv place. Accepts UK postcodes and Irish
         Eircodes (unlike the receipt address, which is UK-only).
       required: [fullAddress, postcode]
       properties:
         fullAddress:
           type: string
+          description: Full address of the site.
           example: 10 Industrial Way, Test City
         postcode:
           type: string
@@ -224,16 +232,15 @@ components:
 
         Conditional requiredness is driven by `wasteSource` and enforced
         server-side:
-        - `Commercial` — `organisationName`, `authorisationNumber` and `sicCode`
-          are required.
+        - `Commercial` — `organisationName`, `address` and `sicCode` are
+          required; `authorisationNumber` is optional.
         - `Household` — the business-only fields (`organisationName`,
-          `authorisationNumber`, `sicCode`, `emailAddress`, `phoneNumber`) must
-          NOT be provided.
-        - `Municipal` — those fields are optional; final conditionality to be
-          confirmed with the BA.
+          `authorisationNumber`, `sicCode`, `emailAddress`, `phoneNumber`) and
+          `address` must NOT be provided.
+        - `Municipal` — `organisationName` and `address` are required;
+          `authorisationNumber` and `sicCode` remain optional.
       required:
         - wasteSource
-        - address
         - councilMovement
       properties:
         wasteSource:
@@ -243,15 +250,15 @@ components:
           example: Commercial
         organisationName:
           type: string
-          description: Producer organisation name. Required for Commercial; not applicable for Household.
+          description: Producer organisation name. Required for Commercial and Municipal; not applicable for Household.
           example: ACME Waste Producers Ltd
         authorisationNumber:
           type: string
           description: |
             Environmental permit or exemption number the producer operates under.
-            Required for Commercial; optional for Municipal; not applicable for
-            Household. Validated against the same UK site-authorisation formats
-            as `receiver.authorisationNumber`.
+            Optional for Commercial and Municipal; not applicable for Household.
+            Validated against the same UK site-authorisation formats as
+            `receiver.authorisationNumber`.
           example: EAS/P/123456
         sicCode:
           type: string
@@ -260,7 +267,7 @@ components:
             Five-digit Standard Industrial Classification code for the process
             that created this waste. Required for Commercial; optional for
             Municipal; not applicable for Household.
-          example: "38110"
+          example: '38110'
         emailAddress:
           type: string
           format: email
@@ -269,9 +276,11 @@ components:
         phoneNumber:
           type: string
           description: Producer contact phone number. Not applicable for Household.
-          example: "01234567890"
+          example: '01234567890'
         address:
-          $ref: "#/components/schemas/address"
+          allOf:
+            - $ref: '#/components/schemas/address'
+          description: Producer site address. Required for Commercial and Municipal; not applicable for Household.
         councilMovement:
           type: boolean
           description: Whether this movement is carried out by, or on behalf of, a council.
@@ -281,10 +290,11 @@ components:
       type: object
       description: |
         Carrier details at creation. Same field structure as the Phase 1
-        `carrier`, but with relaxed requiredness: only `meansOfTransport` is
-        mandatory at creation, because full carrier details may not be known
-        when the movement is planned. Optional fields keep their integrity
-        rules when supplied (enforced server-side):
+        `carrier`, but with relaxed requiredness: `meansOfTransport` and
+        `organisationName` are mandatory at creation; other carrier
+        details may not be known when the movement is planned. Optional
+        fields keep their integrity rules when supplied (enforced
+        server-side):
           * `registrationNumber` and `reasonForNoRegistrationNumber` are mutually exclusive;
           * `vehicleRegistration` is only valid when `meansOfTransport` is `Road`;
           * `otherMeansOfTransport` is only valid when `meansOfTransport` is `Other`.
@@ -292,6 +302,7 @@ components:
         (registrationNumber/reason and Road vehicleRegistration become required).
       required:
         - meansOfTransport
+        - organisationName
       properties:
         meansOfTransport:
           type: string
@@ -305,12 +316,12 @@ components:
           example: CBDU123456
         reasonForNoRegistrationNumber:
           type: string
-          enum: [ON_SITE, HOUSEHOLD, ONE_OFF, MARINE]
+          enum: [ON_SITE, ONE_OFF, MARINE]
           description: Reason a registration number is not supplied. Must not be supplied alongside a valid registrationNumber.
           example: ONE_OFF
         organisationName:
           type: string
-          description: Carrier organisation name. Optional at creation.
+          description: Carrier organisation name. Required at creation.
           example: Test Carrier Ltd
         vehicleRegistration:
           type: string
@@ -323,25 +334,30 @@ components:
         emailAddress:
           type: string
           format: email
+          description: Carrier contact email address.
         phoneNumber:
           type: string
+          description: Carrier contact phone number.
         address:
-          $ref: "#/components/schemas/address"
+          $ref: '#/components/schemas/address'
 
     creationReceiverDetails:
       type: object
       description: |
         Intended receiver details recorded at creation. Required only when the
-        movement contains hazardous waste (enforced server-side). If `siteName`
-        is supplied, `authorisationNumber` and `address` (with fullAddress)
-        become required. These are provisional — the authoritative receiver is
-        confirmed at receipt, where the receiver is modelled by the Phase 1
-        `receiver` (which carries regulatoryPositionStatements and no address;
-        the receipt site address is the separate `receipt.address`).
+        movement contains hazardous waste (enforced server-side). `siteName`
+        is mandatory whenever this object is supplied, which in turn
+        makes `authorisationNumber` and `address` (with fullAddress) mandatory
+        too. These are provisional — the authoritative receiver is confirmed
+        at receipt, where the receiver is modelled by the Phase 1 `receiver`
+        (which carries regulatoryPositionStatements and no address; the
+        receipt site address is the separate `receipt.address`).
+      required:
+        - siteName
       properties:
         siteName:
           type: string
-          description: Name of the intended receiving site. If supplied, authorisationNumber and address are required.
+          description: Name of the intended receiving site. Mandatory whenever the receiver object is supplied; authorisationNumber and address are required as a consequence.
           example: Test Receiver Site
         authorisationNumber:
           type: string
@@ -350,11 +366,13 @@ components:
         emailAddress:
           type: string
           format: email
+          description: Receiver contact email address.
         phoneNumber:
           type: string
+          description: Receiver contact phone number.
         address:
           allOf:
-            - $ref: "#/components/schemas/address"
+            - $ref: '#/components/schemas/address'
           description: Receiver site address. Required (with fullAddress) when siteName is supplied.
 
     collectionSite:
@@ -364,8 +382,17 @@ components:
       properties:
         address:
           allOf:
-            - $ref: "#/components/schemas/addressWithFullAddress"
+            - $ref: '#/components/schemas/addressWithFullAddress'
           description: Address where the waste was physically collected. Both fullAddress and postcode are required.
+        emailAddress:
+          type: string
+          format: email
+          description: Email address of the site where the waste was physically collected.
+          example: mailbox@example.co.uk
+        phoneNumber:
+          type: string
+          description: The UK or international phone number of the site where the waste was physically collected.
+          example: 020 4756 XXXX
 
     deliverySite:
       type: object
@@ -388,8 +415,8 @@ components:
           example: WEX123456
         address:
           allOf:
-            - $ref: "#/components/schemas/addressWithFullAddress"
-          description: Mandatory physical address where the waste was dropped off (D-018). Both fullAddress and postcode are required.
+            - $ref: '#/components/schemas/addressWithFullAddress'
+          description: Mandatory physical address where the waste was delivered. Both fullAddress and postcode are required.
 
     driverDetails:
       type: object
@@ -402,6 +429,249 @@ components:
       properties:
         name:
           type: string
+          description: Driver's name.
+
+    # Waste item classification at Creation (D-042). Forked from the shared
+    # Phase 1 `wasteItem` component below — does not affect Receipt or the
+    # legacy endpoints, which keep using `wasteItem` unchanged.
+    wasteItemClassification:
+      type: object
+      description: |
+        What the waste actually is, as declared at Creation. Distinct
+        from createWasteItem's top-level logistics fields (weight,
+        numberOfContainers, typeOfContainers, physicalForm), which remain
+        updatable at Receipt; classification can only be changed by rejecting
+        and re-creating.
+      required:
+        - ewcCodes
+        - wasteDescription
+        - containsPops
+        - containsHazardous
+      properties:
+        ewcCodes:
+          type: array
+          items:
+            type: string
+          maxItems: 5
+          description: |
+            An EWC code is a six digit code listed in the European Waste Catalogue (EWC) and the List of Wastes Regulations 2005 for the UK.
+            The EWC catalog is a list of waste types which categorise waste based on a combination of what they are and the process or activity that produces them.<br><br>
+            Notes:<br>
+            - users must already know their correct code before using the API <br>
+            - the GET ewc-codes method returns a reference for all EWC codes<br>
+            - there is <b>no maximum</b> number of waste items that can be entered per movement, but there is a maximum of <b>five</b> EWC codes that can be applied to each waste item, thus allowing for multiple EWC codes on some edge cases e.g. Clinical Waste<br><br>
+            To find an EWC code for a particular waste item, refer to the official <a href="https://assets.publishing.service.gov.uk/media/6152d0b78fa8f5610b9c222b/Waste_classification_technical_guidance_WM3.pdf">Waste Classification Technical Guidance WM3 </a>document.<br><br>
+            POPs can also be present in hazardous and non-hazardous waste. See containsPops and pops for more information.<br>
+              <p><font color="green"><b>Business Rules:</b></font></p>
+              - Must be six digits (no spaces) and be in the official ewcCode EWC catalog EUR-Lex.<br>
+              - From one to a maximum of five codes per movement can be provided.</p>
+          example:
+            - 200108
+            - 150109
+        wasteDescription:
+          type: string
+          description: A detailed description of a specific waste material including its physical characteristics, composition and any potential hazards associated with it.
+          example: Basic mixed construction and demolition waste, this includes recyclable house bricks, gypsum plaster and slates.
+        containsPops:
+          type: boolean
+          description: |
+            Does the waste consignment contain POPs? This should be a boolean value, i.e. true or false.
+                Persistent organic pollutants (POPs) are chemical substances that do not break down in the environment. They are a danger to human health and the environment. POPs can be present in hazardous and non-hazardous waste.
+          example: true
+        pops:
+          description: Required when containsPops is true; must not be provided when containsPops is false.
+          type: object
+          required:
+            - sourceOfComponents
+          properties:
+            sourceOfComponents:
+              type: string
+              enum: [NOT_PROVIDED, PROVIDED_WITH_WASTE, GUIDANCE, OWN_TESTING]
+              description: |
+                Indicates the source of POP component details.
+                - NOT_PROVIDED: Carrier did not provide component details
+                - PROVIDED_WITH_WASTE: Components provided with the waste
+                - GUIDANCE: Components determined from guidance
+                - OWN_TESTING: Components determined from own testing<br><br>
+                 <b>Note:</b> The field is case-sensitive, please use the case specified in the list above.
+                <p><font color="green"><b>Business Rules:</b></font></p>
+                <ul>
+                <li>Must be provided when containsPops is true</li>
+                <li>If sourceOfComponents is NOT_PROVIDED, components array must be empty or not provided</li>
+                <li>If sourceOfComponents is PROVIDED_WITH_WASTE, components are recommended but not required (validation warning if not provided)</li>
+                <li>If sourceOfComponents is GUIDANCE or OWN_TESTING, components are required (validation error if not provided)</li>
+                </ul>
+              example: PROVIDED_WITH_WASTE
+            components:
+              type: array
+              items:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    description: |
+                      The code of the POP (Persistent Organic Pollutant) component.
+                      <b>Notes:</b><br>
+                      - A list of POP names and codes can be obtained using the GET pop-names method.<br>
+                      - The field is case-sensitive, please use the case specified for the code returned by the GET method.
+                      <p><font color="green"><b>Business Rule:</b></font></p>
+                      Optional field. If provided, it must be a valid POP code from the reference list returned by the GET method. The code is validated against reference data to ensure accuracy.
+                    example: PFHXS
+                  concentration:
+                    type: number
+                    minimum: 0
+                    exclusiveMinimum: true
+                    description: The concentration of the POP in mg per kg, e.g. 50 mg per kg of Chlordane. <p><font color="green"><b>Business Rule:</b></font></p> Optional field. If provided, must be a positive decimal number (greater than 0). Mutually exclusive with concentrationThresholdOperator — a component may state one or neither, never both.
+                    example: 12.5
+                  concentrationThresholdOperator:
+                    type: string
+                    enum: [LESS_THAN, EQUAL_TO, GREATER_THAN_OR_EQUAL]
+                    description: States that concentration is above/below/at the WM3-defined threshold for this component, without an exact figure — the threshold value itself is not sent; it is resolved from WM3 guidance against code. <p><font color="green"><b>Business Rule:</b></font></p> Optional field, mutually exclusive with concentration — a component may state one or neither, never both.
+                    example: LESS_THAN
+              description: |
+                The list of POP components.
+                <p><font color="green"><b>Business Rules:</b></font></p>
+                <ul>
+                <li>Must be provided when containsPops is true</li>
+                <li>If sourceOfComponents is NOT_PROVIDED, components array must be empty or not provided</li>
+                <li>If sourceOfComponents is PROVIDED_WITH_WASTE, an empty components array will generate a validation warning</li>
+                <li>If sourceOfComponents is GUIDANCE or OWN_TESTING, components are required and cannot be empty (validation error if not provided)</li>
+                </ul>
+        containsHazardous:
+          type: boolean
+          description: Does the waste consignment contain <b>Hazardous Properties</b>, true or false?. This is a mandatory indication. This is a boolean value, i.e. true (contains hazardous properties) or false (does not contain hazardous properties).
+          example: true
+        hazardous:
+          description: Required when containsHazardous is true; must not be provided when containsHazardous is false.
+          type: object
+          required:
+            - sourceOfComponents
+          properties:
+            sourceOfComponents:
+              type: string
+              enum: [NOT_PROVIDED, PROVIDED_WITH_WASTE, GUIDANCE, OWN_TESTING]
+              description: |
+                Indicates the source of hazardous component details.
+                - NOT_PROVIDED: Carrier did not provide component details
+                - PROVIDED_WITH_WASTE: Components provided with the waste
+                - GUIDANCE: Components determined from guidance
+                - OWN_TESTING: Components determined from own testing
+                <p><font color="green"><b>Business Rules:</b></font></p>
+                <ul>
+                <li>Must be provided when containsHazardous is true</li>
+                <li>If sourceOfComponents is NOT_PROVIDED, components array must be empty or not provided</li>
+                <li>If sourceOfComponents is PROVIDED_WITH_WASTE, components are recommended but not required (validation warning if not provided)</li>
+                <li>If sourceOfComponents is GUIDANCE or OWN_TESTING, components are required (validation error if not provided)</li>
+                </ul>
+              example: PROVIDED_WITH_WASTE
+            hazCodes:
+              type: array
+              description: |
+                Hazardous property codes are a list of codes that identify the hazardous waste and the potential risks associated with waste materials, guiding their safe transportation and handling protocols. Common types could include codes, HP_1 - HP_15. The format of the code to be entered is HP_'number', e.g. HP_1 for Explosive, HP_2 for Oxidizing, etc.
+                 <p>The official hazardous code list is found here in Appendix C:
+                 <a href="https://assets.publishing.service.gov.uk/media/6152d0b78fa8f5610b9c222b/Waste_classification_technical_guidance_WM3.pdf">Waste Classification Technical Guidance WM3 document.</a></p>
+                 <b>Notes:</b><br>
+                <ul>
+                - A list of all Hazardous Property Codes can be obtained using the GET hazardous-property-codes method.<br>
+                - The field is case-sensitive, please use the case specified for the code returned by the GET method.
+                </ul>
+                 <p><font color="green"><b>Business Rule:</b></font></p>
+                 If containsHazardous is true then hazardous.hazCodes must be a valid code.
+              example:
+                - HP_5
+                - HP_10
+              items:
+                type: string
+            components:
+              description: Required when sourceOfComponents is GUIDANCE or OWN_TESTING; forbidden when NOT_PROVIDED.
+              type: array
+              items:
+                type: object
+                properties:
+                  name:
+                    type: string
+                    description: Name of the hazardous component, e.g. Mercury. <p><font color="green"><b>Business Rule:</b></font></p> Optional field. If provided, must be a valid chemical or biological component name.
+                    example: lead
+                  concentration:
+                    type: number
+                    minimum: 0
+                    exclusiveMinimum: true
+                    description: The concentration of the hazardous component in milligrams per kilo, e.g. 30mg per kg. <p><font color="green"><b>Business Rule:</b></font></p> One of concentration or concentrationThresholdOperator is required when name is supplied. If provided, must be a positive numeric value (greater than 0). Mutually exclusive with concentrationThresholdOperator — a component may state one or neither, never both.
+                    example: 25.5
+                  concentrationThresholdOperator:
+                    type: string
+                    enum: [EQUAL_TO, GREATER_THAN_OR_EQUAL]
+                    description: States that concentration is above/at the WM3-defined threshold for this component, without an exact figure — the threshold value itself is not sent; it is resolved from WM3 guidance against name. <p><font color="green"><b>Business Rule:</b></font></p> One of concentration or concentrationThresholdOperator is required when name is supplied. Mutually exclusive with concentration.
+                    example: GREATER_THAN_OR_EQUAL
+
+    # Shared waste item base (D-042) — classification plus logistics fields.
+    # Used by createWasteItem (Creation) and receiptWithoutDeliveryWasteItem
+    # (POST /receipts), each adding its own treatment array on top. Does NOT
+    # extend the shared Phase 1 `wasteItem` component below — the ordinary
+    # Receipt endpoint's wasteItem (receiptWasteItem) drops classification
+    # entirely and does not use wasteItemBase either.
+    wasteItemBase:
+      type: object
+      description: |
+        Shared waste item base — classification plus logistics
+        fields. Used by Creation (createWasteItem) and POST /receipts
+        (receiptWithoutDeliveryWasteItem), each adding its own treatment
+        array on top.
+      required:
+        - weight
+        - numberOfContainers
+        - typeOfContainers
+        - physicalForm
+        - classification
+      properties:
+        weight:
+          $ref: '#/components/schemas/weight'
+        numberOfContainers:
+          type: integer
+          minimum: 0
+          nullable: false
+          description: Number of containers for storing, transporting and disposing of waste materials. <p><font color="green"><b>Business Rule:</b></font></p> This must be a non-negative integer (0 or greater).
+          example: 2
+        typeOfContainers:
+          type: string
+          nullable: false
+          description: |
+            Containers are receptacles used for storing, transporting and disposing of waste materials. They come in various sizes and types, ranging from small desk-side bins to large industrial skips. Enter the container code, e.g. DRU for Drum.<br><br>
+            <b>Notes:</b><br>
+            - A list of all container types can be obtained using the GET container-types method.<br>
+            - The field is case-sensitive, please use the case specified for the code returned by the GET method.
+            <br>
+            <p><font color="green"><b>Business Rule:</b></font></p>
+            Must be in typeOfContainers list.
+          example: SKI
+        physicalForm:
+          type: string
+          enum: [Gas, Liquid, Solid, Powder, Sludge, Mixed]
+          description: This is the form of the waste. This could be a Gas, Liquid, Solid, Powder, Sludge or Mixed. <p><font color="green"><b>Business Rule:</b></font></p> Must be “Gas”, “Liquid”, “Solid”, Powder”, “Sludge” or “Mixed”. <b>Note:</b> The field is case-sensitive, please use the case specified in the description.
+          example: Sludge
+        classification:
+          $ref: '#/components/schemas/wasteItemClassification'
+
+    createWasteItem:
+      description: Waste item declared as part of the created movement.
+      allOf:
+        - $ref: '#/components/schemas/wasteItemBase'
+        - type: object
+          required:
+            - intendedTreatments
+          properties:
+            intendedTreatments:
+              type: array
+              minItems: 1
+              items:
+                $ref: '#/components/schemas/intendedTreatment'
+              description: |
+                **Intended Treatment.** The treatment (recovery or disposal)
+                planned for this waste item at the point of creation. Mandatory —
+                at least one entry must be provided, each with
+                disposalOrRecoveryCode and weight. This is a planning figure
+                only; the authoritative outcome is confirmed at Receipt as Actual
+                Treatment.
 
     # --- 4. Request and response bodies per endpoint --------------------
 
@@ -413,9 +683,10 @@ components:
 
     createMovementRequest:
       type: object
+      description: Request body for POST /movements.
       required:
         - apiCode
-        - estimatedDateTimeCollected
+        - plannedCollectionTime
         - producer
         - carrier
         - wasteItems
@@ -427,15 +698,15 @@ components:
             Unique identifier of the submitting organisation, produced by the
             Waste Tracking Service registration process. At creation the
             submitter is the movement initiator (carrier or broker). The backend
-            may resolve this to an internal submittingOrganisation (D-027).
+            may resolve this to an internal submittingOrganisation.
           example: 25b14080-5e77-4f91-9957-2482a0cb8775
-        estimatedDateTimeCollected:
+        plannedCollectionTime:
           type: string
           format: date-time
           description: |
-            Estimated date and time the waste will be collected. The actual
-            collection time is recorded by the collection event and may differ.
-            ISO 8601 (UTC or BST).
+            Planned date and time the waste will be collected. Renamed from
+            estimatedDateTimeCollected. The actual collection time is
+            recorded by the collection event and may differ. ISO 8601 (UTC or BST).
           example: 2025-09-15T08:00:00Z
         hazardousWasteConsignmentCode:
           type: string
@@ -458,51 +729,65 @@ components:
         otherReferencesForMovement:
           type: array
           items:
-            $ref: "#/components/schemas/otherReferenceForMovement"
+            $ref: '#/components/schemas/otherReferenceForMovement'
+          description: Additional label/reference pairs for this movement.
         specialHandlingRequirements:
           type: string
           maxLength: 5000
           description: Special handling instructions (e.g. fragile, hazardous, temperature-sensitive).
         producer:
-          $ref: "#/components/schemas/producerDetails"
+          $ref: '#/components/schemas/producerDetails'
         carrier:
           allOf:
-            - $ref: "#/components/schemas/creationCarrierDetails"
-          description: Carrier details. Always required at creation (D-008), with only meansOfTransport mandatory at this stage.
+            - $ref: '#/components/schemas/creationCarrierDetails'
+          description: Carrier details. Always required at creation; meansOfTransport and organisationName are mandatory at this stage.
         brokerOrDealer:
           allOf:
-            - $ref: "#/components/schemas/brokerOrDealer"
-          description: Broker or dealer details. Required only when the movement is broker/dealer-initiated; omitted otherwise (D-008). Reuses the Phase 1 brokerOrDealer shape.
-        receiver:
+            - $ref: '#/components/schemas/brokerOrDealer'
+          description: Broker or dealer details. Required only when the movement is broker/dealer-initiated; omitted otherwise. Reuses the Phase 1 brokerOrDealer shape.
+        receivers:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/creationReceiverDetails'
+          description: Intended receiving site(s). Required (min 1) only when the movement contains hazardous waste (enforced server-side) — a producer may declare waste heading to more than one receiving site.
+        collectionAddressDifferentFromProducer:
+          type: boolean
+          default: false
+          description: |
+            Whether the waste will be collected from an address other than
+            producer.address. Defaults to false — false or absent means
+            collection is planned at the producer address. When true,
+            collectionSite is required.
+          example: false
+        collectionSite:
           allOf:
-            - $ref: "#/components/schemas/creationReceiverDetails"
-          description: Intended receiver. Required only when the movement contains hazardous waste (enforced server-side).
+            - $ref: '#/components/schemas/addressWithFullAddress'
+          description: |
+            Address where the waste is planned to be collected. Required when
+            collectionAddressDifferentFromProducer is true; must not be
+            provided otherwise. Reuses the same address shape as the
+            Collection event's own collectionSite.address (both fullAddress
+            and postcode required), distinct from that event, which records
+            the actual collection.
         wasteItems:
           type: array
           minItems: 1
           items:
-            allOf:
-              - $ref: "#/components/schemas/wasteItem"
-              - type: object
-                required:
-                  - disposalOrRecoveryCodes
-                properties:
-                  disposalOrRecoveryCodes:
-                    description: |
-                      **Intended Treatment.** The treatment (recovery or disposal)
-                      planned for this waste item at the point of creation.
-                      Mandatory — at least one code must be provided. This is a
-                      planning figure only; the authoritative outcome is
-                      confirmed at Receipt as Actual Treatment (D-031).
+            $ref: '#/components/schemas/createWasteItem'
           description: |
-            At least one waste item. Reuses the Phase 1 wasteItem shape (full
-            classification). At creation, weights are typically estimates
-            (weight.isEstimate true); actual weights are recorded at collection.
+            At least one waste item. Uses Creation's own waste item shape
+            — classification is nested; weight, numberOfContainers,
+            typeOfContainers and physicalForm stay top-level. At creation,
+            weights are typically estimates (weight.isEstimate true); actual
+            weights are recorded at collection. The ordinary Receipt
+            endpoint's wasteItem (receiptWasteItem) drops classification
+            entirely, since a Creation record already has it.
         isDeleted:
           type: boolean
           default: false
           description: |
-            Soft-delete flag (D-009). Defaults to `false`. Must not be supplied
+            Soft-delete flag. Defaults to `false`. Must not be supplied
             as `true` on create — only `PUT /movements/{movementId}` may set it
             to `true`, and only while no Collection has been recorded against
             this Movement; once a Collection exists the Movement can no longer
@@ -517,14 +802,16 @@ components:
         carrying any warnings.
       properties:
         movementId:
-          $ref: "#/components/schemas/movementId"
+          $ref: '#/components/schemas/movementId'
         validation:
+          description: Validation warnings returned alongside a successful response.
           type: object
           properties:
             warnings:
+              description: Array of validation warnings.
               type: array
               items:
-                $ref: "#/components/schemas/validationResult"
+                $ref: '#/components/schemas/validationResult'
 
     updateResponse:
       type: object
@@ -534,12 +821,14 @@ components:
         only, no identifier (it's already in the URL).
       properties:
         validation:
+          description: Validation warnings returned alongside a successful response.
           type: object
           properties:
             warnings:
+              description: Array of validation warnings.
               type: array
               items:
-                $ref: "#/components/schemas/validationResult"
+                $ref: '#/components/schemas/validationResult'
 
     # Collection event — POST /movements/{movementId}/collection.
     #
@@ -552,11 +841,13 @@ components:
 
     collectionRequest:
       type: object
+      description: Request body for POST /movements/{movementId}/collection.
       required:
         - apiCode
         - actualDateTimeCollected
         - carrier
-        - collection
+        - dutyOfCareConfirmed
+        - collectionSite
       properties:
         apiCode:
           type: string
@@ -564,7 +855,7 @@ components:
           description: |
             Unique identifier of the submitting organisation (the carrier
             recording the collection), produced by Waste Tracking Service
-            registration (D-027).
+            registration.
           example: 25b14080-5e77-4f91-9957-2482a0cb8775
         actualDateTimeCollected:
           type: string
@@ -580,7 +871,7 @@ components:
           default: STATIC
           description: |
             Whether this event is a `STATIC` producer-to-driver pickup or a
-            `TRANSIT` driver-to-driver handover (D-029). Optional; defaults to
+            `TRANSIT` driver-to-driver handover. Optional; defaults to
             `STATIC` when omitted.
             <p><font color="green"><b>Business Rules:</b></font></p>
             <ul>
@@ -596,46 +887,56 @@ components:
         otherReferencesForMovement:
           type: array
           items:
-            $ref: "#/components/schemas/otherReferenceForMovement"
+            $ref: '#/components/schemas/otherReferenceForMovement'
+          description: Additional label/reference pairs for this collection event.
+        specialHandlingRequirements:
+          type: string
+          maxLength: 5000
+          description: Special handling instructions (e.g. fragile, hazardous, temperature-sensitive).
         carrier:
           allOf:
-            - $ref: "#/components/schemas/carrier"
+            - $ref: '#/components/schemas/carrier'
           description: |
             Carrier details confirmed at collection. Required even if unchanged
-            from creation (D-008). Uses the full Phase 1 carrier shape — by
+            from creation. Uses the full Phase 1 carrier shape — by
             collection the carrier is physically present, so the strict carrier
             rules apply (registrationNumber/reason; vehicleRegistration for Road).
+        dutyOfCareConfirmed:
+          type: boolean
+          description: |
+            Carrier confirms they have inspected the waste, that it is as
+            described, and that they are content to transport it.
         receivedFromCarrier:
           allOf:
-            - $ref: "#/components/schemas/carrier"
+            - $ref: '#/components/schemas/carrier'
           description: |
             The carrier this Movement was received *from* on a `TRANSIT`
-            (driver-to-driver) handover (D-029). Same shape as `carrier`.
+            (driver-to-driver) handover. Same shape as `carrier`.
             <p><font color="green"><b>Business Rules:</b></font></p>
             <ul>
             <li>Required when `collectionType` is `TRANSIT`.</li>
             <li>Must not be provided when `collectionType` is `STATIC` (mirrors the `registrationNumber`/`reasonForNoRegistrationNumber` mutual-exclusivity pattern).</li>
-            <li>Captured for the record only — it is not cross-checked against the preceding event's `carrier`; any discrepancy is left for regulators to detect (D-029).</li>
+            <li>Captured for the record only — it is not cross-checked against the preceding event's `carrier`; any discrepancy is left for regulators to detect.</li>
             </ul>
         brokerOrDealer:
           allOf:
-            - $ref: "#/components/schemas/brokerOrDealer"
+            - $ref: '#/components/schemas/brokerOrDealer'
           description: |
             Broker or dealer details, when relevant to confirm or re-confirm at
-            collection. Optional; same shared shape as Creation and Receipt (D-008).
-        collection:
-          $ref: "#/components/schemas/collectionSite"
+            collection. Optional; same shared shape as Creation and Receipt.
+        collectionSite:
+          $ref: '#/components/schemas/collectionSite'
         isDeleted:
           type: boolean
           default: false
           description: |
-            Soft-delete flag (D-009). Defaults to `false`. Must not be supplied
+            Soft-delete flag. Defaults to `false`. Must not be supplied
             as `true` on create — only `PUT /movements/{movementId}/collection`
             may set it to `true`, and only while this Movement has not yet been
             referenced in a Delivery; once a Delivery references it the
             Collection can no longer be deleted. Supplying `true` here is
             rejected as a `NotAllowed` validation error.
-            <p><font color="green"><b>Business Rules (transit sequence, D-029):</b></font></p>
+            <p><font color="green"><b>Business Rules (transit sequence):</b></font></p>
             <ul>
             <li>Only the *latest active* event in the Movement's collection sequence may be soft-deleted (tail-peel). Deleting the latest `TRANSIT` makes the prior event the new latest; the `STATIC` head can only be deleted when it is the sole remaining event.</li>
             <li>Attempting to delete any earlier event is rejected as a `BusinessRuleViolation`.</li>
@@ -648,15 +949,17 @@ components:
         with any warnings. The event is appended to the Movement's ordered
         collection sequence and addressed by its position under
         `/movements/{movementId}/collection`; no public collection identifier
-        is returned (D-012/D-016).
+        is returned.
       properties:
         validation:
+          description: Validation warnings returned alongside a successful response.
           type: object
           properties:
             warnings:
+              description: Array of validation warnings.
               type: array
               items:
-                $ref: "#/components/schemas/validationResult"
+                $ref: '#/components/schemas/validationResult'
 
     movementResource:
       description: |
@@ -667,8 +970,8 @@ components:
           required: [movementId]
           properties:
             movementId:
-              $ref: "#/components/schemas/movementId"
-        - $ref: "#/components/schemas/createMovementRequest"
+              $ref: '#/components/schemas/movementId'
+        - $ref: '#/components/schemas/createMovementRequest'
 
     deliveryResource:
       description: |
@@ -679,8 +982,8 @@ components:
           required: [deliveryId]
           properties:
             deliveryId:
-              $ref: "#/components/schemas/deliveryId"
-        - $ref: "#/components/schemas/deliveryRequest"
+              $ref: '#/components/schemas/deliveryId'
+        - $ref: '#/components/schemas/deliveryRequest'
 
     receiptResource:
       description: |
@@ -691,8 +994,8 @@ components:
           required: [deliveryId]
           properties:
             deliveryId:
-              $ref: "#/components/schemas/deliveryId"
-        - $ref: "#/components/schemas/receiveMovementRequest"
+              $ref: '#/components/schemas/deliveryId'
+        - $ref: '#/components/schemas/receiveMovementRequest'
 
     # Delivery event — POST /deliveries.
     #
@@ -704,10 +1007,11 @@ components:
 
     deliveryRequest:
       type: object
+      description: Request body for POST /deliveries.
       required:
         - apiCode
         - movementIds
-        - actualDateTimeDelivery
+        - actualDateTimeDelivered
         - carrier
         - deliverySite
       properties:
@@ -717,22 +1021,22 @@ components:
           description: |
             Unique identifier of the submitting organisation (the carrier
             recording the delivery), produced by Waste Tracking Service
-            registration (D-027).
+            registration.
           example: 25b14080-5e77-4f91-9957-2482a0cb8775
         movementIds:
           type: array
           minItems: 1
           items:
-            $ref: "#/components/schemas/movementId"
+            $ref: '#/components/schemas/movementId'
           description: |
             One or more Movement IDs delivered together at the same drop-off
             place. A single-collection run supplies an array of one; a
             multi-collection run supplies every Movement delivered together.
-            Hazardous-waste constraint (D-010): if any referenced Movement
-            carries hazardous waste, exactly one Movement ID is permitted. This
-            depends on properties of the linked Movements not carried in the
-            body, so it is enforced server-side (see the endpoint description).
-        actualDateTimeDelivery:
+            May mix hazardous and non-hazardous Movement IDs — the
+            server splits them into separate delivery entries in the response.
+            This depends on properties of the linked Movements not carried in
+            the body, so it is performed server-side (see the endpoint description).
+        actualDateTimeDelivered:
           type: string
           format: date-time
           description: Actual date and time the delivery occurred — not the submission time. ISO 8601.
@@ -744,18 +1048,19 @@ components:
         otherReferencesForMovement:
           type: array
           items:
-            $ref: "#/components/schemas/otherReferenceForMovement"
+            $ref: '#/components/schemas/otherReferenceForMovement'
+          description: Additional label/reference pairs for this delivery event.
         carrier:
           allOf:
-            - $ref: "#/components/schemas/carrier"
-          description: Carrier performing the delivery. Required (D-008); uses the full Phase 1 carrier shape.
+            - $ref: '#/components/schemas/carrier'
+          description: Carrier performing the delivery. Required; uses the full Phase 1 carrier shape.
         deliverySite:
-          $ref: "#/components/schemas/deliverySite"
+          $ref: '#/components/schemas/deliverySite'
         isDeleted:
           type: boolean
           default: false
           description: |
-            Soft-delete flag (D-009). Defaults to `false`. Must not be supplied
+            Soft-delete flag. Defaults to `false`. Must not be supplied
             as `true` on create — only `PUT /deliveries/{deliveryId}` may set it
             to `true`, and only while no Receipt has been recorded against this
             Delivery; once a Receipt exists the Delivery can no longer be
@@ -772,6 +1077,7 @@ components:
     # it (isDeleted: true) and record a fresh delivery via POST /deliveries.
     deliveryUpdateRequest:
       type: object
+      description: Request body for PUT /deliveries/{deliveryId} — restricted to the soft-delete flag.
       additionalProperties: false
       required:
         - apiCode
@@ -782,74 +1088,194 @@ components:
           format: uuid
           description: |
             Unique identifier of the submitting organisation (the carrier),
-            produced by Waste Tracking Service registration (D-027). Caller
+            produced by Waste Tracking Service registration. Caller
             identity only — not a mutable property of the delivery record, so
-            its presence does not breach delivery immutability (D-017).
+            its presence does not breach delivery immutability.
           example: 25b14080-5e77-4f91-9957-2482a0cb8775
         isDeleted:
           type: boolean
           description: |
-            Soft-delete flag for the delivery (D-009) — the ONLY property that
-            may be changed on a recorded delivery (D-017). Setting true marks the
+            Soft-delete flag for the delivery — the ONLY property that
+            may be changed on a recorded delivery. Setting true marks the
             Delivery deleted; false restores it. Cannot be set true once a
             Receipt has been recorded against the Delivery (BusinessRuleViolation).
           example: true
 
+    deliveryResult:
+      type: object
+      description: One delivery entry — either the aggregated non-hazardous group or a single hazardous movement.
+      required: [deliveryId, movementIds, wasteType]
+      properties:
+        deliveryId:
+          $ref: '#/components/schemas/deliveryId'
+        movementIds:
+          type: array
+          items:
+            $ref: '#/components/schemas/movementId'
+          description: |
+            Movement IDs covered by this delivery entry. A single ID for a
+            hazardous entry; one or more for the aggregated
+            non-hazardous entry.
+        wasteType:
+          type: string
+          enum: [HAZARDOUS, NON_HAZARDOUS]
+          description: |
+            Whether this entry is the aggregated non-hazardous delivery or
+            one of the per-Movement hazardous deliveries.
+
     deliveryResponse:
       type: object
       description: |
-        Returned on successful delivery. Carries the new public Delivery ID
-        (which links all Movement IDs in this delivery) and a validation
-        envelope with any warnings.
+        Returned on successful delivery. Carries the array of resulting
+        delivery entries and a validation envelope with any warnings.
+      required: [deliveries]
       properties:
-        deliveryId:
-          $ref: "#/components/schemas/deliveryId"
+        deliveries:
+          type: array
+          description: One or more delivery entries created by this request.
+          items:
+            $ref: '#/components/schemas/deliveryResult'
         validation:
+          description: Validation warnings returned alongside a successful response.
           type: object
           properties:
             warnings:
+              description: Array of validation warnings.
               type: array
               items:
-                $ref: "#/components/schemas/validationResult"
+                $ref: '#/components/schemas/validationResult'
 
     # ------------------------------------------------------------------
     # Receipt without a prior delivery (D-041) — proposal. See the
     # /receipts path above; shape not yet finalised (open questions 1-4).
     # ------------------------------------------------------------------
-    receiptWithoutDeliveryRequest:
+    # Waste item for POST /receipts (D-041/D-042) — extends the shared
+    # wasteItemBase (classification + logistics fields), unlike the ordinary
+    # Receipt endpoint's receiptWasteItem, since there is no prior Creation
+    # record to source classification from.
+    receiptWithoutDeliveryWasteItem:
+      description: Waste item received as part of a no-prior-delivery receipt — full classification carried, unlike the ordinary Receipt endpoint.
       allOf:
-        - $ref: "#/components/schemas/receiveMovementRequest"
+        - $ref: '#/components/schemas/wasteItemBase'
         - type: object
-          required:
-            - reasonForNoDeliveryId
           properties:
-            reasonForNoDeliveryId:
-              type: string
+            actualTreatments:
+              type: array
+              items:
+                $ref: '#/components/schemas/actualTreatment'
               description: |
-                Mandatory explanation of why there is no prior
-                Movement/Collection/Delivery trail for this receipt (D-041).
-                Free text pending confirmation of whether this should be a
-                constrained enum, as elsewhere in the spec
-                (e.g. reasonForNoRegistrationNumber).
-              example: Waste received directly with no digital record of an earlier journey.
+                **Actual Treatment.** Optional. Each
+                entry's disposalOrRecoveryCode is itself optional — a
+                receiving site may need to inspect or weigh before
+                confirming the code. Omitting it produces a warning, not a
+                rejection; weight is required only when the code is
+                supplied.
+
+    # Request schema for POST /receipts (D-041, D-042). Does NOT compose via
+    # allOf against receiveMovementRequest — that schema's wasteItems is the
+    # light, classification-free receiptWasteItem shape (D-042), which is
+    # wrong for this endpoint (it has no prior Creation record to source
+    # classification from). Built independently instead: wasteItems uses
+    # receiptWithoutDeliveryWasteItem (full classification); carrier,
+    # brokerOrDealer, receiverSite and receipt reuse the same shared
+    # components as receiveMovementRequest; the remaining root fields are
+    # duplicated inline since receiveMovementRequest doesn't expose them as
+    # separately reusable pieces.
+    receiptWithoutDeliveryRequest:
+      type: object
+      description: Request body for POST /receipts.
+      required:
+        - apiCode
+        - dateTimeReceived
+        - carrier
+        - wasteItems
+        - receiverSite
+        - receipt
+        - reasonForNoDeliveryId
+      properties:
+        apiCode:
+          type: string
+          format: uuid
+          description: This is the unique sixteen byte identifier of the receiving organisation produced by the registration process found within the Waste Tracking Service.
+          example: ba6eb330-4f7f-11eb-a2fb-67c34e9ac07cg
+        dateTimeReceived:
+          type: string
+          format: date-time
+          description: |
+            This is the date and exact time waste was received at the site. This API uses the UTC ISO 8601 and BST standards for machine-readable dates and times. <p>Key Differences:</p>
+            UTC is the global time standard and does not observe daylight saving time.
+            BST is UTC+1, used in the UK during daylight saving time (typically from late March to late October).
+          example: UTC - 2025-09-15T12:12:28Z, BST - 2025-09-15T13:12:28+01:00
+        hazardousWasteConsignmentCode:
+          type: string
+          description: Hazardous waste consignment code. If the EWC is HAZ, then this field is mandatory. Must not be provided alongside reasonForNoConsignmentCode.
+          example: CJ32LE/A0001
+        reasonForNoConsignmentCode:
+          type: string
+          enum:
+            [
+              'Non-Haz Waste Transfer',
+              'No documentation provided with Waste',
+              'Household Waste Recycling Centre Receipt'
+            ]
+          description: Required if waste is hazardous and no hazardousWasteConsignmentCode is provided. Must not be provided alongside hazardousWasteConsignmentCode.
+          example: NO_DOC_WITH_WASTE
+        yourUniqueReference:
+          type: string
+          description: This could be a unique weighbridge ticket number, waste transfer note number etc.
+          example: wTBrdgAA020
+        otherReferencesForMovement:
+          type: array
+          items:
+            $ref: '#/components/schemas/otherReferenceForMovement'
+          description: Optional array of label-reference pairs for additional tracking information
+        wasteItems:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/receiptWithoutDeliveryWasteItem'
+          description: |
+            At least one waste item. Carries full classification —
+            this endpoint has no prior Creation record to source it from.
+        carrier:
+          $ref: '#/components/schemas/carrier'
+        brokerOrDealer:
+          $ref: '#/components/schemas/brokerOrDealer'
+        receiverSite:
+          $ref: '#/components/schemas/receiverSite'
+        receipt:
+          $ref: '#/components/schemas/receipt'
+        reasonForNoDeliveryId:
+          type: string
+          description: |
+            Mandatory explanation of why there is no prior
+            Movement/Collection/Delivery trail for this receipt.
+            Free text pending confirmation of whether this should be a
+            constrained enum, as elsewhere in the spec
+            (e.g. reasonForNoRegistrationNumber).
+          example: Waste received directly with no digital record of an earlier journey.
 
     receiptWithoutDeliveryResponse:
       type: object
       description: |
-        Returned when a receipt is recorded with no prior delivery (D-041).
+        Returned when a receipt is recorded with no prior delivery.
         Carries the new public Delivery ID for the empty Delivery the
         server created (`movementIds: []`) and a validation envelope with
-        any warnings, mirroring deliveryResponse above.
+        any warnings. Always a single `deliveryId` — this case never splits
+        into multiple entries the way `deliveryResponse` can, since
+        it creates exactly one empty Delivery per call.
       properties:
         deliveryId:
-          $ref: "#/components/schemas/deliveryId"
+          $ref: '#/components/schemas/deliveryId'
         validation:
+          description: Validation warnings returned alongside a successful response.
           type: object
           properties:
             warnings:
+              description: Array of validation warnings.
               type: array
               items:
-                $ref: "#/components/schemas/validationResult"
+                $ref: '#/components/schemas/validationResult'
 
     # ------------------------------------------------------------------
     # Phase 1 schemas, preserved verbatim.
@@ -917,7 +1343,7 @@ components:
             Must be in typeOfContainers list.
           example: SKI
         weight:
-          $ref: "#/components/schemas/weight"
+          $ref: '#/components/schemas/weight'
         containsPops:
           type: boolean
           description: |
@@ -968,8 +1394,26 @@ components:
                     type: number
                     minimum: 0
                     exclusiveMinimum: true
-                    description: The concentration of the POP in mg per kg, e.g. 50 mg per kg of Chlordane. <p><font color="green"><b>Business Rule:</b></font></p> Optional field. If provided, must be a positive decimal number (greater than 0)
+                    description: The concentration of the POP in mg per kg, e.g. 50 mg per kg of Chlordane. <p><font color="green"><b>Business Rule:</b></font></p> Optional field. If provided, must be a positive decimal number (greater than 0). Mutually exclusive with concentrationThreshold — a component may state one or neither, never both.
                     example: 12.5
+                  concentrationThreshold:
+                    type: object
+                    description: Concentration expressed as a threshold rather than an exact value. <p><font color="green"><b>Business Rule:</b></font></p> Optional field, mutually exclusive with concentration — a component may state one or neither, never both.
+                    required:
+                      - operator
+                      - value
+                    properties:
+                      operator:
+                        type: string
+                        enum: [LESS_THAN, EQUAL_TO, GREATER_THAN_OR_EQUAL]
+                        description: Comparison operator for the threshold value.
+                        example: LESS_THAN
+                      value:
+                        type: number
+                        minimum: 0
+                        exclusiveMinimum: true
+                        description: Threshold value. Same units as concentration (%).
+                        example: 0.1
               description: |
                 The list of POP components.
                 <p><font color="green"><b>Business Rules:</b></font></p>
@@ -1027,8 +1471,6 @@ components:
               type: array
               items:
                 type: object
-                required:
-                  - name
                 properties:
                   name:
                     type: string
@@ -1038,18 +1480,43 @@ components:
                     type: number
                     minimum: 0
                     exclusiveMinimum: true
-                    description: The concentration of the hazardous component in milligrams per kilo, e.g. 30mg per kg. <p><font color="green"><b>Business Rule:</b></font></p> Optional field. If provided, must be a positive numeric value (greater than 0).
+                    description: The concentration of the hazardous component in milligrams per kilo, e.g. 30mg per kg. <p><font color="green"><b>Business Rule:</b></font></p> Required when name is supplied. If provided, must be a positive numeric value (greater than 0). Mutually exclusive with concentrationThreshold — a component may state one or neither, never both.
                     example: 25.5
+                  concentrationThreshold:
+                    type: object
+                    description: Concentration expressed as a threshold rather than an exact value. <p><font color="green"><b>Business Rule:</b></font></p> Optional field, mutually exclusive with concentration — a component may state one or neither, never both.
+                    required:
+                      - operator
+                      - value
+                    properties:
+                      operator:
+                        type: string
+                        enum: [EQUAL_TO, GREATER_THAN_OR_EQUAL]
+                        description: Comparison operator for the threshold value.
+                        example: GREATER_THAN_OR_EQUAL
+                      value:
+                        type: number
+                        minimum: 0
+                        exclusiveMinimum: true
+                        description: Threshold value. Same units as concentration (%).
+                        example: 0.5
         disposalOrRecoveryCodes:
           type: array
           items:
-            $ref: "#/components/schemas/disposalOrRecoveryCode"
+            $ref: '#/components/schemas/intendedTreatment'
           description: |
             **Actual Treatment.** The confirmed treatment (recovery or disposal)
             applied to this waste item, as determined by the receiver. This is
-            the authoritative treatment outcome (D-031).
+            the authoritative treatment outcome. Each entry now
+            carries `disposalOrRecoveryCode` (renamed from `code`) and `weight`.
+            Note: this whole `wasteItem` component is no longer referenced by
+            any path — Creation uses `createWasteItem`, the ordinary
+            Receipt endpoint uses `receiptWasteItem`, and `POST /receipts` uses
+            `receiptWithoutDeliveryWasteItem`. Preserved verbatim rather than
+            deleted, per this file's Phase 1 convention.
     carrier:
       type: object
+      description: Carrier organisation and transport details. Required on every write event.
       required:
         - registrationNumber
         - organisationName
@@ -1082,15 +1549,15 @@ components:
           example: CBDL6
         reasonForNoRegistrationNumber:
           type: string
+          enum: [ON_SITE, ONE_OFF, MARINE]
           description: |
             If you have not provided a registration number, then here you must provide an appropriate reason code from the list below:
             <ul>
             <li><b>ON_SITE - Movement within the same premises</b> (e.g. waste transferred between different areas or authorisations on the same site)</li>
-            <li><b>HOUSEHOLD - Householder transporting own waste</b> (e.g. individual taking personal or household waste to a HWRC, not for profit)</li>
             <li><b>ONE_OFF - One-off or infrequent waste transport</b> (carrier does not normally and regularly transport controlled waste)</li>
             <li><b>MARINE - Marine transport covered by a marine licence/exemption</b> (waste moved by vessel in connection with a licensed marine operation)</li>
             </ul>
-            <p><font color="green"><b>Business Rules:</b></font></p> 
+            <p><font color="green"><b>Business Rules:</b></font></p>
             <ul>
             <li>If either “Null” or an empty string are entered into carrier.registrationNumber then carrier.reasonForNoRegistrationNumber is required.</li>
             <li>If a valid string is entered into carrier.registrationNumber then carrier.reasonForNoRegistrationNumber should not be provided.</li>
@@ -1101,7 +1568,7 @@ components:
           description: The business name of the carrier.
           example: Waste Carriers Lite Ltd
         address:
-          $ref: "#/components/schemas/address"
+          $ref: '#/components/schemas/address'
         emailAddress:
           type: string
           format: email
@@ -1127,15 +1594,22 @@ components:
           example: Rail
     brokerOrDealer:
       type: object
+      description: |
+        Broker or dealer details — required when the movement is
+        broker-initiated. registrationNumber is required whenever this
+        object is supplied; reasonForNoRegistrationNumber is required
+        in its place when registrationNumber is null or empty, mirroring
+        carrier's mutual-exclusivity rule.
       required:
         - organisationName
+        - registrationNumber
       properties:
         organisationName:
           type: string
           description: The broker or dealer organisation name who arranged this transfer.
           example: Waste Disposal Ltd
         address:
-          $ref: "#/components/schemas/address"
+          $ref: '#/components/schemas/address'
         emailAddress:
           type: string
           format: email
@@ -1147,6 +1621,7 @@ components:
           example: 020 4756 XXXX
         registrationNumber:
           type: string
+          nullable: true
           description: |
             <p>A waste carrier registration number is a legal requirement for businesses that transport, buy, sell or dispose of waste. This license ensures that waste is handled and transported in a responsible and environmentally friendly manner.</p>
             <p><b>Home Nations Codes:</b></p>
@@ -1169,8 +1644,17 @@ components:
                ROCLT9999<p></p><p></p>
                <p><b>Note:</b> where 9 is a digit 0-9</p>
           example: CBDL6
-    receiver:
+        reasonForNoRegistrationNumber:
+          type: string
+          enum: [ON_SITE, ONE_OFF, MARINE]
+          description: |
+            Reason a registration number is not supplied. Required when
+            registrationNumber is null or empty. Must not be supplied
+            alongside a valid registrationNumber.
+          example: ONE_OFF
+    receiverSite:
       type: object
+      description: Receiving organisation and site details, confirmed at receipt.
       required:
         - siteName
         - authorisationNumber
@@ -1255,35 +1739,75 @@ components:
             - 789
     receipt:
       type: object
+      description: Physical receipt site details.
       required:
         - address
       properties:
         address:
-          $ref: "#/components/schemas/receiptAddress"
-    disposalOrRecoveryCode:
+          $ref: '#/components/schemas/receiptAddress'
+    # Intended Treatment (D-031 amended) — renamed from disposalOrRecoveryCode/
+    # treatment; the `code` field is renamed to `disposalOrRecoveryCode` (same
+    # validation). Used by createWasteItem.intendedTreatments (Creation) and
+    # the legacy wasteItem.disposalOrRecoveryCodes below, where both fields
+    # are always required. Distinct from actualTreatment (Receipt), where
+    # disposalOrRecoveryCode itself is optional and weight is conditional on
+    # the code being present.
+    intendedTreatment:
       type: object
+      description: Disposal or recovery treatment planned at creation.
       required:
-        - code
+        - disposalOrRecoveryCode
         - weight
       properties:
-        code:
+        disposalOrRecoveryCode:
           type: string
           description: |
             Disposal and Recovery Codes play a crucial role in categorising the methods by which waste is managed, whether through recovery or disposal processes. These codes (Recovery (R) and Disposal (D)) serve as a standardised system to ensure proper handling and treatment of waste materials. Specifically, they aid in classifying whether waste is to be recovered for further use or disposed of in a safe and environmentally responsible manner.
 
-              <p><b>Notes:</b> 
+              <p><b>Notes:</b>
               <ul>
               - The field is case-sensitive, please use the case specified for the code returned by the GET method.<br>
               - A complete list of Disposal and Recovery Codes can be obtained using the GET Disposal and Recovery Codes method.<br>
              </ul>
-             <p><font color="green"><b>Business Rule:</b></font></p> 
-             If disposalOrRecoveryCode.code entered, then it should be in the disposalOrRecoveryCode.code listed in EUR-Lex.
+             <p><font color="green"><b>Business Rule:</b></font></p>
+             If intendedTreatment.disposalOrRecoveryCode entered, then it should be in the intendedTreatment.disposalOrRecoveryCode listed in EUR-Lex.
           example: |
             "R1"
         weight:
-          $ref: "#/components/schemas/weight"
+          $ref: '#/components/schemas/weight'
+
+    # Actual Treatment (D-031 amended) — used by receiptWasteItem.actualTreatments
+    # (POST /deliveries/{deliveryId}/receipt) and receiptWithoutDeliveryWasteItem.
+    # actualTreatments (POST /receipts). disposalOrRecoveryCode is optional —
+    # a receiving site may need to inspect or weigh before confirming the
+    # code; omitting it produces a warning, not a rejection. weight is
+    # required only when disposalOrRecoveryCode is supplied. Distinct from
+    # intendedTreatment (Creation), where both fields are always required.
+    actualTreatment:
+      type: object
+      description: Disposal or recovery treatment confirmed at receipt.
+      properties:
+        disposalOrRecoveryCode:
+          type: string
+          description: |
+            Disposal and Recovery Codes play a crucial role in categorising the methods by which waste is managed, whether through recovery or disposal processes. These codes (Recovery (R) and Disposal (D)) serve as a standardised system to ensure proper handling and treatment of waste materials. Specifically, they aid in classifying whether waste is to be recovered for further use or disposed of in a safe and environmentally responsible manner.
+
+              <p><b>Notes:</b>
+              <ul>
+              - The field is case-sensitive, please use the case specified for the code returned by the GET method.<br>
+              - A complete list of Disposal and Recovery Codes can be obtained using the GET Disposal and Recovery Codes method.<br>
+             </ul>
+             <p><font color="green"><b>Business Rule:</b></font></p>
+             Optional — a receiving site may need to inspect or weigh before confirming the code. Omitting it produces a warning, not a rejection. If entered, it should be in the disposalOrRecoveryCode listed in EUR-Lex.
+          example: |
+            "R1"
+        weight:
+          allOf:
+            - $ref: '#/components/schemas/weight'
+          description: Required when disposalOrRecoveryCode is supplied.
     weight:
       type: object
+      description: Weight of a waste item, or of the amount treated under a specific disposal/recovery code.
       required:
         - metric
         - amount
@@ -1298,7 +1822,7 @@ components:
           type: number
           minimum: 0
           exclusiveMinimum: true
-          description: Total weight of the waste in a unit specified - Grams - Kilograms - Tonnes <p><font color="green">Business Rule:</font></p> Must be a positive number (greater than 0). <b>Note-</b><p> Weight in terms of the Waste Item is the total weight of the waste being received.</p> <p> Weight in terms of the DisposalRecoveryCode is the total weight of the waste being disposed of or recovered for final treatment.</p>
+          description: Total weight of the waste in a unit specified - Grams - Kilograms - Tonnes <p><font color="green">Business Rule:</font></p> Must be a positive number (greater than 0). <b>Note-</b><p> Weight in terms of the Waste Item is the total weight of the waste being received.</p> <p> Weight in terms of the Treatment is the total weight of the waste being disposed of or recovered for final treatment.</p>
           example: 150
         isEstimate:
           type: boolean
@@ -1306,10 +1830,12 @@ components:
           example: true
     validationResult:
       type: object
+      description: One validation warning or error entry.
       properties:
         key:
           type: string
-          example: wasteItems[0].disposalOrRecoveryCodes
+          description: Field path the warning/error relates to.
+          example: wasteItems[0].actualTreatments
         errorType:
           type: string
           description: |
@@ -1328,6 +1854,7 @@ components:
           description: Waste description is/is not successfully stored.
     address:
       type: object
+      description: Business address of a carrier, broker/dealer, producer or receiver.
       required:
         - postcode
       properties:
@@ -1341,6 +1868,7 @@ components:
           example: W12 7ZL
     receiptAddress:
       type: object
+      description: Address where the waste is physically received. UK postcodes only.
       required:
         - fullAddress
         - postcode
@@ -1354,17 +1882,70 @@ components:
           description: A valid postcode must be included. <p><b>Note- </b></p> <p>Carriers, Brokers/Dealers accept UK and Irish post codes. Receivers accept only UK post codes.</p> <p><font color="green"><b>Business Rule:</b></font></p> Must be in specified receiptAddress.postcode format.
           example: W12 7ZL
 
+    # Waste item for the ordinary Receipt endpoint (D-042) — logistics
+    # fields plus actualTreatments only. Classification is dropped entirely;
+    # a prior Creation record already has it. Does not extend wasteItemBase
+    # (that's for Creation and POST /receipts, which have no prior Creation
+    # record to source classification from).
+    receiptWasteItem:
+      type: object
+      description: Waste item received as part of the receipt movement — classification dropped.
+      required:
+        - weight
+        - numberOfContainers
+        - typeOfContainers
+        - physicalForm
+      properties:
+        weight:
+          $ref: '#/components/schemas/weight'
+        numberOfContainers:
+          type: integer
+          minimum: 0
+          nullable: false
+          description: Number of containers for storing, transporting and disposing of waste materials. <p><font color="green"><b>Business Rule:</b></font></p> This must be a non-negative integer (0 or greater).
+          example: 2
+        typeOfContainers:
+          type: string
+          nullable: false
+          description: |
+            Containers are receptacles used for storing, transporting and disposing of waste materials. They come in various sizes and types, ranging from small desk-side bins to large industrial skips. Enter the container code, e.g. DRU for Drum.<br><br>
+            <b>Notes:</b><br>
+            - A list of all container types can be obtained using the GET container-types method.<br>
+            - The field is case-sensitive, please use the case specified for the code returned by the GET method.
+            <br>
+            <p><font color="green"><b>Business Rule:</b></font></p>
+            Must be in typeOfContainers list.
+          example: SKI
+        physicalForm:
+          type: string
+          enum: [Gas, Liquid, Solid, Powder, Sludge, Mixed]
+          description: This is the form of the waste. This could be a Gas, Liquid, Solid, Powder, Sludge or Mixed. <p><font color="green"><b>Business Rule:</b></font></p> Must be “Gas”, “Liquid”, “Solid”, Powder”, “Sludge” or “Mixed”. <b>Note:</b> The field is case-sensitive, please use the case specified in the description.
+          example: Sludge
+        actualTreatments:
+          type: array
+          items:
+            $ref: '#/components/schemas/actualTreatment'
+          description: |
+            **Actual Treatment.** The confirmed treatment (recovery or
+            disposal) applied to this waste item, as determined by the
+            receiver. Optional. Each entry's
+            disposalOrRecoveryCode is itself optional — a receiving site may
+            need to inspect or weigh before confirming the code. Omitting it
+            produces a warning, not a rejection; weight is required only
+            when the code is supplied.
+
     # Phase 1 receipt request schema — extracted from the requestBody
     # so it can be reused by receiptResource (allOf) without a
     # cross-section $ref.
     receiveMovementRequest:
       type: object
+      description: Request body for POST /deliveries/{deliveryId}/receipt (and the deprecated POST /movements/receive).
       required:
         - apiCode
         - dateTimeReceived
         - carrier
         - wasteItems
-        - receiver
+        - receiverSite
         - receipt
       properties:
         apiCode:
@@ -1388,9 +1969,9 @@ components:
           type: string
           enum:
             [
-              "Non-Haz Waste Transfer",
-              "No documentation provided with Waste",
-              "Household Waste Recycling Centre Receipt",
+              'Non-Haz Waste Transfer',
+              'No documentation provided with Waste',
+              'Household Waste Recycling Centre Receipt'
             ]
           description: If you have not provided a hazardous waste consignment code, then there are three reason codes you can choose to provide. See the table below. <table border="1"> <thead> <tr> <th>Reason</th> <th>Reason Code</th> </tr> </thead> <tbody> <tr> <td>Non-Haz Waste Transfer</td> <td>NON_HAZ_WASTE_TRANSFER</td> </tr> <tr> <td>No documentation provided with Waste</td> <td>NO_DOC_WITH_WASTE</td> </tr> <tr> <td>Household Wast Recycling Centre Receipt</td> <td>HWRC_RECEIPT</td> </tr> </tbody> </table> <b>Note:</b> The field is case-sensitive, please use the case for the code specified in the table. <p><font color="green"><b>Business Rules:</b></font></p> <ul> <li>If any waste.ewcCodes provided are considered hazardous and receiveMovementRequest.hazardousWasteConsignmentCode is not provided a receiveMovementRequest.reasonForNoConsignmentCode is required.</li> <li>If receiveMovementRequest.hazardousWasteConsignmentCode is provided it must be either “NON_HAZ_WASTE_TRANSFER”, “NO_DOC_WITH_WASTE” or “HWRC_RECEIPT”. </li> </ul>
           example: NO_DOC_WITH_WASTE
@@ -1424,25 +2005,23 @@ components:
               reference: WT-67890
             - label: Haulier Note
               reference: HN-11111
-        specialHandlingRequirements:
-          type: string
-          maxLength: 5000
-          description: |
-            Required when abnormal hazardous waste and some non-hazardous waste contains harmful chemical, biological or physical characteristics that require some special handling to prevent harm.
-          example: The waste must be fully inspected by the waste handler according to the Hazardous waste consignment and or EWC codes provided.
         wasteItems:
           type: array
           minItems: 1
           items:
-            $ref: "#/components/schemas/wasteItem"
+            $ref: '#/components/schemas/receiptWasteItem'
+          description: |
+            At least one waste item. Uses the ordinary Receipt endpoint's
+            light waste item shape — no classification; a prior
+            Creation record already has it.
         carrier:
-          $ref: "#/components/schemas/carrier"
+          $ref: '#/components/schemas/carrier'
         brokerOrDealer:
-          $ref: "#/components/schemas/brokerOrDealer"
-        receiver:
-          $ref: "#/components/schemas/receiver"
+          $ref: '#/components/schemas/brokerOrDealer'
+        receiverSite:
+          $ref: '#/components/schemas/receiverSite'
         receipt:
-          $ref: "#/components/schemas/receipt"
+          $ref: '#/components/schemas/receipt'
 
   # ----------------------------------------------------------------------
   # Reusable request bodies (Phase 1)
@@ -1454,13 +2033,13 @@ components:
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/receiveMovementRequest"
+            $ref: '#/components/schemas/receiveMovementRequest'
 
   # ----------------------------------------------------------------------
   # Reusable responses
   # ----------------------------------------------------------------------
   responses:
-    "400":
+    '400':
       description: Input was not in the correct format.
       content:
         application/json:
@@ -1473,7 +2052,7 @@ components:
                   errors:
                     type: array
                     items:
-                      $ref: "#/components/schemas/validationResult"
+                      $ref: '#/components/schemas/validationResult'
 
 # ======================================================================
 # Paths
@@ -1490,34 +2069,34 @@ paths:
         should be stored by the caller and used for any subsequent
         updates or related events (collection, delivery,
         fate-of-waste query). `isDeleted` must not be supplied as `true`
-        here — it can only be set via `PUT /movements/{movementId}` (D-009).
+        here — it can only be set via `PUT /movements/{movementId}`.
       operationId: createMovement
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/createMovementRequest"
+              $ref: '#/components/schemas/createMovementRequest'
       responses:
-        "201":
+        '201':
           description: Movement created. Body carries the new Movement ID and any validation warnings.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/createMovementResponse"
-        "400":
-          $ref: "#/components/responses/400"
+                $ref: '#/components/schemas/createMovementResponse'
+        '400':
+          $ref: '#/components/responses/400'
 
   /movements/{movementId}:
     parameters:
-      - $ref: "#/components/parameters/movementIdPath"
+      - $ref: '#/components/parameters/movementIdPath'
     put:
       tags: [Movement]
       summary: Update a waste movement
       description: |
         Update an existing movement using its Movement ID. Before applying
         the update, the current record is snapshotted to a history store
-        and the live record's revision counter is incremented (D-034).
+        and the live record's revision counter is incremented.
 
         `isDeleted` may be set `true` here to soft-delete the Movement, but
         only while no Collection has been recorded against it — once a
@@ -1525,39 +2104,39 @@ paths:
         as a `BusinessRuleViolation`. A deleted Movement can be restored by
         a further `PUT` with `isDeleted: false`. While a Movement is
         deleted, no Collection may be recorded or updated against it, and
-        it may not be named in a Delivery's `movementIds` (D-009).
+        it may not be named in a Delivery's `movementIds`.
       operationId: updateMovement
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/createMovementRequest"
+              $ref: '#/components/schemas/createMovementRequest'
       responses:
-        "200":
+        '200':
           description: Movement updated.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/updateResponse"
-        "400":
-          $ref: "#/components/responses/400"
-        "404":
+                $ref: '#/components/schemas/updateResponse'
+        '400':
+          $ref: '#/components/responses/400'
+        '404':
           description: Movement not found.
 
   /movements/{movementId}/collection:
     parameters:
-      - $ref: "#/components/parameters/movementIdPath"
+      - $ref: '#/components/parameters/movementIdPath'
     post:
       tags: [Collection]
       summary: Record the collection for a movement
       description: |
         Append a collection event to the given Movement's ordered collection
-        sequence (D-029). The first event is a `STATIC` producer-to-driver
+        sequence. The first event is a `STATIC` producer-to-driver
         pickup; each subsequent event is a `TRANSIT` driver-to-driver
         handover. Each call appends the next event and mints its (internal)
         Collection ID — events are addressed by position in the sequence, not
-        by a public per-event id (D-012/D-016). See `collectionType` and
+        by a public per-event id. See `collectionType` and
         `receivedFromCarrier` on `collectionRequest` for the per-event rules.
 
         The sequence is closed once this Movement is named in a Delivery's
@@ -1565,7 +2144,7 @@ paths:
         `BusinessRuleViolation`.
 
         Also rejected as a `BusinessRuleViolation` if the Movement is
-        currently `isDeleted: true` (D-009). `isDeleted` must not be supplied
+        currently `isDeleted: true`. `isDeleted` must not be supplied
         as `true` in this request — it can only be set via
         `PUT /movements/{movementId}/collection`.
       operationId: recordCollection
@@ -1574,57 +2153,56 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/collectionRequest"
+              $ref: '#/components/schemas/collectionRequest'
       responses:
-        "201":
+        '201':
           description: Collection recorded. Body carries any validation warnings.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/recordCollectionResponse"
-        "400":
-          $ref: "#/components/responses/400"
-        "404":
+                $ref: '#/components/schemas/recordCollectionResponse'
+        '400':
+          $ref: '#/components/responses/400'
+        '404':
           description: Movement not found.
     put:
       tags: [Collection]
       summary: Update the collection for a movement
       description: |
         Correct or soft-delete the *latest active* event in the given
-        Movement's collection sequence (D-029). `PUT` acts on the latest
+        Movement's collection sequence. `PUT` acts on the latest
         active event only; correcting an arbitrary earlier event is out of
-        scope for v1 and is tracked as a follow-up (D-035). Before applying
+        scope for v1 and is tracked as a follow-up. Before applying
         the update, the current record is snapshotted to a history store and
-        the live record's revision counter is incremented (D-034).
+        the live record's revision counter is incremented.
 
         Once the sequence is closed (this Movement has been named in a
         Delivery's `movementIds`), `PUT` is blocked entirely — both data
         correction and soft-delete — for parity with the immutable delivery
-        record (D-017); the attempt is rejected as a `BusinessRuleViolation`.
+        record; the attempt is rejected as a `BusinessRuleViolation`.
 
         `isDeleted` may be set `true` here to soft-delete the latest active
         event (tail-peel); the `STATIC` head can only be deleted when it is
         the sole remaining event. A deleted event can be restored by a
         further `PUT` with `isDeleted: false`. While the Collection is
-        deleted, this Movement may not be named in a Delivery's `movementIds`
-        (D-009).
+        deleted, this Movement may not be named in a Delivery's `movementIds`.
       operationId: updateCollection
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/collectionRequest"
+              $ref: '#/components/schemas/collectionRequest'
       responses:
-        "200":
+        '200':
           description: Collection updated.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/updateResponse"
-        "400":
-          $ref: "#/components/responses/400"
-        "404":
+                $ref: '#/components/schemas/updateResponse'
+        '400':
+          $ref: '#/components/responses/400'
+        '404':
           description: |
             Either the Movement does not exist (`MOVEMENT_NOT_FOUND`), or it
             exists but no collection has yet been recorded to update
@@ -1633,7 +2211,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/notFoundError"
+                $ref: '#/components/schemas/notFoundError'
 
   /deliveries:
     post:
@@ -1643,29 +2221,29 @@ paths:
         Record a delivery event, covering one or more Movement IDs delivered
         together (carried in `movementIds`). In a single-collection run
         `movementIds` is an array of one; in a multi-collection run it
-        carries every Movement being delivered. Returns a Delivery ID: a
-        newly-minted one for a non-hazardous delivery, or the reused
-        Movement ID for a hazardous one (see below).
+        carries every Movement being delivered. Returns an array of delivery
+        entries — one per resulting delivery — each with a newly-minted
+        deliveryId for the aggregated non-hazardous entry, or the reused
+        Movement ID for each hazardous entry (see below).
 
         The drop-off place is a lighter, carrier-declared site model (`deliverySite`)
         — not necessarily an official receiver site, and possibly an exempt
         place. A receipt event may not always follow a delivery.
 
-        Hazardous waste cannot be aggregated across Movements (D-010): if any
-        Movement named in `movementIds` carries hazardous waste, the request
-        must contain exactly one Movement ID. Multi-Movement deliveries are
-        permitted only when every linked Movement is non-hazardous. This depends
-        on properties of the linked Movements that the request body does not
-        carry, so it is enforced server-side and surfaced as a
-        BusinessRuleViolation in `validation.warnings` (it may harden to a 400
-        in a later revision). For a delivery that satisfies this constraint,
-        the returned `deliveryId` is set equal to the single Movement ID
-        rather than minted.
+        A single request's `movementIds` may mix hazardous and non-hazardous
+        Movement IDs. The server splits them: every non-hazardous
+        Movement is aggregated under one newly-minted deliveryId; every
+        hazardous Movement becomes its own delivery, never aggregated with
+        anything else, with its deliveryId set equal to that Movement ID rather
+        than minted. This split depends on properties of the linked Movements
+        that the request body does not carry, so it is performed server-side.
+        The response is an array of delivery entries (see `deliveryResponse`)
+        rather than a single deliveryId.
 
         Every Movement named in `movementIds` must be active: a Movement that
         is currently `isDeleted: true`, or whose Collection is currently
         `isDeleted: true`, must not be referenced here. Either case is
-        rejected as a `BusinessRuleViolation` (D-009). `isDeleted` must not be
+        rejected as a `BusinessRuleViolation`. `isDeleted` must not be
         supplied as `true` in this request — it can only be set via
         `PUT /deliveries/{deliveryId}`.
       operationId: recordDelivery
@@ -1674,27 +2252,27 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/deliveryRequest"
+              $ref: '#/components/schemas/deliveryRequest'
       responses:
-        "201":
-          description: Delivery recorded. Body carries the new Delivery ID and any validation warnings.
+        '201':
+          description: Delivery recorded. Body carries the array of resulting delivery entries and any validation warnings.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/deliveryResponse"
-        "400":
-          $ref: "#/components/responses/400"
+                $ref: '#/components/schemas/deliveryResponse'
+        '400':
+          $ref: '#/components/responses/400'
 
   /deliveries/{deliveryId}:
     parameters:
-      - $ref: "#/components/parameters/deliveryIdPath"
+      - $ref: '#/components/parameters/deliveryIdPath'
     put:
       tags: [Delivery]
       summary: Soft-delete or restore a delivery
       description: |
-        A recorded delivery is immutable under policy (D-017): its place,
+        A recorded delivery is immutable under policy: its place,
         carrier, timestamp and `movementIds` cannot be edited after the event.
-        The only permitted change is the soft-delete flag `isDeleted` (D-009),
+        The only permitted change is the soft-delete flag `isDeleted`,
         so this operation accepts the restricted `deliveryUpdateRequest` only —
         any other field in the body is rejected with a `NotAllowed` validation
         error.
@@ -1704,9 +2282,9 @@ paths:
         to set `isDeleted: true` is rejected as a `BusinessRuleViolation`. A
         deleted Delivery can be restored by a further `PUT` with
         `isDeleted: false`. While the Delivery is deleted, no Receipt may be
-        recorded or updated against it (D-009). Before applying the change the
+        recorded or updated against it. Before applying the change the
         current record is snapshotted to a history store and the live record's
-        revision counter is incremented (D-034).
+        revision counter is incremented.
 
         To correct a recorded delivery, soft-delete it (`isDeleted: true`) and
         record a fresh delivery via `POST /deliveries`.
@@ -1716,17 +2294,17 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/deliveryUpdateRequest"
+              $ref: '#/components/schemas/deliveryUpdateRequest'
       responses:
-        "200":
+        '200':
           description: Delivery soft-delete state updated.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/updateResponse"
-        "400":
-          $ref: "#/components/responses/400"
-        "404":
+                $ref: '#/components/schemas/updateResponse'
+        '400':
+          $ref: '#/components/responses/400'
+        '404':
           description: Delivery not found.
 
   # ----------------------------------------------------------------------
@@ -1743,7 +2321,7 @@ paths:
 
   /deliveries/{deliveryId}/receipt:
     parameters:
-      - $ref: "#/components/parameters/deliveryIdPath"
+      - $ref: '#/components/parameters/deliveryIdPath'
     post:
       tags: [Receipt]
       summary: Record receipt of waste against a delivery
@@ -1757,24 +2335,24 @@ paths:
 
         Waste details on the receipt may be cross-checked against the linked
         Movement record — the classification declared at creation plus the
-        actual weights recorded at collection (D-006); the delivery carries no
+        actual weights recorded at collection; the delivery carries no
         waste details and is not a source for the waste cross-check. Carrier
         details may be cross-checked against the carrier on the Movement chain.
         Where details differ, the difference is returned as an entry in
         `validation.warnings` rather than rejected. The exact comparison rules
         (including weight tolerance, since creation is an estimate and
-        collection an actual) are still being defined (D-021).
+        collection an actual) are still being defined.
 
         Rejected as a `BusinessRuleViolation` if the Delivery is currently
-        `isDeleted: true` (D-009). Receipt itself has no `isDeleted` field —
+        `isDeleted: true`. Receipt itself has no `isDeleted` field —
         once recorded, a receipt is the terminal event in the chain and
         cannot be soft-deleted.
       operationId: recordReceipt
       requestBody:
-        $ref: "#/components/requestBodies/receiveMovementRequest"
+        $ref: '#/components/requestBodies/receiveMovementRequest'
         required: true
       responses:
-        "201":
+        '201':
           description: |
             Success — the receipt has been stored against the delivery.
             The receipt is addressed by its Delivery ID
@@ -1791,10 +2369,10 @@ paths:
                       warnings:
                         type: array
                         items:
-                          $ref: "#/components/schemas/validationResult"
-        "400":
-          $ref: "#/components/responses/400"
-        "404":
+                          $ref: '#/components/schemas/validationResult'
+        '400':
+          $ref: '#/components/responses/400'
+        '404':
           description: Delivery not found.
     put:
       tags: [Receipt]
@@ -1803,13 +2381,13 @@ paths:
         Updates the receipt previously recorded against the given Delivery.
         Same request body as the Phase 1 receipt payload. Before applying
         the update, the current record is snapshotted to a history store
-        and the live record's revision counter is incremented (D-034).
+        and the live record's revision counter is incremented.
       operationId: updateReceipt
       requestBody:
-        $ref: "#/components/requestBodies/receiveMovementRequest"
+        $ref: '#/components/requestBodies/receiveMovementRequest'
         required: true
       responses:
-        "200":
+        '200':
           description: The receipt has been updated.
           content:
             application/json:
@@ -1822,10 +2400,10 @@ paths:
                       warnings:
                         type: array
                         items:
-                          $ref: "#/components/schemas/validationResult"
-        "400":
-          $ref: "#/components/responses/400"
-        "404":
+                          $ref: '#/components/schemas/validationResult'
+        '400':
+          $ref: '#/components/responses/400'
+        '404':
           description: |
             Either the Delivery does not exist (`DELIVERY_NOT_FOUND`), or it
             exists but no receipt has yet been recorded to update
@@ -1834,10 +2412,10 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/notFoundError"
+                $ref: '#/components/schemas/notFoundError'
 
   # ----------------------------------------------------------------------
-  # Receipt without a prior delivery (D-041) — proposal.
+  # Receipt without a prior delivery (D-041).
   #
   # Exceptional case: waste received with no prior Movement/Collection/
   # Delivery trail at all. Rather than exposing a generic no-Delivery
@@ -1849,10 +2427,14 @@ paths:
   # flow (POST /deliveries/{deliveryId}/receipt against a Delivery that
   # does carry Movement IDs) is unaffected.
   #
-  # Marked x-stability: proposal because D-041 leaves the exact
-  # request/response shape open (see decisions.md#d-041, open questions
-  # 1-4) — modelled here as the existing receipt payload plus
-  # reasonForNoDeliveryId, as a working assumption pending BA confirmation.
+  # Still marked x-stability: proposal — D-042 resolves D-041's open
+  # questions 1 (extra fields: yes, full classification, via
+  # receiptWithoutDeliveryRequest/receiptWithoutDeliveryWasteItem) and 4
+  # (request/response shape: the same shape as
+  # POST /deliveries/{deliveryId}/receipt, except wasteItems uses the full
+  # classification shape). Open questions 2 (correcting an empty Delivery's
+  # fields) and 3 (reasonForNoDeliveryId's scope on the ordinary flow)
+  # remain open (see decisions.md#d-041).
   # ----------------------------------------------------------------------
 
   /receipts:
@@ -1862,10 +2444,12 @@ paths:
       summary: Record a receipt with no prior delivery (proposal)
       description: |
         For the exceptional case where waste is received with no prior
-        Movement, Collection, or Delivery recorded at all (D-041). The
-        caller supplies the same receipt payload as
-        `POST /deliveries/{deliveryId}/receipt`, plus a mandatory
-        `reasonForNoDeliveryId` explaining why there is no prior trail.
+        Movement, Collection, or Delivery recorded at all. The
+        caller supplies the full waste classification (unlike the ordinary
+        `POST /deliveries/{deliveryId}/receipt`, which carries only
+        logistics fields since a prior Creation record already has the
+        classification) plus a mandatory `reasonForNoDeliveryId` explaining
+        why there is no prior trail.
 
         The server creates an empty Delivery (`movementIds: []`) and
         records the receipt against it in a single request, returning the
@@ -1878,31 +2462,28 @@ paths:
         endpoint's implementation, not a documented capability of
         `POST /deliveries`.
 
-        Open questions not yet resolved (see D-041): whether additional
-        fields are required here that would otherwise be sourced from a
-        linked Movement; how an empty Delivery's fields are corrected
-        after the fact, given D-017's immutability; and whether
-        `reasonForNoDeliveryId` is ever meaningful on the ordinary receipt
-        flow. The request/response shape below should be treated as
-        provisional until those are settled.
+        Open questions not yet resolved: how an empty
+        Delivery's fields are corrected after the fact, given the
+        immutability rules for a recorded delivery; and whether
+        `reasonForNoDeliveryId` is ever meaningful on the ordinary receipt flow.
       operationId: recordReceiptWithoutDelivery
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/receiptWithoutDeliveryRequest"
+              $ref: '#/components/schemas/receiptWithoutDeliveryRequest'
       responses:
-        "201":
+        '201':
           description: |
             Receipt recorded and an empty Delivery created to hold it.
             Body carries the new Delivery ID and any validation warnings.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/receiptWithoutDeliveryResponse"
-        "400":
-          $ref: "#/components/responses/400"
+                $ref: '#/components/schemas/receiptWithoutDeliveryResponse'
+        '400':
+          $ref: '#/components/responses/400'
 
   # ----------------------------------------------------------------------
   # Phase 1 receipt endpoints — DEPRECATED.
@@ -1929,10 +2510,10 @@ paths:
         movement is successfully stored.
       operationId: createReceiptMovementLegacy
       requestBody:
-        $ref: "#/components/requestBodies/receiveMovementRequest"
+        $ref: '#/components/requestBodies/receiveMovementRequest'
         required: true
       responses:
-        "201":
+        '201':
           description: Success — the waste movement has been stored.
           content:
             application/json:
@@ -1941,7 +2522,7 @@ paths:
                 properties:
                   wasteTrackingId:
                     allOf:
-                      - $ref: "#/components/schemas/wasteTrackingId"
+                      - $ref: '#/components/schemas/wasteTrackingId'
                     description: |
                       Public Phase 1 tracking identifier. Store it and use
                       it to address the deprecated PUT
@@ -1952,9 +2533,9 @@ paths:
                       warnings:
                         type: array
                         items:
-                          $ref: "#/components/schemas/validationResult"
-        "400":
-          $ref: "#/components/responses/400"
+                          $ref: '#/components/schemas/validationResult'
+        '400':
+          $ref: '#/components/responses/400'
 
   /movements/{wasteTrackingId}/receive:
     parameters:
@@ -1967,7 +2548,7 @@ paths:
           identifier — do not substitute a Phase 2 `movementId` here.
         example: YY3F7K2Q
         schema:
-          $ref: "#/components/schemas/wasteTrackingId"
+          $ref: '#/components/schemas/wasteTrackingId'
     put:
       tags: [Receipt]
       summary: Update a receipt of waste record (Phase 1, deprecated)
@@ -1979,10 +2560,10 @@ paths:
         (Phase 1 `wasteTrackingId`) in the URL path.
       operationId: updateReceiptMovementLegacy
       requestBody:
-        $ref: "#/components/requestBodies/receiveMovementRequest"
+        $ref: '#/components/requestBodies/receiveMovementRequest'
         required: true
       responses:
-        "200":
+        '200':
           description: The waste movement receipt has been updated.
           content:
             application/json:
@@ -1995,10 +2576,10 @@ paths:
                       warnings:
                         type: array
                         items:
-                          $ref: "#/components/schemas/validationResult"
-        "400":
-          $ref: "#/components/responses/400"
-        "404":
+                          $ref: '#/components/schemas/validationResult'
+        '400':
+          $ref: '#/components/responses/400'
+        '404':
           description: Movement not found. The details will still be stored in the Waste Tracking Service, the response informs the receiver that the carrier has provided incorrect details.
 
   # ----------------------------------------------------------------------
@@ -2007,7 +2588,7 @@ paths:
 
   /movements/{movementId}/fate-of-waste:
     parameters:
-      - $ref: "#/components/parameters/movementIdPath"
+      - $ref: '#/components/parameters/movementIdPath'
     get:
       tags: [Fate of waste]
       x-stability: proposal
@@ -2020,17 +2601,17 @@ paths:
         Response schema is not yet defined — field content, timestamp
         cardinality, treatment-code projection and onward-movement scope
         are open questions pending BA and policy confirmation. See the
-        decisions register (D-019).
+        decisions register.
       operationId: getFateOfWaste
       responses:
-        "200":
+        '200':
           description: Movement summary. Response schema to be defined.
           content:
             application/json:
               schema:
                 type: object
                 description: Proposal — response fields to be defined.
-        "404":
+        '404':
           description: Movement not found.
 
   /reference-data/ewc-codes:
@@ -2045,7 +2626,7 @@ paths:
           --header "authorization": Bearer eyJraWQiOiJQYnJiZXZvYUF5d1NQcG5KUWlsQXVCT1Q4aVdyNUFcL3RaQkZHaTk5TU5CTT0iLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiIybHRldX...
         ```
       responses:
-        "200":
+        '200':
           description: |
             A truncated list of EWC codes obtained using the GET ewc-codes method<br><br>
             ```json
@@ -2130,7 +2711,7 @@ paths:
         --header "authorization": Bearer eyJraWQiOiJQYnJiZXZvYUF5d1NQcG5KUWlsQXVCT1Q4aVdyNUFcL3RaQkZHaTk5TU5CTT0iLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiIybHRldXNlaHN...
         ```
       responses:
-        "200":
+        '200':
           description: |
             A truncated list of hazardous property codes obtained using the GET hazardous-property-codes method<br><br>
             ```json
@@ -2191,7 +2772,7 @@ paths:
         --header "authorization": Bearer eyJraWQiOiJQYnJiZXZvYUF5d1NQcG5KUWlsQXVCT1Q4aVdyNUFcL3RaQkZHaTk5TU5CTT0iLCJhbGciOiJSUzI1NiJ9...
         ```
       responses:
-        "200":
+        '200':
           description: |
             A truncated list of disposal or recovery codes obtained using the GET disposal-or-recovery Codes method<br><br>
             Success
@@ -2244,7 +2825,7 @@ paths:
         --header "authorization": Bearer eyJraWQiOiJQYnJiZXZvYUF5d1NQcG5KUWlsQXVCT1Q4aVdyNUFcL3RaQkZHaTk5TU5CTT0iLCJhbGciOiJSUzI1NiJw...
         ```
       responses:
-        "200":
+        '200':
           description: |
             A truncated list of container type codes obtained using the GET container-types method<br><br>
 
@@ -2291,7 +2872,7 @@ paths:
         --header "authorization": Bearer eyJraWQiOiJQYnJiZXZvYUF5d1NQcG5KUWlsQXVCT1Q4aVdyNUFcL3RaQkZHaTk5TU5CTT0iLCJhbGciOiJSUzI1NiJ9...
         ```
       responses:
-        "200":
+        '200':
           description: |
             A truncated list of POP names obtained using the GET pop-names method<br><br>
             Success<br><br>

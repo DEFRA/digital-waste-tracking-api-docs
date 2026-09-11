@@ -12,8 +12,7 @@
  * receiptJoi.js's receiptAddressSchema is the genuine outlier: a standalone
  * reimplementation, not built on this base, which also drops Irish Eircode
  * support (UK postcodes only). That's pending a schema-side change to build
- * receiptAddressSchema from this same businessAddressSchema instead. See
- * phase2-payload-resource-analysis.md §2.
+ * receiptAddressSchema from this same businessAddressSchema instead.
  */
 import { businessAddressSchema } from '../../../../docs/collections/data/sharedSchemas.js'
 

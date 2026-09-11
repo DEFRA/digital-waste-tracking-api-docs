@@ -631,10 +631,10 @@ Because the event store is the source of truth, any projection document can be r
 
 ```javascript
 // Rebuild a single movement projection from its event stream.
-rebuildMovementProjection(db, movementId);
+rebuildMovementProjection(db, movementId)
 
 // Rebuild a single delivery projection from its event stream.
-rebuildDeliveryProjection(db, deliveryId);
+rebuildDeliveryProjection(db, deliveryId)
 ```
 
 A full replay (all movements or all deliveries) iterates every distinct `streamId` prefixed `movement-` or `delivery-` and calls the corresponding rebuild function. This is the recovery path if a projection becomes stale due to a failed write step.

@@ -1,8 +1,7 @@
 /**
  * Placeholder — popsSchema/popComponentSchema, required on a wasteItem when
  * containsPops is true (creation, receipt only). The containsPops wiring
- * itself is tested alongside each event's wasteItem, not here. See
- * phase2-payload-resource-analysis.md §2 and §4.
+ * itself is tested alongside each event's wasteItem, not here.
  */
 import {
   popsSchema,
@@ -56,4 +55,21 @@ describe('components', () => {
 describe('popComponent', () => {
   test.todo('rejects a code that is not on the POP reference list')
   test.todo('accepts a null concentration')
+
+  test('accepts concentrationThresholdOperator instead of concentration', () => {
+    const { error } = popComponentSchema.validate({
+      code: 'PFOS',
+      concentrationThresholdOperator: 'LESS_THAN'
+    })
+    expect(error).toBeUndefined()
+  })
+
+  test('rejects concentration and concentrationThresholdOperator together', () => {
+    const { error } = popComponentSchema.validate({
+      code: 'PFOS',
+      concentration: 12,
+      concentrationThresholdOperator: 'LESS_THAN'
+    })
+    expect(error).toBeDefined()
+  })
 })

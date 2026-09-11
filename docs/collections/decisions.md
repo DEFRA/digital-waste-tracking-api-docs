@@ -37,19 +37,22 @@ At-a-glance view of every decision, sorted by status, then by impact (structural
 | D-006 | [Cross-check of receipt details against the linked delivery](#cross-check-of-receipt-details-against-the-linked-delivery) | ✅ Decided | 🟠 Medium | **Receipt** |
 | D-008 | [Carrier always required; broker or dealer optional, at every stage](#carrier-always-required-broker-or-dealer-optional-at-every-stage) | ✅ Decided | 🟠 Medium | **Actors** |
 | D-009 | [Soft-delete via `isDeleted`, set only on PUT](#soft-delete-via-isdeleted-set-only-on-put) | ✅ Decided | 🟠 Medium | **Lifecycle** |
-| D-010 | [Hazardous waste cannot be merged across Movements at delivery](#hazardous-waste-cannot-be-merged-across-movements-at-delivery) | ✅ Decided | 🟠 Medium | **Delivery** |
+| D-010 | [Hazardous Movements always split into their own delivery; mixed hazardous and non-hazardous requests now accepted](#hazardous-movements-always-split-into-their-own-delivery-mixed-hazardous-and-non-hazardous-requests-now-accepted) | ✅ Decided | 🟠 Medium | **Delivery** |
 | D-014 | [Sub-resource 404 shape: parent-not-found vs event-not-recorded](#sub-resource-404-shape-parent-not-found-vs-event-not-recorded) | ✅ Decided | 🟠 Medium | **Lifecycle** |
 | D-017 | [Delivery PUT restricted to soft-delete only](#delivery-put-restricted-to-soft-delete-only) | ✅ Decided | 🟠 Medium | **Lifecycle** |
 | D-018 | [Delivery address derivability](#delivery-address-derivability) | ✅ Decided | 🟠 Medium | **Delivery** |
 | D-029 | [Transit collection (driver-to-driver) recorded as a sequence of collection events](#transit-collection-driver-to-driver-recorded-as-a-sequence-of-collection-events) | ✅ Decided | 🟠 Medium | **Collection** |
-| D-031 | [Disposal/recovery codes: mandatory Intended Treatment at Creation, Actual Treatment at Receipt](#disposalrecovery-codes-mandatory-intended-treatment-at-creation-actual-treatment-at-receipt) | ✅ Decided | 🟠 Medium | **Collection** |
+| D-031 | [Treatment renamed from disposal/recovery codes: mandatory Intended Treatments at Creation, Actual Treatments at Receipt](#treatment-renamed-from-disposalrecovery-codes-mandatory-intended-treatments-at-creation-actual-treatments-at-receipt) | ✅ Decided | 🟠 Medium | **Collection** |
 | D-032 | [Waste item weights are not captured at Collection or Delivery](#waste-item-weights-are-not-captured-at-collection-or-delivery) | ✅ Decided | 🟠 Medium | **Collection** |
 | D-034 | [PUT operations use history/revision pattern across all events](#put-operations-use-historyrevision-pattern-across-all-events) | ✅ Decided | 🟠 Medium | **Lifecycle** |
 | D-027 | [Per-organisation vs per-actor API credentials](#per-organisation-vs-per-actor-api-credentials) | ✅ Decided | 🟠 Medium | **Onboarding** |
+| D-042 | [Waste item classification: separated from logistics at Creation, reused at the no-prior-delivery Receipt endpoint, dropped at the ordinary Receipt endpoint](#waste-item-classification-separated-from-logistics-at-creation-reused-at-the-no-prior-delivery-receipt-endpoint-dropped-at-the-ordinary-receipt-endpoint) | ✅ Decided | 🟠 Medium | **Creation** |
 | D-002 | [Single OpenAPI file, not `$ref`-split](#single-openapi-file-not-ref-split) | ✅ Decided | 🟢 Low | **Spec structure** |
 | D-003 | [OpenAPI 3.0.3, not 3.1](#openapi-303-not-31) | ✅ Decided | 🟢 Low | **Spec structure** |
 | D-011 | [Static and transit collection collapsed into a single endpoint](#static-and-transit-collection-collapsed-into-a-single-endpoint) | ✅ Decided | 🟢 Low | **Collection** |
 | D-040 | [Rename drop-off and Transfer ID to delivery and Delivery ID](#rename-drop-off-and-transfer-id-to-delivery-and-delivery-id) | ✅ Decided · Applied register-wide | 🟢 Low | **Naming** |
+| D-043 | [Creation's receiver becomes receivers: an array, min 1 when required](#creations-receiver-becomes-receivers-an-array-min-1-when-required) | ✅ Decided | 🟢 Low | **Creation** |
+| D-044 | [Hazardous/POP component concentrationThreshold flattened to an operator only — no value](#hazardouspop-component-concentrationthreshold-flattened-to-an-operator-only-no-value) | ✅ Decided | 🟢 Low | **Creation** |
 | D-022 | [Receipt migration: new endpoint vs extend Phase 1](#receipt-migration-new-endpoint-vs-extend-phase-1) | ⏳ Open | 🔴 High | **Receipt** |
 | D-025 | [Receipt acceptance / rejection outcome (new in Phase 2)](#receipt-acceptance-rejection-outcome-new-in-phase-2) | ⏳ Open | 🔴 High | **Receipt** |
 | D-037 | [Phase 2 MongoDB storage model — three options under evaluation](#phase-2-mongodb-storage-model-three-options-under-evaluation) | ⏳ Open | 🔴 High | **Data model** |
@@ -172,6 +175,8 @@ The shape of the receipt and producer-query downstream both work cleanly off thi
 
 **Consequences.** Schema is consistent across all three request bodies. Server-side logic validates `brokerOrDealer` the same way at each stage. Reintroducing the discriminated union is possible later without breaking clients that already supply both forms.
 
+**Ticket conflict note (2026-09).** DWTC-152, DWTC-153, DWTC-155 and DWTC-162 each ask for a boolean field gating `brokerOrDealer` as conditionally mandatory. This decision (optional on all events, no gate) stands; the conflict has been flagged back to the ticket authors/BA rather than implemented.
+
 <a id="d-009"></a>
 
 ### Soft-delete via `isDeleted`, set only on PUT
@@ -186,7 +191,6 @@ The rules, applied uniformly across the three deletable events:
 
 - **PUT-only.** `isDeleted` may only be set to `true` via the event's `PUT` (update). A `POST` (create) request that supplies `isDeleted: true` is rejected with a `NotAllowed` validation error; `POST` requests may omit the field or send `false`.
 - **No subsequent event.** An event may be marked deleted only while no later event in the chain has been recorded against it:
-
   - A Movement cannot be deleted once its Collection has been recorded.
   - A Collection cannot be deleted once its Movement has been referenced in a Delivery.
   - A Delivery cannot be deleted once a Receipt has been recorded against it.
@@ -194,7 +198,6 @@ The rules, applied uniformly across the three deletable events:
   This checks whether the later event's record _exists_, not whether it is itself currently active — once a Collection has been recorded against a Movement, that Movement stays locked from deletion even if the Collection is later deleted too. The chain of what-was-recorded is preserved; deleting a later event does not reopen an earlier one. Violating this returns a `BusinessRuleViolation` validation error.
 
 - **Deleted blocks what comes next.** While an event is `isDeleted: true`, no event later in the chain may be recorded or updated against it:
-
   - Collection cannot be recorded/updated against a deleted Movement.
   - A Movement that is deleted (with or without a Collection) cannot be named in a Delivery's `movementIds`; nor can a Movement whose Collection is deleted.
   - Receipt cannot be recorded/updated against a deleted Delivery.
@@ -211,19 +214,30 @@ For collection specifically, [D-029](#d-029) adds a further restriction once a M
 
 <a id="d-010"></a>
 
-### Hazardous waste cannot be merged across Movements at delivery
+### Hazardous Movements always split into their own delivery; mixed hazardous and non-hazardous requests now accepted
 
-**D-010** · ✅ Decided · Impact: 🟠 Medium · Area: **Delivery** · Related: [D-007](#d-007)
+**D-010** · ✅ Decided · Impact: 🟠 Medium · Area: **Delivery** · Related: [D-007](#d-007), [D-012](#d-012), [D-013](#d-013)
 
-**Context.** A delivery can cover one or more Movements delivered together at the same receiver site (multi-collection runs). For hazardous waste, regulatory and audit constraints make merging multiple Movements under a single Delivery ID inappropriate — each hazardous Movement needs its own Delivery ID for traceability.
+**Context.** A delivery can cover one or more Movements delivered together at the same receiver site (multi-collection runs). For hazardous waste, regulatory and audit constraints make merging multiple Movements under a single Delivery ID inappropriate — each hazardous Movement needs its own Delivery ID for traceability, because hazardous waste travels under one consignment note end to end and the regulator does not want that identifier changing mid-journey.
 
-**Decision.** When any of the Movements named in a `POST /deliveries` request carries hazardous waste, the request must contain exactly one Movement ID. Multi-Movement deliveries are permitted only when all linked Movements are non-hazardous.
+Policy/regulator feedback clarified that carriers should be able to submit a single mixed load — some hazardous, some non-hazardous Movement IDs — in one `POST /deliveries` call, rather than being forced to pre-split the call themselves. The original decision required the entire request to contain exactly one Movement ID whenever any of them was hazardous, which pushed that splitting work onto the caller instead of the service.
 
-The constraint is data-dependent (depends on properties of the linked Movements that the request body does not carry). It is therefore not expressed in the OpenAPI schema, but documented on the endpoint and validated server-side. Violations return a 400 with a clear validation error.
+**Decision.** `movementIds` may now contain a mix of hazardous and non-hazardous Movement IDs in a single `POST /deliveries` request. The server — not the caller — splits them:
 
-For a delivery that satisfies this constraint (hazardous, exactly one Movement ID), the server does not mint a new Delivery ID: `deliveryId` is set equal to that Movement ID. Non-hazardous deliveries continue to mint a fresh Delivery ID via `waste-tracking-id-backend` as before, whether single- or multi-Movement.
+- Every non-hazardous Movement ID in the request is aggregated under one newly-minted Delivery ID, exactly as for an all-non-hazardous request today.
+- Every hazardous Movement ID becomes its own delivery, never aggregated with any other Movement (hazardous or not). Its Delivery ID is set equal to that Movement ID, not freshly minted — unchanged from the original decision.
 
-**Consequences.** Multi-collection runs remain a first-class concept for non-hazardous waste. Carriers handling hazardous waste record one delivery per Movement, even if the loads physically arrive together. The Delivery ID returned for a hazardous delivery is predictable ahead of the call — it is the Movement ID already known to the caller — rather than a newly-minted value.
+The constraint remains data-dependent (it depends on each linked Movement's hazardous flag, which the request body does not carry), so the split is still performed server-side rather than expressed in the OpenAPI schema.
+
+**Response shape changes accordingly.** `POST /deliveries` now returns `deliveries: DeliveryResult[]`, one entry per resulting delivery, rather than the single `deliveryId` it returned before. Each entry carries:
+
+- `deliveryId` — the Delivery ID for this entry (freshly minted for the aggregated non-hazardous entry; equal to the Movement ID for a hazardous entry).
+- `movementIds: string[]` — the constituent Movement IDs covered by this entry, so a caller can correlate its submitted Movement IDs against the returned deliveries without inferring which output entry covers which input.
+- `wasteType: "HAZARDOUS" | "NON_HAZARDOUS"` — marks whether the entry is the (single) aggregated non-hazardous delivery or one of the per-Movement hazardous deliveries.
+
+A request of `movementIds: ['haz1', 'no-haz1', 'haz2', 'no-haz2', 'no-haz3']` therefore returns three entries: `{ deliveryId: 'haz1', movementIds: ['haz1'], wasteType: 'HAZARDOUS' }`, the equivalent for `haz2`, and one aggregated entry `{ deliveryId: <minted>, movementIds: ['no-haz1', 'no-haz2', 'no-haz3'], wasteType: 'NON_HAZARDOUS' }`.
+
+**Consequences.** Multi-collection runs remain a first-class concept for non-hazardous waste, and now for mixed loads too — carriers no longer need to pre-split a mixed pickup into separate calls themselves. Hazardous Movements are still never aggregated with anything else, preserving the one-consignment-note-per-hazardous-Movement traceability the original decision protected. `POST /deliveries` becomes a call that can mint more than one Delivery ID at once, and its response becomes an array of typed delivery entries rather than a single `deliveryId` string, so every caller integration must move from expecting `{ deliveryId }` to iterating `deliveries[]` and reading `movementIds`/`wasteType` per entry. This also sets a precedent of using a typed enum (`wasteType`) rather than a boolean for a newly-introduced state marker, consistent with the direction flagged for the existing `isEstimate` boolean elsewhere on this ticket (tracked separately as its own future ticket, not amended here).
 
 <a id="d-011"></a>
 
@@ -378,6 +392,23 @@ Correcting a recorded delivery is therefore not an in-place edit: soft-delete th
 
 **Consequences.** `deliverySite.address` is a required field on `POST /deliveries` (reflected in the OpenAPI spec as `deliverySite` `required: [siteName, address]`); callers must supply it even when the actual delivery location matches their planned receiver estimate. It is not part of the delivery `PUT` body, which is restricted to `isDeleted` (`deliveryUpdateRequest`, see [D-017](#d-017)), so the address is captured once at `POST` and never re-edited.
 
+<a id="d-027"></a>
+
+### Per-organisation vs per-actor API credentials
+
+**D-027** · ✅ Decided · Impact: 🟠 Medium · Area: **Onboarding** · Related: [D-008](#d-008), [D-036](#d-036)
+
+**Context.** Phase 1 is receiver-first: a receiver registers its organisation via the Waste Tracking Service and receives credentials — a Cognito app client (`client_id` + `client_secret`) that is exchanged for a Bearer JWT, and an `apiCode` that identifies the submitting organisation in every API request. Phase 2 adds carrier, broker, and producer actors. The open question was whether those actors require separate per-role credentials or whether one organisation-level registration covers all roles that organisation holds.
+
+**Decision.** Per-organisation credentials, not per-actor. Every actor type — carrier, broker, producer, and receiver — onboards via the same process and receives the same credential shape: a Cognito app client (`client_id` + `client_secret`) and an `apiCode`. Every record written to the API is assigned to the submitting organisation identified by `apiCode`; no distinction is made at the credential level between the role the caller is acting in for a given event. An organisation that acts as both a receiver and a carrier holds one set of credentials and uses them for both roles.
+
+The two credentials are issued through different paths, and Phase 2 changes neither:
+
+- **Cognito app client** (`client_id` + `client_secret`) is manually provisioned per third-party integrator system, in the relevant environment (test or production), with credentials shared via a secure channel. This step does not change for Phase 2 — carrier, broker, and producer integrators are provisioned the same manual way as receiver integrators are today.
+- **`apiCode`** is self-service, not manually distributed. Once an organisation is registered and its users can sign in via Defra ID, any user in that organisation generates, names, and disables its own `apiCode`s through `waste-organisation-frontend`'s API management screens — no operator involvement, no encrypted-email step. This self-serve path already exists for Phase 1 receivers; no new UI is needed for Phase 2 actors to use it.
+
+**Consequences.** The credential model is unchanged from Phase 1, but the two halves have different operational profiles. The `apiCode` half is fully self-serve for every actor type via the existing `waste-organisation-frontend` UI — the `waste-organisation-backend` API-code issuance flow is reused for carriers and brokers without modification. The Cognito app client half remains a manual, per-integrator provisioning step regardless of actor type; this is a standing onboarding-scale consideration as Phase 2 brings in carrier, broker, and producer integrators on top of receivers, not something Phase 2 introduces new. Role-based access restrictions — for example, whether only a permitted receiving site may record a Receipt — are a separate policy question deferred to a future decision; the identity mechanism supplies the information to enforce such rules but does not pre-empt them (see [D-036](#d-036)).
+
 <a id="d-029"></a>
 
 ### Transit collection (driver-to-driver) recorded as a sequence of collection events
@@ -428,15 +459,18 @@ D-015's text carries a one-line amendment to its Movement↔Collection clause to
 
 <a id="d-031"></a>
 
-### Disposal/recovery codes: mandatory Intended Treatment at Creation, Actual Treatment at Receipt
+### Treatment renamed from disposal/recovery codes: mandatory Intended Treatments at Creation, Actual Treatments at Receipt
 
-**D-031** · ✅ Decided · Impact: 🟠 Medium · Area: **Collection** · Related: [D-006](#d-006), [D-019](#d-019)
+**D-031** · ✅ Decided · Impact: 🟠 Medium · Area: **Collection** · Related: [D-006](#d-006), [D-019](#d-019), [D-042](#d-042)
 
-**Context.** `wasteItems[].disposalOrRecoveryCodes` is the treatment outcome — what the receiver does with the waste (R-codes for recovery, D-codes for disposal). It's captured at both Creation and Receipt, but represents a different thing at each stage.
+**Context.** `wasteItems[].disposalOrRecoveryCodes` was the treatment outcome — what the receiver does with the waste (R-codes for recovery, D-codes for disposal) — captured at both Creation and Receipt but representing a different thing at each stage: a planned figure at Creation, the confirmed outcome at Receipt. The original decision made it mandatory (Intended Treatment) at Creation and kept it optional (Actual Treatment) at Receipt, same shape, label-only difference. Beta-2 payload work goes further and changes the field itself, not just its label.
 
-**Decision.** At Creation, the field is the **Intended Treatment** — the planned outcome, and is now mandatory (at least one code required). At Receipt, the field is the **Actual Treatment** — the confirmed, authoritative outcome as determined by the receiver, and stays optional, unchanged. Both use the same underlying shape; only the label, description, and Creation's requiredness change.
+**Decision.** A shared `Treatment` type replaces the old array entries: `{ disposalOrRecoveryCode: string, weight: Weight }` — same per-entry shape as before, just the code field renamed from `code` to `disposalOrRecoveryCode`. The wasteItem-level field is renamed per event and stays an array (a waste item can still split across more than one treatment code, e.g. part recovered under R3, part disposed under D1, each with its own weight):
 
-**Consequences.** A Movement's intended treatment is now always known from Creation onward. Receipt remains the source of truth for the actual outcome, which may differ from what was intended. Feeds the treatment-code split question ([D-019](#d-019)): Intended Treatment at Creation is not the same as `startTreatmentCode`/`finalTreatmentCode` derived at Receipt.
+- `intendedTreatments: Treatment[]` — mandatory, min 1, at Creation.
+- `actualTreatments: Treatment[]` — optional, at Receipt. Within a supplied entry, `disposalOrRecoveryCode` itself is optional — a receiving site may need to inspect or weigh before confirming the code — with `weight` conditional on the code being present. Omitting the code produces a warning, not a rejection.
+
+**Consequences.** `disposalOrRecoveryCodes` no longer exists as a field name anywhere in the Phase 2 contract. The original mandatory-at-creation/optional-at-receipt conditionality is preserved; only the field names and the internal optionality at Receipt change. Feeds the treatment-code split question ([D-019](#d-019)): Intended Treatment at Creation is not the same as `startTreatmentCode`/`finalTreatmentCode` derived at Receipt.
 
 <a id="d-032"></a>
 
@@ -462,23 +496,6 @@ D-015's text carries a one-line amendment to its Movement↔Collection clause to
 
 **Consequences.** Every mutation across all four events is fully auditable at the server level. The public API contract is unchanged: each PUT returns the updated record (or a validation envelope), not a version list. Clients see a single live record per resource, identical to the pre-decision behaviour.
 
-<a id="d-027"></a>
-
-### Per-organisation vs per-actor API credentials
-
-**D-027** · ✅ Decided · Impact: 🟠 Medium · Area: **Onboarding** · Related: [D-008](#d-008), [D-036](#d-036)
-
-**Context.** Phase 1 is receiver-first: a receiver registers its organisation via the Waste Tracking Service and receives credentials — a Cognito app client (`client_id` + `client_secret`) that is exchanged for a Bearer JWT, and an `apiCode` that identifies the submitting organisation in every API request. Phase 2 adds carrier, broker, and producer actors. The open question was whether those actors require separate per-role credentials or whether one organisation-level registration covers all roles that organisation holds.
-
-**Decision.** Per-organisation credentials, not per-actor. Every actor type — carrier, broker, producer, and receiver — onboards via the same process and receives the same credential shape: a Cognito app client (`client_id` + `client_secret`) and an `apiCode`. Every record written to the API is assigned to the submitting organisation identified by `apiCode`; no distinction is made at the credential level between the role the caller is acting in for a given event. An organisation that acts as both a receiver and a carrier holds one set of credentials and uses them for both roles.
-
-The two credentials are issued through different paths, and Phase 2 changes neither:
-
-- **Cognito app client** (`client_id` + `client_secret`) is manually provisioned per third-party integrator system, in the relevant environment (test or production), with credentials shared via a secure channel. This step does not change for Phase 2 — carrier, broker, and producer integrators are provisioned the same manual way as receiver integrators are today.
-- **`apiCode`** is self-service, not manually distributed. Once an organisation is registered and its users can sign in via Defra ID, any user in that organisation generates, names, and disables its own `apiCode`s through `waste-organisation-frontend`'s API management screens — no operator involvement, no encrypted-email step. This self-serve path already exists for Phase 1 receivers; no new UI is needed for Phase 2 actors to use it.
-
-**Consequences.** The credential model is unchanged from Phase 1, but the two halves have different operational profiles. The `apiCode` half is fully self-serve for every actor type via the existing `waste-organisation-frontend` UI — the `waste-organisation-backend` API-code issuance flow is reused for carriers and brokers without modification. The Cognito app client half remains a manual, per-integrator provisioning step regardless of actor type; this is a standing onboarding-scale consideration as Phase 2 brings in carrier, broker, and producer integrators on top of receivers, not something Phase 2 introduces new. Role-based access restrictions — for example, whether only a permitted receiving site may record a Receipt — are a separate policy question deferred to a future decision; the identity mechanism supplies the information to enforce such rules but does not pre-empt them (see [D-036](#d-036)).
-
 <a id="d-036"></a>
 
 ### Write authorisation: open append, amend restricted to the authoring organisation
@@ -496,6 +513,25 @@ The two credentials are issued through different paths, and Phase 2 changes neit
 **Deferred to policy (not decided here).** Whether write access to an event should be _restricted by actor role or relationship_ — for example whether only a permitted receiving site may record a Receipt, or only a declared carrier may record a Collection — is a business/regulatory rule, not a technical one. The service provides the authenticated-identity mechanism to enforce such rules if and when policy defines them; Phase 2 does not pre-empt them. Tracked alongside the credentials/identity question in [D-027](#d-027).
 
 **Consequences.** The write model is deliberately open at append and accountable by attribution, which matches the messy reality of reassignment, sub-contracting and transit — consistent with [D-029](#d-029), which captures `receivedFromCarrier` without cross-checking it against the preceding event. The attribution guarantee depends on per-event, server-side provenance (writing organisation, vendor instance, timestamp) being captured immutably and being queryable by regulators; that is the implementation requirement the integrity argument rests on, and it links to the observability / non-reconciled-movement work planned for Beta. If policy later mandates participation restrictions, they are added as authorisation checks in the Movement domain service against the already-captured identity, without changing the public contract shape.
+
+<a id="d-038"></a>
+
+### API versioning: versioned during beta, unversioned at GA
+
+**D-038** · ✅ Decided · Impact: 🔴 High · Area: **Versioning** · Related: [D-023](#d-023)
+
+**Context.** The API has no versioning today — no path prefix, header or query parameter; `info.version` is only a documentation label. As the remaining waste-movement endpoints are built, the shape will be found by iteration, which means frequent breaking changes before it stabilises; once stable, the public contract must not break its integrators. A single fixed policy fits one phase and not the other: always-version adds needless machinery and duplication once the shape is stable, while never-version makes breaking iteration painful while we are still designing. GOV.UK recommends URI-path versioning _if_ you version and advises against header/media-type versioning, but its overriding principle is not to break existing consumers.
+
+**Decision.** Version the API **during beta** and **drop the version at GA**:
+
+- **During beta** — each milestone is versioned in the URI path (`/beta-0`, `/beta-1`, …), a prefix on the resource path (e.g. `/beta-1/waste-movements/{id}`), and milestones can run in parallel, letting the small, controlled set of early integrators migrate at their own pace. Beta is non-public, so path labels are acceptable here. Every endpoint is available at every version — providers never see a split where some endpoints sit on one version and others on another, so a breaking change to one endpoint means copying **all** existing endpoints forward into the new version, not just the changed one. Orchestration is confirmed to live in-service (branching/duplicated handlers per milestone); there is no CDP platform- or gateway-level versioning/routing capability to use instead.
+- **At GA** — drop the version and publish one stable **unversioned** API, evolving it **additive-only** thereafter (new optional fields/endpoints/enum values in place; clients tolerate unknown fields). A genuinely unavoidable breaking change is a new resource/API, not a `/v2`.
+- **Cutover** — dropping the version at GA is a one-time, announced breaking change for beta integrators (expected of a beta contract); the final beta version runs alongside the unversioned GA API for a migration window, marked deprecated, then retired.
+- **Deprecation** — beta versions are retired by usage: monitor calls per software provider (via the JWT `client_id`), and while deprecated every response carries a single `Deprecation: true` header as an in-band signal.
+
+Applies only to the new endpoints; the already-live Receipt of Waste endpoints keep their current unversioned paths.
+
+Full rationale in the [versioning pitch](../api/versioning.md).
 
 <a id="d-039"></a>
 
@@ -519,11 +555,11 @@ The two credentials are issued through different paths, and Phase 2 changes neit
 
 ### Rename drop-off and Transfer ID to delivery and Delivery ID
 
-**D-040** · ✅ Decided · Impact: 🟢 Low · Area: **Naming** · Related: [D-005](#d-005), [D-007](#d-007), [D-013](#d-013), [D-018](#d-018), [D-028](#d-028), [D-036](#d-036), [D-041](#d-041)
+**D-040** · ✅ Decided · Applied register-wide · Impact: 🟢 Low · Area: **Naming** · Related: [D-005](#d-005), [D-007](#d-007), [D-013](#d-013), [D-018](#d-018), [D-028](#d-028), [D-036](#d-036), [D-041](#d-041)
 
 **Context.** The event where a driver hands waste to a receiver, and the identifier it mints, were named "drop-off" and "Transfer ID" (`POST /transfers`, `transferId`). This reads awkwardly against the rest of the journey vocabulary (creation, collection, receipt) and "transfer" invites confusion with unrelated senses of the word (e.g. transfer of ownership/duty of care, data transfer).
 
-**Decision.** Rename "drop-off" to "delivery" and "Transfer ID" to "Delivery ID" everywhere in the public contract and documentation, decided by Perry May:
+**Decision.** Rename "drop-off" to "delivery" and "Transfer ID" to "Delivery ID" everywhere in the public contract and documentation:
 
 - `POST /transfers` → `POST /deliveries`
 - `POST /transfers/receipt` → `POST /deliveries/receipt`
@@ -539,13 +575,13 @@ This is a pure rename. It does not change the resource shape, the many-to-one ca
 
 ### Receipt without a prior delivery: separate endpoint, an empty Delivery created server-side to have a reference
 
-**D-041** · ✅ Decided · Impact: 🔴 High · Area: **Receipt** · Related: [D-005](#d-005), [D-006](#d-006), [D-007](#d-007), [D-017](#d-017), [D-018](#d-018), [D-022](#d-022), [D-025](#d-025), [D-040](#d-040)
+**D-041** · ✅ Decided · Impact: 🔴 High · Area: **Receipt** · Related: [D-005](#d-005), [D-006](#d-006), [D-007](#d-007), [D-017](#d-017), [D-018](#d-018), [D-022](#d-022), [D-025](#d-025), [D-040](#d-040), [D-042](#d-042)
 
 **Context.** In the Level 2 model a receipt is a sub-resource of a Delivery, addressed as `POST /deliveries/{deliveryId}/receipt` ([D-005](#d-005), and Option 1 of the still-open [D-022](#d-022)). `POST /deliveries` itself requires `movementIds` with `minItems: 1` ([D-007](#d-007)) — a Delivery is normally created from one or more Movements. But an exceptional case exists where waste is received with no prior Movement/Collection/Delivery trail at all (e.g. received directly, with none of the earlier journey recorded digitally). A receipt never carries its own exposed id ([D-012](#d-012)), so a receipt recorded with no Delivery behind it would have **no addressable identifier at all** — it could never be looked up, corrected, or, once [D-025](#d-025) settles the acceptance/rejection model, have an outcome recorded against it. A ticket-derived scenario for this case (DWTC-140/142, `scenarios/beta-1/receipt/contract-shape-confirmation-for-the-receipt-endpoint.md`) already expects "a Delivery ID is returned in the response" for exactly this case.
 
 **Decision.** Do not ask software providers to create the empty Delivery themselves, and do not add a generic no-Delivery receipt endpoint either. Add a dedicated endpoint, `POST /receipts`, for recording a receipt with no prior delivery:
 
-- The software provider calls `POST /receipts` once, with the receipt payload plus a mandatory `reason` field explaining why there is no prior Movement/Collection/Delivery trail.
+- The software provider calls `POST /receipts` once, with the receipt payload plus a mandatory `reasonForNoDeliveryId` field explaining why there is no prior Movement/Collection/Delivery trail.
 - The server creates an empty Delivery behind the scenes (`movementIds: []`) and records the receipt against it, in one request.
 - The response returns `deliveryId`, so an empty Delivery gets a real, addressable Delivery ID exactly like a normal one — the addressability guarantee (lookup, correction, future acceptance/rejection outcome) is met without the client ever handling a Delivery directly.
 - The ordinary receipt flow (`POST /deliveries/{deliveryId}/receipt` against a Delivery that does carry Movement IDs) is unaffected.
@@ -557,14 +593,65 @@ This is a pure rename. It does not change the resource shape, the many-to-one ca
 - `POST /deliveries` stays a pure "create from prior Movements" endpoint; empty Deliveries are an internal detail of `POST /receipts`'s implementation, not a documented public capability of `POST /deliveries`.
 - [D-007](#d-007)'s many-to-one-against-Movement-IDs cardinality does not need a documented zero case — that case lives entirely in `POST /receipts`.
 - [D-018](#d-018)'s mandatory delivery address still applies to the empty Delivery the server creates — it must be supplied on the `POST /receipts` request so the server can write it through, same audit fact as before.
-- Satisfies the DWTC-140/142 scenario's expectation that a Delivery ID is returned for a receipt with no prior delivery trail, and does so as a literal one-call description of `POST /receipts` — "no Delivery ID, reason supplied" → "a Delivery ID is returned in the response" — with no two-step rewrite needed.
+- Satisfies the DWTC-140/142 scenario's expectation that a Delivery ID is returned for a receipt with no prior delivery trail, and does so as a literal one-call description of `POST /receipts` — "no Delivery ID, reasonForNoDeliveryId supplied" → "a Delivery ID is returned in the response" — with no two-step rewrite needed.
 
-**Open questions — flagged by the proposer, not yet resolved:**
+**Open questions — flagged by the proposer:**
 
-1. **Extra fields at receipt time.** Should `POST /receipts` require additional fields it would otherwise have sourced from a linked Movement (e.g. the waste classification the [D-006](#d-006) cross-check normally compares against)? Shape not decided here.
-2. **Correction of an empty Delivery.** [D-017](#d-017) restricts a Delivery's `PUT` to the `isDeleted` flag only. If fields from (1) ever need correcting after the fact, that either needs an exception to D-017's immutability for server-created empty Deliveries specifically, or those fields belong on the receipt instead — to be confirmed.
-3. **`reason` scope.** Whether `reason` is ever meaningful on the ordinary `POST /deliveries/{deliveryId}/receipt` flow (e.g. to explain a partial delivery), or is strictly reserved for `POST /receipts`.
-4. **Request/response shape of `POST /receipts`.** Whether it is the same receipt payload as `POST /deliveries/{deliveryId}/receipt` plus `reason`, or a distinct schema — not yet modelled in `openapi.yaml`.
+1. ~~**Extra fields at receipt time.**~~ **Resolved ([D-042](#d-042)).** Yes — `POST /receipts` requires the full waste classification `POST /deliveries/{deliveryId}/receipt` no longer carries, since there is no linked Movement to source it from.
+2. **Correction of an empty Delivery.** [D-017](#d-017) restricts a Delivery's `PUT` to the `isDeleted` flag only. If classification fields ever need correcting after the fact, that either needs an exception to D-017's immutability for server-created empty Deliveries specifically, or those fields belong on the receipt instead — to be confirmed. Still open.
+3. **`reasonForNoDeliveryId` scope.** Whether `reasonForNoDeliveryId` is ever meaningful on the ordinary `POST /deliveries/{deliveryId}/receipt` flow (e.g. to explain a partial delivery), or is strictly reserved for `POST /receipts`. Still open.
+4. ~~**Request/response shape of `POST /receipts`.**~~ **Resolved ([D-042](#d-042)).** Same shape as `POST /deliveries/{deliveryId}/receipt`, except `wasteItem` uses the full-classification shape instead of the light one, plus the mandatory `reasonForNoDeliveryId` field.
+
+<a id="d-042"></a>
+
+### Waste item classification: separated from logistics at Creation, reused at the no-prior-delivery Receipt endpoint, dropped at the ordinary Receipt endpoint
+
+**D-042** · ✅ Decided · Impact: 🟠 Medium · Area: **Creation** · Related: [D-031](#d-031), [D-032](#d-032), [D-041](#d-041)
+
+**Context.** Waste item classification (EWC codes, waste description, POPs and hazardous detail) and the logistics fields describing what physically arrived (weight, physical form, container type and count) were flat and undifferentiated on the shared `wasteItem` shape. At Creation, separating them out makes the intent of each field group explicit and gives classification a stable, reusable shape rather than six loose sibling fields.
+
+Two further questions came up once Delivery and Receipt were worked through in this same round of beta-2 changes: whether Receipt's ordinary endpoint (`POST /deliveries/{deliveryId}/receipt`) should keep re-accepting classification already captured at Creation, and whether the exceptional no-prior-delivery endpoint (`POST /receipts`, [D-041](#d-041)) — which has no Creation record to fall back on — should keep it. Policy/regulator feedback said the ordinary endpoint shouldn't duplicate classification once a Creation exists; [D-041](#d-041)'s open question 1 asked exactly this for its own endpoint, and is resolved here: yes, `POST /receipts` needs it, because nothing upstream supplies it.
+
+**Decision.**
+
+- At Creation, `wasteItem` nests classification under a `classification` object — `{ ewcCodes, wasteDescription, containsPops, pops, containsHazardous, hazardous }`, one per item, not an array — with `weight`, `physicalForm`, `typeOfContainers`, `numberOfContainers` remaining top-level siblings, unchanged.
+- `POST /receipts` (the no-prior-delivery Receipt endpoint, [D-041](#d-041)) uses the identical shape — the same nested `classification` object, the same logistics siblings — since it has no Creation record to source classification from.
+- Because these two are now identical apart from the treatment field, they share one base type, `wasteItemBase` (`classification` + the four logistics fields), with each event adding its own treatment array on top: `intendedTreatments: Treatment[]` (mandatory) at Creation, `actualTreatments?: Treatment[]` (optional) at `POST /receipts` — the same shared-shape-plus-per-event-array pattern already used for `Treatment` itself ([D-031](#d-031)).
+- `POST /deliveries/{deliveryId}/receipt` (the ordinary Receipt endpoint, used when a Delivery — and therefore a Creation — already exists) drops classification entirely. Its `wasteItem` becomes just the logistics fields plus `actualTreatments`: `weight`, `physicalForm`, `typeOfContainers`, `numberOfContainers`, `actualTreatments?`. It does not extend `wasteItemBase`.
+
+This also resolves [D-041](#d-041)'s open question 4 (request/response shape of `POST /receipts`): the same shape as `POST /deliveries/{deliveryId}/receipt`, except `wasteItem` is the full `wasteItemBase`-derived shape instead of the light one, plus the mandatory `reasonForNoDeliveryId` field.
+
+**Consequences.** Creation and `POST /receipts` now define their waste item once, via `wasteItemBase`, and stay in step with each other by construction — a future classification change touches one place. `POST /deliveries/{deliveryId}/receipt` sheds classification data it never needed once a Creation record exists, keeping that payload lean. Extracting `wasteItemBase` means Creation's already-applied `createWasteItem` schema/types move to reference the shared base rather than defining `classification` and the logistics fields inline — a refactor of already-shipped Creation code, not a behavioural change to it.
+
+<a id="d-043"></a>
+
+### Creation's `receiver` becomes `receivers`: an array, min 1 when required
+
+**D-043** · ✅ Decided · Impact: 🟢 Low · Area: **Creation** · Related: [D-042](#d-042)
+
+**Context.** DWTC-155 (Receipt-with-delivery-ID's own ticket) states that Creation's `receiver` should be an array, because a producer may declare waste heading to more than one receiving site — worth noting explicitly that this change was driven by a Receipt ticket, not Creation's own (DWTC-152), which never raised it and only asked for `receiver.siteName` to become mandatory (already applied). Before this decision, `creationJoi.js` modelled `receiver` as a single, optional object, conditionally required via a custom validator when the movement contains a hazardous EWC code.
+
+**Decision.** Rename `receiver` → `receivers`, an array (`min(1)` when required) of the existing per-entry receiver shape — the per-entry shape itself is unchanged (`siteName` mandatory whenever an entry is supplied, which makes `authorisationNumber` and `address` mandatory too). The hazardous-waste gating rule moves from "the object is provided" to "the array has at least one entry."
+
+**Consequences.** Ripples into `creationTypes.ts` (`receiver?: Receiver` → `receivers?: Receiver[]`), the Creation test suite (`creation/create-movement.test.js`), the `creationEvent.js` worked examples (including the validation-warning example, which now addresses an array entry: `receivers[0].authorisationNumber`), and `openapi.yaml`'s Creation request schema (`receiver` → a `receivers` array of `creationReceiverDetails`). Receipt's separate `receiverSiteSchema` (a different, already-diverging shape — no nested address, adds `regulatoryPositionStatements` — tracked via an existing `test.todo()`) is untouched by this change.
+
+**Ticket conflict note (2026-09).** Separately, DWTC-152, DWTC-153, DWTC-155 and DWTC-162 each ask for a boolean field gating `brokerOrDealer` as conditionally mandatory. That conflicts with [D-008](#d-008) (optional on all events, no gate) — see the note on D-008's entry. D-008 stands; the boolean gate has not been implemented.
+
+<a id="d-044"></a>
+
+### Hazardous/POP component `concentrationThreshold` flattened to an operator only — no `value`
+
+**D-044** · ✅ Decided · Impact: 🟢 Low · Area: **Creation** · Related: [D-042](#d-042)
+
+**Context.** `popComponentSchema`/`hazardousComponentSchema` modelled a threshold-expressed concentration as `concentrationThreshold: { operator, value }`, implying the numeric threshold is something the caller measures or chooses per submission. BA feedback (Perry) clarified this is wrong: WM3 guidance already publishes a fixed regulatory concentration threshold per specific substance — the same number for everyone, not caller-supplied. Asking for `value` means restating a constant that's determined by which substance it is, not by the caller's own measurement, and there's only one valid figure for a given substance regardless of what the caller sends.
+
+While implementing this, a related pre-existing gap was found and fixed: `hazardousComponentSchema.concentration` was unconditionally `.when('name', { is: exist, then: required })`, which would have made the new threshold-only path unusable whenever `name` was supplied — the exact case this change is meant to support. `popComponentSchema` had no equivalent linkage between `code` and `concentration`, so it needed no corresponding fix.
+
+**Decision.** `concentrationThreshold` is removed. Both `popComponentSchema` and `hazardousComponentSchema` gain a flat `concentrationThresholdOperator` field (POPs: `LESS_THAN`/`EQUAL_TO`/`GREATER_THAN_OR_EQUAL`; hazardous: `EQUAL_TO`/`GREATER_THAN_OR_EQUAL`), still mutually exclusive with `concentration` via `.nand()`. No numeric threshold value is carried in the payload — it is resolved from WM3 guidance against the component's identity (POP `code`, already a controlled reference validated against `/reference-data/pop-names`; hazardous `name`, still free text — see below). `hazardousComponentSchema` additionally now requires one of `concentration` or `concentrationThresholdOperator` whenever `name` is supplied (previously `concentration` alone was force-required, which blocked the threshold path).
+
+**Known asymmetry, flagged for Perry/BA follow-up.** POPs' `code` is already a controlled, validated reference field, so its WM3 threshold is resolvable today. Hazardous components' `name` is still free text with no reference list or endpoint — there is no `/reference-data/hazardous-component-names` equivalent to `/reference-data/pop-names`. Until one exists, "the threshold is implicit" cannot actually be resolved by the API for hazardous components; it stays a manual/regulatory-side lookup.
+
+**Consequences.** Ripples into `sharedTypes.ts` (`PopConcentrationThreshold`/`HazardousConcentrationThreshold` types removed, `PopComponent`/`HazardousComponent` gain `concentrationThresholdOperator`), `creationTypes.ts`'s re-exports, `openapi.yaml`'s `wasteItemClassification` POP/hazardous component schemas, the `creationEvent.js` worked examples (now demonstrating a named hazardous component using the threshold path), and `common/pops.test.js`/`common/hazardous.test.js`. The legacy, unreferenced `wasteItem` component in `openapi.yaml` (Phase 1, preserved verbatim) still carries the old `concentrationThreshold: { operator, value }` shape — deliberately left untouched, consistent with that block's preserved-verbatim convention.
 
 ## Open
 
@@ -686,25 +773,6 @@ The **CQRS / event-sourcing model** ([`model/mongo-schema-proposal-CQRS.md`](mod
 5. Two paradigms coexist intentionally — Phase 1 (mutation + snapshot) and Phase 2 (event sourcing) are cleanly isolated in the same service, with the Phase 1 pattern retired when Phase 1 endpoints are deprecated.
 
 A full evaluation of the CQRS model against all 37 decisions and the live Phase 1 implementation is available as an [interactive report](https://claude.ai/code/artifact/f52d0e9b-f90d-44d0-b956-0dafbe9a5fb0).
-
-<a id="d-038"></a>
-
-### API versioning: versioned during beta, unversioned at GA
-
-**D-038** · ✅ Decided · Impact: 🔴 High · Area: **Versioning** · Related: [D-023](#d-023)
-
-**Context.** The API has no versioning today — no path prefix, header or query parameter; `info.version` is only a documentation label. As the remaining waste-movement endpoints are built, the shape will be found by iteration, which means frequent breaking changes before it stabilises; once stable, the public contract must not break its integrators. A single fixed policy fits one phase and not the other: always-version adds needless machinery and duplication once the shape is stable, while never-version makes breaking iteration painful while we are still designing. GOV.UK recommends URI-path versioning _if_ you version and advises against header/media-type versioning, but its overriding principle is not to break existing consumers.
-
-**Decision.** Version the API **during beta** and **drop the version at GA**:
-
-- **During beta** — each milestone is versioned in the URI path (`/beta-0`, `/beta-1`, …), a prefix on the resource path (e.g. `/beta-1/waste-movements/{id}`), and milestones can run in parallel, letting the small, controlled set of early integrators migrate at their own pace. Beta is non-public, so path labels are acceptable here. Every endpoint is available at every version — providers never see a split where some endpoints sit on one version and others on another, so a breaking change to one endpoint means copying **all** existing endpoints forward into the new version, not just the changed one. Orchestration is confirmed to live in-service (branching/duplicated handlers per milestone); there is no CDP platform- or gateway-level versioning/routing capability to use instead.
-- **At GA** — drop the version and publish one stable **unversioned** API, evolving it **additive-only** thereafter (new optional fields/endpoints/enum values in place; clients tolerate unknown fields). A genuinely unavoidable breaking change is a new resource/API, not a `/v2`.
-- **Cutover** — dropping the version at GA is a one-time, announced breaking change for beta integrators (expected of a beta contract); the final beta version runs alongside the unversioned GA API for a migration window, marked deprecated, then retired.
-- **Deprecation** — beta versions are retired by usage: monitor calls per software provider (via the JWT `client_id`), and while deprecated every response carries a single `Deprecation: true` header as an in-band signal.
-
-Applies only to the new endpoints; the already-live Receipt of Waste endpoints keep their current unversioned paths.
-
-Full rationale in the [versioning pitch](../api/versioning.md).
 
 **Options.**
 
