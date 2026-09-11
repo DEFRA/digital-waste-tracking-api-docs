@@ -47,6 +47,14 @@ const carrier = {
   vehicleRegistration: 'AB12 CDE'
 }
 
+const hazardousWasteItem = {
+  ...wasteItem,
+  classification: {
+    ...wasteItem.classification,
+    ewcCodes: ['200121']
+  }
+}
+
 const receiptWithoutDelivery = {
   apiCode: '123e4567-e89b-12d3-a456-426614174000',
   dateTimeReceived: '2026-01-01T09:00:00Z',
@@ -92,5 +100,22 @@ describe('hazardousWasteConsignmentCode and reasonForNoConsignmentCode', () => {
       reasonForNoConsignmentCode: 'NON_HAZ_WASTE_TRANSFER'
     })
     expect(error).toBeDefined()
+  })
+
+  test('requires reasonForNoConsignmentCode when the movement contains a hazardous EWC code and no consignment code is provided', () => {
+    const { error } = receiptWithoutDeliverySchema.validate({
+      ...receiptWithoutDelivery,
+      wasteItems: [hazardousWasteItem]
+    })
+    expect(error).toBeDefined()
+  })
+
+  test('accepts a hazardous movement when reasonForNoConsignmentCode is provided', () => {
+    const { error } = receiptWithoutDeliverySchema.validate({
+      ...receiptWithoutDelivery,
+      wasteItems: [hazardousWasteItem],
+      reasonForNoConsignmentCode: 'NON_HAZ_WASTE_TRANSFER'
+    })
+    expect(error).toBeUndefined()
   })
 })

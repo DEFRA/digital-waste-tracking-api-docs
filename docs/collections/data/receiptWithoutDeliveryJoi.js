@@ -28,7 +28,8 @@ import {
   UK_POSTCODE_REGEX,
   isValidPhoneNumber,
   isValidAuthorisationNumber,
-  isValidHazardousWasteConsignmentCode
+  isValidHazardousWasteConsignmentCode,
+  isHazardousEwcCode
 } from './validators.js'
 import {
   carrierSchema,
@@ -55,13 +56,18 @@ const isProvided = (value) =>
   value !== undefined && value !== null && value !== ''
 
 /**
- * Same mutual-exclusivity rule as receiptJoi.js's validateReceiptConsignmentRules
- * (D-042 note there applies here too — wasteItems carries full classification
- * on this endpoint, but the "required when hazardous" half of the rule still
- * can't be checked from the request body alone without cross-referencing
- * reference data, so only the mutual-exclusivity half is checkable here).
+ * Unlike receiptJoi.js's validateReceiptConsignmentRules, this endpoint's
+ * wasteItems carries full classification (D-042 — no prior Creation record to
+ * source it from), so both halves of the consignment-code rule are checkable
+ * from the request body alone, mirroring creationJoi.js's validateCreationRules.
  */
+const hasHazardousEwcCode = (movement) =>
+  movement.wasteItems?.some((item) =>
+    item.classification?.ewcCodes?.some((code) => isHazardousEwcCode(code))
+  )
+
 const validateConsignmentRules = (movement, helpers) => {
+  const containsHazardousEwcCode = hasHazardousEwcCode(movement)
   const hasConsignmentCode = isProvided(movement.hazardousWasteConsignmentCode)
   const hasReasonForNoConsignmentCode = isProvided(
     movement.reasonForNoConsignmentCode
@@ -70,6 +76,16 @@ const validateConsignmentRules = (movement, helpers) => {
   if (hasConsignmentCode && hasReasonForNoConsignmentCode) {
     return helpers.message(
       'reasonForNoConsignmentCode must not be provided when hazardousWasteConsignmentCode is present.'
+    )
+  }
+
+  if (
+    containsHazardousEwcCode &&
+    !hasConsignmentCode &&
+    !hasReasonForNoConsignmentCode
+  ) {
+    return helpers.message(
+      'reasonForNoConsignmentCode is required when the movement contains hazardous waste and no hazardousWasteConsignmentCode is provided.'
     )
   }
 
