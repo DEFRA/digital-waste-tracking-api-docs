@@ -1084,10 +1084,10 @@
 <h2 id="projection-rebuild">Projection rebuild</h2>
 <p>Because the event store is the source of truth, any projection document can be rebuilt at any time without data loss.</p>
 <div class="highlight"><pre><span></span><code><span class="c1">// Rebuild a single movement projection from its event stream.</span>
-<span class="nx">rebuildMovementProjection</span><span class="p">(</span><span class="nx">db</span><span class="p">,</span><span class="w"> </span><span class="nx">movementId</span><span class="p">);</span>
+<span class="nx">rebuildMovementProjection</span><span class="p">(</span><span class="nx">db</span><span class="p">,</span><span class="w"> </span><span class="nx">movementId</span><span class="p">)</span>
 
 <span class="c1">// Rebuild a single delivery projection from its event stream.</span>
-<span class="nx">rebuildDeliveryProjection</span><span class="p">(</span><span class="nx">db</span><span class="p">,</span><span class="w"> </span><span class="nx">deliveryId</span><span class="p">);</span>
+<span class="nx">rebuildDeliveryProjection</span><span class="p">(</span><span class="nx">db</span><span class="p">,</span><span class="w"> </span><span class="nx">deliveryId</span><span class="p">)</span>
 </code></pre></div>
 <p>A full replay (all movements or all deliveries) iterates every distinct <code>streamId</code> prefixed <code>movement-</code> or <code>delivery-</code> and calls the corresponding rebuild function. This is the recovery path if a projection becomes stale due to a failed write step.</p>
 <hr />

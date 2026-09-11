@@ -46,9 +46,13 @@ export type CollectionAddress = {
   fullAddress: string
 }
 
-export type Collection = {
+export type CollectionSite = {
   /** Address where the waste was physically collected. */
   address: CollectionAddress
+  /** Email address of the site where the waste was physically collected. */
+  emailAddress?: string
+  /** Phone number of the site where the waste was physically collected. */
+  phoneNumber?: string
 }
 
 // ---------------------------------------------------------------------------
@@ -70,6 +74,7 @@ export type RecordCollection = {
 
   yourUniqueReference?: string
   otherReferencesForMovement?: OtherReferenceForMovement[]
+  specialHandlingRequirements?: string
 
   /**
    * Soft-delete flag (D-009). Defaults to false on creation.
@@ -81,6 +86,9 @@ export type RecordCollection = {
 
   /** Carrier performing this collection event. Required at collection time. */
   carrier: CarrierDetails
+
+  /** Carrier confirms they have inspected the waste, that it is as described, and that they are content to transport it. */
+  dutyOfCareConfirmed: boolean
 
   /**
    * The carrier this Movement was received from on a TRANSIT handover (D-029).
@@ -94,7 +102,7 @@ export type RecordCollection = {
   brokerOrDealer?: BrokerDetails
 
   /** Collection site details. */
-  collection: Collection
+  collectionSite: CollectionSite
 }
 
 /** Collection events return a validation envelope only — no new ID is minted. */

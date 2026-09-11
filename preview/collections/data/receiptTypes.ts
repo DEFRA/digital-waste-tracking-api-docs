@@ -4,7 +4,16 @@
  *
  * The deliveryId is a path parameter and is not included in the request body.
  * The request body below contains only the receipt details recorded by the receiver.
+ *
+ * carrier and brokerOrDealer use the shared CarrierDetails/BrokerDetails types
+ * (sharedTypes.ts) rather than local duplicates, so this endpoint picks up the
+ * same registrationNumber/reasonForNoRegistrationNumber rules and reduced
+ * ON_SITE/ONE_OFF/MARINE enum as Creation and Collection. wasteItems drops
+ * classification entirely (D-042) — POST /receipts, which has no prior
+ * Creation to source classification from, is the one that keeps it.
  */
+
+import type { ActualTreatment, CarrierDetails, BrokerDetails } from './sharedTypes.js'
 
 export type WeightMetric =
   | 'Grams'
@@ -30,25 +39,9 @@ export type ReasonForNoConsignmentCode =
   | 'NO_DOC_WITH_WASTE'
   | 'HWRC_RECEIPT'
 
-export type MeansOfTransport =
-  | 'Road'
-  | 'Rail'
-  | 'Air'
-  | 'Sea'
-  | 'Inland Waterway'
-  | 'Piped'
-  | 'Other'
-
-export type CarrierReasonForNoRegistrationNumber =
-  | 'ON_SITE'
-  | 'HOUSEHOLD'
-  | 'ONE_OFF'
-  | 'MARINE'
-
 export type ReceiptMovement = {
   // Request root
   yourUniqueReference?: string
-  specialHandlingRequirements?: string
   otherReferencesForMovement?: OtherReferenceForMovement[]
 
   hazardousWasteConsignmentCode?: string
@@ -58,11 +51,11 @@ export type ReceiptMovement = {
   apiCode: string
 
   // Main objects
-  wasteItems: WasteItem[]
-  receiver: Receiver
+  wasteItems: ReceiptWasteItem[]
+  receiverSite: ReceiverSite
   receipt: Receipt
-  carrier: Carrier
-  brokerOrDealer?: BrokerOrDealer
+  carrier: CarrierDetails
+  brokerOrDealer?: BrokerDetails
 }
 
 export type OtherReferenceForMovement = {
@@ -76,23 +69,13 @@ export type Weight = {
   amount: number
 }
 
-export type WasteItem = {
+export type ReceiptWasteItem = {
   weight: Weight
-
-  wasteDescription: string
-  typeOfContainers: string
   physicalForm: PhysicalForm
+  typeOfContainers: string
   numberOfContainers: number
-  ewcCodes: string[]
-
-  /** Actual Treatment (D-031). The confirmed, authoritative treatment outcome as determined by the receiver. Optional, unchanged from Phase 1. */
-  disposalOrRecoveryCodes?: DisposalOrRecoveryCode[]
-
-  containsPops: boolean
-  pops?: Pops
-
-  containsHazardous: boolean
-  hazardous?: Hazardous
+  /** Actual Treatment (D-031, D-042). Optional. */
+  actualTreatments?: ActualTreatment[]
 }
 
 export type DisposalOrRecoveryCode = {
@@ -121,7 +104,7 @@ export type HazardousComponent = {
   concentration?: number
 }
 
-export type Receiver = {
+export type ReceiverSite = {
   siteName: string
   regulatoryPositionStatements?: number[]
   phoneNumber?: string
@@ -136,35 +119,4 @@ export type Receipt = {
 export type ReceiptAddress = {
   postcode: string
   fullAddress: string
-}
-
-export type Carrier = {
-  vehicleRegistration?: string
-  registrationNumber?: string
-  reasonForNoRegistrationNumber?: CarrierReasonForNoRegistrationNumber
-
-  phoneNumber?: string
-  organisationName: string
-  meansOfTransport: MeansOfTransport
-  emailAddress?: string
-
-  address?: CarrierAddress
-}
-
-export type CarrierAddress = {
-  postcode: string
-  fullAddress?: string
-}
-
-export type BrokerOrDealer = {
-  registrationNumber?: string
-  phoneNumber?: string
-  organisationName: string
-  emailAddress?: string
-  address?: BrokerOrDealerAddress
-}
-
-export type BrokerOrDealerAddress = {
-  postcode: string
-  fullAddress?: string
 }

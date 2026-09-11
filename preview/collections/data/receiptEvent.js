@@ -4,6 +4,10 @@
  *
  * The deliveryId is a path parameter and is not included in the request body.
  * The examples below represent the receipt body only.
+ *
+ * wasteItems carries no classification (D-042) — a prior Creation record
+ * already has it. actualTreatments replaces disposalOrRecoveryCodes
+ * (D-031 amended); receiverSite replaces receiver.
  */
 
 export const carrier = {
@@ -30,7 +34,7 @@ export const brokerOrDealer = {
   emailAddress: 'broker@example.com'
 }
 
-export const receiver = {
+export const receiverSite = {
   siteName: 'Test Receiver',
   emailAddress: 'receiver@example.com',
   phoneNumber: '01234567890',
@@ -47,8 +51,6 @@ export const receipt = {
 
 export const wasteItems = [
   {
-    ewcCodes: ['200121'],
-    wasteDescription: 'Fluorescent tubes and other mercury-containing waste',
     physicalForm: 'Solid',
     numberOfContainers: 1,
     typeOfContainers: 'SKI',
@@ -57,31 +59,13 @@ export const wasteItems = [
       amount: 1,
       isEstimate: false
     },
-    containsPops: true,
-    pops: {
-      sourceOfComponents: 'PROVIDED_WITH_WASTE',
-      components: [
-        {
-          code: 'END',
-          concentration: 10
-        }
-      ]
-    },
-    containsHazardous: true,
-    hazardous: {
-      sourceOfComponents: 'GUIDANCE',
-      hazCodes: ['HP_4'],
-      components: [
-        {
-          name: 'Mercury',
-          concentration: 5
-        }
-      ]
-    },
-    // Actual Treatment (D-031) — the confirmed, authoritative treatment outcome.
-    disposalOrRecoveryCodes: [
+    // Actual Treatment (D-031 amended, D-042) — the confirmed, authoritative
+    // treatment outcome. Optional; disposalOrRecoveryCode itself is optional
+    // per entry, confirmed here since the receiving site has already
+    // inspected and weighed the waste.
+    actualTreatments: [
       {
-        code: 'R1',
+        disposalOrRecoveryCode: 'R1',
         weight: {
           metric: 'Tonnes',
           amount: 0.75,
@@ -104,11 +88,10 @@ export const publicPostBody = {
       reference: 'TN-12345'
     }
   ],
-  specialHandlingRequirements: 'Handle with care and keep upright.',
   wasteItems,
   carrier,
   brokerOrDealer,
-  receiver,
+  receiverSite,
   receipt
 }
 
