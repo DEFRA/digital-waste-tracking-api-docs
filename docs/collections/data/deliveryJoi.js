@@ -22,13 +22,13 @@
  * only — see deliveryTypes.ts for the response shape (deliveries[]).
  */
 
-import Joi from "joi";
+import Joi from 'joi'
 import {
   MOVEMENT_ID_REGEX,
   siteAddressSchema,
   otherReferenceSchema,
-  carrierSchema,
-} from "./sharedSchemas.js";
+  carrierSchema
+} from './sharedSchemas.js'
 
 // ---------------------------------------------------------------------------
 // Delivery site
@@ -39,35 +39,35 @@ import {
 // existing tests/consumers import it as deliverySiteAddressSchema.
 export const deliverySiteAddressSchema = siteAddressSchema
   .required()
-  .description("Delivery address. Both postcode and fullAddress are required.");
+  .description('Delivery address. Both postcode and fullAddress are required.')
 
 export const deliverySiteSchema = Joi.object({
   siteName: Joi.string()
     .required()
     .description(
-      "Name of the carrier-declared site/place where the waste is dropped off or left.",
+      'Name of the carrier-declared site/place where the waste is dropped off or left.'
     ),
 
   exemptionNumber: Joi.string()
     .optional()
     .description(
-      "Optional exemption number for exempt places that store, treat, use or dispose of waste. " +
-        "For example, a WEX number. This is distinct from receiver.authorisationNumber.",
+      'Optional exemption number for exempt places that store, treat, use or dispose of waste. ' +
+        'For example, a WEX number. This is distinct from receiver.authorisationNumber.'
     ),
 
   address: deliverySiteAddressSchema
     .required()
     .description(
-      "Mandatory physical address where the waste was dropped off. Both fullAddress and postcode are required.",
-    ),
+      'Mandatory physical address where the waste was dropped off. Both fullAddress and postcode are required.'
+    )
 })
   .required()
   .description(
-    "Delivery place declared by the carrier. " +
-      "This is not necessarily an official receiver site and does not require a receiver authorisation number. " +
-      "Some drop-offs may be to exempt places that store, treat, use or dispose of waste, in which case exemptionNumber may be supplied. " +
-      "A receipt event may not always follow a delivery.",
-  );
+    'Delivery place declared by the carrier. ' +
+      'This is not necessarily an official receiver site and does not require a receiver authorisation number. ' +
+      'Some drop-offs may be to exempt places that store, treat, use or dispose of waste, in which case exemptionNumber may be supplied. ' +
+      'A receipt event may not always follow a delivery.'
+  )
 
 // ---------------------------------------------------------------------------
 // Root schema
@@ -78,93 +78,93 @@ export const recordDeliverySchema = Joi.object({
     .uuid()
     .required()
     .description(
-      "Unique identifier of the submitting organisation produced by the Waste Tracking Service registration process.",
+      'Unique identifier of the submitting organisation produced by the Waste Tracking Service registration process.'
     ),
 
   movementIds: Joi.array()
     .items(
       Joi.string()
         .pattern(MOVEMENT_ID_REGEX)
-        .description("Movement ID — 8-character year-prefixed sqid (D-013)."),
+        .description('Movement ID — 8-character year-prefixed sqid (D-013).')
     )
     .min(1)
     .required()
     .description(
-      "One or more Movement IDs delivered together at the same drop-off site. " +
-        "Single-collection runs supply an array of one. " +
-        "Multi-collection runs supply all Movement IDs delivered together. " +
-        "May mix hazardous and non-hazardous Movement IDs (D-010) — the server " +
-        "splits them into separate delivery entries in the response.",
+      'One or more Movement IDs delivered together at the same drop-off site. ' +
+        'Single-collection runs supply an array of one. ' +
+        'Multi-collection runs supply all Movement IDs delivered together. ' +
+        'May mix hazardous and non-hazardous Movement IDs (D-010) — the server ' +
+        'splits them into separate delivery entries in the response.'
     ),
 
   actualDateTimeDelivered: Joi.date()
     .iso()
     .required()
     .description(
-      "Actual date and time the delivery occurred. " +
-        "For deferred recording, use the real drop-off time — not the submission time.",
+      'Actual date and time the delivery occurred. ' +
+        'For deferred recording, use the real drop-off time — not the submission time.'
     ),
 
   yourUniqueReference: Joi.string().description(
     "Caller's own reference for this delivery event. " +
-      "For example, a route sheet number or driver trip reference.",
+      'For example, a route sheet number or driver trip reference.'
   ),
 
   otherReferencesForMovement: Joi.array()
     .items(otherReferenceSchema)
-    .description("Additional label/reference pairs for this delivery event."),
+    .description('Additional label/reference pairs for this delivery event.'),
 
   isDeleted: Joi.boolean()
     .strict()
     .default(false)
     .description(
-      "Soft-delete flag (D-009). Defaults to false on creation. " +
-        "May be set to true only via PUT to soft-delete the delivery, subject to downstream constraints. " +
-        "Supplying true on a POST is not permitted — the service layer returns a validation warning and treats the value as false. " +
-        "A delivery cannot be deleted once a Receipt has been recorded against it.",
+      'Soft-delete flag (D-009). Defaults to false on creation. ' +
+        'May be set to true only via PUT to soft-delete the delivery, subject to downstream constraints. ' +
+        'Supplying true on a POST is not permitted — the service layer returns a validation warning and treats the value as false. ' +
+        'A delivery cannot be deleted once a Receipt has been recorded against it.'
     ),
 
   carrier: carrierSchema
     .required()
     .description(
-      "Carrier details confirmed at delivery. " +
-        "Required even if unchanged from creation or collection. " +
-        "Uses the same required/optional carrier schema as Collection and Receipt.",
+      'Carrier details confirmed at delivery. ' +
+        'Required even if unchanged from creation or collection. ' +
+        'Uses the same required/optional carrier schema as Collection and Receipt.'
     ),
 
-  deliverySite: deliverySiteSchema,
+  deliverySite: deliverySiteSchema
 }).description(
-  "Record Delivery request payload. " +
-    "POST /deliveries → 201 with an array of delivery entries (D-010). " +
+  'Record Delivery request payload. ' +
+    'POST /deliveries → 201 with an array of delivery entries (D-010). ' +
     "Each entry's deliveryId may be passed by the driver to the receiver to enable " +
-    "POST /deliveries/{deliveryId}/receipt, where applicable. " +
-    "A receipt event may not always follow a delivery.",
-);
+    'POST /deliveries/{deliveryId}/receipt, where applicable. ' +
+    'A receipt event may not always follow a delivery.'
+)
 
 export const updateDeliverySchema = Joi.object({
   apiCode: Joi.string()
     .uuid()
     .required()
     .description(
-      "Unique identifier of the submitting organisation produced by the Waste Tracking Service registration process. " +
-        "Caller identity only — not a mutable property of the delivery record (D-017).",
+      'Unique identifier of the submitting organisation produced by the Waste Tracking Service registration process. ' +
+        'Caller identity only — not a mutable property of the delivery record (D-017).'
     ),
 
   isDeleted: Joi.boolean()
     .strict()
     .required()
     .description(
-      "Soft-delete flag (D-009) — the only property that may be changed on a recorded delivery (D-017). " +
-        "true soft-deletes the delivery; false restores it. " +
-        "Cannot be set to true once a Receipt has been recorded against this Delivery — rejected server-side as a BusinessRuleViolation.",
-    ),
+      'Soft-delete flag (D-009) — the only property that may be changed on a recorded delivery (D-017). ' +
+        'true soft-deletes the delivery; false restores it. ' +
+        'Cannot be set to true once a Receipt has been recorded against this Delivery — rejected server-side as a BusinessRuleViolation.'
+    )
 })
   .unknown(false)
   .required()
   .description(
-    "Restricted delivery update body (D-017). PUT /deliveries/{deliveryId}. " +
-      "A recorded delivery is immutable except for the isDeleted soft-delete flag; " +
-      "any field other than apiCode and isDeleted is rejected as NotAllowed.",
-  );
+    'Restricted delivery update body (D-017). PUT /deliveries/{deliveryId}. ' +
+      'A recorded delivery is immutable except for the isDeleted soft-delete flag; ' +
+      'any field other than apiCode and isDeleted is rejected as NotAllowed.'
+  )
 
-export default recordDeliverySchema;
+export default recordDeliverySchema

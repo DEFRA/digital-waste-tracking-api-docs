@@ -68,7 +68,9 @@ const hasHazardousEwcCode = (movement) =>
 const validateCreationRules = (movement, helpers) => {
   const containsHazardousEwcCode = hasHazardousEwcCode(movement)
   const hasConsignmentCode = isProvided(movement.hazardousWasteConsignmentCode)
-  const hasReasonForNoConsignmentCode = isProvided(movement.reasonForNoConsignmentCode)
+  const hasReasonForNoConsignmentCode = isProvided(
+    movement.reasonForNoConsignmentCode
+  )
 
   if (hasConsignmentCode && hasReasonForNoConsignmentCode) {
     return helpers.message(
@@ -76,14 +78,23 @@ const validateCreationRules = (movement, helpers) => {
     )
   }
 
-  if (containsHazardousEwcCode && !hasConsignmentCode && !hasReasonForNoConsignmentCode) {
+  if (
+    containsHazardousEwcCode &&
+    !hasConsignmentCode &&
+    !hasReasonForNoConsignmentCode
+  ) {
     return helpers.message(
       'reasonForNoConsignmentCode is required when the movement contains hazardous waste and no hazardousWasteConsignmentCode is provided.'
     )
   }
 
-  if (containsHazardousEwcCode && !(Array.isArray(movement.receivers) && movement.receivers.length > 0)) {
-    return helpers.message('at least one receivers entry is required when the movement contains hazardous waste.')
+  if (
+    containsHazardousEwcCode &&
+    !(Array.isArray(movement.receivers) && movement.receivers.length > 0)
+  ) {
+    return helpers.message(
+      'at least one receivers entry is required when the movement contains hazardous waste.'
+    )
   }
 
   return movement
@@ -96,31 +107,40 @@ const validateCreationRules = (movement, helpers) => {
 // ---------------------------------------------------------------------------
 
 // Exported for testing (see test/event-model/schema/creation/).
-export const createWasteItemSchema = wasteItemBaseSchema.keys({
-  intendedTreatments: Joi.array()
-    .items(intendedTreatmentSchema)
-    .min(1)
-    .required()
-    .description(
-      'Intended Treatment (D-031 amended). Mandatory at Creation, min 1 — the treatment(s) planned for ' +
-      'this waste item. The receiver confirms the authoritative Actual Treatment (actualTreatments) at Receipt. ' +
-      'Each treatment entry must include both a valid disposalOrRecoveryCode and a weight.'
-    )
-}).description('Waste item declared as part of the created movement (D-042 Creation-specific shape).')
+export const createWasteItemSchema = wasteItemBaseSchema
+  .keys({
+    intendedTreatments: Joi.array()
+      .items(intendedTreatmentSchema)
+      .min(1)
+      .required()
+      .description(
+        'Intended Treatment (D-031 amended). Mandatory at Creation, min 1 — the treatment(s) planned for ' +
+          'this waste item. The receiver confirms the authoritative Actual Treatment (actualTreatments) at Receipt. ' +
+          'Each treatment entry must include both a valid disposalOrRecoveryCode and a weight.'
+      )
+  })
+  .description(
+    'Waste item declared as part of the created movement (D-042 Creation-specific shape).'
+  )
 
 // ---------------------------------------------------------------------------
 // Receiver at creation
 // ---------------------------------------------------------------------------
 
-const receiverAddressSchema = businessAddressSchema.keys({
-  fullAddress: Joi.string()
-    .required()
-    .description('Full receiver site address.'),
+const receiverAddressSchema = businessAddressSchema
+  .keys({
+    fullAddress: Joi.string()
+      .required()
+      .description('Full receiver site address.'),
 
-  postcode: businessAddressSchema.extract('postcode')
-    .required()
-    .description('Receiver site postcode.')
-}).description('Receiver site address. Required with fullAddress and postcode when receiver.siteName is populated.')
+    postcode: businessAddressSchema
+      .extract('postcode')
+      .required()
+      .description('Receiver site postcode.')
+  })
+  .description(
+    'Receiver site address. Required with fullAddress and postcode when receiver.siteName is populated.'
+  )
 
 /**
  * Planned collection address — same shape as Collection's own collectionSite.address
@@ -129,21 +149,28 @@ const receiverAddressSchema = businessAddressSchema.keys({
  * distinctly from collectionJoi.js's exported collectionSiteSchema (the actual
  * collection site, a different, larger shape) to avoid a naming collision.
  */
-const plannedCollectionAddressSchema = businessAddressSchema.keys({
-  fullAddress: Joi.string()
-    .required()
-    .description('Full collection site address.'),
+const plannedCollectionAddressSchema = businessAddressSchema
+  .keys({
+    fullAddress: Joi.string()
+      .required()
+      .description('Full collection site address.'),
 
-  postcode: businessAddressSchema.extract('postcode')
-    .required()
-    .description('Collection site postcode.')
-}).description('Address where the waste is planned to be collected, when different from producer.address. Both fullAddress and postcode are required.')
+    postcode: businessAddressSchema
+      .extract('postcode')
+      .required()
+      .description('Collection site postcode.')
+  })
+  .description(
+    'Address where the waste is planned to be collected, when different from producer.address. Both fullAddress and postcode are required.'
+  )
 
 // Exported for testing (see test/event-model/schema/common/receiver.test.js).
 export const receiverSchema = Joi.object({
   siteName: Joi.string()
     .required()
-    .description('Name of the intended receiving site. Required whenever the receiver object is supplied.'),
+    .description(
+      'Name of the intended receiving site. Required whenever the receiver object is supplied.'
+    ),
 
   authorisationNumber: Joi.when('siteName', {
     is: Joi.exist(),
@@ -163,7 +190,9 @@ export const receiverSchema = Joi.object({
         )
       )
       .optional()
-  }).description('Required when receiver.siteName is populated. Must be a valid site authorisation number.'),
+  }).description(
+    'Required when receiver.siteName is populated. Must be a valid site authorisation number.'
+  ),
 
   emailAddress: Joi.string()
     .email()
@@ -182,11 +211,13 @@ export const receiverSchema = Joi.object({
     is: Joi.exist(),
     then: receiverAddressSchema.required(),
     otherwise: receiverAddressSchema.optional()
-  }).description('Required when receiver.siteName is populated. Must include postcode and fullAddress.')
+  }).description(
+    'Required when receiver.siteName is populated. Must include postcode and fullAddress.'
+  )
 }).description(
   'A single receiving site entry within receivers (D-043). siteName is mandatory whenever an ' +
-  'entry is supplied, which in turn makes authorisationNumber and address mandatory too (both ' +
-  'are conditional on siteName being populated).'
+    'entry is supplied, which in turn makes authorisationNumber and address mandatory too (both ' +
+    'are conditional on siteName being populated).'
 )
 
 // ---------------------------------------------------------------------------
@@ -199,13 +230,17 @@ export const producerSchema = Joi.object({
   wasteSource: Joi.string()
     .valid('Household', 'Commercial', 'Municipal')
     .required()
-    .description('Whether the waste originates from household, commercial or municipal sources.'),
+    .description(
+      'Whether the waste originates from household, commercial or municipal sources.'
+    ),
 
   organisationName: Joi.when('wasteSource', {
     is: 'Household',
     then: Joi.forbidden(),
     otherwise: Joi.string().required()
-  }).description('Producer organisation name. Required for Commercial and Municipal waste; not applicable for Household.'),
+  }).description(
+    'Producer organisation name. Required for Commercial and Municipal waste; not applicable for Household.'
+  ),
 
   authorisationNumber: Joi.when('wasteSource', {
     is: 'Household',
@@ -218,21 +253,30 @@ export const producerSchema = Joi.object({
         )
       )
       .optional()
-  }).description('Producer environmental permit or exemption number. Optional for Commercial and Municipal, not applicable for Household.'),
+  }).description(
+    'Producer environmental permit or exemption number. Optional for Commercial and Municipal, not applicable for Household.'
+  ),
 
   sicCode: Joi.when('wasteSource', {
     switch: [
-      { is: 'Commercial', then: Joi.string().pattern(SIC_CODE_REGEX).required() },
+      {
+        is: 'Commercial',
+        then: Joi.string().pattern(SIC_CODE_REGEX).required()
+      },
       { is: 'Household', then: Joi.forbidden() }
     ],
     otherwise: Joi.string().pattern(SIC_CODE_REGEX).optional()
-  }).description('Five-digit Standard Industrial Classification code. Required for Commercial, optional for Municipal, not applicable for Household.'),
+  }).description(
+    'Five-digit Standard Industrial Classification code. Required for Commercial, optional for Municipal, not applicable for Household.'
+  ),
 
   emailAddress: Joi.when('wasteSource', {
     is: 'Household',
     then: Joi.forbidden(),
     otherwise: Joi.string().email().optional()
-  }).description('Producer contact email address. Not applicable for Household waste.'),
+  }).description(
+    'Producer contact email address. Not applicable for Household waste.'
+  ),
 
   phoneNumber: Joi.when('wasteSource', {
     is: 'Household',
@@ -245,18 +289,24 @@ export const producerSchema = Joi.object({
         )
       )
       .optional()
-  }).description('Producer contact phone number. Not applicable for Household waste.'),
+  }).description(
+    'Producer contact phone number. Not applicable for Household waste.'
+  ),
 
   address: Joi.when('wasteSource', {
     is: 'Household',
     then: Joi.forbidden(),
     otherwise: businessAddressSchema.required()
-  }).description('Producer site address. Required for Commercial and Municipal; not applicable for Household.'),
+  }).description(
+    'Producer site address. Required for Commercial and Municipal; not applicable for Household.'
+  ),
 
   councilMovement: Joi.boolean()
     .strict()
     .required()
-    .description('Whether this movement is carried out by, or on behalf of, a council.')
+    .description(
+      'Whether this movement is carried out by, or on behalf of, a council.'
+    )
 }).description('Producer organisation details.')
 
 // ---------------------------------------------------------------------------
@@ -273,7 +323,7 @@ export const creationCarrierSchema = Joi.object({
     .optional()
     .description(
       'Optional at Creation. If provided, must be in a valid carrier registration number format. ' +
-      'Must not be supplied together with carrier.reasonForNoRegistrationNumber.'
+        'Must not be supplied together with carrier.reasonForNoRegistrationNumber.'
     ),
 
   reasonForNoRegistrationNumber: Joi.string()
@@ -287,7 +337,7 @@ export const creationCarrierSchema = Joi.object({
     })
     .description(
       'Optional at Creation when carrier.registrationNumber is not supplied, null, or empty. ' +
-      'Must not be supplied when a valid registrationNumber is provided.'
+        'Must not be supplied when a valid registrationNumber is provided.'
     ),
 
   organisationName: Joi.string()
@@ -300,7 +350,7 @@ export const creationCarrierSchema = Joi.object({
     otherwise: Joi.forbidden()
   }).description(
     "Optional at Creation when meansOfTransport is 'Road'. " +
-    'Must not be provided when meansOfTransport is any other value.'
+      'Must not be provided when meansOfTransport is any other value.'
   ),
 
   otherMeansOfTransport: Joi.when('meansOfTransport', {
@@ -309,7 +359,7 @@ export const creationCarrierSchema = Joi.object({
     otherwise: Joi.forbidden()
   }).description(
     "Optional description when meansOfTransport is 'Other'. " +
-    'Must not be provided for any other transport method.'
+      'Must not be provided for any other transport method.'
   ),
 
   emailAddress: Joi.string()
@@ -330,11 +380,10 @@ export const creationCarrierSchema = Joi.object({
   address: businessAddressSchema
     .optional()
     .description('Carrier business address. Optional at Creation.')
-})
-  .description(
-    'Carrier details at Creation. Same field structure as Receipt carrier, with meansOfTransport and ' +
+}).description(
+  'Carrier details at Creation. Same field structure as Receipt carrier, with meansOfTransport and ' +
     'organisationName mandatory. Optional fields retain integrity rules when supplied.'
-  )
+)
 
 // ---------------------------------------------------------------------------
 // Root schema
@@ -344,12 +393,16 @@ export const createMovementSchema = Joi.object({
   apiCode: Joi.string()
     .uuid()
     .required()
-    .description('Unique identifier of the submitting organisation produced by the Waste Tracking Service registration process.'),
+    .description(
+      'Unique identifier of the submitting organisation produced by the Waste Tracking Service registration process.'
+    ),
 
   plannedCollectionTime: Joi.date()
     .iso()
     .required()
-    .description('Planned date and time the waste will be collected. Actual time is recorded by the Collection event and may differ.'),
+    .description(
+      'Planned date and time the waste will be collected. Actual time is recorded by the Collection event and may differ.'
+    ),
 
   hazardousWasteConsignmentCode: Joi.string()
     .empty('')
@@ -360,16 +413,21 @@ export const createMovementSchema = Joi.object({
         'hazardousWasteConsignmentCode must match one of the accepted region-specific consignment code formats.'
       )
     )
-    .description('Required when any waste item carries a hazardous EWC code. Must not be provided alongside reasonForNoConsignmentCode.'),
+    .description(
+      'Required when any waste item carries a hazardous EWC code. Must not be provided alongside reasonForNoConsignmentCode.'
+    ),
 
   reasonForNoConsignmentCode: Joi.string()
     .valid(...NO_CONSIGNMENT_REASONS)
     .empty('')
     .empty(null)
-    .description('Required when waste is hazardous and no hazardousWasteConsignmentCode is provided. Must not be provided alongside hazardousWasteConsignmentCode.'),
+    .description(
+      'Required when waste is hazardous and no hazardousWasteConsignmentCode is provided. Must not be provided alongside hazardousWasteConsignmentCode.'
+    ),
 
-  yourUniqueReference: Joi.string()
-    .description("Caller's own reference — no format rules enforced."),
+  yourUniqueReference: Joi.string().description(
+    "Caller's own reference — no format rules enforced."
+  ),
 
   otherReferencesForMovement: Joi.array()
     .items(otherReferenceSchema)
@@ -377,23 +435,26 @@ export const createMovementSchema = Joi.object({
 
   specialHandlingRequirements: Joi.string()
     .max(5000)
-    .description('Special handling instructions, e.g. fragile, hazardous, temperature-sensitive or other operational notes.'),
+    .description(
+      'Special handling instructions, e.g. fragile, hazardous, temperature-sensitive or other operational notes.'
+    ),
 
   isDeleted: Joi.boolean()
     .strict()
     .default(false)
     .description(
       'Soft-delete flag (D-009). Defaults to false on creation. ' +
-      'May be set to true only via PUT to soft-delete the movement, subject to downstream constraints. ' +
-      'Supplying true on a POST is not permitted — the service layer returns a validation warning and treats the value as false.'
+        'May be set to true only via PUT to soft-delete the movement, subject to downstream constraints. ' +
+        'Supplying true on a POST is not permitted — the service layer returns a validation warning and treats the value as false.'
     ),
 
-  producer: producerSchema
-    .required(),
+  producer: producerSchema.required(),
 
   carrier: creationCarrierSchema
     .required()
-    .description('Carrier details. Required object at Creation, using the Receipt carrier field structure with meansOfTransport as the only mandatory carrier field.'),
+    .description(
+      'Carrier details. Required object at Creation, using the Receipt carrier field structure with meansOfTransport as the only mandatory carrier field.'
+    ),
 
   brokerOrDealer: brokerSchema
     .optional()
@@ -404,9 +465,9 @@ export const createMovementSchema = Joi.object({
     .min(1)
     .description(
       'Intended receiving site(s) (D-043). Required only when the movement contains hazardous ' +
-      'waste — a producer may declare waste heading to more than one receiving site. Each entry ' +
-      'follows the same receiver shape (siteName mandatory whenever an entry is supplied, which ' +
-      'makes authorisationNumber and address mandatory too).'
+        'waste — a producer may declare waste heading to more than one receiving site. Each entry ' +
+        'follows the same receiver shape (siteName mandatory whenever an entry is supplied, which ' +
+        'makes authorisationNumber and address mandatory too).'
     ),
 
   collectionAddressDifferentFromProducer: Joi.boolean()
@@ -414,8 +475,8 @@ export const createMovementSchema = Joi.object({
     .default(false)
     .description(
       'Whether the waste will be collected from an address other than producer.address. ' +
-      'Defaults to false — false or absent means collection is planned at the producer address. ' +
-      'When true, collectionSite is required.'
+        'Defaults to false — false or absent means collection is planned at the producer address. ' +
+        'When true, collectionSite is required.'
     ),
 
   collectionSite: Joi.when('collectionAddressDifferentFromProducer', {
@@ -424,17 +485,21 @@ export const createMovementSchema = Joi.object({
     otherwise: Joi.forbidden()
   }).description(
     'Address where the waste is planned to be collected. Required when ' +
-    'collectionAddressDifferentFromProducer is true; must not be provided otherwise.'
+      'collectionAddressDifferentFromProducer is true; must not be provided otherwise.'
   ),
 
   wasteItems: Joi.array()
     .items(createWasteItemSchema)
     .min(1)
     .required()
-    .description('At least one waste item is required. Creation uses its own waste item shape with a nested classification object (D-042).')
+    .description(
+      'At least one waste item is required. Creation uses its own waste item shape with a nested classification object (D-042).'
+    )
 })
   .custom(validateCreationRules, 'creation movement business rules')
-  .description('Create Movement request payload. POST /movements → 201 with movementId.')
+  .description(
+    'Create Movement request payload. POST /movements → 201 with movementId.'
+  )
 
 // Alias retained for projects that currently import creationJoi.
 export const creationJoi = createMovementSchema

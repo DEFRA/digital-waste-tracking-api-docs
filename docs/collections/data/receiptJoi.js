@@ -54,7 +54,9 @@ import {
  */
 const validateReceiptConsignmentRules = (movement, helpers) => {
   const hasConsignmentCode = isProvided(movement.hazardousWasteConsignmentCode)
-  const hasReasonForNoConsignmentCode = isProvided(movement.reasonForNoConsignmentCode)
+  const hasReasonForNoConsignmentCode = isProvided(
+    movement.reasonForNoConsignmentCode
+  )
 
   if (hasConsignmentCode && hasReasonForNoConsignmentCode) {
     return helpers.message(
@@ -122,11 +124,13 @@ export const receiptWasteItemSchema = Joi.object({
   actualTreatments: Joi.array()
     .items(actualTreatmentSchema)
     .description(
-      'Actual Treatment (D-031 amended, D-042). Optional. Each entry\'s disposalOrRecoveryCode is itself ' +
-      'optional — a receiving site may need to inspect or weigh before confirming the code. Omitting it ' +
-      'produces a warning, not a rejection; weight is required only when the code is supplied.'
+      "Actual Treatment (D-031 amended, D-042). Optional. Each entry's disposalOrRecoveryCode is itself " +
+        'optional — a receiving site may need to inspect or weigh before confirming the code. Omitting it ' +
+        'produces a warning, not a rejection; weight is required only when the code is supplied.'
     )
-}).description('Waste item received as part of the receipt movement (D-042 — classification dropped).')
+}).description(
+  'Waste item received as part of the receipt movement (D-042 — classification dropped).'
+)
 
 // carrier and brokerOrDealer use the shared carrierSchema/brokerSchema (sharedSchemas.js)
 // rather than local duplicates, so this endpoint picks up the same
@@ -179,10 +183,9 @@ export const receiptSiteSchema = Joi.object({
 }).description('Physical receipt site details.')
 
 export const receiptMovementSchema = Joi.object({
-  yourUniqueReference: Joi.string()
-    .description(
-      "No specific business rules. For operator's own reference purposes."
-    ),
+  yourUniqueReference: Joi.string().description(
+    "No specific business rules. For operator's own reference purposes."
+  ),
 
   otherReferencesForMovement: Joi.array()
     .items(otherReferenceSchema)
@@ -239,7 +242,10 @@ export const receiptMovementSchema = Joi.object({
 
   brokerOrDealer: brokerSchema.optional()
 })
-  .custom(validateReceiptConsignmentRules, 'receipt movement consignment business rules')
+  .custom(
+    validateReceiptConsignmentRules,
+    'receipt movement consignment business rules'
+  )
   .description('Receipt movement event payload.')
 
 // Alias retained for projects that currently import receiptJoi.

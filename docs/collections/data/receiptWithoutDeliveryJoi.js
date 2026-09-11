@@ -24,8 +24,18 @@ import Joi from 'joi'
  * since that file doesn't currently export them — matching receiptJoi.js's
  * own historical self-contained-file convention for Receipt-specific pieces.
  */
-import { UK_POSTCODE_REGEX, isValidPhoneNumber, isValidAuthorisationNumber, isValidHazardousWasteConsignmentCode } from './validators.js'
-import { carrierSchema, brokerSchema, wasteItemBaseSchema, actualTreatmentSchema } from './sharedSchemas.js'
+import {
+  UK_POSTCODE_REGEX,
+  isValidPhoneNumber,
+  isValidAuthorisationNumber,
+  isValidHazardousWasteConsignmentCode
+} from './validators.js'
+import {
+  carrierSchema,
+  brokerSchema,
+  wasteItemBaseSchema,
+  actualTreatmentSchema
+} from './sharedSchemas.js'
 
 const NO_CONSIGNMENT_REASONS = [
   'NON_HAZ_WASTE_TRANSFER',
@@ -41,7 +51,8 @@ const validateWithBooleanHelper = (predicate, message) => (value, helpers) => {
   return value
 }
 
-const isProvided = (value) => value !== undefined && value !== null && value !== ''
+const isProvided = (value) =>
+  value !== undefined && value !== null && value !== ''
 
 /**
  * Same mutual-exclusivity rule as receiptJoi.js's validateReceiptConsignmentRules
@@ -52,7 +63,9 @@ const isProvided = (value) => value !== undefined && value !== null && value !==
  */
 const validateConsignmentRules = (movement, helpers) => {
   const hasConsignmentCode = isProvided(movement.hazardousWasteConsignmentCode)
-  const hasReasonForNoConsignmentCode = isProvided(movement.reasonForNoConsignmentCode)
+  const hasReasonForNoConsignmentCode = isProvided(
+    movement.reasonForNoConsignmentCode
+  )
 
   if (hasConsignmentCode && hasReasonForNoConsignmentCode) {
     return helpers.message(
@@ -67,7 +80,9 @@ const otherReferenceSchema = Joi.object({
   reference: Joi.string()
     .min(1)
     .required()
-    .description('Both label and reference must be provided together as a pair.'),
+    .description(
+      'Both label and reference must be provided together as a pair.'
+    ),
 
   label: Joi.string()
     .min(1)
@@ -140,21 +155,24 @@ const receiverSiteSchema = Joi.object({
  * light wasteItem, since there is no prior Creation record to source
  * classification from.
  */
-const receiptWithoutDeliveryWasteItemSchema = wasteItemBaseSchema.keys({
-  actualTreatments: Joi.array()
-    .items(actualTreatmentSchema)
-    .description(
-      'Actual Treatment (D-031 amended, D-042). Optional. Each entry\'s disposalOrRecoveryCode is itself ' +
-      'optional — a receiving site may need to inspect or weigh before confirming the code. Omitting it ' +
-      'produces a warning, not a rejection; weight is required only when the code is supplied.'
-    )
-}).description('Waste item received as part of a no-prior-delivery receipt (D-042 — full classification carried, unlike the ordinary Receipt endpoint).')
+const receiptWithoutDeliveryWasteItemSchema = wasteItemBaseSchema
+  .keys({
+    actualTreatments: Joi.array()
+      .items(actualTreatmentSchema)
+      .description(
+        "Actual Treatment (D-031 amended, D-042). Optional. Each entry's disposalOrRecoveryCode is itself " +
+          'optional — a receiving site may need to inspect or weigh before confirming the code. Omitting it ' +
+          'produces a warning, not a rejection; weight is required only when the code is supplied.'
+      )
+  })
+  .description(
+    'Waste item received as part of a no-prior-delivery receipt (D-042 — full classification carried, unlike the ordinary Receipt endpoint).'
+  )
 
 export const receiptWithoutDeliverySchema = Joi.object({
-  yourUniqueReference: Joi.string()
-    .description(
-      "No specific business rules. For operator's own reference purposes."
-    ),
+  yourUniqueReference: Joi.string().description(
+    "No specific business rules. For operator's own reference purposes."
+  ),
 
   otherReferencesForMovement: Joi.array()
     .items(otherReferenceSchema)
@@ -201,7 +219,9 @@ export const receiptWithoutDeliverySchema = Joi.object({
     .items(receiptWithoutDeliveryWasteItemSchema)
     .min(1)
     .required()
-    .description('At least one waste item is required. Carries full classification (D-042) — this endpoint has no prior Creation record to source it from.'),
+    .description(
+      'At least one waste item is required. Carries full classification (D-042) — this endpoint has no prior Creation record to source it from.'
+    ),
 
   receiverSite: receiverSiteSchema.required(),
 
@@ -218,7 +238,10 @@ export const receiptWithoutDeliverySchema = Joi.object({
       'Mandatory explanation of why there is no prior Movement/Collection/Delivery trail for this receipt (D-041).'
     )
 })
-  .custom(validateConsignmentRules, 'receipt-without-delivery consignment business rules')
+  .custom(
+    validateConsignmentRules,
+    'receipt-without-delivery consignment business rules'
+  )
   .description('Receipt-without-a-prior-delivery payload (D-041, D-042).')
 
 export default receiptWithoutDeliverySchema

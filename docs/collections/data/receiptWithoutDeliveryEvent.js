@@ -16,7 +16,12 @@
  * classification shape (creationEvent.js), since receiptEvent.js's own
  * wasteItems now uses the light, classification-free shape (D-042).
  */
-import { carrier, brokerOrDealer, receipt, receiverSite } from './receiptEvent.js'
+import {
+  carrier,
+  brokerOrDealer,
+  receipt,
+  receiverSite
+} from './receiptEvent.js'
 
 export const wasteItems = [
   {
@@ -80,7 +85,8 @@ export const requestBody = {
   brokerOrDealer,
   receiverSite,
   receipt,
-  reasonForNoDeliveryId: 'Waste received directly with no digital record of an earlier journey.'
+  reasonForNoDeliveryId:
+    'Waste received directly with no digital record of an earlier journey.'
 }
 
 // 201 response: the receipt is recorded and an empty Delivery
