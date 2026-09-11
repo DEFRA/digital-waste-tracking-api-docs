@@ -15,7 +15,7 @@ tags:
   - name: Collection
     description: Record a collection event — waste passing from a producer to a driver.
   - name: Delivery
-    description: Record a delivery event, generating a Delivery ID.
+    description: Record a delivery event, generating one or more Delivery IDs.
   - name: Receipt
     description: Record receipt of waste at a receiver site.
 
@@ -55,6 +55,14 @@ components:
       description: Unique identifier for a delivery, minted by the server on `POST /deliveries`.
       example: 25KMT4Z9
 
+    wasteType:
+      type: string
+      enum:
+        - HAZARDOUS
+        - NON_HAZARDOUS
+      description: Whether the waste covered by this delivery is hazardous or non-hazardous.
+      example: NON_HAZARDOUS
+
     createMovementRequest:
       type: object
       required: [apiCode]
@@ -89,7 +97,8 @@ components:
           minItems: 1
           items:
             $ref: '#/components/schemas/movementId'
-          description: One or more Movement IDs delivered together at this delivery.
+          description: >-
+            One or more Movement IDs delivered together. The server groups these into one Delivery per distinct waste type — see the response — so a single request may mint more than one Delivery ID.
 
     recordReceiptRequest:
       type: object
@@ -209,6 +218,22 @@ components:
         validation:
           $ref: '#/components/schemas/validation'
 
+    deliveryItem:
+      type: object
+      description: A single Delivery minted from a `POST /deliveries` request, covering the Movements sharing one waste type.
+      required: [deliveryId, movementIds, wasteType]
+      properties:
+        deliveryId:
+          $ref: '#/components/schemas/deliveryId'
+        movementIds:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/movementId'
+          description: The subset of the submitted Movement IDs covered by this Delivery.
+        wasteType:
+          $ref: '#/components/schemas/wasteType'
+
     deliveryResponse:
       type: object
       description: Response returned when a delivery is recorded.
@@ -216,10 +241,14 @@ components:
       properties:
         data:
           type: object
-          required: [deliveryId]
+          required: [deliveries]
           properties:
-            deliveryId:
-              $ref: '#/components/schemas/deliveryId'
+            deliveries:
+              type: array
+              items:
+                $ref: '#/components/schemas/deliveryItem'
+              description: >-
+                One Delivery per distinct waste type represented in the submitted Movement IDs. Most requests produce a single-item list.
         validation:
           $ref: '#/components/schemas/validation'
 
@@ -352,7 +381,8 @@ paths:
     post:
       tags: [Delivery]
       summary: Record a delivery
-      description: Records a delivery event and returns a Delivery ID.
+      description: >-
+        Records a delivery event and returns one Delivery ID per distinct waste type among the submitted Movements.
       operationId: recordDelivery
       requestBody:
         required: true
@@ -362,7 +392,8 @@ paths:
               $ref: '#/components/schemas/recordDeliveryRequest'
       responses:
         '201':
-          description: Delivery recorded. Body carries the new Delivery ID and any validation warnings.
+          description: >-
+            Delivery recorded. Body carries a list of the new Delivery(ies) — one per distinct waste type — and any validation warnings.
           headers:
             x-request-id:
               $ref: '#/components/headers/RequestId'
