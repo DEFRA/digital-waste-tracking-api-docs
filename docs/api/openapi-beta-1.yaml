@@ -237,6 +237,7 @@ components:
           description: >-
             The Delivery the receipt is recorded against — echoed from the path on `POST /deliveries/{deliveryId}/receipt`, or a new empty Delivery minted by `POST /receipts`.
 
+
         validation:
           $ref: '#/components/schemas/validation'
 
@@ -383,6 +384,7 @@ paths:
       description: >-
         Fallback for recording receipt with no prior Delivery, e.g. waste received with no movement trail. Not linked to any Movement; `reason` must explain why. The server creates an empty Delivery behind the scenes and returns its `deliveryId`, so the receipt stays addressable.
 
+
       operationId: recordReceiptWithoutDelivery
       requestBody:
         required: true
@@ -394,6 +396,7 @@ paths:
         '201':
           description: >-
             Receipt recorded against a server-created empty Delivery. Body carries the new Delivery ID and any validation warnings.
+
 
           headers:
             x-request-id:
