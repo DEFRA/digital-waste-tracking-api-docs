@@ -11,7 +11,7 @@
  * Creation-specific business rules reflected here:
  * - apiCode is required, as per the Receipt event.
  * - Date/time field renamed from estimatedDateTimeCollected to plannedCollectionTime.
- * - Object names align with the spreadsheet / Receipt shape: producer, carrier, brokerOrDealer, receiver.
+ * - Object names align with the spreadsheet / Receipt shape: producer, carrier, brokerOrDealer, receivers.
  * - producer.organisationName and producer.address are required for Commercial and Municipal, forbidden
  *   for Household; producer.authorisationNumber is optional for Commercial and Municipal.
  * - carrier follows the Receipt carrier structure, but carrier.meansOfTransport and
@@ -19,9 +19,10 @@
  *   integrity rules when supplied: registrationNumber and reasonForNoRegistrationNumber are mutually
  *   exclusive; vehicleRegistration is only for Road; otherMeansOfTransport is only for Other.
  * - producer.councilMovement uses the BA spreadsheet name.
- * - receiver is required only when the movement contains hazardous waste; receiver.siteName is now
- *   mandatory whenever the receiver object is supplied, which makes authorisationNumber and address
- *   mandatory too.
+ * - receivers (D-043; array, renamed from receiver) requires at least one entry only when the movement
+ *   contains hazardous waste — a producer may declare waste heading to more than one receiving site.
+ *   Each entry's siteName is mandatory whenever that entry is supplied, which makes authorisationNumber
+ *   and address mandatory too.
  * - brokerOrDealer is optional, but registrationNumber is required whenever it is supplied — null/empty
  *   requires reasonForNoRegistrationNumber instead, mirroring carrier's mutual-exclusivity rule.
  * - collectionAddressDifferentFromProducer / collectionSite: planning-time fields for where the waste
@@ -47,11 +48,9 @@ export type {
   BusinessAddress,
   Pops,
   PopComponent,
-  PopConcentrationThreshold,
   PopConcentrationThresholdOperator,
   Hazardous,
   HazardousComponent,
-  HazardousConcentrationThreshold,
   HazardousConcentrationThresholdOperator,
   WasteItemClassification,
   WasteItemBase,
@@ -167,12 +166,12 @@ export type ReceiverAddress = {
 }
 
 /**
- * Receiver recorded at Creation.
+ * A single receiving site entry within receivers (D-043).
  *
- * Required only for hazardous waste. siteName is mandatory whenever the
- * receiver object is supplied; authorisationNumber and full address
- * are conditional on siteName being populated, which — now that siteName is
- * always populated when this object is present — makes them mandatory too.
+ * siteName is mandatory whenever an entry is supplied; authorisationNumber
+ * and full address are conditional on siteName being populated, which — now
+ * that siteName is always populated when an entry is present — makes them
+ * mandatory too.
  */
 export type Receiver = {
   siteName: string
@@ -228,8 +227,12 @@ export type CreateMovement = {
   carrier: Carrier
   /** Optional broker/dealer details. registrationNumber is required whenever this object is supplied. */
   brokerOrDealer?: BrokerOrDealer
-  /** Required only when the movement contains hazardous waste. */
-  receiver?: Receiver
+  /**
+   * Intended receiving site(s) (D-043). Required (min 1) only when the movement
+   * contains hazardous waste — a producer may declare waste heading to more
+   * than one receiving site.
+   */
+  receivers?: Receiver[]
 
   /**
    * Whether the waste will be collected from an address other than producer.address.

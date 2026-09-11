@@ -88,7 +88,6 @@ export const publicPostBody = {
       reference: 'TN-12345'
     }
   ],
-  specialHandlingRequirements: 'Handle with care and keep upright.',
   wasteItems,
   carrier,
   brokerOrDealer,

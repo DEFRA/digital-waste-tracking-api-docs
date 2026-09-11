@@ -184,12 +184,6 @@ export const receiptMovementSchema = Joi.object({
       "No specific business rules. For operator's own reference purposes."
     ),
 
-  specialHandlingRequirements: Joi.string()
-    .max(5000)
-    .description(
-      'Required for abnormal hazardous waste or non-hazardous waste with harmful chemical, biological or physical characteristics.'
-    ),
-
   otherReferencesForMovement: Joi.array()
     .items(otherReferenceSchema)
     .description(

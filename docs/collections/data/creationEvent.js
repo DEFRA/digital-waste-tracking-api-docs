@@ -8,7 +8,7 @@
  * Creation-specific alignment notes:
  * - apiCode is present as per Receipt.
  * - plannedCollectionTime (renamed from estimatedDateTimeCollected) follows the Receipt date/time naming style.
- * - Object names are producer, carrier, brokerOrDealer and receiver.
+ * - Object names are producer, carrier, brokerOrDealer and receivers.
  * - wasteItems use Creation's own shape (D-042): classification is nested; weight, numberOfContainers,
  *   typeOfContainers and physicalForm stay top-level. intendedTreatments is mandatory at Creation
  *   (min 1) — the Intended Treatment. The receiver confirms actualTreatments (Actual Treatment) at
@@ -20,7 +20,8 @@
  *   Household; producer.authorisationNumber is optional for Commercial and Municipal.
  * - brokerOrDealer.registrationNumber is required whenever brokerOrDealer is supplied, with
  *   reasonForNoRegistrationNumber required in its place when null/empty.
- * - receiver.siteName is mandatory whenever receiver is supplied.
+ * - receivers (D-043; array, renamed from receiver) requires at least one entry only for hazardous
+ *   waste. Each entry's siteName is mandatory whenever that entry is supplied.
  * - collectionAddressDifferentFromProducer / collectionSite: planning-time fields for where the
  *   waste will be collected from, if not the producer's address.
  */
@@ -113,8 +114,9 @@ export const brokerOrDealerWithoutRegistrationNumber = {
   phoneNumber: '01112223333'
 }
 
-// Required at Creation only for hazardous waste. siteName is mandatory whenever
-// receiver is supplied, which makes authorisationNumber and address mandatory too.
+// A single receiving site entry within receivers (D-043). siteName is mandatory
+// whenever an entry is supplied, which makes authorisationNumber and address
+// mandatory too. At least one entry is required only for hazardous waste.
 export const receiver = {
   siteName: 'Test Receiver Site',
   authorisationNumber: 'HP3456XX',
@@ -158,7 +160,7 @@ export const wasteItems = [
         hazCodes: ['HP_4'],
         components: [
           {
-            // Plain concentration value (mutually exclusive with concentrationThreshold).
+            // Plain concentration value (mutually exclusive with concentrationThresholdOperator).
             name: 'Mercury',
             concentration: 5
           }
@@ -196,13 +198,12 @@ export const wasteItems = [
         components: [
           {
             code: 'PFOA',
-            // Concentration expressed as a threshold instead of a plain value
-            // (mutually exclusive with concentration) — a different item to
-            // the plain-concentration example above.
-            concentrationThreshold: {
-              operator: 'LESS_THAN',
-              value: 0.001
-            }
+            // States concentration is below the WM3-defined threshold for PFOA
+            // instead of supplying a plain value (mutually exclusive with
+            // concentration) — a different item to the plain-concentration
+            // example above. The threshold's numeric value is not sent; it is
+            // resolved from WM3 guidance against code.
+            concentrationThresholdOperator: 'LESS_THAN'
           }
         ]
       },
@@ -212,13 +213,12 @@ export const wasteItems = [
         hazCodes: ['HP_8'],
         components: [
           {
-            // name omitted — concentrationThreshold is only usable when name is
-            // absent, since concentration (not concentrationThreshold) is the
-            // field required when name is supplied.
-            concentrationThreshold: {
-              operator: 'GREATER_THAN_OR_EQUAL',
-              value: 0.5
-            }
+            // One of concentration or concentrationThresholdOperator is
+            // required when name is supplied — here the component states it's
+            // at-or-above the WM3-defined threshold for Cadmium rather than
+            // supplying a plain value.
+            name: 'Cadmium',
+            concentrationThresholdOperator: 'GREATER_THAN_OR_EQUAL'
           }
         ]
       }
@@ -257,7 +257,7 @@ export const publicPostBody = {
   isDeleted: false,
   producer,
   carrier,
-  receiver,
+  receivers: [receiver],
   wasteItems
   // brokerOrDealer omitted — optional
 }
@@ -349,7 +349,10 @@ export const createMovementResponseWithWarnings = {
   validation: {
     warnings: [
       {
-        key: 'receiver.authorisationNumber',
+        // Indexed path into the receivers array (D-043) — no other warning key in
+        // this file addresses an array entry, so there's no established indexed-path
+        // convention to follow; this extends the existing dot-path style with [0].
+        key: 'receivers[0].authorisationNumber',
         errorType: 'NotProvided',
         message: 'Receiver authorisation number was not provided at creation.'
       }

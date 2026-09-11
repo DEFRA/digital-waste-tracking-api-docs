@@ -217,6 +217,19 @@ export const businessAddressSchema = Joi.object({
     .description('Accepts UK postcodes and Irish Eircodes.')
 }).description('Business address object. postcode is required; fullAddress is optional.')
 
+/**
+ * Site address used by Collection's collectionSite.address and Delivery's
+ * deliverySite.address — businessAddressSchema with fullAddress also required
+ * (both events physically visit the site, unlike a carrier/broker/producer
+ * business address where only postcode is guaranteed). Consolidated here since
+ * both events previously defined identically-shaped consts independently.
+ */
+export const siteAddressSchema = businessAddressSchema.keys({
+  fullAddress: Joi.string()
+    .required()
+    .description('Full address of the physical site.')
+}).description('Site address. Both postcode and fullAddress are required.')
+
 export const otherReferenceSchema = Joi.object({
   reference: Joi.string()
     .min(1)
@@ -230,29 +243,6 @@ export const otherReferenceSchema = Joi.object({
 }).description('Additional label/reference pair for the movement.')
 
 // ---------------------------------------------------------------------------
-// Concentration threshold sub-schema (shared shape, per-parent operator enum)
-// ---------------------------------------------------------------------------
-
-/**
- * Concentration expressed as a threshold (operator + value) rather than an
- * exact figure. Mutually exclusive with the parent component's `concentration`
- * field — see the `.nand('concentration', 'concentrationThreshold')` rule on
- * popComponentSchema and hazardousComponentSchema below.
- */
-const concentrationThresholdSchema = (operators) => Joi.object({
-  operator: Joi.string()
-    .valid(...operators)
-    .required()
-    .description('Comparison operator for the threshold value.'),
-
-  value: Joi.number()
-    .strict()
-    .positive()
-    .required()
-    .description('Threshold value. Same units as concentration (%).')
-}).description('Concentration expressed as a threshold rather than an exact value.')
-
-// ---------------------------------------------------------------------------
 // POPs sub-schemas
 // ---------------------------------------------------------------------------
 
@@ -263,8 +253,13 @@ export const popComponentSchema = Joi.object({
     .allow(null)
     .description('Concentration value. If supplied, must be greater than 0.'),
 
-  concentrationThreshold: concentrationThresholdSchema(POP_CONCENTRATION_THRESHOLD_OPERATORS)
-    .description('Concentration expressed as a threshold rather than an exact value. Mutually exclusive with concentration.'),
+  concentrationThresholdOperator: Joi.string()
+    .valid(...POP_CONCENTRATION_THRESHOLD_OPERATORS)
+    .description(
+      'States that concentration is above/below/at the WM3-defined threshold for this ' +
+      'component, without supplying an exact figure — the threshold value itself is not ' +
+      'sent; it is resolved from WM3 guidance against code. Mutually exclusive with concentration.'
+    ),
 
   code: Joi.string()
     .empty('')
@@ -277,8 +272,8 @@ export const popComponentSchema = Joi.object({
     )
     .description('Valid code from GET /reference-data/pop-names.')
 })
-  .nand('concentration', 'concentrationThreshold')
-  .description('POP component detail. concentration and concentrationThreshold are mutually exclusive — a component may state one or neither, never both.')
+  .nand('concentration', 'concentrationThresholdOperator')
+  .description('POP component detail. concentration and concentrationThresholdOperator are mutually exclusive — a component may state one or neither, never both.')
 
 export const popsSchema = Joi.object({
   sourceOfComponents: Joi.string()
@@ -307,6 +302,11 @@ export const popsSchema = Joi.object({
 // Hazardous sub-schemas
 // ---------------------------------------------------------------------------
 
+/**
+ * name is currently free text — unlike popComponentSchema's code, there is no
+ * hazardous-component-name reference list/endpoint yet, so a future WM3
+ * threshold lookup against name is not resolvable from the API alone today.
+ */
 export const hazardousComponentSchema = Joi.object({
   name: Joi.string()
     .empty('')
@@ -317,17 +317,28 @@ export const hazardousComponentSchema = Joi.object({
     .strict()
     .positive()
     .allow(null)
-    .when('name', {
-      is: Joi.exist(),
-      then: Joi.required()
-    })
-    .description('Concentration value. If supplied, must be greater than 0. Required when name is supplied.'),
+    .description('Concentration value. If supplied, must be greater than 0. One of concentration or concentrationThresholdOperator is required when name is supplied.'),
 
-  concentrationThreshold: concentrationThresholdSchema(HAZARDOUS_CONCENTRATION_THRESHOLD_OPERATORS)
-    .description('Concentration expressed as a threshold rather than an exact value. Mutually exclusive with concentration.')
+  concentrationThresholdOperator: Joi.string()
+    .valid(...HAZARDOUS_CONCENTRATION_THRESHOLD_OPERATORS)
+    .description(
+      'States that concentration is above/at the WM3-defined threshold for this ' +
+      'component, without supplying an exact figure — the threshold value itself is not ' +
+      'sent; it is resolved from WM3 guidance against name. Mutually exclusive with concentration. ' +
+      'One of concentration or concentrationThresholdOperator is required when name is supplied.'
+    )
 })
-  .nand('concentration', 'concentrationThreshold')
-  .description('Hazardous component detail. concentration and concentrationThreshold are mutually exclusive — a component may state one or neither, never both.')
+  .nand('concentration', 'concentrationThresholdOperator')
+  .custom((value, helpers) => {
+    if (isProvided(value.name) && value.concentration === undefined && value.concentrationThresholdOperator === undefined) {
+      return helpers.message(
+        'One of concentration or concentrationThresholdOperator is required when name is supplied.'
+      )
+    }
+
+    return value
+  })
+  .description('Hazardous component detail. concentration and concentrationThresholdOperator are mutually exclusive — a component may state one or neither, never both.')
 
 export const hazardousSchema = Joi.object({
   sourceOfComponents: Joi.string()

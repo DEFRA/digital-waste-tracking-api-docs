@@ -25,7 +25,7 @@
 import Joi from "joi";
 import {
   MOVEMENT_ID_REGEX,
-  businessAddressSchema,
+  siteAddressSchema,
   otherReferenceSchema,
   carrierSchema,
 } from "./sharedSchemas.js";
@@ -34,13 +34,10 @@ import {
 // Delivery site
 // ---------------------------------------------------------------------------
 
-// Exported for testing (see test/event-model/schema/delivery/).
-export const deliverySiteAddressSchema = businessAddressSchema
-  .keys({
-    fullAddress: Joi.string()
-      .required()
-      .description("Full address where the waste was physically dropped off."),
-  })
+// Exported for testing (see test/event-model/schema/delivery/). Alias of the
+// shared siteAddressSchema (sharedSchemas.js) — kept under this name since
+// existing tests/consumers import it as deliverySiteAddressSchema.
+export const deliverySiteAddressSchema = siteAddressSchema
   .required()
   .description("Delivery address. Both postcode and fullAddress are required.");
 

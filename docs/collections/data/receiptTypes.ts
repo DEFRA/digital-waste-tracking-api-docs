@@ -42,7 +42,6 @@ export type ReasonForNoConsignmentCode =
 export type ReceiptMovement = {
   // Request root
   yourUniqueReference?: string
-  specialHandlingRequirements?: string
   otherReferencesForMovement?: OtherReferenceForMovement[]
 
   hazardousWasteConsignmentCode?: string

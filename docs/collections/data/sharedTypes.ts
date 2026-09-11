@@ -115,20 +115,18 @@ export type PopConcentrationThresholdOperator =
   | 'EQUAL_TO'
   | 'GREATER_THAN_OR_EQUAL'
 
-/** Concentration expressed as a threshold rather than an exact value. */
-export type PopConcentrationThreshold = {
-  operator: PopConcentrationThresholdOperator
-  /** Threshold value. Same units as concentration (%). */
-  value: number
-}
-
 export type PopComponent = {
   /** Must be a valid code from GET /reference-data/pop-names */
   code?: string
-  /** Mutually exclusive with concentrationThreshold — a component may state one or neither, never both. */
+  /** Mutually exclusive with concentrationThresholdOperator — a component may state one or neither, never both. */
   concentration?: number | null
-  /** Mutually exclusive with concentration — a component may state one or neither, never both. */
-  concentrationThreshold?: PopConcentrationThreshold
+  /**
+   * States that concentration is above/below/at the WM3-defined threshold for
+   * this component, without an exact figure — the threshold value itself is
+   * not carried here; it is resolved from WM3 guidance against code.
+   * Mutually exclusive with concentration.
+   */
+  concentrationThresholdOperator?: PopConcentrationThresholdOperator
 }
 
 export type Pops = {
@@ -145,22 +143,26 @@ export type HazardousConcentrationThresholdOperator =
   | 'EQUAL_TO'
   | 'GREATER_THAN_OR_EQUAL'
 
-/** Concentration expressed as a threshold rather than an exact value. */
-export type HazardousConcentrationThreshold = {
-  operator: HazardousConcentrationThresholdOperator
-  /** Threshold value. Same units as concentration (%). */
-  value: number
-}
-
+/**
+ * name is currently free text — unlike PopComponent's code, there is no
+ * hazardous-component-name reference list/endpoint yet, so a future WM3
+ * threshold lookup against name is not resolvable from the API alone today.
+ */
 export type HazardousComponent = {
   name?: string
   /**
-   * Required when name is supplied. Mutually exclusive with
-   * concentrationThreshold — a component may state one or neither, never both.
+   * One of concentration or concentrationThresholdOperator is required when
+   * name is supplied. Mutually exclusive with concentrationThresholdOperator
+   * — a component may state one or neither, never both.
    */
   concentration?: number | null
-  /** Mutually exclusive with concentration — a component may state one or neither, never both. */
-  concentrationThreshold?: HazardousConcentrationThreshold
+  /**
+   * States that concentration is above/at the WM3-defined threshold for this
+   * component, without an exact figure — the threshold value itself is not
+   * carried here; it is resolved from WM3 guidance against name. Mutually
+   * exclusive with concentration.
+   */
+  concentrationThresholdOperator?: HazardousConcentrationThresholdOperator
 }
 
 export type Hazardous = {

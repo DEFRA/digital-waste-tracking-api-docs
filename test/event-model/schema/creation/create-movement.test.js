@@ -84,7 +84,7 @@ const hazardousMovement = {
   wasteItems: [hazardousWasteItem]
 }
 
-test('accepts a valid non-hazardous movement with no receiver or consignment code', () => {
+test('accepts a valid non-hazardous movement with no receivers or consignment code', () => {
   const { error } = createMovementSchema.validate(baseMovement)
   expect(error).toBeUndefined()
 })
@@ -105,7 +105,7 @@ describe('hazardousWasteConsignmentCode and reasonForNoConsignmentCode', () => {
   })
 })
 
-describe('receiver', () => {
+describe('receivers', () => {
   test('is required when the movement contains a hazardous EWC code', () => {
     const { error } = createMovementSchema.validate({
       ...hazardousMovement,
@@ -114,11 +114,38 @@ describe('receiver', () => {
     expect(error).toBeDefined()
   })
 
-  test('accepts a hazardous movement when reasonForNoConsignmentCode and receiver are both provided', () => {
+  test('rejects an empty receivers array on a hazardous movement', () => {
     const { error } = createMovementSchema.validate({
       ...hazardousMovement,
       reasonForNoConsignmentCode: 'NON_HAZ_WASTE_TRANSFER',
-      receiver
+      receivers: []
+    })
+    expect(error).toBeDefined()
+  })
+
+  test('rejects receivers supplied as a bare object instead of an array', () => {
+    const { error } = createMovementSchema.validate({
+      ...hazardousMovement,
+      reasonForNoConsignmentCode: 'NON_HAZ_WASTE_TRANSFER',
+      receivers: receiver
+    })
+    expect(error).toBeDefined()
+  })
+
+  test('accepts a hazardous movement when reasonForNoConsignmentCode and receivers are both provided', () => {
+    const { error } = createMovementSchema.validate({
+      ...hazardousMovement,
+      reasonForNoConsignmentCode: 'NON_HAZ_WASTE_TRANSFER',
+      receivers: [receiver]
+    })
+    expect(error).toBeUndefined()
+  })
+
+  test('accepts more than one receiving site', () => {
+    const { error } = createMovementSchema.validate({
+      ...hazardousMovement,
+      reasonForNoConsignmentCode: 'NON_HAZ_WASTE_TRANSFER',
+      receivers: [receiver, { ...receiver, siteName: 'Second Receiver Site' }]
     })
     expect(error).toBeUndefined()
   })

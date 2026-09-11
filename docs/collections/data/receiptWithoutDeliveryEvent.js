@@ -75,7 +75,6 @@ export const requestBody = {
       reference: 'TN-12345'
     }
   ],
-  specialHandlingRequirements: 'Handle with care and keep upright.',
   wasteItems,
   carrier,
   brokerOrDealer,

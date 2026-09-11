@@ -68,4 +68,26 @@ describe('components', () => {
 
 describe('hazardousComponent', () => {
   test.todo('accepts a null concentration')
+
+  test('accepts concentrationThresholdOperator instead of concentration when name is supplied', () => {
+    const { error } = hazardousComponentSchema.validate({
+      name: 'Cadmium',
+      concentrationThresholdOperator: 'GREATER_THAN_OR_EQUAL'
+    })
+    expect(error).toBeUndefined()
+  })
+
+  test('requires one of concentration or concentrationThresholdOperator when name is supplied', () => {
+    const { error } = hazardousComponentSchema.validate({ name: 'Cadmium' })
+    expect(error).toBeDefined()
+  })
+
+  test('rejects concentration and concentrationThresholdOperator together', () => {
+    const { error } = hazardousComponentSchema.validate({
+      name: 'Cadmium',
+      concentration: 5,
+      concentrationThresholdOperator: 'EQUAL_TO'
+    })
+    expect(error).toBeDefined()
+  })
 })

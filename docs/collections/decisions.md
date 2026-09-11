@@ -51,6 +51,8 @@ At-a-glance view of every decision, sorted by status, then by impact (structural
 | D-003 | [OpenAPI 3.0.3, not 3.1](#openapi-303-not-31) | ✅ Decided | 🟢 Low | **Spec structure** |
 | D-011 | [Static and transit collection collapsed into a single endpoint](#static-and-transit-collection-collapsed-into-a-single-endpoint) | ✅ Decided | 🟢 Low | **Collection** |
 | D-040 | [Rename drop-off and Transfer ID to delivery and Delivery ID](#rename-drop-off-and-transfer-id-to-delivery-and-delivery-id) | ✅ Decided · Applied register-wide | 🟢 Low | **Naming** |
+| D-043 | [Creation's receiver becomes receivers: an array, min 1 when required](#creations-receiver-becomes-receivers-an-array-min-1-when-required) | ✅ Decided | 🟢 Low | **Creation** |
+| D-044 | [Hazardous/POP component concentrationThreshold flattened to an operator only — no value](#hazardouspop-component-concentrationthreshold-flattened-to-an-operator-only-no-value) | ✅ Decided | 🟢 Low | **Creation** |
 | D-022 | [Receipt migration: new endpoint vs extend Phase 1](#receipt-migration-new-endpoint-vs-extend-phase-1) | ⏳ Open | 🔴 High | **Receipt** |
 | D-025 | [Receipt acceptance / rejection outcome (new in Phase 2)](#receipt-acceptance-rejection-outcome-new-in-phase-2) | ⏳ Open | 🔴 High | **Receipt** |
 | D-037 | [Phase 2 MongoDB storage model — three options under evaluation](#phase-2-mongodb-storage-model-three-options-under-evaluation) | ⏳ Open | 🔴 High | **Data model** |
@@ -172,6 +174,8 @@ The shape of the receipt and producer-query downstream both work cleanly off thi
 **Decision.** `carrier` is required on every write event — Creation, Collection, and Receipt. `brokerOrDealer` is optional on all three, using the same shared object shape throughout. The broker-vs-carrier discriminated union proposed earlier remains deferred (see D-030).
 
 **Consequences.** Schema is consistent across all three request bodies. Server-side logic validates `brokerOrDealer` the same way at each stage. Reintroducing the discriminated union is possible later without breaking clients that already supply both forms.
+
+**Ticket conflict note (2026-09).** DWTC-152, DWTC-153, DWTC-155 and DWTC-162 each ask for a boolean field gating `brokerOrDealer` as conditionally mandatory. This decision (optional on all events, no gate) stands; the conflict has been flagged back to the ticket authors/BA rather than implemented.
 
 <a id="d-009"></a>
 
@@ -388,6 +392,23 @@ Correcting a recorded delivery is therefore not an in-place edit: soft-delete th
 
 **Consequences.** `deliverySite.address` is a required field on `POST /deliveries` (reflected in the OpenAPI spec as `deliverySite` `required: [siteName, address]`); callers must supply it even when the actual delivery location matches their planned receiver estimate. It is not part of the delivery `PUT` body, which is restricted to `isDeleted` (`deliveryUpdateRequest`, see [D-017](#d-017)), so the address is captured once at `POST` and never re-edited.
 
+<a id="d-027"></a>
+
+### Per-organisation vs per-actor API credentials
+
+**D-027** · ✅ Decided · Impact: 🟠 Medium · Area: **Onboarding** · Related: [D-008](#d-008), [D-036](#d-036)
+
+**Context.** Phase 1 is receiver-first: a receiver registers its organisation via the Waste Tracking Service and receives credentials — a Cognito app client (`client_id` + `client_secret`) that is exchanged for a Bearer JWT, and an `apiCode` that identifies the submitting organisation in every API request. Phase 2 adds carrier, broker, and producer actors. The open question was whether those actors require separate per-role credentials or whether one organisation-level registration covers all roles that organisation holds.
+
+**Decision.** Per-organisation credentials, not per-actor. Every actor type — carrier, broker, producer, and receiver — onboards via the same process and receives the same credential shape: a Cognito app client (`client_id` + `client_secret`) and an `apiCode`. Every record written to the API is assigned to the submitting organisation identified by `apiCode`; no distinction is made at the credential level between the role the caller is acting in for a given event. An organisation that acts as both a receiver and a carrier holds one set of credentials and uses them for both roles.
+
+The two credentials are issued through different paths, and Phase 2 changes neither:
+
+- **Cognito app client** (`client_id` + `client_secret`) is manually provisioned per third-party integrator system, in the relevant environment (test or production), with credentials shared via a secure channel. This step does not change for Phase 2 — carrier, broker, and producer integrators are provisioned the same manual way as receiver integrators are today.
+- **`apiCode`** is self-service, not manually distributed. Once an organisation is registered and its users can sign in via Defra ID, any user in that organisation generates, names, and disables its own `apiCode`s through `waste-organisation-frontend`'s API management screens — no operator involvement, no encrypted-email step. This self-serve path already exists for Phase 1 receivers; no new UI is needed for Phase 2 actors to use it.
+
+**Consequences.** The credential model is unchanged from Phase 1, but the two halves have different operational profiles. The `apiCode` half is fully self-serve for every actor type via the existing `waste-organisation-frontend` UI — the `waste-organisation-backend` API-code issuance flow is reused for carriers and brokers without modification. The Cognito app client half remains a manual, per-integrator provisioning step regardless of actor type; this is a standing onboarding-scale consideration as Phase 2 brings in carrier, broker, and producer integrators on top of receivers, not something Phase 2 introduces new. Role-based access restrictions — for example, whether only a permitted receiving site may record a Receipt — are a separate policy question deferred to a future decision; the identity mechanism supplies the information to enforce such rules but does not pre-empt them (see [D-036](#d-036)).
+
 <a id="d-029"></a>
 
 ### Transit collection (driver-to-driver) recorded as a sequence of collection events
@@ -475,23 +496,6 @@ D-015's text carries a one-line amendment to its Movement↔Collection clause to
 
 **Consequences.** Every mutation across all four events is fully auditable at the server level. The public API contract is unchanged: each PUT returns the updated record (or a validation envelope), not a version list. Clients see a single live record per resource, identical to the pre-decision behaviour.
 
-<a id="d-027"></a>
-
-### Per-organisation vs per-actor API credentials
-
-**D-027** · ✅ Decided · Impact: 🟠 Medium · Area: **Onboarding** · Related: [D-008](#d-008), [D-036](#d-036)
-
-**Context.** Phase 1 is receiver-first: a receiver registers its organisation via the Waste Tracking Service and receives credentials — a Cognito app client (`client_id` + `client_secret`) that is exchanged for a Bearer JWT, and an `apiCode` that identifies the submitting organisation in every API request. Phase 2 adds carrier, broker, and producer actors. The open question was whether those actors require separate per-role credentials or whether one organisation-level registration covers all roles that organisation holds.
-
-**Decision.** Per-organisation credentials, not per-actor. Every actor type — carrier, broker, producer, and receiver — onboards via the same process and receives the same credential shape: a Cognito app client (`client_id` + `client_secret`) and an `apiCode`. Every record written to the API is assigned to the submitting organisation identified by `apiCode`; no distinction is made at the credential level between the role the caller is acting in for a given event. An organisation that acts as both a receiver and a carrier holds one set of credentials and uses them for both roles.
-
-The two credentials are issued through different paths, and Phase 2 changes neither:
-
-- **Cognito app client** (`client_id` + `client_secret`) is manually provisioned per third-party integrator system, in the relevant environment (test or production), with credentials shared via a secure channel. This step does not change for Phase 2 — carrier, broker, and producer integrators are provisioned the same manual way as receiver integrators are today.
-- **`apiCode`** is self-service, not manually distributed. Once an organisation is registered and its users can sign in via Defra ID, any user in that organisation generates, names, and disables its own `apiCode`s through `waste-organisation-frontend`'s API management screens — no operator involvement, no encrypted-email step. This self-serve path already exists for Phase 1 receivers; no new UI is needed for Phase 2 actors to use it.
-
-**Consequences.** The credential model is unchanged from Phase 1, but the two halves have different operational profiles. The `apiCode` half is fully self-serve for every actor type via the existing `waste-organisation-frontend` UI — the `waste-organisation-backend` API-code issuance flow is reused for carriers and brokers without modification. The Cognito app client half remains a manual, per-integrator provisioning step regardless of actor type; this is a standing onboarding-scale consideration as Phase 2 brings in carrier, broker, and producer integrators on top of receivers, not something Phase 2 introduces new. Role-based access restrictions — for example, whether only a permitted receiving site may record a Receipt — are a separate policy question deferred to a future decision; the identity mechanism supplies the information to enforce such rules but does not pre-empt them (see [D-036](#d-036)).
-
 <a id="d-036"></a>
 
 ### Write authorisation: open append, amend restricted to the authoring organisation
@@ -509,6 +513,25 @@ The two credentials are issued through different paths, and Phase 2 changes neit
 **Deferred to policy (not decided here).** Whether write access to an event should be _restricted by actor role or relationship_ — for example whether only a permitted receiving site may record a Receipt, or only a declared carrier may record a Collection — is a business/regulatory rule, not a technical one. The service provides the authenticated-identity mechanism to enforce such rules if and when policy defines them; Phase 2 does not pre-empt them. Tracked alongside the credentials/identity question in [D-027](#d-027).
 
 **Consequences.** The write model is deliberately open at append and accountable by attribution, which matches the messy reality of reassignment, sub-contracting and transit — consistent with [D-029](#d-029), which captures `receivedFromCarrier` without cross-checking it against the preceding event. The attribution guarantee depends on per-event, server-side provenance (writing organisation, vendor instance, timestamp) being captured immutably and being queryable by regulators; that is the implementation requirement the integrity argument rests on, and it links to the observability / non-reconciled-movement work planned for Beta. If policy later mandates participation restrictions, they are added as authorisation checks in the Movement domain service against the already-captured identity, without changing the public contract shape.
+
+<a id="d-038"></a>
+
+### API versioning: versioned during beta, unversioned at GA
+
+**D-038** · ✅ Decided · Impact: 🔴 High · Area: **Versioning** · Related: [D-023](#d-023)
+
+**Context.** The API has no versioning today — no path prefix, header or query parameter; `info.version` is only a documentation label. As the remaining waste-movement endpoints are built, the shape will be found by iteration, which means frequent breaking changes before it stabilises; once stable, the public contract must not break its integrators. A single fixed policy fits one phase and not the other: always-version adds needless machinery and duplication once the shape is stable, while never-version makes breaking iteration painful while we are still designing. GOV.UK recommends URI-path versioning _if_ you version and advises against header/media-type versioning, but its overriding principle is not to break existing consumers.
+
+**Decision.** Version the API **during beta** and **drop the version at GA**:
+
+- **During beta** — each milestone is versioned in the URI path (`/beta-0`, `/beta-1`, …), a prefix on the resource path (e.g. `/beta-1/waste-movements/{id}`), and milestones can run in parallel, letting the small, controlled set of early integrators migrate at their own pace. Beta is non-public, so path labels are acceptable here. Every endpoint is available at every version — providers never see a split where some endpoints sit on one version and others on another, so a breaking change to one endpoint means copying **all** existing endpoints forward into the new version, not just the changed one. Orchestration is confirmed to live in-service (branching/duplicated handlers per milestone); there is no CDP platform- or gateway-level versioning/routing capability to use instead.
+- **At GA** — drop the version and publish one stable **unversioned** API, evolving it **additive-only** thereafter (new optional fields/endpoints/enum values in place; clients tolerate unknown fields). A genuinely unavoidable breaking change is a new resource/API, not a `/v2`.
+- **Cutover** — dropping the version at GA is a one-time, announced breaking change for beta integrators (expected of a beta contract); the final beta version runs alongside the unversioned GA API for a migration window, marked deprecated, then retired.
+- **Deprecation** — beta versions are retired by usage: monitor calls per software provider (via the JWT `client_id`), and while deprecated every response carries a single `Deprecation: true` header as an in-band signal.
+
+Applies only to the new endpoints; the already-live Receipt of Waste endpoints keep their current unversioned paths.
+
+Full rationale in the [versioning pitch](../api/versioning.md).
 
 <a id="d-039"></a>
 
@@ -532,11 +555,11 @@ The two credentials are issued through different paths, and Phase 2 changes neit
 
 ### Rename drop-off and Transfer ID to delivery and Delivery ID
 
-**D-040** · ✅ Decided · Impact: 🟢 Low · Area: **Naming** · Related: [D-005](#d-005), [D-007](#d-007), [D-013](#d-013), [D-018](#d-018), [D-028](#d-028), [D-036](#d-036), [D-041](#d-041)
+**D-040** · ✅ Decided · Applied register-wide · Impact: 🟢 Low · Area: **Naming** · Related: [D-005](#d-005), [D-007](#d-007), [D-013](#d-013), [D-018](#d-018), [D-028](#d-028), [D-036](#d-036), [D-041](#d-041)
 
 **Context.** The event where a driver hands waste to a receiver, and the identifier it mints, were named "drop-off" and "Transfer ID" (`POST /transfers`, `transferId`). This reads awkwardly against the rest of the journey vocabulary (creation, collection, receipt) and "transfer" invites confusion with unrelated senses of the word (e.g. transfer of ownership/duty of care, data transfer).
 
-**Decision.** Rename "drop-off" to "delivery" and "Transfer ID" to "Delivery ID" everywhere in the public contract and documentation, decided by Perry May:
+**Decision.** Rename "drop-off" to "delivery" and "Transfer ID" to "Delivery ID" everywhere in the public contract and documentation:
 
 - `POST /transfers` → `POST /deliveries`
 - `POST /transfers/receipt` → `POST /deliveries/receipt`
@@ -599,6 +622,36 @@ Two further questions came up once Delivery and Receipt were worked through in t
 This also resolves [D-041](#d-041)'s open question 4 (request/response shape of `POST /receipts`): the same shape as `POST /deliveries/{deliveryId}/receipt`, except `wasteItem` is the full `wasteItemBase`-derived shape instead of the light one, plus the mandatory `reasonForNoDeliveryId` field.
 
 **Consequences.** Creation and `POST /receipts` now define their waste item once, via `wasteItemBase`, and stay in step with each other by construction — a future classification change touches one place. `POST /deliveries/{deliveryId}/receipt` sheds classification data it never needed once a Creation record exists, keeping that payload lean. Extracting `wasteItemBase` means Creation's already-applied `createWasteItem` schema/types move to reference the shared base rather than defining `classification` and the logistics fields inline — a refactor of already-shipped Creation code, not a behavioural change to it.
+
+<a id="d-043"></a>
+
+### Creation's `receiver` becomes `receivers`: an array, min 1 when required
+
+**D-043** · ✅ Decided · Impact: 🟢 Low · Area: **Creation** · Related: [D-042](#d-042)
+
+**Context.** DWTC-155 (Receipt-with-delivery-ID's own ticket) states that Creation's `receiver` should be an array, because a producer may declare waste heading to more than one receiving site — worth noting explicitly that this change was driven by a Receipt ticket, not Creation's own (DWTC-152), which never raised it and only asked for `receiver.siteName` to become mandatory (already applied). Before this decision, `creationJoi.js` modelled `receiver` as a single, optional object, conditionally required via a custom validator when the movement contains a hazardous EWC code.
+
+**Decision.** Rename `receiver` → `receivers`, an array (`min(1)` when required) of the existing per-entry receiver shape — the per-entry shape itself is unchanged (`siteName` mandatory whenever an entry is supplied, which makes `authorisationNumber` and `address` mandatory too). The hazardous-waste gating rule moves from "the object is provided" to "the array has at least one entry."
+
+**Consequences.** Ripples into `creationTypes.ts` (`receiver?: Receiver` → `receivers?: Receiver[]`), the Creation test suite (`creation/create-movement.test.js`), the `creationEvent.js` worked examples (including the validation-warning example, which now addresses an array entry: `receivers[0].authorisationNumber`), and `openapi.yaml`'s Creation request schema (`receiver` → a `receivers` array of `creationReceiverDetails`). Receipt's separate `receiverSiteSchema` (a different, already-diverging shape — no nested address, adds `regulatoryPositionStatements` — tracked via an existing `test.todo()`) is untouched by this change.
+
+**Ticket conflict note (2026-09).** Separately, DWTC-152, DWTC-153, DWTC-155 and DWTC-162 each ask for a boolean field gating `brokerOrDealer` as conditionally mandatory. That conflicts with [D-008](#d-008) (optional on all events, no gate) — see the note on D-008's entry. D-008 stands; the boolean gate has not been implemented.
+
+<a id="d-044"></a>
+
+### Hazardous/POP component `concentrationThreshold` flattened to an operator only — no `value`
+
+**D-044** · ✅ Decided · Impact: 🟢 Low · Area: **Creation** · Related: [D-042](#d-042)
+
+**Context.** `popComponentSchema`/`hazardousComponentSchema` modelled a threshold-expressed concentration as `concentrationThreshold: { operator, value }`, implying the numeric threshold is something the caller measures or chooses per submission. BA feedback (Perry) clarified this is wrong: WM3 guidance already publishes a fixed regulatory concentration threshold per specific substance — the same number for everyone, not caller-supplied. Asking for `value` means restating a constant that's determined by which substance it is, not by the caller's own measurement, and there's only one valid figure for a given substance regardless of what the caller sends.
+
+While implementing this, a related pre-existing gap was found and fixed: `hazardousComponentSchema.concentration` was unconditionally `.when('name', { is: exist, then: required })`, which would have made the new threshold-only path unusable whenever `name` was supplied — the exact case this change is meant to support. `popComponentSchema` had no equivalent linkage between `code` and `concentration`, so it needed no corresponding fix.
+
+**Decision.** `concentrationThreshold` is removed. Both `popComponentSchema` and `hazardousComponentSchema` gain a flat `concentrationThresholdOperator` field (POPs: `LESS_THAN`/`EQUAL_TO`/`GREATER_THAN_OR_EQUAL`; hazardous: `EQUAL_TO`/`GREATER_THAN_OR_EQUAL`), still mutually exclusive with `concentration` via `.nand()`. No numeric threshold value is carried in the payload — it is resolved from WM3 guidance against the component's identity (POP `code`, already a controlled reference validated against `/reference-data/pop-names`; hazardous `name`, still free text — see below). `hazardousComponentSchema` additionally now requires one of `concentration` or `concentrationThresholdOperator` whenever `name` is supplied (previously `concentration` alone was force-required, which blocked the threshold path).
+
+**Known asymmetry, flagged for Perry/BA follow-up.** POPs' `code` is already a controlled, validated reference field, so its WM3 threshold is resolvable today. Hazardous components' `name` is still free text with no reference list or endpoint — there is no `/reference-data/hazardous-component-names` equivalent to `/reference-data/pop-names`. Until one exists, "the threshold is implicit" cannot actually be resolved by the API for hazardous components; it stays a manual/regulatory-side lookup.
+
+**Consequences.** Ripples into `sharedTypes.ts` (`PopConcentrationThreshold`/`HazardousConcentrationThreshold` types removed, `PopComponent`/`HazardousComponent` gain `concentrationThresholdOperator`), `creationTypes.ts`'s re-exports, `openapi.yaml`'s `wasteItemClassification` POP/hazardous component schemas, the `creationEvent.js` worked examples (now demonstrating a named hazardous component using the threshold path), and `common/pops.test.js`/`common/hazardous.test.js`. The legacy, unreferenced `wasteItem` component in `openapi.yaml` (Phase 1, preserved verbatim) still carries the old `concentrationThreshold: { operator, value }` shape — deliberately left untouched, consistent with that block's preserved-verbatim convention.
 
 ## Open
 
@@ -720,25 +773,6 @@ The **CQRS / event-sourcing model** ([`model/mongo-schema-proposal-CQRS.md`](mod
 5. Two paradigms coexist intentionally — Phase 1 (mutation + snapshot) and Phase 2 (event sourcing) are cleanly isolated in the same service, with the Phase 1 pattern retired when Phase 1 endpoints are deprecated.
 
 A full evaluation of the CQRS model against all 37 decisions and the live Phase 1 implementation is available as an [interactive report](https://claude.ai/code/artifact/f52d0e9b-f90d-44d0-b956-0dafbe9a5fb0).
-
-<a id="d-038"></a>
-
-### API versioning: versioned during beta, unversioned at GA
-
-**D-038** · ✅ Decided · Impact: 🔴 High · Area: **Versioning** · Related: [D-023](#d-023)
-
-**Context.** The API has no versioning today — no path prefix, header or query parameter; `info.version` is only a documentation label. As the remaining waste-movement endpoints are built, the shape will be found by iteration, which means frequent breaking changes before it stabilises; once stable, the public contract must not break its integrators. A single fixed policy fits one phase and not the other: always-version adds needless machinery and duplication once the shape is stable, while never-version makes breaking iteration painful while we are still designing. GOV.UK recommends URI-path versioning _if_ you version and advises against header/media-type versioning, but its overriding principle is not to break existing consumers.
-
-**Decision.** Version the API **during beta** and **drop the version at GA**:
-
-- **During beta** — each milestone is versioned in the URI path (`/beta-0`, `/beta-1`, …), a prefix on the resource path (e.g. `/beta-1/waste-movements/{id}`), and milestones can run in parallel, letting the small, controlled set of early integrators migrate at their own pace. Beta is non-public, so path labels are acceptable here. Every endpoint is available at every version — providers never see a split where some endpoints sit on one version and others on another, so a breaking change to one endpoint means copying **all** existing endpoints forward into the new version, not just the changed one. Orchestration is confirmed to live in-service (branching/duplicated handlers per milestone); there is no CDP platform- or gateway-level versioning/routing capability to use instead.
-- **At GA** — drop the version and publish one stable **unversioned** API, evolving it **additive-only** thereafter (new optional fields/endpoints/enum values in place; clients tolerate unknown fields). A genuinely unavoidable breaking change is a new resource/API, not a `/v2`.
-- **Cutover** — dropping the version at GA is a one-time, announced breaking change for beta integrators (expected of a beta contract); the final beta version runs alongside the unversioned GA API for a migration window, marked deprecated, then retired.
-- **Deprecation** — beta versions are retired by usage: monitor calls per software provider (via the JWT `client_id`), and while deprecated every response carries a single `Deprecation: true` header as an in-band signal.
-
-Applies only to the new endpoints; the already-live Receipt of Waste endpoints keep their current unversioned paths.
-
-Full rationale in the [versioning pitch](../api/versioning.md).
 
 **Options.**
 

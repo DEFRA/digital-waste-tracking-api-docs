@@ -24,7 +24,6 @@ export type ReceiptWithoutDeliveryWasteItem = WasteItemBase & {
 
 export type ReceiptWithoutDeliveryRequest = {
   yourUniqueReference?: string
-  specialHandlingRequirements?: string
   otherReferencesForMovement?: OtherReferenceForMovement[]
 
   hazardousWasteConsignmentCode?: string

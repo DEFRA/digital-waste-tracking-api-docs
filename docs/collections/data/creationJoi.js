@@ -8,7 +8,7 @@
  * Creation-specific rules reflected here:
  * - apiCode is required, as per Receipt.
  * - plannedCollectionTime (renamed from estimatedDateTimeCollected) follows the same DateTime naming style as dateTimeReceived.
- * - Root objects are producer, carrier, brokerOrDealer and receiver.
+ * - Root objects are producer, carrier, brokerOrDealer and receivers.
  * - Creation wasteItems extend the shared wasteItemBaseSchema (sharedSchemas.js, D-042): weight,
  *   numberOfContainers, typeOfContainers and physicalForm are top-level; classification (ewcCodes,
  *   wasteDescription, containsPops/pops, containsHazardous/hazardous) is nested. intendedTreatments
@@ -19,8 +19,10 @@
  * - Municipal is an accepted wasteSource.
  * - producer.organisationName and producer.address are required for Commercial and Municipal, forbidden
  *   for Household; producer.authorisationNumber is optional for Commercial and Municipal.
- * - receiver is required only when the movement contains hazardous waste; receiver.siteName is mandatory
- *   whenever the receiver object is supplied, which makes authorisationNumber and address mandatory too.
+ * - receivers (D-043; array, renamed from receiver) requires at least one entry only when the movement
+ *   contains hazardous waste — a producer may declare waste heading to more than one receiving site.
+ *   Each entry's siteName is mandatory whenever that entry is supplied, which makes authorisationNumber
+ *   and address mandatory too.
  * - brokerOrDealer is optional, but registrationNumber is required whenever it is supplied (null/empty
  *   requires reasonForNoRegistrationNumber instead, mirroring carrier's mutual-exclusivity rule).
  * - carrier follows the Receipt carrier structure, but only carrier.meansOfTransport and
@@ -80,8 +82,8 @@ const validateCreationRules = (movement, helpers) => {
     )
   }
 
-  if (containsHazardousEwcCode && !isProvided(movement.receiver)) {
-    return helpers.message('receiver is required when the movement contains hazardous waste.')
+  if (containsHazardousEwcCode && !(Array.isArray(movement.receivers) && movement.receivers.length > 0)) {
+    return helpers.message('at least one receivers entry is required when the movement contains hazardous waste.')
   }
 
   return movement
@@ -121,11 +123,13 @@ const receiverAddressSchema = businessAddressSchema.keys({
 }).description('Receiver site address. Required with fullAddress and postcode when receiver.siteName is populated.')
 
 /**
- * Collection site address — same shape as Collection's own collectionSite.address
+ * Planned collection address — same shape as Collection's own collectionSite.address
  * (both fullAddress and postcode required), reused here so Creation's planned
- * collection address matches what the Collection event itself records.
+ * collection address matches what the Collection event itself records. Named
+ * distinctly from collectionJoi.js's exported collectionSiteSchema (the actual
+ * collection site, a different, larger shape) to avoid a naming collision.
  */
-const collectionSiteSchema = businessAddressSchema.keys({
+const plannedCollectionAddressSchema = businessAddressSchema.keys({
   fullAddress: Joi.string()
     .required()
     .description('Full collection site address.'),
@@ -180,9 +184,9 @@ export const receiverSchema = Joi.object({
     otherwise: receiverAddressSchema.optional()
   }).description('Required when receiver.siteName is populated. Must include postcode and fullAddress.')
 }).description(
-  'Receiver details at Creation. Required only when the movement contains hazardous waste. ' +
-  'siteName is mandatory whenever this object is supplied, which in turn makes authorisationNumber ' +
-  'and address mandatory too (both are conditional on siteName being populated).'
+  'A single receiving site entry within receivers (D-043). siteName is mandatory whenever an ' +
+  'entry is supplied, which in turn makes authorisationNumber and address mandatory too (both ' +
+  'are conditional on siteName being populated).'
 )
 
 // ---------------------------------------------------------------------------
@@ -395,8 +399,15 @@ export const createMovementSchema = Joi.object({
     .optional()
     .description('Optional broker/dealer details.'),
 
-  receiver: receiverSchema
-    .optional(),
+  receivers: Joi.array()
+    .items(receiverSchema)
+    .min(1)
+    .description(
+      'Intended receiving site(s) (D-043). Required only when the movement contains hazardous ' +
+      'waste — a producer may declare waste heading to more than one receiving site. Each entry ' +
+      'follows the same receiver shape (siteName mandatory whenever an entry is supplied, which ' +
+      'makes authorisationNumber and address mandatory too).'
+    ),
 
   collectionAddressDifferentFromProducer: Joi.boolean()
     .strict()
@@ -409,7 +420,7 @@ export const createMovementSchema = Joi.object({
 
   collectionSite: Joi.when('collectionAddressDifferentFromProducer', {
     is: true,
-    then: collectionSiteSchema.required(),
+    then: plannedCollectionAddressSchema.required(),
     otherwise: Joi.forbidden()
   }).description(
     'Address where the waste is planned to be collected. Required when ' +
