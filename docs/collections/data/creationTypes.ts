@@ -3,20 +3,35 @@
  * POST /movements → returns movementId
  *
  * The creation record is the starting point of the waste journey. It captures
- * who is producing the waste, the estimated collection date/time, the carrier
- * transport method, and the waste item structure used by the Receipt event.
+ * who is producing the waste, the planned collection date/time, the carrier
+ * transport method, and the declared waste items, each with its Intended
+ * Treatment (intendedTreatments), confirmed by the receiver as Actual
+ * Treatment (actualTreatments) at Receipt (D-031 amended).
  *
  * Creation-specific business rules reflected here:
  * - apiCode is required, as per the Receipt event.
- * - Date/time fields follow the Receipt naming style: dateTimeReceived → estimatedDateTimeCollected.
+ * - Date/time field renamed from estimatedDateTimeCollected to plannedCollectionTime.
  * - Object names align with the spreadsheet / Receipt shape: producer, carrier, brokerOrDealer, receiver.
- * - carrier follows the Receipt carrier structure, but only carrier.meansOfTransport is mandatory at Creation.
- *   Optional carrier fields still keep integrity rules when supplied: registrationNumber
- *   and reasonForNoRegistrationNumber are mutually exclusive; vehicleRegistration is
- *   only for Road; otherMeansOfTransport is only for Other.
+ * - producer.organisationName and producer.address are required for Commercial and Municipal, forbidden
+ *   for Household; producer.authorisationNumber is optional for Commercial and Municipal.
+ * - carrier follows the Receipt carrier structure, but carrier.meansOfTransport and
+ *   carrier.organisationName are mandatory at Creation. Optional carrier fields still keep
+ *   integrity rules when supplied: registrationNumber and reasonForNoRegistrationNumber are mutually
+ *   exclusive; vehicleRegistration is only for Road; otherMeansOfTransport is only for Other.
  * - producer.councilMovement uses the BA spreadsheet name.
- * - receiver is required only when the movement contains hazardous waste.
- * - receiver.authorisationNumber and receiver.address are mandatory when receiver.siteName is populated.
+ * - receiver is required only when the movement contains hazardous waste; receiver.siteName is now
+ *   mandatory whenever the receiver object is supplied, which makes authorisationNumber and address
+ *   mandatory too.
+ * - brokerOrDealer is optional, but registrationNumber is required whenever it is supplied — null/empty
+ *   requires reasonForNoRegistrationNumber instead, mirroring carrier's mutual-exclusivity rule.
+ * - collectionAddressDifferentFromProducer / collectionSite: planning-time fields for where the waste
+ *   will be collected from, if not the producer's address. Distinct from the Collection event's
+ *   own collectionSite, which records the actual collection.
+ * - CreateWasteItem extends the shared WasteItemBase (sharedTypes.ts, D-042): classification
+ *   (ewcCodes, wasteDescription, containsPops/pops, containsHazardous/hazardous) is nested; weight,
+ *   numberOfContainers, typeOfContainers and physicalForm stay top-level. POST /receipts shares the
+ *   same WasteItemBase; the ordinary Receipt endpoint's wasteItem does not extend it and drops
+ *   classification entirely.
  */
 
 export type {
@@ -28,28 +43,31 @@ export type {
   ReasonForNoConsignmentCode,
   OtherReferenceForMovement,
   Weight,
-  DisposalOrRecoveryCode,
+  IntendedTreatment,
   BusinessAddress,
   Pops,
   PopComponent,
+  PopConcentrationThreshold,
+  PopConcentrationThresholdOperator,
   Hazardous,
   HazardousComponent,
+  HazardousConcentrationThreshold,
+  HazardousConcentrationThresholdOperator,
+  WasteItemClassification,
+  WasteItemBase,
   CarrierDetails,
   BrokerDetails,
   ValidationResult
 } from './sharedTypes.js'
 
 import type {
-  PhysicalForm,
   MeansOfTransport,
   CarrierReasonForNoRegistrationNumber,
   ReasonForNoConsignmentCode,
   OtherReferenceForMovement,
-  Weight,
-  DisposalOrRecoveryCode,
+  IntendedTreatment,
   BusinessAddress,
-  Pops,
-  Hazardous,
+  WasteItemBase,
   BrokerDetails,
   ValidationResult
 } from './sharedTypes.js'
@@ -63,26 +81,26 @@ export type WasteSource = 'Household' | 'Commercial' | 'Municipal'
 /**
  * Producer information.
  *
- * Commercial waste requires the producer organisation, authorisation number and
- * SIC code. Household waste must not provide those business-only fields.
- * Municipal waste is accepted as a distinct waste source; its final field
- * conditionality can be tightened once BA rules are confirmed.
- *
- * Creation does not currently carry a separate collection object or collection
- * address/contact workaround fields.
+ * Commercial waste requires organisationName, address and sicCode; authorisationNumber
+ * is optional. Household waste must not provide any of the business-only fields
+ * (organisationName, authorisationNumber, sicCode, emailAddress, phoneNumber) or address.
+ * Municipal waste requires organisationName and address; authorisationNumber and sicCode
+ * stay optional.
  */
 export type Producer = {
   wasteSource: WasteSource
 
+  /** Required for Commercial and Municipal; forbidden for Household. */
   organisationName?: string
-  /** Environmental permit or exemption number the producer operates under. */
+  /** Environmental permit or exemption number the producer operates under. Optional for Commercial and Municipal; forbidden for Household. */
   authorisationNumber?: string
   emailAddress?: string
   phoneNumber?: string
   /** Five-digit Standard Industrial Classification code for the process that created this waste. */
   sicCode?: string
 
-  address: BusinessAddress
+  /** Required for Commercial and Municipal; forbidden for Household. */
+  address?: BusinessAddress
   /** Whether this movement is carried out by, or on behalf of, a council. */
   councilMovement: boolean
 }
@@ -95,8 +113,8 @@ export type Producer = {
  * Carrier details at Creation.
  *
  * Same field structure as Receipt carrier, with relaxed Creation requiredness.
- * Only meansOfTransport is mandatory at Creation. Other carrier fields can be
- * supplied when known and are validated when present.
+ * meansOfTransport and organisationName are mandatory at Creation; other
+ * carrier fields can be supplied when known and are validated when present.
  *
  * Integrity rules still apply:
  * - registrationNumber and reasonForNoRegistrationNumber are mutually exclusive.
@@ -107,7 +125,7 @@ export type Carrier = {
   meansOfTransport: MeansOfTransport
   registrationNumber?: string | null
   reasonForNoRegistrationNumber?: CarrierReasonForNoRegistrationNumber
-  organisationName?: string
+  organisationName: string
   vehicleRegistration?: string
   otherMeansOfTransport?: string
   emailAddress?: string
@@ -128,21 +146,15 @@ export type BrokerOrDealer = BrokerDetails
 /**
  * A waste item declared at movement creation.
  *
- * Creation uses the same waste item structure as Receipt.
+ * Extends the shared WasteItemBase (sharedTypes.ts, D-042) — classification
+ * nested, weight/numberOfContainers/typeOfContainers/physicalForm top-level —
+ * with Creation's own intendedTreatments. POST /receipts shares the same
+ * WasteItemBase; the ordinary Receipt endpoint's wasteItem does not extend it
+ * and drops classification entirely.
  */
-export type CreateWasteItem = {
-  weight: Weight
-  wasteDescription: string
-  typeOfContainers: string
-  physicalForm: PhysicalForm
-  numberOfContainers: number
-  ewcCodes: string[]
-  /** Intended Treatment (D-031). Mandatory at Creation — the receiver confirms the authoritative Actual Treatment at Receipt. */
-  disposalOrRecoveryCodes: DisposalOrRecoveryCode[]
-  containsPops: boolean
-  pops?: Pops
-  containsHazardous: boolean
-  hazardous?: Hazardous
+export type CreateWasteItem = WasteItemBase & {
+  /** Intended Treatment (D-031, D-042). Mandatory at Creation, min 1 — the receiver confirms the authoritative Actual Treatment (actualTreatments) at Receipt. */
+  intendedTreatments: IntendedTreatment[]
 }
 
 // ---------------------------------------------------------------------------
@@ -157,15 +169,31 @@ export type ReceiverAddress = {
 /**
  * Receiver recorded at Creation.
  *
- * Required only for hazardous waste. If siteName is supplied, the receiver
- * authorisation number and full address must also be supplied.
+ * Required only for hazardous waste. siteName is mandatory whenever the
+ * receiver object is supplied; authorisationNumber and full address
+ * are conditional on siteName being populated, which — now that siteName is
+ * always populated when this object is present — makes them mandatory too.
  */
 export type Receiver = {
-  siteName?: string
+  siteName: string
   authorisationNumber?: string
   emailAddress?: string
   phoneNumber?: string
   address?: ReceiverAddress
+}
+
+// ---------------------------------------------------------------------------
+// Collection fields at creation
+// ---------------------------------------------------------------------------
+
+/**
+ * Collection site address — same shape as Collection's own collectionSite.address
+ * (both fullAddress and postcode required), reused here so Creation's planned
+ * collection address matches what the Collection event itself records.
+ */
+export type CollectionSiteAddress = {
+  fullAddress: string
+  postcode: string
 }
 
 // ---------------------------------------------------------------------------
@@ -176,8 +204,8 @@ export type CreateMovement = {
   /** Unique identifier for the submitting organisation, as per the Receipt event. */
   apiCode: string
 
-  /** Estimated date and time the waste will be collected. ISO 8601. */
-  estimatedDateTimeCollected: string
+  /** Planned date and time the waste will be collected. ISO 8601. Renamed from estimatedDateTimeCollected. */
+  plannedCollectionTime: string
 
   /** Required when any waste item carries a hazardous EWC code. Mutually exclusive with reasonForNoConsignmentCode. */
   hazardousWasteConsignmentCode?: string
@@ -196,12 +224,22 @@ export type CreateMovement = {
   isDeleted?: boolean
 
   producer: Producer
-  /** Required object at Creation; follows Receipt carrier fields, with only meansOfTransport mandatory. */
+  /** Required object at Creation; follows Receipt carrier fields, with meansOfTransport and organisationName mandatory. */
   carrier: Carrier
-  /** Optional broker/dealer details. */
+  /** Optional broker/dealer details. registrationNumber is required whenever this object is supplied. */
   brokerOrDealer?: BrokerOrDealer
   /** Required only when the movement contains hazardous waste. */
   receiver?: Receiver
+
+  /**
+   * Whether the waste will be collected from an address other than producer.address.
+   * Defaults to false — false or absent means collection is planned at the producer address.
+   * When true, collectionSite is required.
+   */
+  collectionAddressDifferentFromProducer?: boolean
+  /** Required when collectionAddressDifferentFromProducer is true; must not be provided otherwise. */
+  collectionSite?: CollectionSiteAddress
+
   /** At least one waste item required. */
   wasteItems: CreateWasteItem[]
 }

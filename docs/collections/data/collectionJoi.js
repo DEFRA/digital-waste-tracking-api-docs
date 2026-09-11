@@ -5,21 +5,29 @@
  * The movementId is validated as a path parameter by the route — not
  * included in this request body schema.
  *
- * Key behaviours:
+ * Key behaviours (DWTC-153):
  * - apiCode is mandatory, matching the registered submitting organisation.
  * - actualDateTimeCollected must be the actual collection time, not submission time.
  * - collectionType is optional; defaults to STATIC. TRANSIT records a driver-to-driver handover (D-029).
  * - receivedFromCarrier is required when collectionType is TRANSIT; forbidden when STATIC. Enforced server-side.
  * - carrier is mandatory at collection time.
- * - collection.address is mandatory and contains postcode and fullAddress.
+ * - dutyOfCareConfirmed is mandatory — carrier confirms they have inspected the waste, that it is as
+ *   described, and that they are content to transport it.
+ * - collectionSite (renamed from collection) is mandatory. collectionSite.address is mandatory and
+ *   contains postcode and fullAddress; collectionSite.emailAddress and .phoneNumber are optional.
+ * - brokerOrDealer reuses the shared brokerSchema from sharedSchemas.js — same shape as Creation and
+ *   Receipt, including registrationNumber (required whenever brokerOrDealer is supplied) and
+ *   reasonForNoRegistrationNumber.
  */
 
 import Joi from 'joi'
+import { isValidPhoneNumber } from './validators.js'
 import {
   businessAddressSchema,
   otherReferenceSchema,
   carrierSchema,
-  brokerSchema
+  brokerSchema,
+  validateWithBooleanHelper
 } from './sharedSchemas.js'
 
 // ---------------------------------------------------------------------------
@@ -35,10 +43,23 @@ const collectionAddressSchema = businessAddressSchema
   .required()
   .description('Collection address. Both postcode and fullAddress are required.')
 
-const collectionSchema = Joi.object({
+const collectionSiteSchema = Joi.object({
   address: collectionAddressSchema
     .required()
-    .description('Address where the waste was physically collected.')
+    .description('Address where the waste was physically collected.'),
+
+  emailAddress: Joi.string()
+    .email()
+    .description('Email address of the site where the waste was physically collected.'),
+
+  phoneNumber: Joi.string()
+    .custom(
+      validateWithBooleanHelper(
+        isValidPhoneNumber,
+        'collectionSite.phoneNumber must be a valid UK or international phone number.'
+      )
+    )
+    .description('Phone number of the site where the waste was physically collected.')
 })
   .required()
   .description('Collection site details.')
@@ -83,6 +104,10 @@ export const recordCollectionSchema = Joi.object({
     .items(otherReferenceSchema)
     .description('Additional label/reference pairs for this collection event.'),
 
+  specialHandlingRequirements: Joi.string()
+    .max(5000)
+    .description('Special handling instructions (e.g. fragile, hazardous, temperature-sensitive).'),
+
   isDeleted: Joi.boolean()
     .strict()
     .default(false)
@@ -101,6 +126,14 @@ export const recordCollectionSchema = Joi.object({
       'Provides the authoritative carrier record for this event.'
     ),
 
+  dutyOfCareConfirmed: Joi.boolean()
+    .strict()
+    .required()
+    .description(
+      'Carrier confirms they have inspected the waste, that it is as described, ' +
+      'and that they are content to transport it.'
+    ),
+
   receivedFromCarrier: carrierSchema
     .description(
       'The carrier this Movement was received from on a TRANSIT handover (D-029). ' +
@@ -113,7 +146,7 @@ export const recordCollectionSchema = Joi.object({
     .optional()
     .description('Optional broker/dealer details, matching the Creation and Receipt shape (D-008).'),
 
-  collection: collectionSchema
+  collectionSite: collectionSiteSchema
 }).description(
   'Record Collection request payload. ' +
   'POST /movements/{movementId}/collection → 201 with optional validation warnings.'

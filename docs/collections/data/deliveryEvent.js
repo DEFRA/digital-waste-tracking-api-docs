@@ -1,10 +1,13 @@
 /**
  * Example payloads for the Record Delivery event.
- * POST /deliveries → 201 with deliveryId
+ * POST /deliveries → 201 with an array of delivery entries (D-010)
  *
- * The Delivery ID returned here may be passed to an official receiver
- * so the receipt can be recorded via POST /deliveries/{deliveryId}/receipt,
- * where applicable.
+ * A single request's movementIds may mix hazardous and non-hazardous Movement
+ * IDs. The server splits them: non-hazardous Movements aggregate under one
+ * newly-minted deliveryId; each hazardous Movement becomes its own entry,
+ * whose deliveryId equals that Movement ID. Each entry's deliveryId may be
+ * passed to an official receiver so the receipt can be recorded via
+ * POST /deliveries/{deliveryId}/receipt, where applicable.
  *
  * Receiver details are NOT on this payload. The drop-off place is a lighter
  * carrier-declared site model than the receipt receiver. A receipt event may
@@ -37,7 +40,7 @@ export const deliverySite = {
 export const singleMovementPostBody = {
   apiCode: "25b14080-5e77-4f91-9957-2482a0cb8775",
   movementIds: ["25HRA0B2"],
-  actualDateTimeDelivery: "2025-09-15T11:15:00Z",
+  actualDateTimeDelivered: "2025-09-15T11:15:00Z",
   isDeleted: false,
   carrier,
   deliverySite,
@@ -52,7 +55,7 @@ export const singleMovementPostBody = {
 export const multiMovementPostBody = {
   apiCode: "25b14080-5e77-4f91-9957-2482a0cb8775",
   movementIds: ["25HRA0B2", "25TKP3C9", "25ZWQ7D1"],
-  actualDateTimeDelivery: "2025-09-15T11:15:00Z",
+  actualDateTimeDelivered: "2025-09-15T11:15:00Z",
   yourUniqueReference: "DRIVER-RUN-AM-001",
   otherReferencesForMovement: [
     {
@@ -67,13 +70,14 @@ export const multiMovementPostBody = {
 
 // ---------------------------------------------------------------------------
 // Hazardous single-movement delivery
-// Exactly one Movement ID — multi-movement aggregation is forbidden (D-010)
+// A hazardous Movement always becomes its own delivery entry, never
+// aggregated with any other Movement (D-010).
 // ---------------------------------------------------------------------------
 
 export const hazardousSingleMovementPostBody = {
   apiCode: "25b14080-5e77-4f91-9957-2482a0cb8775",
-  movementIds: ["25HRA0B2"], // One Movement ID only — hazardous constraint (D-010)
-  actualDateTimeDelivery: "2025-09-15T11:15:00Z",
+  movementIds: ["25HRA0B2"], // Hazardous Movement — becomes its own delivery entry (D-010)
+  actualDateTimeDelivered: "2025-09-15T11:15:00Z",
   isDeleted: false,
   carrier,
   deliverySite: {
@@ -86,30 +90,78 @@ export const hazardousSingleMovementPostBody = {
 };
 
 // ---------------------------------------------------------------------------
+// Mixed hazardous / non-hazardous delivery (single request, D-010)
+// Server splits: each hazardous Movement becomes its own delivery entry;
+// non-hazardous Movements are aggregated under one newly-minted deliveryId.
+// ---------------------------------------------------------------------------
+
+export const mixedMovementPostBody = {
+  apiCode: "25b14080-5e77-4f91-9957-2482a0cb8775",
+  movementIds: ["25HAZ0A1", "25NHZ0B2", "25HAZ0C3", "25NHZ0D4", "25NHZ0E5"],
+  actualDateTimeDelivered: "2025-09-15T11:15:00Z",
+  isDeleted: false,
+  carrier,
+  deliverySite,
+};
+
+// ---------------------------------------------------------------------------
 // Responses
 // ---------------------------------------------------------------------------
 
-// Non-hazardous delivery: server mints and returns a new Delivery ID (D-012, D-013)
-// The driver may pass this to the receiver to enable POST /deliveries/{deliveryId}/receipt, where applicable.
+// Non-hazardous delivery (paired with singleMovementPostBody above): one
+// aggregated entry, freshly minted deliveryId (D-012, D-013). The driver may
+// pass deliveryId to the receiver to enable POST /deliveries/{deliveryId}/receipt,
+// where applicable.
 export const recordDeliveryResponse = {
-  deliveryId: "25XMN4F7",
+  deliveries: [
+    {
+      deliveryId: "25XMN4F7",
+      movementIds: ["25HRA0B2"],
+      wasteType: "NON_HAZARDOUS",
+    },
+  ],
 };
 
 // Hazardous delivery (paired with hazardousSingleMovementPostBody above): the
 // Delivery ID is the sole Movement ID, not a freshly minted value (D-010).
 export const hazardousDeliveryResponse = {
-  deliveryId: "25HRA0B2",
+  deliveries: [
+    {
+      deliveryId: "25HRA0B2",
+      movementIds: ["25HRA0B2"],
+      wasteType: "HAZARDOUS",
+    },
+  ],
 };
 
-export const recordDeliveryResponseWithWarnings = {
-  deliveryId: "25XMN4F7",
+// Mixed delivery (paired with mixedMovementPostBody above): each hazardous
+// Movement gets its own entry; non-hazardous Movements aggregate under one
+// newly-minted entry (D-010).
+export const mixedMovementResponse = {
+  deliveries: [
+    { deliveryId: "25HAZ0A1", movementIds: ["25HAZ0A1"], wasteType: "HAZARDOUS" },
+    { deliveryId: "25HAZ0C3", movementIds: ["25HAZ0C3"], wasteType: "HAZARDOUS" },
+    {
+      deliveryId: "25XMN9K2",
+      movementIds: ["25NHZ0B2", "25NHZ0D4", "25NHZ0E5"],
+      wasteType: "NON_HAZARDOUS",
+    },
+  ],
+};
+
+// 400 — a Movement named in movementIds (paired with multiMovementPostBody above)
+// is currently isDeleted: true (D-009). Rejected outright; no delivery is
+// recorded. Message shape matches deletedMovementBlocksDeliveryError in
+// validators.js. deletedCollectionBlocksDeliveryError covers the sibling case
+// where the Movement's Collection (rather than the Movement itself) is deleted.
+export const deletedMovementInDeliveryError = {
   validation: {
-    warnings: [
+    errors: [
       {
         key: "movementIds",
         errorType: "BusinessRuleViolation",
         message:
-          "One or more Movement IDs may require a separate delivery record under the hazardous waste aggregation rule.",
+          "Cannot include movementId 25TKP3C9 in this delivery: it is marked as deleted.",
       },
     ],
   },

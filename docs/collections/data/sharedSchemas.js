@@ -13,6 +13,7 @@ import {
   IRL_POSTCODE_REGEX,
   isValidCarrierRegistrationNumber,
   isValidContainerType,
+  isValidDisposalOrRecoveryCode,
   isValidEwcCode,
   isHazardousEwcCode,
   isValidPhoneNumber,
@@ -35,7 +36,6 @@ export const MEANS_OF_TRANSPORT = [
 
 export const REASONS_FOR_NO_REGISTRATION_NUMBER = [
   'ON_SITE',
-  'HOUSEHOLD',
   'ONE_OFF',
   'MARINE'
 ]
@@ -63,6 +63,17 @@ export const PHYSICAL_FORMS = [
 ]
 
 export const WEIGHT_METRICS = ['Grams', 'Kilograms', 'Tonnes']
+
+export const HAZARDOUS_CONCENTRATION_THRESHOLD_OPERATORS = [
+  'EQUAL_TO',
+  'GREATER_THAN_OR_EQUAL'
+]
+
+export const POP_CONCENTRATION_THRESHOLD_OPERATORS = [
+  'LESS_THAN',
+  'EQUAL_TO',
+  'GREATER_THAN_OR_EQUAL'
+]
 
 export const HAZARDOUS_PROPERTY_CODES = [
   'HP_1',
@@ -132,6 +143,63 @@ export const weightSchema = Joi.object({
 }).description('Weight block — shared across all events and waste item types.')
 
 /**
+ * Intended Treatment entry — replaces the old disposalOrRecoveryCode shape
+ * (D-031 amended). Renamed field: code → disposalOrRecoveryCode; same
+ * validation. Used as intendedTreatments (Creation, mandatory, min 1) — both
+ * fields always required. Distinct from actualTreatmentSchema (Receipt,
+ * optional), where disposalOrRecoveryCode itself is optional and weight is
+ * conditional on the code being present.
+ */
+export const intendedTreatmentSchema = Joi.object({
+  disposalOrRecoveryCode: Joi.string()
+    .required()
+    .custom(
+      validateWithBooleanHelper(
+        isValidDisposalOrRecoveryCode,
+        'disposalOrRecoveryCode must be a valid disposal or recovery code.'
+      )
+    )
+    .description('Must be a valid code from GET /reference-data/disposal-or-recovery-codes.'),
+
+  weight: weightSchema
+    .required()
+    .description('Weight of waste being disposed of or recovered under this code.')
+}).description('Each treatment entry must include both a valid disposalOrRecoveryCode and a weight.')
+
+/**
+ * Actual Treatment entry (D-031 amended) — used as actualTreatments at
+ * Receipt (POST /deliveries/{deliveryId}/receipt and POST /receipts), where
+ * the confirmed outcome may not be known yet at the point of receipt.
+ * disposalOrRecoveryCode is optional — omitting it produces a warning, not a
+ * rejection — with weight required only when disposalOrRecoveryCode is
+ * supplied. Distinct from intendedTreatmentSchema (Creation, mandatory),
+ * where both fields are always required.
+ */
+export const actualTreatmentSchema = Joi.object({
+  disposalOrRecoveryCode: Joi.string()
+    .custom(
+      validateWithBooleanHelper(
+        isValidDisposalOrRecoveryCode,
+        'disposalOrRecoveryCode must be a valid disposal or recovery code.'
+      )
+    )
+    .description(
+      'Must be a valid code from GET /reference-data/disposal-or-recovery-codes. Optional — a ' +
+      'receiving site may need to inspect or weigh before confirming the code. Omitting it ' +
+      'produces a warning, not a rejection.'
+    ),
+
+  weight: Joi.when('disposalOrRecoveryCode', {
+    is: Joi.exist(),
+    then: weightSchema.required(),
+    otherwise: weightSchema.optional()
+  }).description('Weight of waste being disposed of or recovered under this code. Required when disposalOrRecoveryCode is supplied.')
+}).description(
+  'Actual Treatment entry (D-031 amended). disposalOrRecoveryCode is optional; weight is ' +
+  'required only when disposalOrRecoveryCode is supplied.'
+)
+
+/**
  * Business address used by carrier, broker, producer and receiver parties.
  * Accepts both UK postcodes and Irish Eircodes.
  * Receipt address (UK only, fullAddress required) is defined separately in receiptJoi.js.
@@ -162,6 +230,29 @@ export const otherReferenceSchema = Joi.object({
 }).description('Additional label/reference pair for the movement.')
 
 // ---------------------------------------------------------------------------
+// Concentration threshold sub-schema (shared shape, per-parent operator enum)
+// ---------------------------------------------------------------------------
+
+/**
+ * Concentration expressed as a threshold (operator + value) rather than an
+ * exact figure. Mutually exclusive with the parent component's `concentration`
+ * field — see the `.nand('concentration', 'concentrationThreshold')` rule on
+ * popComponentSchema and hazardousComponentSchema below.
+ */
+const concentrationThresholdSchema = (operators) => Joi.object({
+  operator: Joi.string()
+    .valid(...operators)
+    .required()
+    .description('Comparison operator for the threshold value.'),
+
+  value: Joi.number()
+    .strict()
+    .positive()
+    .required()
+    .description('Threshold value. Same units as concentration (%).')
+}).description('Concentration expressed as a threshold rather than an exact value.')
+
+// ---------------------------------------------------------------------------
 // POPs sub-schemas
 // ---------------------------------------------------------------------------
 
@@ -171,6 +262,9 @@ export const popComponentSchema = Joi.object({
     .positive()
     .allow(null)
     .description('Concentration value. If supplied, must be greater than 0.'),
+
+  concentrationThreshold: concentrationThresholdSchema(POP_CONCENTRATION_THRESHOLD_OPERATORS)
+    .description('Concentration expressed as a threshold rather than an exact value. Mutually exclusive with concentration.'),
 
   code: Joi.string()
     .empty('')
@@ -182,7 +276,9 @@ export const popComponentSchema = Joi.object({
       )
     )
     .description('Valid code from GET /reference-data/pop-names.')
-}).description('POP component detail.')
+})
+  .nand('concentration', 'concentrationThreshold')
+  .description('POP component detail. concentration and concentrationThreshold are mutually exclusive — a component may state one or neither, never both.')
 
 export const popsSchema = Joi.object({
   sourceOfComponents: Joi.string()
@@ -221,8 +317,17 @@ export const hazardousComponentSchema = Joi.object({
     .strict()
     .positive()
     .allow(null)
-    .description('Concentration value. If supplied, must be greater than 0.')
-}).description('Hazardous component detail.')
+    .when('name', {
+      is: Joi.exist(),
+      then: Joi.required()
+    })
+    .description('Concentration value. If supplied, must be greater than 0. Required when name is supplied.'),
+
+  concentrationThreshold: concentrationThresholdSchema(HAZARDOUS_CONCENTRATION_THRESHOLD_OPERATORS)
+    .description('Concentration expressed as a threshold rather than an exact value. Mutually exclusive with concentration.')
+})
+  .nand('concentration', 'concentrationThreshold')
+  .description('Hazardous component detail. concentration and concentrationThreshold are mutually exclusive — a component may state one or neither, never both.')
 
 export const hazardousSchema = Joi.object({
   sourceOfComponents: Joi.string()
@@ -254,6 +359,99 @@ export const hazardousSchema = Joi.object({
       'Forbidden when sourceOfComponents is NOT_PROVIDED.'
     )
 }).description('Hazardous details — required when containsHazardous is true.')
+
+// ---------------------------------------------------------------------------
+// Waste item classification and base (D-042)
+//
+// Shared by Creation and POST /receipts (the no-prior-delivery Receipt
+// endpoint) — both need the full classification since neither can source it
+// from elsewhere. POST /deliveries/{deliveryId}/receipt (the ordinary
+// Receipt endpoint) does NOT use wasteItemBaseSchema — a Creation record
+// already exists, so it drops classification and defines its own light
+// waste item (logistics fields + actualTreatments only).
+// ---------------------------------------------------------------------------
+
+export const wasteItemClassificationSchema = Joi.object({
+  ewcCodes: Joi.array()
+    .items(
+      Joi.string().custom(
+        validateWithBooleanHelper(
+          isValidEwcCode,
+          'ewcCodes must contain valid codes from GET /reference-data/ewc-codes.'
+        )
+      )
+    )
+    .min(1)
+    .max(5)
+    .required()
+    .description('Must be valid codes from the official EWC catalogue. Minimum 1, maximum 5 per waste item.'),
+
+  wasteDescription: Joi.string()
+    .required()
+    .description('Detailed description of the specific waste material.'),
+
+  containsPops: Joi.boolean()
+    .strict()
+    .required()
+    .description('Flags whether the waste contains Persistent Organic Pollutants. Drives conditionality of the entire pops sub-object.'),
+
+  pops: Joi.when('containsPops', {
+    is: true,
+    then: popsSchema.required(),
+    otherwise: Joi.forbidden()
+  }).description('Required when containsPops is true. Must not be provided when containsPops is false.'),
+
+  containsHazardous: Joi.boolean()
+    .strict()
+    .required()
+    .description('Flags whether the waste contains hazardous properties. Drives conditionality of the entire hazardous sub-object.'),
+
+  hazardous: Joi.when('containsHazardous', {
+    is: true,
+    then: hazardousSchema.required(),
+    otherwise: Joi.forbidden()
+  }).description('Required when containsHazardous is true. Must not be provided when containsHazardous is false.')
+}).description('Waste classification (D-042). One object per waste item, not an array.')
+
+/**
+ * Field order matches the live createWasteItemSchema (weight,
+ * numberOfContainers, typeOfContainers, physicalForm), not the order in
+ * decisions.md's D-042 prose.
+ */
+export const wasteItemBaseSchema = Joi.object({
+  classification: wasteItemClassificationSchema
+    .required()
+    .description('Waste classification (D-042). See wasteItemClassificationSchema.'),
+
+  weight: weightSchema
+    .required()
+    .description('Total weight of the waste item.'),
+
+  numberOfContainers: Joi.number()
+    .strict()
+    .integer()
+    .min(0)
+    .required()
+    .description('Must be 0 or greater. Represents the number of containers for storing, transporting, or disposing of the waste.'),
+
+  typeOfContainers: Joi.string()
+    .required()
+    .custom(
+      validateWithBooleanHelper(
+        isValidContainerType,
+        'typeOfContainers must match a valid container type code from GET /reference-data/container-types.'
+      )
+    )
+    .description('Must match a valid code from GET /reference-data/container-types. Use exact case returned by the GET method.'),
+
+  physicalForm: Joi.string()
+    .valid(...PHYSICAL_FORMS)
+    .required()
+    .description('Must be exactly one of the permitted values. Case-sensitive; use exact case shown.')
+}).description(
+  'Shared waste item base (D-042) — classification plus logistics fields. ' +
+  'Used by Creation and POST /receipts, each adding its own treatment array on top.'
+)
 
 // ---------------------------------------------------------------------------
 // Party schemas
@@ -335,12 +533,31 @@ export const carrierSchema = Joi.object({
 
 /**
  * Broker schema — required when the movement is broker-initiated (D-008).
- * Shares the same registration number format as the carrier.
+ * Shares the same registration number format as the carrier, and the same
+ * registrationNumber/reasonForNoRegistrationNumber mutual-exclusivity rule.
  */
 export const brokerSchema = Joi.object({
   registrationNumber: carrierRegistrationNumberSchema
+    .required()
     .description(
-      'If provided, must follow the same format rules as carrier.registrationNumber.'
+      'Required whenever the brokerOrDealer object is supplied. Null or empty → ' +
+      'reasonForNoRegistrationNumber is required. Valid value → reasonForNoRegistrationNumber ' +
+      'must not be provided. Must follow the same format rules as carrier.registrationNumber.'
+    ),
+
+  reasonForNoRegistrationNumber: Joi.string()
+    .valid(...REASONS_FOR_NO_REGISTRATION_NUMBER)
+    .empty('')
+    .empty(null)
+    .when('registrationNumber', {
+      switch: [
+        { is: null, then: Joi.required() },
+        { is: '', then: Joi.required() }
+      ],
+      otherwise: Joi.forbidden()
+    })
+    .description(
+      'Required when registrationNumber is null or empty. Forbidden when a valid registrationNumber is supplied.'
     ),
 
   organisationName: Joi.string()
@@ -362,7 +579,11 @@ export const brokerSchema = Joi.object({
 
   address: businessAddressSchema
     .description('Broker or dealer business address.')
-}).description('Broker or dealer details — required when the movement is broker-initiated.')
+}).description(
+  'Broker or dealer details — required when the movement is broker-initiated. ' +
+  'registrationNumber is required whenever this object is supplied, with reasonForNoRegistrationNumber ' +
+  'required in its place when registrationNumber is null or empty.'
+)
 
 /**
  * Driver details schema — minimal for now; full model to be defined as the

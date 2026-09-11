@@ -37,7 +37,7 @@ At-a-glance view of every decision, sorted by status, then by impact (structural
 | D-006 | [Cross-check of receipt details against the linked delivery](#cross-check-of-receipt-details-against-the-linked-delivery) | ✅ Decided | 🟠 Medium | **Receipt** |
 | D-008 | [Carrier always required; broker or dealer optional, at every stage](#carrier-always-required-broker-or-dealer-optional-at-every-stage) | ✅ Decided | 🟠 Medium | **Actors** |
 | D-009 | [Soft-delete via `isDeleted`, set only on PUT](#soft-delete-via-isdeleted-set-only-on-put) | ✅ Decided | 🟠 Medium | **Lifecycle** |
-| D-010 | [Hazardous waste cannot be merged across Movements at delivery](#hazardous-waste-cannot-be-merged-across-movements-at-delivery) | ✅ Decided | 🟠 Medium | **Delivery** |
+| D-010 | [Hazardous Movements always split into their own delivery; mixed hazardous and non-hazardous requests now accepted](#hazardous-movements-always-split-into-their-own-delivery-mixed-hazardous-and-non-hazardous-requests-now-accepted) | ✅ Decided | 🟠 Medium | **Delivery** |
 | D-014 | [Sub-resource 404 shape: parent-not-found vs event-not-recorded](#sub-resource-404-shape-parent-not-found-vs-event-not-recorded) | ✅ Decided | 🟠 Medium | **Lifecycle** |
 | D-017 | [Delivery PUT restricted to soft-delete only](#delivery-put-restricted-to-soft-delete-only) | ✅ Decided | 🟠 Medium | **Lifecycle** |
 | D-018 | [Delivery address derivability](#delivery-address-derivability) | ✅ Decided | 🟠 Medium | **Delivery** |
@@ -46,7 +46,7 @@ At-a-glance view of every decision, sorted by status, then by impact (structural
 | D-032 | [Waste item weights are not captured at Collection or Delivery](#waste-item-weights-are-not-captured-at-collection-or-delivery) | ✅ Decided | 🟠 Medium | **Collection** |
 | D-034 | [PUT operations use history/revision pattern across all events](#put-operations-use-historyrevision-pattern-across-all-events) | ✅ Decided | 🟠 Medium | **Lifecycle** |
 | D-027 | [Per-organisation vs per-actor API credentials](#per-organisation-vs-per-actor-api-credentials) | ✅ Decided | 🟠 Medium | **Onboarding** |
-| D-042 | [Waste item classification separated from logistics fields at Creation](#waste-item-classification-separated-from-logistics-fields-at-creation) | ✅ Decided | 🟠 Medium | **Creation** |
+| D-042 | [Waste item classification: separated from logistics at Creation, reused at the no-prior-delivery Receipt endpoint, dropped at the ordinary Receipt endpoint](#waste-item-classification-separated-from-logistics-at-creation-reused-at-the-no-prior-delivery-receipt-endpoint-dropped-at-the-ordinary-receipt-endpoint) | ✅ Decided | 🟠 Medium | **Creation** |
 | D-002 | [Single OpenAPI file, not `$ref`-split](#single-openapi-file-not-ref-split) | ✅ Decided | 🟢 Low | **Spec structure** |
 | D-003 | [OpenAPI 3.0.3, not 3.1](#openapi-303-not-31) | ✅ Decided | 🟢 Low | **Spec structure** |
 | D-011 | [Static and transit collection collapsed into a single endpoint](#static-and-transit-collection-collapsed-into-a-single-endpoint) | ✅ Decided | 🟢 Low | **Collection** |
@@ -187,7 +187,6 @@ The rules, applied uniformly across the three deletable events:
 
 - **PUT-only.** `isDeleted` may only be set to `true` via the event's `PUT` (update). A `POST` (create) request that supplies `isDeleted: true` is rejected with a `NotAllowed` validation error; `POST` requests may omit the field or send `false`.
 - **No subsequent event.** An event may be marked deleted only while no later event in the chain has been recorded against it:
-
   - A Movement cannot be deleted once its Collection has been recorded.
   - A Collection cannot be deleted once its Movement has been referenced in a Delivery.
   - A Delivery cannot be deleted once a Receipt has been recorded against it.
@@ -195,7 +194,6 @@ The rules, applied uniformly across the three deletable events:
   This checks whether the later event's record _exists_, not whether it is itself currently active — once a Collection has been recorded against a Movement, that Movement stays locked from deletion even if the Collection is later deleted too. The chain of what-was-recorded is preserved; deleting a later event does not reopen an earlier one. Violating this returns a `BusinessRuleViolation` validation error.
 
 - **Deleted blocks what comes next.** While an event is `isDeleted: true`, no event later in the chain may be recorded or updated against it:
-
   - Collection cannot be recorded/updated against a deleted Movement.
   - A Movement that is deleted (with or without a Collection) cannot be named in a Delivery's `movementIds`; nor can a Movement whose Collection is deleted.
   - Receipt cannot be recorded/updated against a deleted Delivery.
@@ -212,19 +210,30 @@ For collection specifically, [D-029](#d-029) adds a further restriction once a M
 
 <a id="d-010"></a>
 
-### Hazardous waste cannot be merged across Movements at delivery
+### Hazardous Movements always split into their own delivery; mixed hazardous and non-hazardous requests now accepted
 
-**D-010** · ✅ Decided · Impact: 🟠 Medium · Area: **Delivery** · Related: [D-007](#d-007)
+**D-010** · ✅ Decided · Impact: 🟠 Medium · Area: **Delivery** · Related: [D-007](#d-007), [D-012](#d-012), [D-013](#d-013)
 
-**Context.** A delivery can cover one or more Movements delivered together at the same receiver site (multi-collection runs). For hazardous waste, regulatory and audit constraints make merging multiple Movements under a single Delivery ID inappropriate — each hazardous Movement needs its own Delivery ID for traceability.
+**Context.** A delivery can cover one or more Movements delivered together at the same receiver site (multi-collection runs). For hazardous waste, regulatory and audit constraints make merging multiple Movements under a single Delivery ID inappropriate — each hazardous Movement needs its own Delivery ID for traceability, because hazardous waste travels under one consignment note end to end and the regulator does not want that identifier changing mid-journey.
 
-**Decision.** When any of the Movements named in a `POST /deliveries` request carries hazardous waste, the request must contain exactly one Movement ID. Multi-Movement deliveries are permitted only when all linked Movements are non-hazardous.
+Policy/regulator feedback clarified that carriers should be able to submit a single mixed load — some hazardous, some non-hazardous Movement IDs — in one `POST /deliveries` call, rather than being forced to pre-split the call themselves. The original decision required the entire request to contain exactly one Movement ID whenever any of them was hazardous, which pushed that splitting work onto the caller instead of the service.
 
-The constraint is data-dependent (depends on properties of the linked Movements that the request body does not carry). It is therefore not expressed in the OpenAPI schema, but documented on the endpoint and validated server-side. Violations return a 400 with a clear validation error.
+**Decision.** `movementIds` may now contain a mix of hazardous and non-hazardous Movement IDs in a single `POST /deliveries` request. The server — not the caller — splits them:
 
-For a delivery that satisfies this constraint (hazardous, exactly one Movement ID), the server does not mint a new Delivery ID: `deliveryId` is set equal to that Movement ID. Non-hazardous deliveries continue to mint a fresh Delivery ID via `waste-tracking-id-backend` as before, whether single- or multi-Movement.
+- Every non-hazardous Movement ID in the request is aggregated under one newly-minted Delivery ID, exactly as for an all-non-hazardous request today.
+- Every hazardous Movement ID becomes its own delivery, never aggregated with any other Movement (hazardous or not). Its Delivery ID is set equal to that Movement ID, not freshly minted — unchanged from the original decision.
 
-**Consequences.** Multi-collection runs remain a first-class concept for non-hazardous waste. Carriers handling hazardous waste record one delivery per Movement, even if the loads physically arrive together. The Delivery ID returned for a hazardous delivery is predictable ahead of the call — it is the Movement ID already known to the caller — rather than a newly-minted value.
+The constraint remains data-dependent (it depends on each linked Movement's hazardous flag, which the request body does not carry), so the split is still performed server-side rather than expressed in the OpenAPI schema.
+
+**Response shape changes accordingly.** `POST /deliveries` now returns `deliveries: DeliveryResult[]`, one entry per resulting delivery, rather than the single `deliveryId` it returned before. Each entry carries:
+
+- `deliveryId` — the Delivery ID for this entry (freshly minted for the aggregated non-hazardous entry; equal to the Movement ID for a hazardous entry).
+- `movementIds: string[]` — the constituent Movement IDs covered by this entry, so a caller can correlate its submitted Movement IDs against the returned deliveries without inferring which output entry covers which input.
+- `wasteType: "HAZARDOUS" | "NON_HAZARDOUS"` — marks whether the entry is the (single) aggregated non-hazardous delivery or one of the per-Movement hazardous deliveries.
+
+A request of `movementIds: ['haz1', 'no-haz1', 'haz2', 'no-haz2', 'no-haz3']` therefore returns three entries: `{ deliveryId: 'haz1', movementIds: ['haz1'], wasteType: 'HAZARDOUS' }`, the equivalent for `haz2`, and one aggregated entry `{ deliveryId: <minted>, movementIds: ['no-haz1', 'no-haz2', 'no-haz3'], wasteType: 'NON_HAZARDOUS' }`.
+
+**Consequences.** Multi-collection runs remain a first-class concept for non-hazardous waste, and now for mixed loads too — carriers no longer need to pre-split a mixed pickup into separate calls themselves. Hazardous Movements are still never aggregated with anything else, preserving the one-consignment-note-per-hazardous-Movement traceability the original decision protected. `POST /deliveries` becomes a call that can mint more than one Delivery ID at once, and its response becomes an array of typed delivery entries rather than a single `deliveryId` string, so every caller integration must move from expecting `{ deliveryId }` to iterating `deliveries[]` and reading `movementIds`/`wasteType` per entry. This also sets a precedent of using a typed enum (`wasteType`) rather than a boolean for a newly-introduced state marker, consistent with the direction flagged for the existing `isEstimate` boolean elsewhere on this ticket (tracked separately as its own future ticket, not amended here).
 
 <a id="d-011"></a>
 
@@ -431,7 +440,7 @@ D-015's text carries a one-line amendment to its Movement↔Collection clause to
 
 ### Treatment renamed from disposal/recovery codes: mandatory Intended Treatments at Creation, Actual Treatments at Receipt
 
-**D-031** · ✅ Decided (amended) · Impact: 🟠 Medium · Area: **Collection** · Related: [D-006](#d-006), [D-019](#d-019), [D-042](#d-042)
+**D-031** · ✅ Decided · Impact: 🟠 Medium · Area: **Collection** · Related: [D-006](#d-006), [D-019](#d-019), [D-042](#d-042)
 
 **Context.** `wasteItems[].disposalOrRecoveryCodes` was the treatment outcome — what the receiver does with the waste (R-codes for recovery, D-codes for disposal) — captured at both Creation and Receipt but representing a different thing at each stage: a planned figure at Creation, the confirmed outcome at Receipt. The original decision made it mandatory (Intended Treatment) at Creation and kept it optional (Actual Treatment) at Receipt, same shape, label-only difference. Beta-2 payload work goes further and changes the field itself, not just its label.
 
@@ -543,13 +552,13 @@ This is a pure rename. It does not change the resource shape, the many-to-one ca
 
 ### Receipt without a prior delivery: separate endpoint, an empty Delivery created server-side to have a reference
 
-**D-041** · ✅ Decided · Impact: 🔴 High · Area: **Receipt** · Related: [D-005](#d-005), [D-006](#d-006), [D-007](#d-007), [D-017](#d-017), [D-018](#d-018), [D-022](#d-022), [D-025](#d-025), [D-040](#d-040)
+**D-041** · ✅ Decided · Impact: 🔴 High · Area: **Receipt** · Related: [D-005](#d-005), [D-006](#d-006), [D-007](#d-007), [D-017](#d-017), [D-018](#d-018), [D-022](#d-022), [D-025](#d-025), [D-040](#d-040), [D-042](#d-042)
 
 **Context.** In the Level 2 model a receipt is a sub-resource of a Delivery, addressed as `POST /deliveries/{deliveryId}/receipt` ([D-005](#d-005), and Option 1 of the still-open [D-022](#d-022)). `POST /deliveries` itself requires `movementIds` with `minItems: 1` ([D-007](#d-007)) — a Delivery is normally created from one or more Movements. But an exceptional case exists where waste is received with no prior Movement/Collection/Delivery trail at all (e.g. received directly, with none of the earlier journey recorded digitally). A receipt never carries its own exposed id ([D-012](#d-012)), so a receipt recorded with no Delivery behind it would have **no addressable identifier at all** — it could never be looked up, corrected, or, once [D-025](#d-025) settles the acceptance/rejection model, have an outcome recorded against it. A ticket-derived scenario for this case (DWTC-140/142, `scenarios/beta-1/receipt/contract-shape-confirmation-for-the-receipt-endpoint.md`) already expects "a Delivery ID is returned in the response" for exactly this case.
 
 **Decision.** Do not ask software providers to create the empty Delivery themselves, and do not add a generic no-Delivery receipt endpoint either. Add a dedicated endpoint, `POST /receipts`, for recording a receipt with no prior delivery:
 
-- The software provider calls `POST /receipts` once, with the receipt payload plus a mandatory `reason` field explaining why there is no prior Movement/Collection/Delivery trail.
+- The software provider calls `POST /receipts` once, with the receipt payload plus a mandatory `reasonForNoDeliveryId` field explaining why there is no prior Movement/Collection/Delivery trail.
 - The server creates an empty Delivery behind the scenes (`movementIds: []`) and records the receipt against it, in one request.
 - The response returns `deliveryId`, so an empty Delivery gets a real, addressable Delivery ID exactly like a normal one — the addressability guarantee (lookup, correction, future acceptance/rejection outcome) is met without the client ever handling a Delivery directly.
 - The ordinary receipt flow (`POST /deliveries/{deliveryId}/receipt` against a Delivery that does carry Movement IDs) is unaffected.
@@ -561,26 +570,35 @@ This is a pure rename. It does not change the resource shape, the many-to-one ca
 - `POST /deliveries` stays a pure "create from prior Movements" endpoint; empty Deliveries are an internal detail of `POST /receipts`'s implementation, not a documented public capability of `POST /deliveries`.
 - [D-007](#d-007)'s many-to-one-against-Movement-IDs cardinality does not need a documented zero case — that case lives entirely in `POST /receipts`.
 - [D-018](#d-018)'s mandatory delivery address still applies to the empty Delivery the server creates — it must be supplied on the `POST /receipts` request so the server can write it through, same audit fact as before.
-- Satisfies the DWTC-140/142 scenario's expectation that a Delivery ID is returned for a receipt with no prior delivery trail, and does so as a literal one-call description of `POST /receipts` — "no Delivery ID, reason supplied" → "a Delivery ID is returned in the response" — with no two-step rewrite needed.
+- Satisfies the DWTC-140/142 scenario's expectation that a Delivery ID is returned for a receipt with no prior delivery trail, and does so as a literal one-call description of `POST /receipts` — "no Delivery ID, reasonForNoDeliveryId supplied" → "a Delivery ID is returned in the response" — with no two-step rewrite needed.
 
-**Open questions — flagged by the proposer, not yet resolved:**
+**Open questions — flagged by the proposer:**
 
-1. **Extra fields at receipt time.** Should `POST /receipts` require additional fields it would otherwise have sourced from a linked Movement (e.g. the waste classification the [D-006](#d-006) cross-check normally compares against)? Shape not decided here.
-2. **Correction of an empty Delivery.** [D-017](#d-017) restricts a Delivery's `PUT` to the `isDeleted` flag only. If fields from (1) ever need correcting after the fact, that either needs an exception to D-017's immutability for server-created empty Deliveries specifically, or those fields belong on the receipt instead — to be confirmed.
-3. **`reason` scope.** Whether `reason` is ever meaningful on the ordinary `POST /deliveries/{deliveryId}/receipt` flow (e.g. to explain a partial delivery), or is strictly reserved for `POST /receipts`.
-4. **Request/response shape of `POST /receipts`.** Whether it is the same receipt payload as `POST /deliveries/{deliveryId}/receipt` plus `reason`, or a distinct schema — not yet modelled in `openapi.yaml`.
+1. ~~**Extra fields at receipt time.**~~ **Resolved ([D-042](#d-042)).** Yes — `POST /receipts` requires the full waste classification `POST /deliveries/{deliveryId}/receipt` no longer carries, since there is no linked Movement to source it from.
+2. **Correction of an empty Delivery.** [D-017](#d-017) restricts a Delivery's `PUT` to the `isDeleted` flag only. If classification fields ever need correcting after the fact, that either needs an exception to D-017's immutability for server-created empty Deliveries specifically, or those fields belong on the receipt instead — to be confirmed. Still open.
+3. **`reasonForNoDeliveryId` scope.** Whether `reasonForNoDeliveryId` is ever meaningful on the ordinary `POST /deliveries/{deliveryId}/receipt` flow (e.g. to explain a partial delivery), or is strictly reserved for `POST /receipts`. Still open.
+4. ~~**Request/response shape of `POST /receipts`.**~~ **Resolved ([D-042](#d-042)).** Same shape as `POST /deliveries/{deliveryId}/receipt`, except `wasteItem` uses the full-classification shape instead of the light one, plus the mandatory `reasonForNoDeliveryId` field.
 
 <a id="d-042"></a>
 
-### Waste item classification separated from logistics fields at Creation
+### Waste item classification: separated from logistics at Creation, reused at the no-prior-delivery Receipt endpoint, dropped at the ordinary Receipt endpoint
 
-**D-042** · ✅ Decided · Impact: 🟠 Medium · Area: **Creation** · Related: [D-031](#d-031), [D-032](#d-032)
+**D-042** · ✅ Decided · Impact: 🟠 Medium · Area: **Creation** · Related: [D-031](#d-031), [D-032](#d-032), [D-041](#d-041)
 
-**Context.** `wasteItem` today is flat: `ewcCodes`, `wasteDescription`, `physicalForm`, `numberOfContainers`, `typeOfContainers`, `weight`, `containsPops`/`pops`, `containsHazardous`/`hazardous` all sit as siblings. Policy/regulator feedback on the Creation payload flagged that this misrepresents which fields can change after Creation — `physicalForm`, container details and `weight` are updatable at Receipt (D-032 already keeps weight out of Collection/Delivery), but what the waste actually *is* — its classification — can only be changed by rejecting and re-creating, never edited in place.
+**Context.** Waste item classification (EWC codes, waste description, POPs and hazardous detail) and the logistics fields describing what physically arrived (weight, physical form, container type and count) were flat and undifferentiated on the shared `wasteItem` shape. At Creation, separating them out makes the intent of each field group explicit and gives classification a stable, reusable shape rather than six loose sibling fields.
 
-**Decision.** Introduce a `classification` object nested within `wasteItem`, at Creation only: `{ ewcCodes, wasteDescription, containsPops, pops, containsHazardous, hazardous }`. One `classification` per waste item (not an array). `weight`, `numberOfContainers`, `typeOfContainers` remain top-level siblings of `classification`, unchanged. This is forked as a Creation-specific `wasteItem` shape rather than a change to the shared component, so it doesn't pre-empt the Receipt beta-2 work, which defines its own lighter waste item with no classification fields at all (reclassification there happens only via reject).
+Two further questions came up once Delivery and Receipt were worked through in this same round of beta-2 changes: whether Receipt's ordinary endpoint (`POST /deliveries/{deliveryId}/receipt`) should keep re-accepting classification already captured at Creation, and whether the exceptional no-prior-delivery endpoint (`POST /receipts`, [D-041](#d-041)) — which has no Creation record to fall back on — should keep it. Policy/regulator feedback said the ordinary endpoint shouldn't duplicate classification once a Creation exists; [D-041](#d-041)'s open question 1 asked exactly this for its own endpoint, and is resolved here: yes, `POST /receipts` needs it, because nothing upstream supplies it.
 
-**Consequences.** Creation's `wasteItem` gains a nesting level; Receipt's waste item and Creation's diverge in shape by design, not by accident — Receipt carries only the logistics fields, and the one exception (a no-Delivery-ID receipt re-supplying full classification because there's no upstream Movement to inherit it from) is consistent with this split, not a contradiction of it.
+**Decision.**
+
+- At Creation, `wasteItem` nests classification under a `classification` object — `{ ewcCodes, wasteDescription, containsPops, pops, containsHazardous, hazardous }`, one per item, not an array — with `weight`, `physicalForm`, `typeOfContainers`, `numberOfContainers` remaining top-level siblings, unchanged.
+- `POST /receipts` (the no-prior-delivery Receipt endpoint, [D-041](#d-041)) uses the identical shape — the same nested `classification` object, the same logistics siblings — since it has no Creation record to source classification from.
+- Because these two are now identical apart from the treatment field, they share one base type, `wasteItemBase` (`classification` + the four logistics fields), with each event adding its own treatment array on top: `intendedTreatments: Treatment[]` (mandatory) at Creation, `actualTreatments?: Treatment[]` (optional) at `POST /receipts` — the same shared-shape-plus-per-event-array pattern already used for `Treatment` itself ([D-031](#d-031)).
+- `POST /deliveries/{deliveryId}/receipt` (the ordinary Receipt endpoint, used when a Delivery — and therefore a Creation — already exists) drops classification entirely. Its `wasteItem` becomes just the logistics fields plus `actualTreatments`: `weight`, `physicalForm`, `typeOfContainers`, `numberOfContainers`, `actualTreatments?`. It does not extend `wasteItemBase`.
+
+This also resolves [D-041](#d-041)'s open question 4 (request/response shape of `POST /receipts`): the same shape as `POST /deliveries/{deliveryId}/receipt`, except `wasteItem` is the full `wasteItemBase`-derived shape instead of the light one, plus the mandatory `reasonForNoDeliveryId` field.
+
+**Consequences.** Creation and `POST /receipts` now define their waste item once, via `wasteItemBase`, and stay in step with each other by construction — a future classification change touches one place. `POST /deliveries/{deliveryId}/receipt` sheds classification data it never needed once a Creation record exists, keeping that payload lean. Extracting `wasteItemBase` means Creation's already-applied `createWasteItem` schema/types move to reference the shared base rather than defining `classification` and the logistics fields inline — a refactor of already-shipped Creation code, not a behavioural change to it.
 
 ## Open
 

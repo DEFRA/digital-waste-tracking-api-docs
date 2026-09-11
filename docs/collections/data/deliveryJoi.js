@@ -1,11 +1,11 @@
 /**
  * Joi validation schema for the Record Delivery event.
- * POST /deliveries → 201 with deliveryId
+ * POST /deliveries → 201 with an array of delivery entries (D-010)
  *
  * Key behaviours:
  * - apiCode is mandatory, matching the registered submitting organisation.
- * - movementIds array: minimum 1; server validates hazardous constraint (D-010).
- * - actualDateTimeDelivery must be the actual drop-off time, not submission time.
+ * - movementIds array: minimum 1; may mix hazardous and non-hazardous Movement IDs (D-010).
+ * - actualDateTimeDelivered must be the actual drop-off time, not submission time.
  * - carrier is mandatory and uses the same required/optional carrier schema as Collection/Receipt.
  * - deliverySite contains the carrier-declared site/place name, optional exemption number, and mandatory address.
  * - The drop-off place is a lighter site model than the receipt receiver.
@@ -14,10 +14,12 @@
  * - A receipt event may not always follow a delivery, for example when waste is left at an exempt place.
  * - A recorded delivery is immutable except for soft-delete
  *
- * The hazardous-waste single-Movement constraint (D-010) is data-dependent
- * (requires knowing whether any referenced Movement carries hazardous waste)
- * and cannot be expressed in this schema. It is assessed server-side and
- * may be returned as a BusinessRuleViolation validation warning for now.
+ * The hazardous/non-hazardous split (D-010) is data-dependent (requires
+ * knowing each referenced Movement's hazardous flag) and cannot be expressed
+ * in this request schema — it is performed server-side. Every non-hazardous
+ * Movement is aggregated under one newly-minted deliveryId; every hazardous
+ * Movement becomes its own delivery entry. This schema validates the request
+ * only — see deliveryTypes.ts for the response shape (deliveries[]).
  */
 
 import Joi from "joi";
@@ -92,12 +94,12 @@ export const recordDeliverySchema = Joi.object({
     .description(
       "One or more Movement IDs delivered together at the same drop-off site. " +
         "Single-collection runs supply an array of one. " +
-        "Multi-collection runs (non-hazardous only) supply all Movement IDs delivered together. " +
-        "Hazardous waste constraint (D-010): if any referenced Movement carries hazardous waste, " +
-        "exactly one Movement ID is permitted — validated server-side.",
+        "Multi-collection runs supply all Movement IDs delivered together. " +
+        "May mix hazardous and non-hazardous Movement IDs (D-010) — the server " +
+        "splits them into separate delivery entries in the response.",
     ),
 
-  actualDateTimeDelivery: Joi.date()
+  actualDateTimeDelivered: Joi.date()
     .iso()
     .required()
     .description(
@@ -135,8 +137,8 @@ export const recordDeliverySchema = Joi.object({
   deliverySite: deliverySiteSchema,
 }).description(
   "Record Delivery request payload. " +
-    "POST /deliveries → 201 with deliveryId. " +
-    "The Delivery ID may be passed by the driver to the receiver to enable " +
+    "POST /deliveries → 201 with an array of delivery entries (D-010). " +
+    "Each entry's deliveryId may be passed by the driver to the receiver to enable " +
     "POST /deliveries/{deliveryId}/receipt, where applicable. " +
     "A receipt event may not always follow a delivery.",
 );
