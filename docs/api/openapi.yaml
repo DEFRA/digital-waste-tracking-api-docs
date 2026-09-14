@@ -341,7 +341,7 @@ components:
         address:
           $ref: '#/components/schemas/address'
 
-    creationReceiverDetails:
+    intendedReceiverDetails:
       type: object
       description: |
         Intended receiver details recorded at creation. Required only when the
@@ -749,7 +749,7 @@ components:
           type: array
           minItems: 1
           items:
-            $ref: '#/components/schemas/creationReceiverDetails'
+            $ref: '#/components/schemas/intendedReceiverDetails'
           description: Intended receiving site(s). Required (min 1) only when the movement contains hazardous waste (enforced server-side) — a producer may declare waste heading to more than one receiving site.
         collectionAddressDifferentFromProducer:
           type: boolean

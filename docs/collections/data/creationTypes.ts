@@ -173,7 +173,7 @@ export type ReceiverAddress = {
  * that siteName is always populated when an entry is present — makes them
  * mandatory too.
  */
-export type Receiver = {
+export type IntendedReceiver = {
   siteName: string
   authorisationNumber?: string
   emailAddress?: string
@@ -232,7 +232,7 @@ export type CreateMovement = {
    * contains hazardous waste — a producer may declare waste heading to more
    * than one receiving site.
    */
-  receivers?: Receiver[]
+  receivers?: IntendedReceiver[]
 
   /**
    * Whether the waste will be collected from an address other than producer.address.

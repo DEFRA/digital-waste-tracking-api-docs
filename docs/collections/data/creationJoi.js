@@ -165,7 +165,7 @@ const plannedCollectionAddressSchema = businessAddressSchema
   )
 
 // Exported for testing (see test/event-model/schema/common/receiver.test.js).
-export const receiverSchema = Joi.object({
+export const intendedReceiverSchema = Joi.object({
   siteName: Joi.string()
     .required()
     .description(
@@ -461,7 +461,7 @@ export const createMovementSchema = Joi.object({
     .description('Optional broker/dealer details.'),
 
   receivers: Joi.array()
-    .items(receiverSchema)
+    .items(intendedReceiverSchema)
     .min(1)
     .description(
       'Intended receiving site(s) (D-043). Required only when the movement contains hazardous ' +
