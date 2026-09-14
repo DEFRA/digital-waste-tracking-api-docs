@@ -1,0 +1,71 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "producer-municipal.schema.json",
+  "title": "Producer (Municipal)",
+  "description": "Producer fields specific to municipal waste. organisationName and address are required; authorisationNumber, sicCode, emailAddress and phoneNumber are optional.",
+  "type": "object",
+  "allOf": [
+    { "$ref": "producer-base.schema.json" },
+    {
+      "type": "object",
+      "properties": {
+        "wasteSource": {
+          "const": "Municipal",
+          "description": "Waste originates from a municipal source."
+        },
+        "organisationName": {
+          "type": "string",
+          "description": "Producer organisation name."
+        },
+        "authorisationNumber": {
+          "type": "string",
+          "format": "authorisationNumber",
+          "description": "Producer environmental permit or exemption number, in a valid UK format."
+        },
+        "sicCode": {
+          "type": "string",
+          "pattern": "^\\d{5}$",
+          "description": "Five-digit Standard Industrial Classification code."
+        },
+        "emailAddress": {
+          "type": "string",
+          "format": "email",
+          "description": "Producer contact email address."
+        },
+        "phoneNumber": {
+          "type": "string",
+          "format": "phoneNumber",
+          "description": "Producer contact phone number, in a valid format."
+        },
+        "address": {
+          "type": "object",
+          "description": "Producer site address.",
+          "properties": {
+            "fullAddress": {
+              "type": "string",
+              "description": "Full address line."
+            },
+            "postcode": {
+              "type": "string",
+              "description": "Accepts UK postcodes and Irish Eircodes."
+            }
+          },
+          "required": ["postcode"]
+        }
+      },
+      "required": ["wasteSource", "organisationName", "address"]
+    }
+  ],
+  "propertyNames": {
+    "enum": [
+      "wasteSource",
+      "organisationName",
+      "authorisationNumber",
+      "sicCode",
+      "emailAddress",
+      "phoneNumber",
+      "address",
+      "councilMovement"
+    ]
+  }
+}
