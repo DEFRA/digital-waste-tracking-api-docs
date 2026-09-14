@@ -33,7 +33,7 @@ const receiverSite = {
   authorisationNumber: 'HP3456XX'
 }
 
-const receipt = {
+const receiptSite = {
   address: {
     fullAddress: '1 Receipt Yard, Test City',
     postcode: 'TE1 1ST'
@@ -60,7 +60,7 @@ const receiptWithoutDelivery = {
   dateTimeReceived: '2026-01-01T09:00:00Z',
   wasteItems: [wasteItem],
   receiverSite,
-  receipt,
+  receiptSite,
   carrier,
   reasonForNoDeliveryId:
     'Waste collected directly from an exempt site with no prior delivery record.'

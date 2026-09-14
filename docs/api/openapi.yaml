@@ -351,7 +351,7 @@ components:
         too. These are provisional — the authoritative receiver is confirmed
         at receipt, where the receiver is modelled by the Phase 1 `receiver`
         (which carries regulatoryPositionStatements and no address; the
-        receipt site address is the separate `receipt.address`).
+        receipt site address is the separate `receiptSite.address`).
       required:
         - siteName
       properties:
@@ -1177,7 +1177,7 @@ components:
     # wrong for this endpoint (it has no prior Creation record to source
     # classification from). Built independently instead: wasteItems uses
     # receiptWithoutDeliveryWasteItem (full classification); carrier,
-    # brokerOrDealer, receiverSite and receipt reuse the same shared
+    # brokerOrDealer, receiverSite and receiptSite reuse the same shared
     # components as receiveMovementRequest; the remaining root fields are
     # duplicated inline since receiveMovementRequest doesn't expose them as
     # separately reusable pieces.
@@ -1190,7 +1190,7 @@ components:
         - carrier
         - wasteItems
         - receiverSite
-        - receipt
+        - receiptSite
         - reasonForNoDeliveryId
       properties:
         apiCode:
@@ -1243,8 +1243,8 @@ components:
           $ref: '#/components/schemas/brokerOrDealer'
         receiverSite:
           $ref: '#/components/schemas/receiverSite'
-        receipt:
-          $ref: '#/components/schemas/receipt'
+        receiptSite:
+          $ref: '#/components/schemas/receiptSite'
         reasonForNoDeliveryId:
           type: string
           description: |
@@ -1737,7 +1737,7 @@ components:
             - 343
             - 456
             - 789
-    receipt:
+    receiptSite:
       type: object
       description: Physical receipt site details.
       required:
@@ -1946,7 +1946,7 @@ components:
         - carrier
         - wasteItems
         - receiverSite
-        - receipt
+        - receiptSite
       properties:
         apiCode:
           type: string
@@ -2020,15 +2020,15 @@ components:
           $ref: '#/components/schemas/brokerOrDealer'
         receiverSite:
           $ref: '#/components/schemas/receiverSite'
-        receipt:
-          $ref: '#/components/schemas/receipt'
+        receiptSite:
+          $ref: '#/components/schemas/receiptSite'
 
   # ----------------------------------------------------------------------
   # Reusable request bodies (Phase 1)
   # ----------------------------------------------------------------------
   requestBodies:
     receiveMovementRequest:
-      description: Details of the waste movement to be created or updated. The mandatory parameters to be included in the API call are the <b>apiCode, dateTimeReceived, carrier, wasteItems, receiver and receipt</b>.
+      description: Details of the waste movement to be created or updated. The mandatory parameters to be included in the API call are the <b>apiCode, dateTimeReceived, carrier, wasteItems, receiver and receiptSite</b>.
       required: true
       content:
         application/json:

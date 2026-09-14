@@ -53,7 +53,7 @@ export type ReceiptMovement = {
   // Main objects
   wasteItems: ReceiptWasteItem[]
   receiverSite: ReceiverSite
-  receipt: Receipt
+  receiptSite: ReceiptSite
   carrier: CarrierDetails
   brokerOrDealer?: BrokerDetails
 }
@@ -112,7 +112,7 @@ export type ReceiverSite = {
   authorisationNumber: string
 }
 
-export type Receipt = {
+export type ReceiptSite = {
   address: ReceiptAddress
 }
 

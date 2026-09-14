@@ -42,7 +42,7 @@ export const receiverSite = {
   regulatoryPositionStatements: [343]
 }
 
-export const receipt = {
+export const receiptSite = {
   address: {
     fullAddress: '123 Test St, Test City',
     postcode: 'TE1 1ST'
@@ -92,7 +92,7 @@ export const publicPostBody = {
   carrier,
   brokerOrDealer,
   receiverSite,
-  receipt
+  receiptSite
 }
 
 const { apiCode, ...movementWithoutApiCode } = publicPostBody

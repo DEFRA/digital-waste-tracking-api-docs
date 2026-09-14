@@ -241,7 +241,7 @@ export const receiptWithoutDeliverySchema = Joi.object({
 
   receiverSite: receiverSiteSchema.required(),
 
-  receipt: receiptSiteSchema.required(),
+  receiptSite: receiptSiteSchema.required(),
 
   carrier: carrierSchema.required(),
 

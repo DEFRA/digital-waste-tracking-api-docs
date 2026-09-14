@@ -10,7 +10,7 @@ import Joi from 'joi'
  * This file keeps the Receipt schema, nested schemas, allowed values and field descriptions together.
  * Shared sub-schemas (weight, other-reference, carrier, broker/dealer, treatments, etc.) are imported
  * from sharedSchemas.js, like the other three event files. Only genuinely Receipt-specific shapes —
- * receiptWasteItem, receiverSite, the receipt site/address — are defined locally here, and exported
+ * receiptWasteItem, receiverSite, the receiptSite/receiptAddress — are defined locally here, and exported
  * for testing (see test/event-model/schema/receipt/).
  *
  * carrier and brokerOrDealer use the shared carrierSchema/brokerSchema (sharedSchemas.js) rather than
@@ -236,7 +236,7 @@ export const receiptMovementSchema = Joi.object({
 
   receiverSite: receiverSiteSchema.required(),
 
-  receipt: receiptSiteSchema.required(),
+  receiptSite: receiptSiteSchema.required(),
 
   carrier: carrierSchema.required(),
 

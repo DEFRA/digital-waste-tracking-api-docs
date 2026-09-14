@@ -10,7 +10,7 @@
  * Creation/Delivery to source classification from. Both are decided, not
  * speculative.
  *
- * carrier, brokerOrDealer and receipt are reused from receiptEvent.js —
+ * carrier, brokerOrDealer and receiptSite are reused from receiptEvent.js —
  * unaffected by the classification/receiverSite changes. wasteItems is
  * defined fresh here, mirroring a Creation wasteItem example's nested
  * classification shape (creationEvent.js), since receiptEvent.js's own
@@ -19,7 +19,7 @@
 import {
   carrier,
   brokerOrDealer,
-  receipt,
+  receiptSite,
   receiverSite
 } from './receiptEvent.js'
 
@@ -84,7 +84,7 @@ export const requestBody = {
   carrier,
   brokerOrDealer,
   receiverSite,
-  receipt,
+  receiptSite,
   reasonForNoDeliveryId:
     'Waste received directly with no digital record of an earlier journey.'
 }
