@@ -217,7 +217,7 @@ export type WasteItemBase = {
  * Carrier organisation and transport details.
  *
  * Some events tighten this shape. For Creation, only meansOfTransport is
- * mandatory, so creationTypes.ts defines a Creation-specific Carrier type.
+ * mandatory, so creationTypes.ts defines a Creation-specific IntendedCarrier type.
  */
 export type CarrierDetails = {
   /**

@@ -313,7 +313,7 @@ export const producerSchema = Joi.object({
 // Carrier at creation
 // ---------------------------------------------------------------------------
 
-export const creationCarrierSchema = Joi.object({
+export const intendedCarrierSchema = Joi.object({
   meansOfTransport: Joi.string()
     .valid(...MEANS_OF_TRANSPORT)
     .required()
@@ -450,7 +450,7 @@ export const createMovementSchema = Joi.object({
 
   producer: producerSchema.required(),
 
-  carrier: creationCarrierSchema
+  carrier: intendedCarrierSchema
     .required()
     .description(
       'Carrier details. Required object at Creation, using the Receipt carrier field structure with meansOfTransport as the only mandatory carrier field.'

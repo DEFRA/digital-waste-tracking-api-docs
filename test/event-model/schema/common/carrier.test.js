@@ -6,12 +6,12 @@
  * in which case reasonForNoRegistrationNumber becomes required).
  *
  * creationJoi.js does NOT import this schema yet — it still defines its own,
- * more relaxed creationCarrierSchema (only meansOfTransport required), kept
+ * more relaxed intendedCarrierSchema (only meansOfTransport required), kept
  * around solely for Creation's current, deliberately looser rules. That
  * split is pending a schema-side change to make creationJoi.js import this
  * same carrierSchema — including a flagged inconsistency: otherMeansOfTransport
  * is unconstrained here (allowed regardless of meansOfTransport), whereas
- * creationCarrierSchema forbids it unless meansOfTransport is 'Other'.
+ * intendedCarrierSchema forbids it unless meansOfTransport is 'Other'.
  */
 import { carrierSchema } from '../../../../docs/collections/data/sharedSchemas.js'
 
@@ -103,14 +103,14 @@ describe('registrationNumber and reasonForNoRegistrationNumber', () => {
 describe('otherMeansOfTransport', () => {
   test.todo(
     'documents whether otherMeansOfTransport should stay unconstrained here, ' +
-      'or be forbidden-unless-Other to match creationCarrierSchema (flagged inconsistency)'
+      'or be forbidden-unless-Other to match intendedCarrierSchema (flagged inconsistency)'
   )
 })
 
 test.todo(
   'creationJoi.js imports this carrierSchema directly instead of its own ' +
-    'creationCarrierSchema, once Creation is updated to require the full carrier fields — ' +
-    'delete creationCarrierSchema at that point'
+    'intendedCarrierSchema, once Creation is updated to require the full carrier fields — ' +
+    'delete intendedCarrierSchema at that point'
 )
 
 describe('address', () => {

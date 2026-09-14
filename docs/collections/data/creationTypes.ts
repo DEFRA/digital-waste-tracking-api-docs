@@ -120,7 +120,7 @@ export type Producer = {
  * - vehicleRegistration may be supplied only when meansOfTransport is 'Road'.
  * - otherMeansOfTransport may be supplied only when meansOfTransport is 'Other'.
  */
-export type Carrier = {
+export type IntendedCarrier = {
   meansOfTransport: MeansOfTransport
   registrationNumber?: string | null
   reasonForNoRegistrationNumber?: CarrierReasonForNoRegistrationNumber
@@ -224,7 +224,7 @@ export type CreateMovement = {
 
   producer: Producer
   /** Required object at Creation; follows Receipt carrier fields, with meansOfTransport and organisationName mandatory. */
-  carrier: Carrier
+  carrier: IntendedCarrier
   /** Optional broker/dealer details. registrationNumber is required whenever this object is supplied. */
   brokerOrDealer?: BrokerOrDealer
   /**

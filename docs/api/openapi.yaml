@@ -286,7 +286,7 @@ components:
           description: Whether this movement is carried out by, or on behalf of, a council.
           example: false
 
-    creationCarrierDetails:
+    intendedCarrierDetails:
       type: object
       description: |
         Carrier details at creation. Same field structure as the Phase 1
@@ -739,7 +739,7 @@ components:
           $ref: '#/components/schemas/producerDetails'
         carrier:
           allOf:
-            - $ref: '#/components/schemas/creationCarrierDetails'
+            - $ref: '#/components/schemas/intendedCarrierDetails'
           description: Carrier details. Always required at creation; meansOfTransport and organisationName are mandatory at this stage.
         brokerOrDealer:
           allOf:
