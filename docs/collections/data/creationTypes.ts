@@ -94,6 +94,7 @@ export type Producer = {
   organisationName?: string
   /** Environmental permit or exemption number the producer operates under. Optional for Commercial and Municipal; forbidden for Household. */
   authorisationNumber?: string
+  /** At least one of emailAddress or phoneNumber must be provided for Commercial and Municipal waste. Not applicable for Household (forbidden). */
   emailAddress?: string
   phoneNumber?: string
   /** Five-digit Standard Industrial Classification code for the process that created this waste. */
@@ -128,6 +129,7 @@ export type IntendedCarrier = {
   organisationName: string
   vehicleRegistration?: string
   otherMeansOfTransport?: string
+  /** At least one of emailAddress or phoneNumber must be provided. */
   emailAddress?: string
   phoneNumber?: string
   address?: Address
@@ -174,6 +176,7 @@ export type ReceiverAddress = SiteAddress
 export type IntendedReceiver = {
   siteName: string
   authorisationNumber?: string
+  /** At least one of emailAddress or phoneNumber must be provided. */
   emailAddress?: string
   phoneNumber?: string
   address?: ReceiverAddress

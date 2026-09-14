@@ -68,6 +68,11 @@ export const collectionSiteSchema = Joi.object({
       'Phone number of the site where the waste was physically collected.'
     )
 })
+  .or('emailAddress', 'phoneNumber')
+  .messages({
+    'object.missing':
+      'collectionSite: at least one of emailAddress or phoneNumber must be provided.'
+  })
   .required()
   .description('Collection site details.')
 

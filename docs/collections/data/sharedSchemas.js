@@ -11,6 +11,7 @@ import Joi from 'joi'
 import {
   UK_POSTCODE_REGEX,
   IRL_POSTCODE_REGEX,
+  isValidAuthorisationNumber,
   isValidCarrierRegistrationNumber,
   isValidContainerType,
   isValidDisposalOrRecoveryCode,
@@ -591,9 +592,15 @@ export const carrierSchema = Joi.object({
   address: addressSchema.description(
     'Carrier business address. postcode is required when address object is provided.'
   )
-}).description(
-  'Carrier organisation and transport details. Required on all events (D-008).'
-)
+})
+  .or('emailAddress', 'phoneNumber')
+  .messages({
+    'object.missing':
+      'carrier: at least one of emailAddress or phoneNumber must be provided.'
+  })
+  .description(
+    'Carrier organisation and transport details. Required on all events (D-008).'
+  )
 
 /**
  * Broker schema — required when the movement is broker-initiated (D-008).
@@ -644,11 +651,81 @@ export const brokerSchema = Joi.object({
     .description('Broker/dealer contact phone number.'),
 
   address: addressSchema.description('Broker or dealer business address.')
-}).description(
-  'Broker or dealer details — required when the movement is broker-initiated. ' +
-    'registrationNumber is required whenever this object is supplied, with reasonForNoRegistrationNumber ' +
-    'required in its place when registrationNumber is null or empty.'
-)
+})
+  .or('emailAddress', 'phoneNumber')
+  .messages({
+    'object.missing':
+      'brokerOrDealer: at least one of emailAddress or phoneNumber must be provided.'
+  })
+  .description(
+    'Broker or dealer details — required when the movement is broker-initiated. ' +
+      'registrationNumber is required whenever this object is supplied, with reasonForNoRegistrationNumber ' +
+      'required in its place when registrationNumber is null or empty.'
+  )
+
+/**
+ * Receiver site schema — the receiving organisation, contact details, and
+ * physical receipt address, confirmed at receipt. Shared by both receipt
+ * endpoints (POST /deliveries/{deliveryId}/receipt and POST /receipts) —
+ * moved here after the two event files' copies were confirmed byte-identical.
+ * Distinct from Creation's own intendedReceiverSchema (creationJoi.js), which
+ * has different requiredness rules (siteName/authorisationNumber/address are
+ * conditional there, unconditional here) — reconciling the two remains a
+ * separate, open question (see test/event-model/schema/common/receiver.test.js).
+ */
+export const receiverSiteSchema = Joi.object({
+  siteName: Joi.string()
+    .required()
+    .description('Name of the site receiving the waste.'),
+
+  regulatoryPositionStatements: Joi.array()
+    .items(Joi.number().strict().integer().positive())
+    .description(
+      'RPS numbers where the regulator does not require a permit for certain activities. Each must be a positive integer.'
+    ),
+
+  phoneNumber: Joi.string()
+    .custom(
+      validateWithBooleanHelper(
+        isValidPhoneNumber,
+        'receiverSite.phoneNumber must be a valid UK or Irish phone number.'
+      )
+    )
+    .description('Phone number of the receiving organisation.'),
+
+  emailAddress: Joi.string()
+    .email()
+    .description('Email address of the receiving organisation.'),
+
+  authorisationNumber: Joi.string()
+    .strict()
+    .custom(
+      validateWithBooleanHelper(
+        isValidAuthorisationNumber,
+        'Site authorisation number must be in a valid UK format.'
+      )
+    )
+    .required()
+    .description(
+      "One authorisation number per receipt. Must match a valid UK format pattern. Invalid format returns: 'Site authorisation number must be in a valid UK format'."
+    ),
+
+  address: requiredFullAddressSchema(
+    'The address where the waste is physically received.'
+  )
+    .required()
+    .description(
+      'Address where the waste is physically received (merged in from the former receiptSite object).'
+    )
+})
+  .or('emailAddress', 'phoneNumber')
+  .messages({
+    'object.missing':
+      'receiverSite: at least one of emailAddress or phoneNumber must be provided.'
+  })
+  .description(
+    'Receiving organisation, contact details, and the physical address where the waste was received.'
+  )
 
 /**
  * Driver details schema — minimal for now; full model to be defined as the

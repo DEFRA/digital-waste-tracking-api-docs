@@ -107,6 +107,7 @@ export type ReceiverSite = {
   siteName: string
   regulatoryPositionStatements?: number[]
   phoneNumber?: string
+  /** At least one of emailAddress or phoneNumber must be provided. */
   emailAddress?: string
   authorisationNumber: string
   /** Address where the waste is physically received (merged in from the former ReceiptSite type). */

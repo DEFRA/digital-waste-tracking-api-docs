@@ -222,6 +222,9 @@ components:
           `address` must NOT be provided.
         - `Municipal` — `organisationName` and `address` are required;
           `authorisationNumber` and `sicCode` remain optional.
+        - `Commercial` and `Municipal` — at least one of `emailAddress` or
+          `phoneNumber` must be provided (both may be supplied). Not
+          applicable for `Household`, where both remain forbidden.
       required:
         - wasteSource
         - councilMovement
@@ -254,11 +257,17 @@ components:
         emailAddress:
           type: string
           format: email
-          description: Producer contact email address. Not applicable for Household.
+          description: |
+            Producer contact email address. Not applicable for Household.
+            At least one of emailAddress or phoneNumber must be provided
+            for Commercial and Municipal waste.
           example: producer@example.com
         phoneNumber:
           type: string
-          description: Producer contact phone number. Not applicable for Household.
+          description: |
+            Producer contact phone number. Not applicable for Household.
+            At least one of emailAddress or phoneNumber must be provided
+            for Commercial and Municipal waste.
           example: '01234567890'
         address:
           allOf:
@@ -280,7 +289,8 @@ components:
         server-side):
           * `registrationNumber` and `reasonForNoRegistrationNumber` are mutually exclusive;
           * `vehicleRegistration` is only valid when `meansOfTransport` is `Road`;
-          * `otherMeansOfTransport` is only valid when `meansOfTransport` is `Other`.
+          * `otherMeansOfTransport` is only valid when `meansOfTransport` is `Other`;
+          * at least one of `emailAddress` or `phoneNumber` must be provided.
         By collection and delivery the full Phase 1 `carrier` shape applies
         (registrationNumber/reason and Road vehicleRegistration become required).
       required:
@@ -317,10 +327,14 @@ components:
         emailAddress:
           type: string
           format: email
-          description: Carrier contact email address.
+          description: |
+            Carrier contact email address. At least one of emailAddress or
+            phoneNumber must be provided.
         phoneNumber:
           type: string
-          description: Carrier contact phone number.
+          description: |
+            Carrier contact phone number. At least one of emailAddress or
+            phoneNumber must be provided.
         address:
           $ref: '#/components/schemas/address'
 
@@ -335,7 +349,8 @@ components:
         at receipt, where the receiver is modelled by the Phase 1 `receiver`
         (which carries regulatoryPositionStatements and, since the former
         receiptSite object was merged in, the physical receipt address too —
-        see `receiverSite.address`).
+        see `receiverSite.address`). At least one of `emailAddress` or
+        `phoneNumber` must be provided.
       required:
         - siteName
       properties:
@@ -350,10 +365,14 @@ components:
         emailAddress:
           type: string
           format: email
-          description: Receiver contact email address.
+          description: |
+            Receiver contact email address. At least one of emailAddress or
+            phoneNumber must be provided.
         phoneNumber:
           type: string
-          description: Receiver contact phone number.
+          description: |
+            Receiver contact phone number. At least one of emailAddress or
+            phoneNumber must be provided.
         address:
           allOf:
             - $ref: '#/components/schemas/address'
@@ -363,7 +382,10 @@ components:
 
     collectionSite:
       type: object
-      description: Collection site details. The address is where the waste was physically collected, typically a producer site.
+      description: |
+        Collection site details. The address is where the waste was
+        physically collected, typically a producer site. At least one of
+        emailAddress or phoneNumber must be provided.
       required: [address]
       properties:
         address:
@@ -375,11 +397,17 @@ components:
         emailAddress:
           type: string
           format: email
-          description: Email address of the site where the waste was physically collected.
+          description: |
+            Email address of the site where the waste was physically
+            collected. At least one of emailAddress or phoneNumber must be
+            provided.
           example: mailbox@example.co.uk
         phoneNumber:
           type: string
-          description: The UK or international phone number of the site where the waste was physically collected.
+          description: |
+            The UK or international phone number of the site where the
+            waste was physically collected. At least one of emailAddress or
+            phoneNumber must be provided.
           example: 020 4756 XXXX
 
     deliverySite:
@@ -1506,7 +1534,9 @@ components:
             deleted, per this file's Phase 1 convention.
     carrier:
       type: object
-      description: Carrier organisation and transport details. Required on every write event.
+      description: |
+        Carrier organisation and transport details. Required on every write
+        event. At least one of emailAddress or phoneNumber must be provided.
       required:
         - registrationNumber
         - organisationName
@@ -1562,11 +1592,15 @@ components:
         emailAddress:
           type: string
           format: email
-          description: The email address of the carrier.
+          description: |
+            The email address of the carrier. At least one of emailAddress
+            or phoneNumber must be provided.
           example: mailbox@example.co.uk
         phoneNumber:
           type: string
-          description: The UK or international phone number of the carrier.
+          description: |
+            The UK or international phone number of the carrier. At least
+            one of emailAddress or phoneNumber must be provided.
           example: 020 4756 XXXX
         vehicleRegistration:
           type: string
@@ -1589,7 +1623,8 @@ components:
         broker-initiated. registrationNumber is required whenever this
         object is supplied; reasonForNoRegistrationNumber is required
         in its place when registrationNumber is null or empty, mirroring
-        carrier's mutual-exclusivity rule.
+        carrier's mutual-exclusivity rule. At least one of emailAddress or
+        phoneNumber must be provided.
       required:
         - organisationName
         - registrationNumber
@@ -1603,11 +1638,15 @@ components:
         emailAddress:
           type: string
           format: email
-          description: The email address of the carrier.
+          description: |
+            The email address of the broker or dealer. At least one of
+            emailAddress or phoneNumber must be provided.
           example: mailbox@example.co.uk
         phoneNumber:
           type: string
-          description: The UK or international phone number of the carrier.
+          description: |
+            The UK or international phone number of the broker or dealer.
+            At least one of emailAddress or phoneNumber must be provided.
           example: 020 4756 XXXX
         registrationNumber:
           type: string
@@ -1646,7 +1685,8 @@ components:
       type: object
       description: |
         Receiving organisation, contact details, and the physical address
-        where the waste was received, confirmed at receipt.
+        where the waste was received, confirmed at receipt. At least one of
+        emailAddress or phoneNumber must be provided.
       required:
         - siteName
         - authorisationNumber
@@ -1657,11 +1697,16 @@ components:
           description: The name of the site receiving the waste.
         emailAddress:
           type: string
-          description: The email address of the organisation receiving the waste.
+          description: |
+            The email address of the organisation receiving the waste. At
+            least one of emailAddress or phoneNumber must be provided.
           example: mailbox@example.co.uk
         phoneNumber:
           type: string
-          description: The UK or Irish phone number of the organisation receiving the waste.
+          description: |
+            The UK or Irish phone number of the organisation receiving the
+            waste. At least one of emailAddress or phoneNumber must be
+            provided.
           example: 020 4756 XXXX
         authorisationNumber:
           type: string

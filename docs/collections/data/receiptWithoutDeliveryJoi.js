@@ -18,17 +18,15 @@ import Joi from 'joi'
  * is wrong for this endpoint. Built independently instead: wasteItems from
  * the shared wasteItemBaseSchema/actualTreatmentSchema; carrier/brokerOrDealer
  * from the shared carrierSchema/brokerSchema (same as receiptJoi.js, D-042);
- * receiverSite's address from the shared addressSchema via
- * requiredFullAddressSchema (same as receiptJoi.js); the remaining root
- * fields (otherReferenceSchema, receiverSiteSchema, the consignment-code
+ * receiverSite from the shared receiverSiteSchema (same as receiptJoi.js —
+ * the two event files' copies were confirmed byte-identical before merging);
+ * the remaining root fields (otherReferenceSchema, the consignment-code
  * mutual-exclusivity rule) are duplicated from receiptJoi.js rather than
  * imported, since that file doesn't currently export them — matching
  * receiptJoi.js's own historical self-contained-file convention for
  * Receipt-specific pieces.
  */
 import {
-  isValidPhoneNumber,
-  isValidAuthorisationNumber,
   isValidHazardousWasteConsignmentCode,
   isHazardousEwcCode
 } from './validators.js'
@@ -37,7 +35,7 @@ import {
   brokerSchema,
   wasteItemBaseSchema,
   actualTreatmentSchema,
-  requiredFullAddressSchema
+  receiverSiteSchema
 } from './sharedSchemas.js'
 
 const NO_CONSIGNMENT_REASONS = [
@@ -109,54 +107,6 @@ const otherReferenceSchema = Joi.object({
       'Array of label/reference pairs. If the object is included, both label and reference are required together.'
     )
 }).description('Additional movement reference label/reference pair.')
-
-const receiverSiteSchema = Joi.object({
-  siteName: Joi.string()
-    .required()
-    .description('Name of the site receiving the waste.'),
-
-  regulatoryPositionStatements: Joi.array()
-    .items(Joi.number().strict().integer().positive())
-    .description(
-      'RPS numbers where the regulator does not require a permit for certain activities. Each must be a positive integer.'
-    ),
-
-  phoneNumber: Joi.string()
-    .custom(
-      validateWithBooleanHelper(
-        isValidPhoneNumber,
-        'receiverSite.phoneNumber must be a valid UK or Irish phone number.'
-      )
-    )
-    .description('Phone number of the receiving organisation.'),
-
-  emailAddress: Joi.string()
-    .email()
-    .description('Email address of the receiving organisation.'),
-
-  authorisationNumber: Joi.string()
-    .strict()
-    .custom(
-      validateWithBooleanHelper(
-        isValidAuthorisationNumber,
-        'Site authorisation number must be in a valid UK format.'
-      )
-    )
-    .required()
-    .description(
-      "One authorisation number per receipt. Must match a valid UK format pattern. Invalid format returns: 'Site authorisation number must be in a valid UK format'."
-    ),
-
-  address: requiredFullAddressSchema(
-    'The address where the waste is physically received.'
-  )
-    .required()
-    .description(
-      'Address where the waste is physically received (merged in from the former receiptSite object).'
-    )
-}).description(
-  'Receiving organisation, contact details, and the physical address where the waste was received.'
-)
 
 /**
  * Waste item for this endpoint (D-042) — extends the shared wasteItemBaseSchema

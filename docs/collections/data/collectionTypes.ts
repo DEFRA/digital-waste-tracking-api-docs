@@ -47,7 +47,10 @@ export type CollectionAddress = SiteAddress
 export type CollectionSite = {
   /** Address where the waste was physically collected. */
   address: CollectionAddress
-  /** Email address of the site where the waste was physically collected. */
+  /**
+   * Email address of the site where the waste was physically collected.
+   * At least one of emailAddress or phoneNumber must be provided.
+   */
   emailAddress?: string
   /** Phone number of the site where the waste was physically collected. */
   phoneNumber?: string

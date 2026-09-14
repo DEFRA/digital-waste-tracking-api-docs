@@ -8,9 +8,9 @@ import Joi from 'joi'
  * This file validates only the receipt details recorded by the receiver.
  *
  * This file keeps the Receipt schema, nested schemas, allowed values and field descriptions together.
- * Shared sub-schemas (weight, other-reference, carrier, broker/dealer, treatments, address, etc.) are
- * imported from sharedSchemas.js, like the other three event files. Only genuinely Receipt-specific
- * shapes — receiptWasteItem, receiverSite — are defined locally here, and exported for testing
+ * Shared sub-schemas (weight, other-reference, carrier, broker/dealer, treatments, receiverSite, etc.)
+ * are imported from sharedSchemas.js, like the other three event files. Only genuinely Receipt-specific
+ * shapes — receiptWasteItem — are defined locally here, and exported for testing
  * (see test/event-model/schema/receipt/).
  *
  * carrier and brokerOrDealer use the shared carrierSchema/brokerSchema (sharedSchemas.js) rather than
@@ -24,14 +24,14 @@ import Joi from 'joi'
  * since it has no Creation record to source it from.
  *
  * receiverSite (renamed from receiver, pure rename — no shape change) is the receiving organisation
- * and site details; its address (physical receipt site, formerly the separate receiptSite object) is
- * merged directly onto it, built from the shared addressSchema via requiredFullAddressSchema.
+ * and site details, shared with receiptWithoutDeliveryJoi.js (sharedSchemas.js) since the two event
+ * files' copies were confirmed byte-identical. Its address (physical receipt site, formerly the
+ * separate receiptSite object) is merged directly onto it, built from the shared addressSchema via
+ * requiredFullAddressSchema.
  */
 import {
-  isValidAuthorisationNumber,
   isValidContainerType,
-  isValidHazardousWasteConsignmentCode,
-  isValidPhoneNumber
+  isValidHazardousWasteConsignmentCode
 } from './validators.js'
 import {
   PHYSICAL_FORMS,
@@ -41,7 +41,7 @@ import {
   carrierSchema,
   brokerSchema,
   actualTreatmentSchema,
-  requiredFullAddressSchema,
+  receiverSiteSchema,
   validateWithBooleanHelper,
   isProvided
 } from './sharedSchemas.js'
@@ -121,56 +121,9 @@ export const receiptWasteItemSchema = Joi.object({
 // carrier and brokerOrDealer use the shared carrierSchema/brokerSchema (sharedSchemas.js)
 // rather than local duplicates, so this endpoint picks up the same
 // registrationNumber/reasonForNoRegistrationNumber rules and reduced
-// ON_SITE/ONE_OFF/MARINE enum as Creation and Collection.
-
-// Exported for testing (see test/event-model/schema/common/receiver.test.js).
-export const receiverSiteSchema = Joi.object({
-  siteName: Joi.string()
-    .required()
-    .description('Name of the site receiving the waste.'),
-
-  regulatoryPositionStatements: Joi.array()
-    .items(Joi.number().strict().integer().positive())
-    .description(
-      'RPS numbers where the regulator does not require a permit for certain activities. Each must be a positive integer.'
-    ),
-
-  phoneNumber: Joi.string()
-    .custom(
-      validateWithBooleanHelper(
-        isValidPhoneNumber,
-        'receiverSite.phoneNumber must be a valid UK or Irish phone number.'
-      )
-    )
-    .description('Phone number of the receiving organisation.'),
-
-  emailAddress: Joi.string()
-    .email()
-    .description('Email address of the receiving organisation.'),
-
-  authorisationNumber: Joi.string()
-    .strict()
-    .custom(
-      validateWithBooleanHelper(
-        isValidAuthorisationNumber,
-        'Site authorisation number must be in a valid UK format.'
-      )
-    )
-    .required()
-    .description(
-      "One authorisation number per receipt. Must match a valid UK format pattern. Invalid format returns: 'Site authorisation number must be in a valid UK format'."
-    ),
-
-  address: requiredFullAddressSchema(
-    'The address where the waste is physically received.'
-  )
-    .required()
-    .description(
-      'Address where the waste is physically received (merged in from the former receiptSite object).'
-    )
-}).description(
-  'Receiving organisation, contact details, and the physical address where the waste was received.'
-)
+// ON_SITE/ONE_OFF/MARINE enum as Creation and Collection. receiverSiteSchema
+// (also sharedSchemas.js) is shared with receiptWithoutDeliveryJoi.js — the
+// two event files' copies were confirmed byte-identical before merging.
 
 export const receiptMovementSchema = Joi.object({
   yourUniqueReference: Joi.string().description(

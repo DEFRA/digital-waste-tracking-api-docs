@@ -18,13 +18,15 @@ const producer = {
     postcode: 'TE1 2PQ'
   },
   sicCode: '38110',
-  councilMovement: false
+  councilMovement: false,
+  emailAddress: 'producer@example.com'
 }
 
 const carrier = {
   meansOfTransport: 'Road',
   organisationName: 'Test Carrier Ltd',
-  vehicleRegistration: 'AB12 CDE'
+  vehicleRegistration: 'AB12 CDE',
+  emailAddress: 'carrier@example.com'
 }
 
 const nonHazardousWasteItem = {
@@ -68,7 +70,8 @@ const receiver = {
   address: {
     fullAddress: '99 Receiver Road, Test City',
     postcode: 'TE1 3RX'
-  }
+  },
+  emailAddress: 'receiver@example.com'
 }
 
 const baseMovement = {

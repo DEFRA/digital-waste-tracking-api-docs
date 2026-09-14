@@ -245,6 +245,7 @@ export type CarrierDetails = {
   vehicleRegistration?: string
   /** Description when meansOfTransport is Other. */
   otherMeansOfTransport?: string
+  /** At least one of emailAddress or phoneNumber must be provided. */
   emailAddress?: string
   phoneNumber?: string
   address?: Address
@@ -263,6 +264,7 @@ export type BrokerDetails = {
   organisationName: string
   registrationNumber: string | null
   reasonForNoRegistrationNumber?: CarrierReasonForNoRegistrationNumber
+  /** At least one of emailAddress or phoneNumber must be provided. */
   emailAddress?: string
   phoneNumber?: string
   address?: Address

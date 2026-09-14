@@ -202,11 +202,17 @@ export const intendedReceiverSchema = Joi.object({
   }).description(
     'Required when receiver.siteName is populated. Must include postcode and fullAddress.'
   )
-}).description(
-  'A single receiving site entry within receivers (D-043). siteName is mandatory whenever an ' +
-    'entry is supplied, which in turn makes authorisationNumber and address mandatory too (both ' +
-    'are conditional on siteName being populated).'
-)
+})
+  .or('emailAddress', 'phoneNumber')
+  .messages({
+    'object.missing':
+      'receiver: at least one of emailAddress or phoneNumber must be provided.'
+  })
+  .description(
+    'A single receiving site entry within receivers (D-043). siteName is mandatory whenever an ' +
+      'entry is supplied, which in turn makes authorisationNumber and address mandatory too (both ' +
+      'are conditional on siteName being populated).'
+  )
 
 // ---------------------------------------------------------------------------
 // Producer
@@ -295,7 +301,15 @@ export const producerSchema = Joi.object({
     .description(
       'Whether this movement is carried out by, or on behalf of, a council.'
     )
-}).description('Producer organisation details.')
+})
+  .when(Joi.ref('wasteSource', { ancestor: 0 }), {
+    is: Joi.valid('Commercial', 'Municipal'),
+    then: Joi.object().or('emailAddress', 'phoneNumber').messages({
+      'object.missing':
+        'producer: at least one of emailAddress or phoneNumber must be provided for Commercial and Municipal waste.'
+    })
+  })
+  .description('Producer organisation details.')
 
 // ---------------------------------------------------------------------------
 // Carrier at creation
@@ -368,10 +382,16 @@ export const intendedCarrierSchema = Joi.object({
   address: addressSchema
     .optional()
     .description('Carrier business address. Optional at Creation.')
-}).description(
-  'Carrier details at Creation. Same field structure as Receipt carrier, with meansOfTransport and ' +
-    'organisationName mandatory. Optional fields retain integrity rules when supplied.'
-)
+})
+  .or('emailAddress', 'phoneNumber')
+  .messages({
+    'object.missing':
+      'carrier: at least one of emailAddress or phoneNumber must be provided.'
+  })
+  .description(
+    'Carrier details at Creation. Same field structure as Receipt carrier, with meansOfTransport and ' +
+      'organisationName mandatory. Optional fields retain integrity rules when supplied.'
+  )
 
 // ---------------------------------------------------------------------------
 // Root schema

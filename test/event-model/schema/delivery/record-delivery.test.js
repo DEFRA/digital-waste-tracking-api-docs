@@ -11,7 +11,8 @@ const carrier = {
   meansOfTransport: 'Road',
   registrationNumber: 'CBDU123456',
   organisationName: 'Test Carrier Ltd',
-  vehicleRegistration: 'AB12 CDE'
+  vehicleRegistration: 'AB12 CDE',
+  emailAddress: 'carrier@example.com'
 }
 
 const deliverySite = {

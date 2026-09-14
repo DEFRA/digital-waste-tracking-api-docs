@@ -34,13 +34,15 @@ const receiptMovement = {
     address: {
       fullAddress: '1 Receipt Yard, Test City',
       postcode: 'TE1 1ST'
-    }
+    },
+    emailAddress: 'receiver@example.com'
   },
   carrier: {
     meansOfTransport: 'Road',
     registrationNumber: 'CBDU123456',
     organisationName: 'Test Carrier Ltd',
-    vehicleRegistration: 'AB12 CDE'
+    vehicleRegistration: 'AB12 CDE',
+    emailAddress: 'carrier@example.com'
   }
 }
 

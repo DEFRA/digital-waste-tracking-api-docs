@@ -32,7 +32,8 @@ const carrierWithoutRegistrationNumber = {
   meansOfTransport: 'Rail',
   registrationNumber: '',
   reasonForNoRegistrationNumber: 'ONE_OFF',
-  organisationName: 'Test Carrier Ltd'
+  organisationName: 'Test Carrier Ltd',
+  emailAddress: 'carrier@example.com'
 }
 
 test('accepts a fully populated valid carrier', () => {
@@ -119,6 +120,26 @@ describe('address', () => {
       ...carrier,
       address: { fullAddress: '1 Carrier Way, Test City' }
     })
+    expect(error).toBeDefined()
+  })
+})
+
+describe('emailAddress and phoneNumber', () => {
+  test('accepts emailAddress only', () => {
+    const { phoneNumber, ...withoutPhoneNumber } = carrier
+    const { error } = carrierSchema.validate(withoutPhoneNumber)
+    expect(error).toBeUndefined()
+  })
+
+  test('accepts phoneNumber only', () => {
+    const { emailAddress, ...withoutEmailAddress } = carrier
+    const { error } = carrierSchema.validate(withoutEmailAddress)
+    expect(error).toBeUndefined()
+  })
+
+  test('requires at least one of the two', () => {
+    const { emailAddress, phoneNumber, ...withoutContactDetails } = carrier
+    const { error } = carrierSchema.validate(withoutContactDetails)
     expect(error).toBeDefined()
   })
 })

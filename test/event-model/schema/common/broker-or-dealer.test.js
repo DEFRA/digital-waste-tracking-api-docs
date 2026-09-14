@@ -52,11 +52,23 @@ describe('organisationName', () => {
 })
 
 describe('emailAddress and phoneNumber', () => {
-  test('does not require at least one of the two', () => {
+  test('accepts emailAddress only', () => {
+    const { phoneNumber, ...withoutPhoneNumber } = brokerOrDealer
+    const { error } = brokerSchema.validate(withoutPhoneNumber)
+    expect(error).toBeUndefined()
+  })
+
+  test('accepts phoneNumber only', () => {
+    const { emailAddress, ...withoutEmailAddress } = brokerOrDealer
+    const { error } = brokerSchema.validate(withoutEmailAddress)
+    expect(error).toBeUndefined()
+  })
+
+  test('requires at least one of the two', () => {
     const { emailAddress, phoneNumber, ...withoutContactDetails } =
       brokerOrDealer
     const { error } = brokerSchema.validate(withoutContactDetails)
-    expect(error).toBeUndefined()
+    expect(error).toBeDefined()
   })
 })
 
