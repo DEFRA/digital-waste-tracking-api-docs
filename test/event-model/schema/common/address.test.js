@@ -1,20 +1,17 @@
 /**
  * address is treated as one resource across all events — this is
- * businessAddressSchema, the base of the address family (postcode required,
+ * addressSchema, the base of the address family (postcode required,
  * fullAddress optional; UK or Irish postcode accepted).
  *
- * Several events layer a straightforward "fullAddress required" overlay on
- * top of this same base via `.keys()` (collection.address,
- * deliverySite.address, creation's receiver.address when siteName is set) —
- * those are consistent extensions of this schema, not a divergent shape, and
- * are tested alongside their owning event, not here.
- *
- * receiptJoi.js's receiptAddressSchema is the genuine outlier: a standalone
- * reimplementation, not built on this base, which also drops Irish Eircode
- * support (UK postcodes only). That's pending a schema-side change to build
- * receiptAddressSchema from this same businessAddressSchema instead.
+ * Every event layers a straightforward "fullAddress required" overlay on top
+ * of this same base via requiredFullAddressSchema (collection.address,
+ * deliverySite.address, creation's receiver.address when siteName is set,
+ * and Receipt's receiverSite.address) — those are consistent extensions of
+ * this schema, not a divergent shape, and are tested alongside their owning
+ * event, not here. receiptJoi.js's former standalone UK-only address schema
+ * has converged onto this same base.
  */
-import { businessAddressSchema } from '../../../../docs/collections/data/sharedSchemas.js'
+import { addressSchema } from '../../../../docs/collections/data/sharedSchemas.js'
 
 const address = {
   fullAddress: '1 Example Way, Test City',
@@ -22,19 +19,19 @@ const address = {
 }
 
 test('accepts a valid address', () => {
-  const { error } = businessAddressSchema.validate(address)
+  const { error } = addressSchema.validate(address)
   expect(error).toBeUndefined()
 })
 
 describe('postcode', () => {
   test('is required', () => {
     const { postcode, ...withoutPostcode } = address
-    const { error } = businessAddressSchema.validate(withoutPostcode)
+    const { error } = addressSchema.validate(withoutPostcode)
     expect(error).toBeDefined()
   })
 
   test('accepts an Irish Eircode', () => {
-    const { error } = businessAddressSchema.validate({
+    const { error } = addressSchema.validate({
       ...address,
       postcode: 'D6W 1234'
     })
@@ -45,15 +42,9 @@ describe('postcode', () => {
 })
 
 describe('fullAddress', () => {
-  test('is not required on the base business address', () => {
+  test('is not required on the base address', () => {
     const { fullAddress, ...withoutFullAddress } = address
-    const { error } = businessAddressSchema.validate(withoutFullAddress)
+    const { error } = addressSchema.validate(withoutFullAddress)
     expect(error).toBeUndefined()
   })
 })
-
-test.todo(
-  'receiptJoi.js builds receiptAddressSchema from this businessAddressSchema ' +
-    'instead of a standalone copy, once Receipt address rules are reconciled — ' +
-    'including whether Irish Eircodes should be accepted there too'
-)

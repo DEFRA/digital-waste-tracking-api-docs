@@ -2,7 +2,7 @@
  * Placeholder — collectionSiteSchema (collectionSite), exported from
  * collectionJoi.js for testing. Its address overlay (collectionAddressSchema,
  * also exported for testing) requires fullAddress, unlike the base
- * businessAddressSchema (common/address.test.js).
+ * addressSchema (common/address.test.js).
  */
 import {
   collectionSiteSchema,

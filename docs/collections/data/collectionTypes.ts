@@ -17,7 +17,7 @@ export type {
   MeansOfTransport,
   CarrierReasonForNoRegistrationNumber,
   OtherReferenceForMovement,
-  BusinessAddress,
+  Address,
   CarrierDetails,
   BrokerDetails,
   ValidationResult
@@ -27,7 +27,8 @@ import type {
   OtherReferenceForMovement,
   CarrierDetails,
   BrokerDetails,
-  ValidationResult
+  ValidationResult,
+  SiteAddress
 } from './sharedTypes.js'
 
 // ---------------------------------------------------------------------------
@@ -41,10 +42,7 @@ export type CollectionType = 'STATIC' | 'TRANSIT'
 // Collection site
 // ---------------------------------------------------------------------------
 
-export type CollectionAddress = {
-  postcode: string
-  fullAddress: string
-}
+export type CollectionAddress = SiteAddress
 
 export type CollectionSite = {
   /** Address where the waste was physically collected. */

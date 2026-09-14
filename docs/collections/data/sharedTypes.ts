@@ -2,9 +2,6 @@
  * Shared types used across all DWT event schemas (Creation, Collection,
  * Delivery, Receipt). Import from here rather than from individual event
  * files to avoid duplication.
- *
- * Receipt-specific types (ReceiptAddress, Receipt, Receiver) remain in
- * receiptTypes.ts to avoid disturbing the Phase 1 contract.
  */
 
 // ---------------------------------------------------------------------------
@@ -83,15 +80,26 @@ export type ActualTreatment = {
 }
 
 /**
- * Business address used by carrier, broker, producer and receiver parties.
+ * Address used by every party and site across all events — carrier, broker,
+ * producer, receiver, collection site, delivery site and receipt site alike.
  * fullAddress is optional by default; postcode is always required.
- * Event-specific schemas can tighten this, for example Creation receiver
- * requires both fullAddress and postcode when receiver.siteName is populated.
+ * Event-specific schemas tighten this for sites that are physically visited
+ * (see SiteAddress), for example Creation's receiver requires both
+ * fullAddress and postcode when receiver.siteName is populated.
  */
-export type BusinessAddress = {
+export type Address = {
   fullAddress?: string
   postcode: string
 }
+
+/**
+ * Address with fullAddress promoted from optional to required — for sites
+ * that are physically visited: collection, delivery, and receiver/receipt
+ * sites. Event files re-export this under their own established type name
+ * (e.g. CollectionAddress, DeliverySiteAddress) rather than using it directly,
+ * to avoid disturbing existing consumers.
+ */
+export type SiteAddress = Address & { fullAddress: string }
 
 export type OtherReferenceForMovement = {
   /** Label identifying the reference type, e.g. "transferNoteNumber" */
@@ -239,7 +247,7 @@ export type CarrierDetails = {
   otherMeansOfTransport?: string
   emailAddress?: string
   phoneNumber?: string
-  address?: BusinessAddress
+  address?: Address
 }
 
 /**
@@ -257,7 +265,7 @@ export type BrokerDetails = {
   reasonForNoRegistrationNumber?: CarrierReasonForNoRegistrationNumber
   emailAddress?: string
   phoneNumber?: string
-  address?: BusinessAddress
+  address?: Address
 }
 
 /**

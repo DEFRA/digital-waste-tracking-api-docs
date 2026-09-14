@@ -6,11 +6,12 @@
  *
  * receiptJoi.js does NOT import this schema yet — it still defines its own
  * receiverSiteSchema, a genuinely different shape: siteName and
- * authorisationNumber are unconditionally required, it adds
- * regulatoryPositionStatements, and it has no nested address at all (address
- * lives separately on receiptSite.address / receiptSiteSchema). That split is
- * pending a schema-side change to make receiptJoi.js import this same
- * intendedReceiverSchema instead.
+ * authorisationNumber are unconditionally required, and it adds
+ * regulatoryPositionStatements. It now also carries a nested address (merged
+ * in from the former receiptSite object), built from the same shared
+ * addressSchema as this one, but unconditionally required rather than only
+ * when siteName is populated. That split is pending a schema-side change to
+ * make receiptJoi.js import this same intendedReceiverSchema instead.
  */
 import { intendedReceiverSchema } from '../../../../docs/collections/data/creationJoi.js'
 
@@ -41,7 +42,9 @@ describe('siteName', () => {
 describe('authorisationNumber', () => {
   test('is required when siteName is populated', () => {
     const { authorisationNumber, ...withoutAuthorisationNumber } = receiver
-    const { error } = intendedReceiverSchema.validate(withoutAuthorisationNumber)
+    const { error } = intendedReceiverSchema.validate(
+      withoutAuthorisationNumber
+    )
     expect(error).toBeDefined()
   })
 })

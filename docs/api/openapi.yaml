@@ -208,23 +208,6 @@ components:
           description: The reference value. Must be supplied together with its label.
           example: PO-98765
 
-    addressWithFullAddress:
-      type: object
-      description: |
-        Address where both fullAddress and postcode are required. Used by the
-        collection site and deliv place. Accepts UK postcodes and Irish
-        Eircodes (unlike the receipt address, which is UK-only).
-      required: [fullAddress, postcode]
-      properties:
-        fullAddress:
-          type: string
-          description: Full address of the site.
-          example: 10 Industrial Way, Test City
-        postcode:
-          type: string
-          description: Accepts UK postcodes and Irish Eircodes.
-          example: TE1 2PQ
-
     producerDetails:
       type: object
       description: |
@@ -350,8 +333,9 @@ components:
         makes `authorisationNumber` and `address` (with fullAddress) mandatory
         too. These are provisional — the authoritative receiver is confirmed
         at receipt, where the receiver is modelled by the Phase 1 `receiver`
-        (which carries regulatoryPositionStatements and no address; the
-        receipt site address is the separate `receiptSite.address`).
+        (which carries regulatoryPositionStatements and, since the former
+        receiptSite object was merged in, the physical receipt address too —
+        see `receiverSite.address`).
       required:
         - siteName
       properties:
@@ -373,6 +357,8 @@ components:
         address:
           allOf:
             - $ref: '#/components/schemas/address'
+            - type: object
+              required: [fullAddress]
           description: Receiver site address. Required (with fullAddress) when siteName is supplied.
 
     collectionSite:
@@ -382,7 +368,9 @@ components:
       properties:
         address:
           allOf:
-            - $ref: '#/components/schemas/addressWithFullAddress'
+            - $ref: '#/components/schemas/address'
+            - type: object
+              required: [fullAddress]
           description: Address where the waste was physically collected. Both fullAddress and postcode are required.
         emailAddress:
           type: string
@@ -415,7 +403,9 @@ components:
           example: WEX123456
         address:
           allOf:
-            - $ref: '#/components/schemas/addressWithFullAddress'
+            - $ref: '#/components/schemas/address'
+            - type: object
+              required: [fullAddress]
           description: Mandatory physical address where the waste was delivered. Both fullAddress and postcode are required.
 
     driverDetails:
@@ -762,7 +752,9 @@ components:
           example: false
         collectionSite:
           allOf:
-            - $ref: '#/components/schemas/addressWithFullAddress'
+            - $ref: '#/components/schemas/address'
+            - type: object
+              required: [fullAddress]
           description: |
             Address where the waste is planned to be collected. Required when
             collectionAddressDifferentFromProducer is true; must not be
@@ -1177,8 +1169,9 @@ components:
     # wrong for this endpoint (it has no prior Creation record to source
     # classification from). Built independently instead: wasteItems uses
     # receiptWithoutDeliveryWasteItem (full classification); carrier,
-    # brokerOrDealer, receiverSite and receiptSite reuse the same shared
-    # components as receiveMovementRequest; the remaining root fields are
+    # brokerOrDealer and receiverSite (which carries the merged receipt site
+    # address) reuse the same shared components as receiveMovementRequest;
+    # the remaining root fields are
     # duplicated inline since receiveMovementRequest doesn't expose them as
     # separately reusable pieces.
     receiptWithoutDeliveryRequest:
@@ -1190,7 +1183,6 @@ components:
         - carrier
         - wasteItems
         - receiverSite
-        - receiptSite
         - reasonForNoDeliveryId
       properties:
         apiCode:
@@ -1243,8 +1235,6 @@ components:
           $ref: '#/components/schemas/brokerOrDealer'
         receiverSite:
           $ref: '#/components/schemas/receiverSite'
-        receiptSite:
-          $ref: '#/components/schemas/receiptSite'
         reasonForNoDeliveryId:
           type: string
           description: |
@@ -1654,10 +1644,13 @@ components:
           example: ONE_OFF
     receiverSite:
       type: object
-      description: Receiving organisation and site details, confirmed at receipt.
+      description: |
+        Receiving organisation, contact details, and the physical address
+        where the waste was received, confirmed at receipt.
       required:
         - siteName
         - authorisationNumber
+        - address
       properties:
         siteName:
           type: string
@@ -1737,14 +1730,15 @@ components:
             - 343
             - 456
             - 789
-    receiptSite:
-      type: object
-      description: Physical receipt site details.
-      required:
-        - address
-      properties:
         address:
-          $ref: '#/components/schemas/receiptAddress'
+          allOf:
+            - $ref: '#/components/schemas/address'
+            - type: object
+              required: [fullAddress]
+          description: |
+            Address where the waste is physically received (merged in from
+            the former receiptSite object). Both fullAddress and postcode
+            are required.
     # Intended Treatment (D-031 amended) — renamed from disposalOrRecoveryCode/
     # treatment; the `code` field is renamed to `disposalOrRecoveryCode` (same
     # validation). Used by createWasteItem.intendedTreatments (Creation) and
@@ -1866,22 +1860,6 @@ components:
           type: string
           description: A valid postcode must be included. <p><b>Note-</b></p> Carriers, Brokers/Dealers accept UK and Irish post codes.
           example: W12 7ZL
-    receiptAddress:
-      type: object
-      description: Address where the waste is physically received. UK postcodes only.
-      required:
-        - fullAddress
-        - postcode
-      properties:
-        fullAddress:
-          type: string
-          description: This is the address the waste is received at.
-          example: 26a Oil Drum Lane, London, UK
-        postcode:
-          type: string
-          description: A valid postcode must be included. <p><b>Note- </b></p> <p>Carriers, Brokers/Dealers accept UK and Irish post codes. Receivers accept only UK post codes.</p> <p><font color="green"><b>Business Rule:</b></font></p> Must be in specified receiptAddress.postcode format.
-          example: W12 7ZL
-
     # Waste item for the ordinary Receipt endpoint (D-042) — logistics
     # fields plus actualTreatments only. Classification is dropped entirely;
     # a prior Creation record already has it. Does not extend wasteItemBase
@@ -1946,7 +1924,6 @@ components:
         - carrier
         - wasteItems
         - receiverSite
-        - receiptSite
       properties:
         apiCode:
           type: string
@@ -2020,15 +1997,13 @@ components:
           $ref: '#/components/schemas/brokerOrDealer'
         receiverSite:
           $ref: '#/components/schemas/receiverSite'
-        receiptSite:
-          $ref: '#/components/schemas/receiptSite'
 
   # ----------------------------------------------------------------------
   # Reusable request bodies (Phase 1)
   # ----------------------------------------------------------------------
   requestBodies:
     receiveMovementRequest:
-      description: Details of the waste movement to be created or updated. The mandatory parameters to be included in the API call are the <b>apiCode, dateTimeReceived, carrier, wasteItems, receiver and receiptSite</b>.
+      description: Details of the waste movement to be created or updated. The mandatory parameters to be included in the API call are the <b>apiCode, dateTimeReceived, carrier, wasteItems and receiverSite</b>.
       required: true
       content:
         application/json:

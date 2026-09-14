@@ -13,7 +13,7 @@
  * Creation to source classification from, is the one that keeps it.
  */
 
-import type { ActualTreatment, CarrierDetails, BrokerDetails } from './sharedTypes.js'
+import type { ActualTreatment, CarrierDetails, BrokerDetails, SiteAddress } from './sharedTypes.js'
 
 export type WeightMetric =
   | 'Grams'
@@ -53,7 +53,6 @@ export type ReceiptMovement = {
   // Main objects
   wasteItems: ReceiptWasteItem[]
   receiverSite: ReceiverSite
-  receiptSite: ReceiptSite
   carrier: CarrierDetails
   brokerOrDealer?: BrokerDetails
 }
@@ -110,13 +109,6 @@ export type ReceiverSite = {
   phoneNumber?: string
   emailAddress?: string
   authorisationNumber: string
-}
-
-export type ReceiptSite = {
-  address: ReceiptAddress
-}
-
-export type ReceiptAddress = {
-  postcode: string
-  fullAddress: string
+  /** Address where the waste is physically received (merged in from the former ReceiptSite type). */
+  address: SiteAddress
 }

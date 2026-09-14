@@ -45,7 +45,7 @@ export type {
   OtherReferenceForMovement,
   Weight,
   IntendedTreatment,
-  BusinessAddress,
+  Address,
   Pops,
   PopComponent,
   PopConcentrationThresholdOperator,
@@ -65,10 +65,11 @@ import type {
   ReasonForNoConsignmentCode,
   OtherReferenceForMovement,
   IntendedTreatment,
-  BusinessAddress,
+  Address,
   WasteItemBase,
   BrokerDetails,
-  ValidationResult
+  ValidationResult,
+  SiteAddress
 } from './sharedTypes.js'
 
 // ---------------------------------------------------------------------------
@@ -99,7 +100,7 @@ export type Producer = {
   sicCode?: string
 
   /** Required for Commercial and Municipal; forbidden for Household. */
-  address?: BusinessAddress
+  address?: Address
   /** Whether this movement is carried out by, or on behalf of, a council. */
   councilMovement: boolean
 }
@@ -129,7 +130,7 @@ export type IntendedCarrier = {
   otherMeansOfTransport?: string
   emailAddress?: string
   phoneNumber?: string
-  address?: BusinessAddress
+  address?: Address
 }
 
 // ---------------------------------------------------------------------------
@@ -160,10 +161,7 @@ export type CreateWasteItem = WasteItemBase & {
 // Receiver at creation
 // ---------------------------------------------------------------------------
 
-export type ReceiverAddress = {
-  postcode: string
-  fullAddress: string
-}
+export type ReceiverAddress = SiteAddress
 
 /**
  * A single receiving site entry within receivers (D-043).
@@ -190,10 +188,7 @@ export type IntendedReceiver = {
  * (both fullAddress and postcode required), reused here so Creation's planned
  * collection address matches what the Collection event itself records.
  */
-export type CollectionSiteAddress = {
-  fullAddress: string
-  postcode: string
-}
+export type CollectionSiteAddress = SiteAddress
 
 // ---------------------------------------------------------------------------
 // Create Movement request / response

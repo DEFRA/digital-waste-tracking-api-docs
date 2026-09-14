@@ -46,7 +46,8 @@ import {
   MEANS_OF_TRANSPORT,
   REASONS_FOR_NO_REGISTRATION_NUMBER,
   NO_CONSIGNMENT_REASONS,
-  businessAddressSchema,
+  addressSchema,
+  requiredFullAddressSchema,
   otherReferenceSchema,
   brokerSchema,
   carrierRegistrationNumberSchema,
@@ -127,21 +128,6 @@ export const createWasteItemSchema = wasteItemBaseSchema
 // Receiver at creation
 // ---------------------------------------------------------------------------
 
-const receiverAddressSchema = businessAddressSchema
-  .keys({
-    fullAddress: Joi.string()
-      .required()
-      .description('Full receiver site address.'),
-
-    postcode: businessAddressSchema
-      .extract('postcode')
-      .required()
-      .description('Receiver site postcode.')
-  })
-  .description(
-    'Receiver site address. Required with fullAddress and postcode when receiver.siteName is populated.'
-  )
-
 /**
  * Planned collection address — same shape as Collection's own collectionSite.address
  * (both fullAddress and postcode required), reused here so Creation's planned
@@ -149,13 +135,13 @@ const receiverAddressSchema = businessAddressSchema
  * distinctly from collectionJoi.js's exported collectionSiteSchema (the actual
  * collection site, a different, larger shape) to avoid a naming collision.
  */
-const plannedCollectionAddressSchema = businessAddressSchema
+const plannedCollectionAddressSchema = addressSchema
   .keys({
     fullAddress: Joi.string()
       .required()
       .description('Full collection site address.'),
 
-    postcode: businessAddressSchema
+    postcode: addressSchema
       .extract('postcode')
       .required()
       .description('Collection site postcode.')
@@ -209,8 +195,10 @@ export const intendedReceiverSchema = Joi.object({
 
   address: Joi.when('siteName', {
     is: Joi.exist(),
-    then: receiverAddressSchema.required(),
-    otherwise: receiverAddressSchema.optional()
+    then: requiredFullAddressSchema('Full receiver site address.').required(),
+    otherwise: requiredFullAddressSchema(
+      'Full receiver site address.'
+    ).optional()
   }).description(
     'Required when receiver.siteName is populated. Must include postcode and fullAddress.'
   )
@@ -296,7 +284,7 @@ export const producerSchema = Joi.object({
   address: Joi.when('wasteSource', {
     is: 'Household',
     then: Joi.forbidden(),
-    otherwise: businessAddressSchema.required()
+    otherwise: addressSchema.required()
   }).description(
     'Producer site address. Required for Commercial and Municipal; not applicable for Household.'
   ),
@@ -377,7 +365,7 @@ export const intendedCarrierSchema = Joi.object({
     .optional()
     .description('Carrier contact phone number. Optional at Creation.'),
 
-  address: businessAddressSchema
+  address: addressSchema
     .optional()
     .description('Carrier business address. Optional at Creation.')
 }).description(

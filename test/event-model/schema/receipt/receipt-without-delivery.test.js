@@ -1,9 +1,9 @@
 /**
  * Placeholder — receiptWithoutDeliveryJoi.js's receiptWithoutDeliverySchema
- * (D-041, D-042). Only the root schema is exported — its address/site/
- * receiver sub-shapes are private local duplicates identical to receiptJoi.js's
- * already-tested receiptAddressSchema/receiptSiteSchema/receiverSiteSchema, so
- * they're exercised only indirectly through the fixture here, not re-tested
+ * (D-041, D-042). Only the root schema is exported — its receiverSite (which
+ * carries the merged receipt site address) is a private local duplicate
+ * identical to receiptJoi.js's already-tested receiverSiteSchema, so it's
+ * exercised only indirectly through the fixture here, not re-tested
  * under a different name. Unlike the ordinary Receipt endpoint
  * (receipt/waste-item.test.js), wasteItems on this endpoint carry full
  * classification (D-042) — there is no prior Creation record to source it
@@ -30,10 +30,7 @@ const wasteItem = {
 
 const receiverSite = {
   siteName: 'Test Receiver Site',
-  authorisationNumber: 'HP3456XX'
-}
-
-const receiptSite = {
+  authorisationNumber: 'HP3456XX',
   address: {
     fullAddress: '1 Receipt Yard, Test City',
     postcode: 'TE1 1ST'
@@ -60,7 +57,6 @@ const receiptWithoutDelivery = {
   dateTimeReceived: '2026-01-01T09:00:00Z',
   wasteItems: [wasteItem],
   receiverSite,
-  receiptSite,
   carrier,
   reasonForNoDeliveryId:
     'Waste collected directly from an exempt site with no prior delivery record.'

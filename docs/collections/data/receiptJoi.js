@@ -8,10 +8,10 @@ import Joi from 'joi'
  * This file validates only the receipt details recorded by the receiver.
  *
  * This file keeps the Receipt schema, nested schemas, allowed values and field descriptions together.
- * Shared sub-schemas (weight, other-reference, carrier, broker/dealer, treatments, etc.) are imported
- * from sharedSchemas.js, like the other three event files. Only genuinely Receipt-specific shapes —
- * receiptWasteItem, receiverSite, the receiptSite/receiptAddress — are defined locally here, and exported
- * for testing (see test/event-model/schema/receipt/).
+ * Shared sub-schemas (weight, other-reference, carrier, broker/dealer, treatments, address, etc.) are
+ * imported from sharedSchemas.js, like the other three event files. Only genuinely Receipt-specific
+ * shapes — receiptWasteItem, receiverSite — are defined locally here, and exported for testing
+ * (see test/event-model/schema/receipt/).
  *
  * carrier and brokerOrDealer use the shared carrierSchema/brokerSchema (sharedSchemas.js) rather than
  * local duplicates, so this endpoint picks up the same registrationNumber/reasonForNoRegistrationNumber
@@ -24,10 +24,10 @@ import Joi from 'joi'
  * since it has no Creation record to source it from.
  *
  * receiverSite (renamed from receiver, pure rename — no shape change) is the receiving organisation
- * and site details.
+ * and site details; its address (physical receipt site, formerly the separate receiptSite object) is
+ * merged directly onto it, built from the shared addressSchema via requiredFullAddressSchema.
  */
 import {
-  UK_POSTCODE_REGEX,
   isValidAuthorisationNumber,
   isValidContainerType,
   isValidHazardousWasteConsignmentCode,
@@ -41,6 +41,7 @@ import {
   carrierSchema,
   brokerSchema,
   actualTreatmentSchema,
+  requiredFullAddressSchema,
   validateWithBooleanHelper,
   isProvided
 } from './sharedSchemas.js'
@@ -66,21 +67,6 @@ const validateReceiptConsignmentRules = (movement, helpers) => {
 
   return movement
 }
-
-// Exported for testing (see test/event-model/schema/common/address.test.js) —
-// receiptAddress is the pending outlier still to converge on the shared address shape.
-export const receiptAddressSchema = Joi.object({
-  postcode: Joi.string()
-    .pattern(UK_POSTCODE_REGEX)
-    .required()
-    .description(
-      'Unlike carrier and broker addresses, the receipt address accepts UK postcodes only. Must be in valid UK postcode format.'
-    ),
-
-  fullAddress: Joi.string()
-    .required()
-    .description('The address where the waste is physically received.')
-}).description('Address where the waste is physically received.')
 
 /**
  * Waste item received (D-042) — classification dropped entirely; a prior
@@ -173,14 +159,18 @@ export const receiverSiteSchema = Joi.object({
     .required()
     .description(
       "One authorisation number per receipt. Must match a valid UK format pattern. Invalid format returns: 'Site authorisation number must be in a valid UK format'."
-    )
-}).description('Receiving organisation and site details.')
+    ),
 
-export const receiptSiteSchema = Joi.object({
-  address: receiptAddressSchema
+  address: requiredFullAddressSchema(
+    'The address where the waste is physically received.'
+  )
     .required()
-    .description('Address where the waste is physically received.')
-}).description('Physical receipt site details.')
+    .description(
+      'Address where the waste is physically received (merged in from the former receiptSite object).'
+    )
+}).description(
+  'Receiving organisation, contact details, and the physical address where the waste was received.'
+)
 
 export const receiptMovementSchema = Joi.object({
   yourUniqueReference: Joi.string().description(
@@ -235,8 +225,6 @@ export const receiptMovementSchema = Joi.object({
     .description('At least one waste item is required.'),
 
   receiverSite: receiverSiteSchema.required(),
-
-  receiptSite: receiptSiteSchema.required(),
 
   carrier: carrierSchema.required(),
 
