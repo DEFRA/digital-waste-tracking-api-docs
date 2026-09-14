@@ -5,7 +5,7 @@
  * nested address are required as a result.
  *
  * receiptJoi.js does NOT import this schema yet — it still defines its own
- * receiverSchema, a genuinely different shape: siteName and
+ * receiverSiteSchema, a genuinely different shape: siteName and
  * authorisationNumber are unconditionally required, it adds
  * regulatoryPositionStatements, and it has no nested address at all (address
  * lives separately on receiptSite.address / receiptSiteSchema). That split is
@@ -56,7 +56,7 @@ describe('address', () => {
 
 test.todo(
   'receiptJoi.js imports this intendedReceiverSchema directly instead of its own ' +
-    'receiverSchema, once Receipt is updated to match this shape (unconditional ' +
+    'receiverSiteSchema, once Receipt is updated to match this shape (unconditional ' +
     'siteName/authorisationNumber, regulatoryPositionStatements, no nested address) — ' +
     'reconcile the two and delete whichever definition loses out'
 )
