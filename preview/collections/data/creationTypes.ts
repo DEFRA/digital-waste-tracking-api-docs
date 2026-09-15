@@ -45,7 +45,7 @@ export type {
   OtherReferenceForMovement,
   Weight,
   IntendedTreatment,
-  BusinessAddress,
+  Address,
   Pops,
   PopComponent,
   PopConcentrationThresholdOperator,
@@ -65,10 +65,11 @@ import type {
   ReasonForNoConsignmentCode,
   OtherReferenceForMovement,
   IntendedTreatment,
-  BusinessAddress,
+  Address,
   WasteItemBase,
   BrokerDetails,
-  ValidationResult
+  ValidationResult,
+  SiteAddress
 } from './sharedTypes.js'
 
 // ---------------------------------------------------------------------------
@@ -93,13 +94,14 @@ export type Producer = {
   organisationName?: string
   /** Environmental permit or exemption number the producer operates under. Optional for Commercial and Municipal; forbidden for Household. */
   authorisationNumber?: string
+  /** At least one of emailAddress or phoneNumber must be provided for Commercial and Municipal waste. Not applicable for Household (forbidden). */
   emailAddress?: string
   phoneNumber?: string
   /** Five-digit Standard Industrial Classification code for the process that created this waste. */
   sicCode?: string
 
   /** Required for Commercial and Municipal; forbidden for Household. */
-  address?: BusinessAddress
+  address?: Address
   /** Whether this movement is carried out by, or on behalf of, a council. */
   councilMovement: boolean
 }
@@ -120,16 +122,17 @@ export type Producer = {
  * - vehicleRegistration may be supplied only when meansOfTransport is 'Road'.
  * - otherMeansOfTransport may be supplied only when meansOfTransport is 'Other'.
  */
-export type Carrier = {
+export type IntendedCarrier = {
   meansOfTransport: MeansOfTransport
   registrationNumber?: string | null
   reasonForNoRegistrationNumber?: CarrierReasonForNoRegistrationNumber
   organisationName: string
   vehicleRegistration?: string
   otherMeansOfTransport?: string
+  /** At least one of emailAddress or phoneNumber must be provided. */
   emailAddress?: string
   phoneNumber?: string
-  address?: BusinessAddress
+  address?: Address
 }
 
 // ---------------------------------------------------------------------------
@@ -160,10 +163,7 @@ export type CreateWasteItem = WasteItemBase & {
 // Receiver at creation
 // ---------------------------------------------------------------------------
 
-export type ReceiverAddress = {
-  postcode: string
-  fullAddress: string
-}
+export type ReceiverAddress = SiteAddress
 
 /**
  * A single receiving site entry within receivers (D-043).
@@ -173,9 +173,10 @@ export type ReceiverAddress = {
  * that siteName is always populated when an entry is present — makes them
  * mandatory too.
  */
-export type Receiver = {
+export type IntendedReceiver = {
   siteName: string
   authorisationNumber?: string
+  /** At least one of emailAddress or phoneNumber must be provided. */
   emailAddress?: string
   phoneNumber?: string
   address?: ReceiverAddress
@@ -190,10 +191,7 @@ export type Receiver = {
  * (both fullAddress and postcode required), reused here so Creation's planned
  * collection address matches what the Collection event itself records.
  */
-export type CollectionSiteAddress = {
-  fullAddress: string
-  postcode: string
-}
+export type CollectionSiteAddress = SiteAddress
 
 // ---------------------------------------------------------------------------
 // Create Movement request / response
@@ -224,7 +222,7 @@ export type CreateMovement = {
 
   producer: Producer
   /** Required object at Creation; follows Receipt carrier fields, with meansOfTransport and organisationName mandatory. */
-  carrier: Carrier
+  carrier: IntendedCarrier
   /** Optional broker/dealer details. registrationNumber is required whenever this object is supplied. */
   brokerOrDealer?: BrokerOrDealer
   /**
@@ -232,7 +230,7 @@ export type CreateMovement = {
    * contains hazardous waste — a producer may declare waste heading to more
    * than one receiving site.
    */
-  receivers?: Receiver[]
+  receivers?: IntendedReceiver[]
 
   /**
    * Whether the waste will be collected from an address other than producer.address.

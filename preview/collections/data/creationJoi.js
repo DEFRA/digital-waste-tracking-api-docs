@@ -46,7 +46,8 @@ import {
   MEANS_OF_TRANSPORT,
   REASONS_FOR_NO_REGISTRATION_NUMBER,
   NO_CONSIGNMENT_REASONS,
-  businessAddressSchema,
+  addressSchema,
+  requiredFullAddressSchema,
   otherReferenceSchema,
   brokerSchema,
   carrierRegistrationNumberSchema,
@@ -127,21 +128,6 @@ export const createWasteItemSchema = wasteItemBaseSchema
 // Receiver at creation
 // ---------------------------------------------------------------------------
 
-const receiverAddressSchema = businessAddressSchema
-  .keys({
-    fullAddress: Joi.string()
-      .required()
-      .description('Full receiver site address.'),
-
-    postcode: businessAddressSchema
-      .extract('postcode')
-      .required()
-      .description('Receiver site postcode.')
-  })
-  .description(
-    'Receiver site address. Required with fullAddress and postcode when receiver.siteName is populated.'
-  )
-
 /**
  * Planned collection address — same shape as Collection's own collectionSite.address
  * (both fullAddress and postcode required), reused here so Creation's planned
@@ -149,13 +135,13 @@ const receiverAddressSchema = businessAddressSchema
  * distinctly from collectionJoi.js's exported collectionSiteSchema (the actual
  * collection site, a different, larger shape) to avoid a naming collision.
  */
-const plannedCollectionAddressSchema = businessAddressSchema
+const plannedCollectionAddressSchema = addressSchema
   .keys({
     fullAddress: Joi.string()
       .required()
       .description('Full collection site address.'),
 
-    postcode: businessAddressSchema
+    postcode: addressSchema
       .extract('postcode')
       .required()
       .description('Collection site postcode.')
@@ -165,7 +151,7 @@ const plannedCollectionAddressSchema = businessAddressSchema
   )
 
 // Exported for testing (see test/event-model/schema/common/receiver.test.js).
-export const receiverSchema = Joi.object({
+export const intendedReceiverSchema = Joi.object({
   siteName: Joi.string()
     .required()
     .description(
@@ -209,16 +195,24 @@ export const receiverSchema = Joi.object({
 
   address: Joi.when('siteName', {
     is: Joi.exist(),
-    then: receiverAddressSchema.required(),
-    otherwise: receiverAddressSchema.optional()
+    then: requiredFullAddressSchema('Full receiver site address.').required(),
+    otherwise: requiredFullAddressSchema(
+      'Full receiver site address.'
+    ).optional()
   }).description(
     'Required when receiver.siteName is populated. Must include postcode and fullAddress.'
   )
-}).description(
-  'A single receiving site entry within receivers (D-043). siteName is mandatory whenever an ' +
-    'entry is supplied, which in turn makes authorisationNumber and address mandatory too (both ' +
-    'are conditional on siteName being populated).'
-)
+})
+  .or('emailAddress', 'phoneNumber')
+  .messages({
+    'object.missing':
+      'receiver: at least one of emailAddress or phoneNumber must be provided.'
+  })
+  .description(
+    'A single receiving site entry within receivers (D-043). siteName is mandatory whenever an ' +
+      'entry is supplied, which in turn makes authorisationNumber and address mandatory too (both ' +
+      'are conditional on siteName being populated).'
+  )
 
 // ---------------------------------------------------------------------------
 // Producer
@@ -296,7 +290,7 @@ export const producerSchema = Joi.object({
   address: Joi.when('wasteSource', {
     is: 'Household',
     then: Joi.forbidden(),
-    otherwise: businessAddressSchema.required()
+    otherwise: addressSchema.required()
   }).description(
     'Producer site address. Required for Commercial and Municipal; not applicable for Household.'
   ),
@@ -307,13 +301,21 @@ export const producerSchema = Joi.object({
     .description(
       'Whether this movement is carried out by, or on behalf of, a council.'
     )
-}).description('Producer organisation details.')
+})
+  .when(Joi.ref('wasteSource', { ancestor: 0 }), {
+    is: Joi.valid('Commercial', 'Municipal'),
+    then: Joi.object().or('emailAddress', 'phoneNumber').messages({
+      'object.missing':
+        'producer: at least one of emailAddress or phoneNumber must be provided for Commercial and Municipal waste.'
+    })
+  })
+  .description('Producer organisation details.')
 
 // ---------------------------------------------------------------------------
 // Carrier at creation
 // ---------------------------------------------------------------------------
 
-export const creationCarrierSchema = Joi.object({
+export const intendedCarrierSchema = Joi.object({
   meansOfTransport: Joi.string()
     .valid(...MEANS_OF_TRANSPORT)
     .required()
@@ -377,13 +379,19 @@ export const creationCarrierSchema = Joi.object({
     .optional()
     .description('Carrier contact phone number. Optional at Creation.'),
 
-  address: businessAddressSchema
+  address: addressSchema
     .optional()
     .description('Carrier business address. Optional at Creation.')
-}).description(
-  'Carrier details at Creation. Same field structure as Receipt carrier, with meansOfTransport and ' +
-    'organisationName mandatory. Optional fields retain integrity rules when supplied.'
-)
+})
+  .or('emailAddress', 'phoneNumber')
+  .messages({
+    'object.missing':
+      'carrier: at least one of emailAddress or phoneNumber must be provided.'
+  })
+  .description(
+    'Carrier details at Creation. Same field structure as Receipt carrier, with meansOfTransport and ' +
+      'organisationName mandatory. Optional fields retain integrity rules when supplied.'
+  )
 
 // ---------------------------------------------------------------------------
 // Root schema
@@ -450,7 +458,7 @@ export const createMovementSchema = Joi.object({
 
   producer: producerSchema.required(),
 
-  carrier: creationCarrierSchema
+  carrier: intendedCarrierSchema
     .required()
     .description(
       'Carrier details. Required object at Creation, using the Receipt carrier field structure with meansOfTransport as the only mandatory carrier field.'
@@ -461,7 +469,7 @@ export const createMovementSchema = Joi.object({
     .description('Optional broker/dealer details.'),
 
   receivers: Joi.array()
-    .items(receiverSchema)
+    .items(intendedReceiverSchema)
     .min(1)
     .description(
       'Intended receiving site(s) (D-043). Required only when the movement contains hazardous ' +

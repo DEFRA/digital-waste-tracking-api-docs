@@ -23,7 +23,7 @@
 import Joi from 'joi'
 import { isValidPhoneNumber } from './validators.js'
 import {
-  siteAddressSchema,
+  requiredFullAddressSchema,
   otherReferenceSchema,
   carrierSchema,
   brokerSchema,
@@ -34,10 +34,13 @@ import {
 // Collection site
 // ---------------------------------------------------------------------------
 
-// Exported for testing (see test/event-model/schema/collection/). Alias of the
-// shared siteAddressSchema (sharedSchemas.js) — kept under this name since
-// existing tests/consumers import it as collectionAddressSchema.
-export const collectionAddressSchema = siteAddressSchema
+// Exported for testing (see test/event-model/schema/collection/). Built from
+// the shared addressSchema (sharedSchemas.js) via requiredFullAddressSchema —
+// kept under this name since existing tests/consumers import it as
+// collectionAddressSchema.
+export const collectionAddressSchema = requiredFullAddressSchema(
+  'Full address of the physical site.'
+)
   .required()
   .description(
     'Collection address. Both postcode and fullAddress are required.'
@@ -65,6 +68,11 @@ export const collectionSiteSchema = Joi.object({
       'Phone number of the site where the waste was physically collected.'
     )
 })
+  .or('emailAddress', 'phoneNumber')
+  .messages({
+    'object.missing':
+      'collectionSite: at least one of emailAddress or phoneNumber must be provided.'
+  })
   .required()
   .description('Collection site details.')
 

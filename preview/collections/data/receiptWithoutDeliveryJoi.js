@@ -18,16 +18,15 @@ import Joi from 'joi'
  * is wrong for this endpoint. Built independently instead: wasteItems from
  * the shared wasteItemBaseSchema/actualTreatmentSchema; carrier/brokerOrDealer
  * from the shared carrierSchema/brokerSchema (same as receiptJoi.js, D-042);
- * the remaining root fields (otherReferenceSchema, receiptAddressSchema,
- * receiptSiteSchema, receiverSiteSchema, the consignment-code mutual-
- * exclusivity rule) are duplicated from receiptJoi.js rather than imported,
- * since that file doesn't currently export them — matching receiptJoi.js's
- * own historical self-contained-file convention for Receipt-specific pieces.
+ * receiverSite from the shared receiverSiteSchema (same as receiptJoi.js —
+ * the two event files' copies were confirmed byte-identical before merging);
+ * the remaining root fields (otherReferenceSchema, the consignment-code
+ * mutual-exclusivity rule) are duplicated from receiptJoi.js rather than
+ * imported, since that file doesn't currently export them — matching
+ * receiptJoi.js's own historical self-contained-file convention for
+ * Receipt-specific pieces.
  */
 import {
-  UK_POSTCODE_REGEX,
-  isValidPhoneNumber,
-  isValidAuthorisationNumber,
   isValidHazardousWasteConsignmentCode,
   isHazardousEwcCode
 } from './validators.js'
@@ -35,7 +34,8 @@ import {
   carrierSchema,
   brokerSchema,
   wasteItemBaseSchema,
-  actualTreatmentSchema
+  actualTreatmentSchema,
+  receiverSiteSchema
 } from './sharedSchemas.js'
 
 const NO_CONSIGNMENT_REASONS = [
@@ -107,63 +107,6 @@ const otherReferenceSchema = Joi.object({
       'Array of label/reference pairs. If the object is included, both label and reference are required together.'
     )
 }).description('Additional movement reference label/reference pair.')
-
-const receiptAddressSchema = Joi.object({
-  postcode: Joi.string()
-    .pattern(UK_POSTCODE_REGEX)
-    .required()
-    .description(
-      'Unlike carrier and broker addresses, the receipt address accepts UK postcodes only. Must be in valid UK postcode format.'
-    ),
-
-  fullAddress: Joi.string()
-    .required()
-    .description('The address where the waste is physically received.')
-}).description('Address where the waste is physically received.')
-
-const receiptSiteSchema = Joi.object({
-  address: receiptAddressSchema
-    .required()
-    .description('Address where the waste is physically received.')
-}).description('Physical receipt site details.')
-
-const receiverSiteSchema = Joi.object({
-  siteName: Joi.string()
-    .required()
-    .description('Name of the site receiving the waste.'),
-
-  regulatoryPositionStatements: Joi.array()
-    .items(Joi.number().strict().integer().positive())
-    .description(
-      'RPS numbers where the regulator does not require a permit for certain activities. Each must be a positive integer.'
-    ),
-
-  phoneNumber: Joi.string()
-    .custom(
-      validateWithBooleanHelper(
-        isValidPhoneNumber,
-        'receiverSite.phoneNumber must be a valid UK or Irish phone number.'
-      )
-    )
-    .description('Phone number of the receiving organisation.'),
-
-  emailAddress: Joi.string()
-    .email()
-    .description('Email address of the receiving organisation.'),
-
-  authorisationNumber: Joi.string()
-    .strict()
-    .custom(
-      validateWithBooleanHelper(
-        isValidAuthorisationNumber,
-        'Site authorisation number must be in a valid UK format.'
-      )
-    )
-    .required()
-    .description(
-      "One authorisation number per receipt. Must match a valid UK format pattern. Invalid format returns: 'Site authorisation number must be in a valid UK format'."
-    )
-}).description('Receiving organisation and site details.')
 
 /**
  * Waste item for this endpoint (D-042) — extends the shared wasteItemBaseSchema
@@ -240,8 +183,6 @@ export const receiptWithoutDeliverySchema = Joi.object({
     ),
 
   receiverSite: receiverSiteSchema.required(),
-
-  receipt: receiptSiteSchema.required(),
 
   carrier: carrierSchema.required(),
 

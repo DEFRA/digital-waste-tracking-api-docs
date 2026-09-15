@@ -39,10 +39,7 @@ export const receiverSite = {
   emailAddress: 'receiver@example.com',
   phoneNumber: '01234567890',
   authorisationNumber: 'HP3456XX',
-  regulatoryPositionStatements: [343]
-}
-
-export const receipt = {
+  regulatoryPositionStatements: [343],
   address: {
     fullAddress: '123 Test St, Test City',
     postcode: 'TE1 1ST'
@@ -91,8 +88,7 @@ export const publicPostBody = {
   wasteItems,
   carrier,
   brokerOrDealer,
-  receiverSite,
-  receipt
+  receiverSite
 }
 
 const { apiCode, ...movementWithoutApiCode } = publicPostBody

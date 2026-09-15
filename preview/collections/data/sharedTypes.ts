@@ -2,9 +2,6 @@
  * Shared types used across all DWT event schemas (Creation, Collection,
  * Delivery, Receipt). Import from here rather than from individual event
  * files to avoid duplication.
- *
- * Receipt-specific types (ReceiptAddress, Receipt, Receiver) remain in
- * receiptTypes.ts to avoid disturbing the Phase 1 contract.
  */
 
 // ---------------------------------------------------------------------------
@@ -83,15 +80,26 @@ export type ActualTreatment = {
 }
 
 /**
- * Business address used by carrier, broker, producer and receiver parties.
+ * Address used by every party and site across all events — carrier, broker,
+ * producer, receiver, collection site, delivery site and receipt site alike.
  * fullAddress is optional by default; postcode is always required.
- * Event-specific schemas can tighten this, for example Creation receiver
- * requires both fullAddress and postcode when receiver.siteName is populated.
+ * Event-specific schemas tighten this for sites that are physically visited
+ * (see SiteAddress), for example Creation's receiver requires both
+ * fullAddress and postcode when receiver.siteName is populated.
  */
-export type BusinessAddress = {
+export type Address = {
   fullAddress?: string
   postcode: string
 }
+
+/**
+ * Address with fullAddress promoted from optional to required — for sites
+ * that are physically visited: collection, delivery, and receiver/receipt
+ * sites. Event files re-export this under their own established type name
+ * (e.g. CollectionAddress, DeliverySiteAddress) rather than using it directly,
+ * to avoid disturbing existing consumers.
+ */
+export type SiteAddress = Address & { fullAddress: string }
 
 export type OtherReferenceForMovement = {
   /** Label identifying the reference type, e.g. "transferNoteNumber" */
@@ -217,7 +225,7 @@ export type WasteItemBase = {
  * Carrier organisation and transport details.
  *
  * Some events tighten this shape. For Creation, only meansOfTransport is
- * mandatory, so creationTypes.ts defines a Creation-specific Carrier type.
+ * mandatory, so creationTypes.ts defines a Creation-specific IntendedCarrier type.
  */
 export type CarrierDetails = {
   /**
@@ -237,9 +245,10 @@ export type CarrierDetails = {
   vehicleRegistration?: string
   /** Description when meansOfTransport is Other. */
   otherMeansOfTransport?: string
+  /** At least one of emailAddress or phoneNumber must be provided. */
   emailAddress?: string
   phoneNumber?: string
-  address?: BusinessAddress
+  address?: Address
 }
 
 /**
@@ -255,9 +264,10 @@ export type BrokerDetails = {
   organisationName: string
   registrationNumber: string | null
   reasonForNoRegistrationNumber?: CarrierReasonForNoRegistrationNumber
+  /** At least one of emailAddress or phoneNumber must be provided. */
   emailAddress?: string
   phoneNumber?: string
-  address?: BusinessAddress
+  address?: Address
 }
 
 /**

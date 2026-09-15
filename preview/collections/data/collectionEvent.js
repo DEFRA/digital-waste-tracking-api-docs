@@ -21,7 +21,8 @@ export const receivedFromCarrier = {
   organisationName: 'First Leg Haulage Ltd',
   registrationNumber: 'CB1234ZZ',
   meansOfTransport: 'Road',
-  vehicleRegistration: 'FL21 ABC'
+  vehicleRegistration: 'FL21 ABC',
+  emailAddress: 'carrier@example.com'
 }
 
 // ---------------------------------------------------------------------------
@@ -32,7 +33,8 @@ export const collectionSite = {
   address: {
     fullAddress: '10 Industrial Way, Test City',
     postcode: 'TE1 2PQ'
-  }
+  },
+  emailAddress: 'siteoffice@example.com'
 }
 
 // collectionSite with the optional emailAddress/phoneNumber fields populated.
@@ -106,7 +108,8 @@ export const transitPostBody = {
     organisationName: 'Second Leg Haulage Ltd',
     registrationNumber: 'CB5678YY',
     meansOfTransport: 'Road',
-    vehicleRegistration: 'SL21 DEF'
+    vehicleRegistration: 'SL21 DEF',
+    emailAddress: 'carrier@example.com'
   },
   dutyOfCareConfirmed: true,
   receivedFromCarrier,

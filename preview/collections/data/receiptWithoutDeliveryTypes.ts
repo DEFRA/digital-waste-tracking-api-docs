@@ -14,7 +14,7 @@
  * duplicated explicitly rather than inherited, so this type doesn't silently
  * pick up ReceiptMovement's light wasteItems whenever that shape changes.
  */
-import type { OtherReferenceForMovement, ReasonForNoConsignmentCode, ReceiverSite, Receipt } from './receiptTypes.js'
+import type { OtherReferenceForMovement, ReasonForNoConsignmentCode, ReceiverSite } from './receiptTypes.js'
 import type { ActualTreatment, CarrierDetails, BrokerDetails, WasteItemBase, ValidationResult } from './sharedTypes.js'
 
 export type ReceiptWithoutDeliveryWasteItem = WasteItemBase & {
@@ -34,7 +34,6 @@ export type ReceiptWithoutDeliveryRequest = {
 
   wasteItems: ReceiptWithoutDeliveryWasteItem[]
   receiverSite: ReceiverSite
-  receipt: Receipt
   carrier: CarrierDetails
   brokerOrDealer?: BrokerDetails
 

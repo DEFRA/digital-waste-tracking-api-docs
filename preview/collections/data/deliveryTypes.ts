@@ -32,16 +32,14 @@ import type {
   OtherReferenceForMovement,
   CarrierDetails,
   ValidationResult,
+  SiteAddress,
 } from "./sharedTypes.js";
 
 // ---------------------------------------------------------------------------
 // Delivery site
 // ---------------------------------------------------------------------------
 
-export type DeliverySiteAddress = {
-  postcode: string;
-  fullAddress: string;
-};
+export type DeliverySiteAddress = SiteAddress;
 
 /**
  * Delivery place declared by the carrier.
