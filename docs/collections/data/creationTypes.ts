@@ -11,18 +11,20 @@
  * Creation-specific business rules reflected here:
  * - apiCode is required, as per the Receipt event.
  * - Date/time field renamed from estimatedDateTimeCollected to plannedCollectionTime.
- * - Object names align with the spreadsheet / Receipt shape: producer, carrier, brokerOrDealer, receivers.
+ * - Object names align with the spreadsheet / Receipt shape: producer, intendedCarriers, brokerOrDealer, intendedReceivers.
  * - producer.organisationName and producer.address are required for Commercial and Municipal, forbidden
  *   for Household; producer.authorisationNumber is optional for Commercial and Municipal.
- * - carrier follows the Receipt carrier structure, but carrier.meansOfTransport and
- *   carrier.organisationName are mandatory at Creation. Optional carrier fields still keep
- *   integrity rules when supplied: registrationNumber and reasonForNoRegistrationNumber are mutually
- *   exclusive; vehicleRegistration is only for Road; otherMeansOfTransport is only for Other.
+ * - intendedCarriers (D-045; array, renamed from carrier) is always required, min 1 — a producer may
+ *   declare more than one prospective carrier at Creation. Each entry follows the Receipt carrier
+ *   structure, but meansOfTransport and organisationName are the only mandatory fields at Creation.
+ *   Optional carrier fields still keep integrity rules when supplied: registrationNumber and
+ *   reasonForNoRegistrationNumber are mutually exclusive; vehicleRegistration is only for Road;
+ *   otherMeansOfTransport is only for Other.
  * - producer.councilMovement uses the BA spreadsheet name.
- * - receivers (D-043; array, renamed from receiver) requires at least one entry only when the movement
- *   contains hazardous waste — a producer may declare waste heading to more than one receiving site.
- *   Each entry's siteName is mandatory whenever that entry is supplied, which makes authorisationNumber
- *   and address mandatory too.
+ * - intendedReceivers (D-043; array, renamed from receiver, then from receivers) requires at least one
+ *   entry only when the movement contains hazardous waste — a producer may declare waste heading to more
+ *   than one receiving site. Each entry's siteName is mandatory whenever that entry is supplied, which
+ *   makes authorisationNumber and address mandatory too.
  * - brokerOrDealer is optional, but registrationNumber is required whenever it is supplied — null/empty
  *   requires reasonForNoRegistrationNumber instead, mirroring carrier's mutual-exclusivity rule.
  * - collectionAddressDifferentFromProducer / collectionSite: planning-time fields for where the waste
@@ -166,7 +168,7 @@ export type CreateWasteItem = WasteItemBase & {
 export type ReceiverAddress = SiteAddress
 
 /**
- * A single receiving site entry within receivers (D-043).
+ * A single receiving site entry within intendedReceivers (D-043).
  *
  * siteName is mandatory whenever an entry is supplied; authorisationNumber
  * and full address are conditional on siteName being populated, which — now
@@ -221,8 +223,13 @@ export type CreateMovement = {
   isDeleted?: boolean
 
   producer: Producer
-  /** Required object at Creation; follows Receipt carrier fields, with meansOfTransport and organisationName mandatory. */
-  carrier: IntendedCarrier
+  /**
+   * Prospective carrier(s) declared at Creation (D-045). Always required,
+   * min 1 — a producer may declare more than one prospective carrier. Each
+   * entry follows Receipt carrier fields, with meansOfTransport and
+   * organisationName mandatory.
+   */
+  intendedCarriers: IntendedCarrier[]
   /** Optional broker/dealer details. registrationNumber is required whenever this object is supplied. */
   brokerOrDealer?: BrokerOrDealer
   /**
@@ -230,7 +237,7 @@ export type CreateMovement = {
    * contains hazardous waste — a producer may declare waste heading to more
    * than one receiving site.
    */
-  receivers?: IntendedReceiver[]
+  intendedReceivers?: IntendedReceiver[]
 
   /**
    * Whether the waste will be collected from an address other than producer.address.
