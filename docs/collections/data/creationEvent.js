@@ -8,20 +8,21 @@
  * Creation-specific alignment notes:
  * - apiCode is present as per Receipt.
  * - plannedCollectionTime (renamed from estimatedDateTimeCollected) follows the Receipt date/time naming style.
- * - Object names are producer, carrier, brokerOrDealer and receivers.
+ * - Object names are producer, intendedCarriers, brokerOrDealer and intendedReceivers.
  * - wasteItems use Creation's own shape (D-042): classification is nested; weight, numberOfContainers,
  *   typeOfContainers and physicalForm stay top-level. intendedTreatments is mandatory at Creation
  *   (min 1) — the Intended Treatment. The receiver confirms actualTreatments (Actual Treatment) at
  *   Receipt (D-031 amended).
- * - carrier follows the Receipt carrier structure, but Creation requires only meansOfTransport and
- *   organisationName. Optional carrier fields still retain integrity rules when supplied.
- *   This example includes extra carrier details.
+ * - intendedCarriers (D-045; array, renamed from carrier) is always required, min 1 — a producer may
+ *   declare more than one prospective carrier. Each entry follows the Receipt carrier structure, but
+ *   Creation requires only meansOfTransport and organisationName. Optional carrier fields still retain
+ *   integrity rules when supplied. This example includes extra carrier details.
  * - producer.organisationName/address are required for Commercial and Municipal, forbidden for
  *   Household; producer.authorisationNumber is optional for Commercial and Municipal.
  * - brokerOrDealer.registrationNumber is required whenever brokerOrDealer is supplied, with
  *   reasonForNoRegistrationNumber required in its place when null/empty.
- * - receivers (D-043; array, renamed from receiver) requires at least one entry only for hazardous
- *   waste. Each entry's siteName is mandatory whenever that entry is supplied.
+ * - intendedReceivers (D-043; array, renamed from receiver, then from receivers) requires at least one
+ *   entry only for hazardous waste. Each entry's siteName is mandatory whenever that entry is supplied.
  * - collectionAddressDifferentFromProducer / collectionSite: planning-time fields for where the
  *   waste will be collected from, if not the producer's address.
  */
@@ -114,7 +115,7 @@ export const brokerOrDealerWithoutRegistrationNumber = {
   phoneNumber: '01112223333'
 }
 
-// A single receiving site entry within receivers (D-043). siteName is mandatory
+// A single receiving site entry within intendedReceivers (D-043). siteName is mandatory
 // whenever an entry is supplied, which makes authorisationNumber and address
 // mandatory too. At least one entry is required only for hazardous waste.
 export const receiver = {
@@ -256,8 +257,8 @@ export const publicPostBody = {
   specialHandlingRequirements: 'Handle with care and keep upright.',
   isDeleted: false,
   producer,
-  carrier,
-  receivers: [receiver],
+  intendedCarriers: [carrier],
+  intendedReceivers: [receiver],
   wasteItems
   // brokerOrDealer omitted — optional
 }
@@ -271,7 +272,7 @@ export const brokerInitiatedPostBody = {
 // Minimal Creation carrier example inside an otherwise valid hazardous movement.
 export const minimalCarrierPostBody = {
   ...publicPostBody,
-  carrier: minimalCreationCarrier
+  intendedCarriers: [minimalCreationCarrier]
 }
 
 // collectionAddressDifferentFromProducer true — collectionSite is then required.
@@ -331,7 +332,7 @@ export const nonHazardousPostBodyWithoutReceiver = {
   yourUniqueReference: 'CARRIER-JOB-002',
   isDeleted: false,
   producer,
-  carrier: minimalCreationCarrier,
+  intendedCarriers: [minimalCreationCarrier],
   wasteItems: nonHazardousWasteItems
 }
 
@@ -349,10 +350,11 @@ export const createMovementResponseWithWarnings = {
   validation: {
     warnings: [
       {
-        // Indexed path into the receivers array (D-043) — no other warning key in
-        // this file addresses an array entry, so there's no established indexed-path
-        // convention to follow; this extends the existing dot-path style with [0].
-        key: 'receivers[0].authorisationNumber',
+        // Indexed path into the intendedReceivers array (D-043) — no other warning
+        // key in this file addresses an array entry, so there's no established
+        // indexed-path convention to follow; this extends the existing dot-path
+        // style with [0].
+        key: 'intendedReceivers[0].authorisationNumber',
         errorType: 'NotProvided',
         message: 'Receiver authorisation number was not provided at creation.'
       }
