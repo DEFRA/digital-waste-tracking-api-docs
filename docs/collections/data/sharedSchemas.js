@@ -11,6 +11,7 @@ import Joi from 'joi'
 import {
   UK_POSTCODE_REGEX,
   IRL_POSTCODE_REGEX,
+  isValidAuthorisationNumber,
   isValidCarrierRegistrationNumber,
   isValidContainerType,
   isValidDisposalOrRecoveryCode,
@@ -211,11 +212,13 @@ export const actualTreatmentSchema = Joi.object({
 )
 
 /**
- * Business address used by carrier, broker, producer and receiver parties.
- * Accepts both UK postcodes and Irish Eircodes.
- * Receipt address (UK only, fullAddress required) is defined separately in receiptJoi.js.
+ * Address used by every party and site across all events — carrier, broker,
+ * producer, receiver, collection site, delivery site and receipt site alike.
+ * Accepts both UK postcodes and Irish Eircodes. postcode is always required;
+ * fullAddress is optional here and promoted to required at the point of use
+ * (see requiredFullAddressSchema) for sites that are physically visited.
  */
-export const businessAddressSchema = Joi.object({
+export const addressSchema = Joi.object({
   fullAddress: Joi.string().description('Full address line.'),
 
   postcode: Joi.alternatives()
@@ -226,23 +229,22 @@ export const businessAddressSchema = Joi.object({
     .required()
     .description('Accepts UK postcodes and Irish Eircodes.')
 }).description(
-  'Business address object. postcode is required; fullAddress is optional.'
+  'Address object. postcode is required; fullAddress is optional unless ' +
+    'extended with .required() at the point of use for a physical site.'
 )
 
 /**
- * Site address used by Collection's collectionSite.address and Delivery's
- * deliverySite.address — businessAddressSchema with fullAddress also required
- * (both events physically visit the site, unlike a carrier/broker/producer
- * business address where only postcode is guaranteed). Consolidated here since
- * both events previously defined identically-shaped consts independently.
+ * addressSchema with fullAddress promoted from optional to required — for
+ * sites that are physically visited (collection, delivery, receiver/receipt),
+ * unlike a carrier/broker/producer business address where only postcode is
+ * guaranteed. Takes a call-site-specific description for the fullAddress
+ * field. Callers still layer their own .required()/.optional() on the
+ * returned schema as appropriate.
  */
-export const siteAddressSchema = businessAddressSchema
-  .keys({
-    fullAddress: Joi.string()
-      .required()
-      .description('Full address of the physical site.')
+export const requiredFullAddressSchema = (fullAddressDescription) =>
+  addressSchema.keys({
+    fullAddress: Joi.string().required().description(fullAddressDescription)
   })
-  .description('Site address. Both postcode and fullAddress are required.')
 
 export const otherReferenceSchema = Joi.object({
   reference: Joi.string()
@@ -587,12 +589,18 @@ export const carrierSchema = Joi.object({
     )
     .description('Carrier contact phone number.'),
 
-  address: businessAddressSchema.description(
+  address: addressSchema.description(
     'Carrier business address. postcode is required when address object is provided.'
   )
-}).description(
-  'Carrier organisation and transport details. Required on all events (D-008).'
-)
+})
+  .or('emailAddress', 'phoneNumber')
+  .messages({
+    'object.missing':
+      'carrier: at least one of emailAddress or phoneNumber must be provided.'
+  })
+  .description(
+    'Carrier organisation and transport details. Required on all events (D-008).'
+  )
 
 /**
  * Broker schema — required when the movement is broker-initiated (D-008).
@@ -642,14 +650,82 @@ export const brokerSchema = Joi.object({
     )
     .description('Broker/dealer contact phone number.'),
 
-  address: businessAddressSchema.description(
-    'Broker or dealer business address.'
+  address: addressSchema.description('Broker or dealer business address.')
+})
+  .or('emailAddress', 'phoneNumber')
+  .messages({
+    'object.missing':
+      'brokerOrDealer: at least one of emailAddress or phoneNumber must be provided.'
+  })
+  .description(
+    'Broker or dealer details — required when the movement is broker-initiated. ' +
+      'registrationNumber is required whenever this object is supplied, with reasonForNoRegistrationNumber ' +
+      'required in its place when registrationNumber is null or empty.'
   )
-}).description(
-  'Broker or dealer details — required when the movement is broker-initiated. ' +
-    'registrationNumber is required whenever this object is supplied, with reasonForNoRegistrationNumber ' +
-    'required in its place when registrationNumber is null or empty.'
-)
+
+/**
+ * Receiver site schema — the receiving organisation, contact details, and
+ * physical receipt address, confirmed at receipt. Shared by both receipt
+ * endpoints (POST /deliveries/{deliveryId}/receipt and POST /receipts) —
+ * moved here after the two event files' copies were confirmed byte-identical.
+ * Distinct from Creation's own intendedReceiverSchema (creationJoi.js), which
+ * has different requiredness rules (siteName/authorisationNumber/address are
+ * conditional there, unconditional here) — reconciling the two remains a
+ * separate, open question (see test/event-model/schema/common/receiver.test.js).
+ */
+export const receiverSiteSchema = Joi.object({
+  siteName: Joi.string()
+    .required()
+    .description('Name of the site receiving the waste.'),
+
+  regulatoryPositionStatements: Joi.array()
+    .items(Joi.number().strict().integer().positive())
+    .description(
+      'RPS numbers where the regulator does not require a permit for certain activities. Each must be a positive integer.'
+    ),
+
+  phoneNumber: Joi.string()
+    .custom(
+      validateWithBooleanHelper(
+        isValidPhoneNumber,
+        'receiverSite.phoneNumber must be a valid UK or Irish phone number.'
+      )
+    )
+    .description('Phone number of the receiving organisation.'),
+
+  emailAddress: Joi.string()
+    .email()
+    .description('Email address of the receiving organisation.'),
+
+  authorisationNumber: Joi.string()
+    .strict()
+    .custom(
+      validateWithBooleanHelper(
+        isValidAuthorisationNumber,
+        'Site authorisation number must be in a valid UK format.'
+      )
+    )
+    .required()
+    .description(
+      "One authorisation number per receipt. Must match a valid UK format pattern. Invalid format returns: 'Site authorisation number must be in a valid UK format'."
+    ),
+
+  address: requiredFullAddressSchema(
+    'The address where the waste is physically received.'
+  )
+    .required()
+    .description(
+      'Address where the waste is physically received (merged in from the former receiptSite object).'
+    )
+})
+  .or('emailAddress', 'phoneNumber')
+  .messages({
+    'object.missing':
+      'receiverSite: at least one of emailAddress or phoneNumber must be provided.'
+  })
+  .description(
+    'Receiving organisation, contact details, and the physical address where the waste was received.'
+  )
 
 /**
  * Driver details schema — minimal for now; full model to be defined as the

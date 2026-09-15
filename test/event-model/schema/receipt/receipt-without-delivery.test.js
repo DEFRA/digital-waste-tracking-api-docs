@@ -1,9 +1,9 @@
 /**
  * Placeholder — receiptWithoutDeliveryJoi.js's receiptWithoutDeliverySchema
- * (D-041, D-042). Only the root schema is exported — its address/site/
- * receiver sub-shapes are private local duplicates identical to receiptJoi.js's
- * already-tested receiptAddressSchema/receiptSiteSchema/receiverSiteSchema, so
- * they're exercised only indirectly through the fixture here, not re-tested
+ * (D-041, D-042). Only the root schema is exported — its receiverSite (which
+ * carries the merged receipt site address) is the shared receiverSiteSchema
+ * (sharedSchemas.js, already tested directly in receipt/receipt-site.test.js),
+ * so it's exercised only indirectly through the fixture here, not re-tested
  * under a different name. Unlike the ordinary Receipt endpoint
  * (receipt/waste-item.test.js), wasteItems on this endpoint carry full
  * classification (D-042) — there is no prior Creation record to source it
@@ -30,21 +30,20 @@ const wasteItem = {
 
 const receiverSite = {
   siteName: 'Test Receiver Site',
-  authorisationNumber: 'HP3456XX'
-}
-
-const receipt = {
+  authorisationNumber: 'HP3456XX',
   address: {
     fullAddress: '1 Receipt Yard, Test City',
     postcode: 'TE1 1ST'
-  }
+  },
+  emailAddress: 'receiver@example.com'
 }
 
 const carrier = {
   meansOfTransport: 'Road',
   registrationNumber: 'CBDU123456',
   organisationName: 'Test Carrier Ltd',
-  vehicleRegistration: 'AB12 CDE'
+  vehicleRegistration: 'AB12 CDE',
+  emailAddress: 'carrier@example.com'
 }
 
 const hazardousWasteItem = {
@@ -60,7 +59,6 @@ const receiptWithoutDelivery = {
   dateTimeReceived: '2026-01-01T09:00:00Z',
   wasteItems: [wasteItem],
   receiverSite,
-  receipt,
   carrier,
   reasonForNoDeliveryId:
     'Waste collected directly from an exempt site with no prior delivery record.'
@@ -79,6 +77,26 @@ describe('wasteItems', () => {
     const { error } = receiptWithoutDeliverySchema.validate({
       ...receiptWithoutDelivery,
       wasteItems: [wasteItemWithoutClassification]
+    })
+    expect(error).toBeDefined()
+  })
+})
+
+describe('receiverSite emailAddress and phoneNumber', () => {
+  test('accepts phoneNumber only', () => {
+    const { emailAddress, ...withoutEmailAddress } = receiverSite
+    const { error } = receiptWithoutDeliverySchema.validate({
+      ...receiptWithoutDelivery,
+      receiverSite: { ...withoutEmailAddress, phoneNumber: '01234567890' }
+    })
+    expect(error).toBeUndefined()
+  })
+
+  test('requires at least one of the two', () => {
+    const { emailAddress, ...receiverSiteWithoutContactDetails } = receiverSite
+    const { error } = receiptWithoutDeliverySchema.validate({
+      ...receiptWithoutDelivery,
+      receiverSite: receiverSiteWithoutContactDetails
     })
     expect(error).toBeDefined()
   })

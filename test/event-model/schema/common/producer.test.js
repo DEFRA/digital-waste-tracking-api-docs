@@ -40,10 +40,22 @@ describe('wasteSource = Commercial', () => {
     expect(error).toBeUndefined()
   })
 
-  test('does not require emailAddress or phoneNumber', () => {
+  test('accepts emailAddress only', () => {
+    const { phoneNumber, ...withoutPhoneNumber } = producer
+    const { error } = producerSchema.validate(withoutPhoneNumber)
+    expect(error).toBeUndefined()
+  })
+
+  test('accepts phoneNumber only', () => {
+    const { emailAddress, ...withoutEmailAddress } = producer
+    const { error } = producerSchema.validate(withoutEmailAddress)
+    expect(error).toBeUndefined()
+  })
+
+  test('requires at least one of emailAddress or phoneNumber', () => {
     const { emailAddress, phoneNumber, ...withoutContactDetails } = producer
     const { error } = producerSchema.validate(withoutContactDetails)
-    expect(error).toBeUndefined()
+    expect(error).toBeDefined()
   })
 
   test('does not require fullAddress', () => {
@@ -84,6 +96,13 @@ describe('wasteSource = Municipal', () => {
     const { error } = producerSchema.validate(municipalProducer)
     expect(error).toBeUndefined()
   })
+
+  test('requires at least one of emailAddress or phoneNumber', () => {
+    const { emailAddress, phoneNumber, ...withoutContactDetails } =
+      municipalProducer
+    const { error } = producerSchema.validate(withoutContactDetails)
+    expect(error).toBeDefined()
+  })
 })
 
 describe('wasteSource = Household', () => {
@@ -122,5 +141,10 @@ describe('wasteSource = Household', () => {
       }
     })
     expect(error).toBeDefined()
+  })
+
+  test('does not require emailAddress or phoneNumber, unlike Commercial and Municipal', () => {
+    const { error } = producerSchema.validate(householdProducer)
+    expect(error).toBeUndefined()
   })
 })

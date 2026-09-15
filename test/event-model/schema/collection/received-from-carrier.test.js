@@ -20,14 +20,16 @@ const baseCollection = {
     meansOfTransport: 'Road',
     registrationNumber: 'CBDU123456',
     organisationName: 'Test Carrier Ltd',
-    vehicleRegistration: 'AB12 CDE'
+    vehicleRegistration: 'AB12 CDE',
+    emailAddress: 'carrier@example.com'
   },
   dutyOfCareConfirmed: true,
   collectionSite: {
     address: {
       fullAddress: '1 Collection Yard, Test City',
       postcode: 'TE1 1ST'
-    }
+    },
+    emailAddress: 'siteoffice@example.com'
   }
 }
 

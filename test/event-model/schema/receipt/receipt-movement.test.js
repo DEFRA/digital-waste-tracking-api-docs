@@ -2,7 +2,7 @@
  * Placeholder — receiptJoi.js's receiptMovementSchema root and its
  * validateReceiptConsignmentRules custom validator. Sub-schema field-level
  * rules are covered elsewhere: waste items (receipt/waste-item.test.js),
- * receiverSite/receipt (receipt/receipt-site.test.js), carrier
+ * receiverSite, including its merged address (receipt/receipt-site.test.js), carrier
  * (common/carrier.test.js). Unlike Creation's validateCreationRules
  * (creation/create-movement.test.js), only the mutual-exclusivity half of the
  * consignment-code rule is checkable here — this endpoint's wasteItems drop
@@ -30,19 +30,19 @@ const receiptMovement = {
   ],
   receiverSite: {
     siteName: 'Test Receiver Site',
-    authorisationNumber: 'HP3456XX'
-  },
-  receipt: {
+    authorisationNumber: 'HP3456XX',
     address: {
       fullAddress: '1 Receipt Yard, Test City',
       postcode: 'TE1 1ST'
-    }
+    },
+    emailAddress: 'receiver@example.com'
   },
   carrier: {
     meansOfTransport: 'Road',
     registrationNumber: 'CBDU123456',
     organisationName: 'Test Carrier Ltd',
-    vehicleRegistration: 'AB12 CDE'
+    vehicleRegistration: 'AB12 CDE',
+    emailAddress: 'carrier@example.com'
   }
 }
 
