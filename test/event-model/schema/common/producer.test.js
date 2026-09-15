@@ -119,17 +119,10 @@ describe('Feature: Producer payload validation for the create endpoint', () => {
       address: { ...commercialProducer.address, postcode: 'NOTAPOSTCODE' }
     }
 
-    test('the payload is rejected by the Joi schema', () => {
+    test('the payload is rejected', () => {
       expect(validateJoi(payload).valid).toBe(false)
+      expect(validateAjv(payload).valid).toBe(false)
     })
-
-    // Known gap: producer-commercial/municipal.schema.json's address.postcode
-    // has no format/pattern check yet (unlike Joi's addressSchema), so ajv
-    // currently accepts a malformed postcode here. Same gap already tracked
-    // in test/event-model/schema/common/address.test.js's postcode todo.
-    test.todo(
-      'the payload is rejected by the JSON schema (ajv) once postcode format is enforced in producer-*.schema.json'
-    )
   })
 
   describe('Scenario: sicCode is not five digits', () => {
