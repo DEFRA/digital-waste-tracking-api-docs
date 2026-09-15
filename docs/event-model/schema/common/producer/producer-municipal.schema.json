@@ -19,6 +19,7 @@
         },
         "organisationName": {
           "type": "string",
+          "minLength": 1,
           "description": "Producer organisation name."
         },
         "authorisationNumber": {
@@ -47,6 +48,7 @@
           "properties": {
             "fullAddress": {
               "type": "string",
+              "minLength": 1,
               "description": "Full address line."
             },
             "postcode": {
