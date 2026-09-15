@@ -7,7 +7,8 @@
 // (carrier, hazardous, receipt waste-item, …) are wired up.
 import {
   isValidAuthorisationNumber,
-  isValidPhoneNumber
+  isValidPhoneNumber,
+  isValidPostcode
 } from '../../collections/data/validators.js'
 
 export function registerFormats(ajv) {
@@ -19,6 +20,11 @@ export function registerFormats(ajv) {
   ajv.addFormat('phoneNumber', {
     type: 'string',
     validate: isValidPhoneNumber
+  })
+
+  ajv.addFormat('postcode', {
+    type: 'string',
+    validate: isValidPostcode
   })
 
   return ajv

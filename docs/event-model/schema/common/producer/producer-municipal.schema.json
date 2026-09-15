@@ -51,6 +51,7 @@
             },
             "postcode": {
               "type": "string",
+              "format": "postcode",
               "description": "Accepts UK postcodes and Irish Eircodes."
             }
           },
