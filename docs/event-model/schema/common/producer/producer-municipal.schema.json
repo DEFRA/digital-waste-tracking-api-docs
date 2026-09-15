@@ -2,12 +2,16 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "producer-municipal.schema.json",
   "title": "Producer (Municipal)",
-  "description": "Producer fields specific to municipal waste. organisationName and address are required; authorisationNumber, sicCode, emailAddress and phoneNumber are optional.",
+  "description": "Producer fields specific to municipal waste. organisationName and address are required; authorisationNumber and sicCode are optional. At least one of emailAddress or phoneNumber must be provided.",
   "type": "object",
   "allOf": [
     { "$ref": "producer-base.schema.json" },
     {
       "type": "object",
+      "anyOf": [
+        { "properties": { "emailAddress": {} }, "required": ["emailAddress"] },
+        { "properties": { "phoneNumber": {} }, "required": ["phoneNumber"] }
+      ],
       "properties": {
         "wasteSource": {
           "const": "Municipal",
@@ -30,12 +34,12 @@
         "emailAddress": {
           "type": "string",
           "format": "email",
-          "description": "Producer contact email address."
+          "description": "Producer contact email address. At least one of emailAddress or phoneNumber must be provided."
         },
         "phoneNumber": {
           "type": "string",
           "format": "phoneNumber",
-          "description": "Producer contact phone number, in a valid format."
+          "description": "Producer contact phone number, in a valid format. At least one of emailAddress or phoneNumber must be provided."
         },
         "address": {
           "type": "object",
