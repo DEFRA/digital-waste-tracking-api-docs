@@ -14,8 +14,15 @@ const validateAjv = (payload) => {
   return { valid, errors: valid ? null : getErrors('producer.schema.json') }
 }
 
-describe('wasteSource = Commercial', () => {
-  const producer = {
+// ---------------------------------------------------------------------------
+// Structured after the "Producer payload validation for the create endpoint"
+// Gherkin feature — one describe per Scenario, test names following the
+// When/Then wording. Coverage that isn't called out by that feature file is
+// kept below under "Additional coverage", so nothing from the previous
+// wasteSource-grouped version of this file is lost.
+// ---------------------------------------------------------------------------
+describe('Feature: Producer payload validation for the create endpoint', () => {
+  const commercialProducer = {
     wasteSource: 'Commercial',
     organisationName: 'ACME Waste Producers Ltd',
     authorisationNumber: 'EAS/P/123456',
@@ -29,63 +36,6 @@ describe('wasteSource = Commercial', () => {
     councilMovement: false
   }
 
-  test('accepts a valid Commercial producer', () => {
-    expect(validateJoi(producer).valid).toBe(true)
-    expect(validateAjv(producer).valid).toBe(true)
-  })
-
-  test('rejects wasteSource given in lower/upper mismatched case', () => {
-    const payload = {
-      ...producer,
-      wasteSource: 'COMMERCIAL'
-    }
-    expect(validateJoi(payload).valid).toBe(false)
-    expect(validateAjv(payload).valid).toBe(false)
-  })
-
-  test('requires organisationName', () => {
-    const { organisationName, ...withoutOrganisationName } = producer
-    expect(validateJoi(withoutOrganisationName).valid).toBe(false)
-    expect(validateAjv(withoutOrganisationName).valid).toBe(false)
-  })
-
-  test('does not require authorisationNumber', () => {
-    const { authorisationNumber, ...withoutAuthorisationNumber } = producer
-    expect(validateJoi(withoutAuthorisationNumber).valid).toBe(true)
-    expect(validateAjv(withoutAuthorisationNumber).valid).toBe(true)
-  })
-
-  test('accepts emailAddress only', () => {
-    const { phoneNumber, ...withoutPhoneNumber } = producer
-
-    expect(validateJoi(withoutPhoneNumber).valid).toBe(true)
-    expect(validateAjv(withoutPhoneNumber).valid).toBe(true)
-  })
-
-  test('accepts phoneNumber only', () => {
-    const { emailAddress, ...withoutEmailAddress } = producer
-    expect(validateJoi(withoutEmailAddress).valid).toBe(true)
-    expect(validateAjv(withoutEmailAddress).valid).toBe(true)
-  })
-
-  test('requires at least one of emailAddress or phoneNumber', () => {
-    const { emailAddress, phoneNumber, ...withoutContactDetails } = producer
-    expect(validateJoi(withoutContactDetails).valid).toBe(false)
-    expect(validateAjv(withoutContactDetails).valid).toBe(false)
-  })
-
-  test('does not require fullAddress', () => {
-    const { postcode } = producer.address
-    const payload = {
-      ...producer,
-      address: { postcode }
-    }
-    expect(validateJoi(payload).valid).toBe(true)
-    expect(validateAjv(payload).valid).toBe(true)
-  })
-})
-
-describe('wasteSource = Municipal', () => {
   const municipalProducer = {
     wasteSource: 'Municipal',
     organisationName: 'Test Council',
@@ -98,73 +48,155 @@ describe('wasteSource = Municipal', () => {
     councilMovement: true
   }
 
-  test('accepts a valid Municipal producer', () => {
-    expect(validateJoi(municipalProducer).valid).toBe(true)
-    expect(validateAjv(municipalProducer).valid).toBe(true)
-  })
-
-  test('requires organisationName', () => {
-    const { organisationName, ...withoutOrganisationName } = municipalProducer
-    expect(validateJoi(withoutOrganisationName).valid).toBe(false)
-    expect(validateAjv(withoutOrganisationName).valid).toBe(false)
-  })
-
-  test('does not require sicCode', () => {
-    expect(validateJoi(municipalProducer).valid).toBe(true)
-    expect(validateAjv(municipalProducer).valid).toBe(true)
-  })
-
-  test('requires at least one of emailAddress or phoneNumber', () => {
-    const { emailAddress, phoneNumber, ...withoutContactDetails } =
-      municipalProducer
-    expect(validateJoi(withoutContactDetails).valid).toBe(false)
-    expect(validateAjv(withoutContactDetails).valid).toBe(false)
-  })
-})
-
-describe('wasteSource = Household', () => {
   const householdProducer = {
     wasteSource: 'Household',
     councilMovement: true
   }
 
-  test('accepts a valid Household producer', () => {
-    expect(validateJoi(householdProducer).valid).toBe(true)
-    expect(validateAjv(householdProducer).valid).toBe(true)
+  describe('Scenario: Household producer is submitted correctly', () => {
+    test('the Movement is created successfully when only wasteSource and councilMovement are provided', () => {
+      expect(validateJoi(householdProducer).valid).toBe(true)
+      expect(validateAjv(householdProducer).valid).toBe(true)
+    })
   })
 
-  test('rejects organisationName', () => {
-    const payload = {
-      ...householdProducer,
-      organisationName: 'Acme'
-    }
-    expect(validateJoi(payload).valid).toBe(false)
-    expect(validateAjv(payload).valid).toBe(false)
+  describe('Scenario: Household producer includes a forbidden field', () => {
+    test.each([
+      ['organisationName', 'Acme'],
+      ['authorisationNumber', 'EAS/P/123456'],
+      ['sicCode', '38110'],
+      ['emailAddress', 'producer@example.com'],
+      ['phoneNumber', '01234567890'],
+      [
+        'address',
+        { fullAddress: '5 Elm Street, Test Town', postcode: 'TE2 4HH' }
+      ]
+    ])('the payload is rejected when %s is also provided', (field, value) => {
+      const payload = { ...householdProducer, [field]: value }
+      expect(validateJoi(payload).valid).toBe(false)
+      expect(validateAjv(payload).valid).toBe(false)
+    })
   })
 
-  test('forbids authorisationNumber', () => {
-    const payload = {
-      ...householdProducer,
-      authorisationNumber: 'EAS/P/123456'
-    }
-    expect(validateJoi(payload).valid).toBe(false)
-    expect(validateAjv(payload).valid).toBe(false)
-  })
-
-  test('forbids an address', () => {
-    const payload = {
-      ...householdProducer,
-      address: {
-        fullAddress: '5 Elm Street, Test Town',
-        postcode: 'TE2 4HH'
+  describe('Scenario: Commercial producer is missing a required field', () => {
+    test.each(['organisationName', 'sicCode', 'address'])(
+      'the payload is rejected when %s is missing',
+      (field) => {
+        const { [field]: excluded, ...payload } = commercialProducer
+        expect(validateJoi(payload).valid).toBe(false)
+        expect(validateAjv(payload).valid).toBe(false)
       }
-    }
-    expect(validateJoi(payload).valid).toBe(false)
-    expect(validateAjv(payload).valid).toBe(false)
+    )
   })
 
-  test('does not require emailAddress or phoneNumber, unlike Commercial and Municipal', () => {
-    expect(validateJoi(householdProducer).valid).toBe(true)
-    expect(validateAjv(householdProducer).valid).toBe(true)
+  describe('Scenario: Municipal producer is missing a required field', () => {
+    test.each(['organisationName', 'address'])(
+      'the payload is rejected when %s is missing',
+      (field) => {
+        const { [field]: excluded, ...payload } = municipalProducer
+        expect(validateJoi(payload).valid).toBe(false)
+        expect(validateAjv(payload).valid).toBe(false)
+      }
+    )
+  })
+
+  describe('Scenario: Commercial or Municipal producer provides neither contact method', () => {
+    test.each(['Commercial', 'Municipal'])(
+      'the payload is rejected for a %s producer when neither emailAddress nor phoneNumber is provided',
+      (wasteSource) => {
+        const base =
+          wasteSource === 'Commercial' ? commercialProducer : municipalProducer
+        const { emailAddress, phoneNumber, ...payload } = base
+        expect(validateJoi(payload).valid).toBe(false)
+        expect(validateAjv(payload).valid).toBe(false)
+      }
+    )
+  })
+
+  describe('Scenario: Producer address postcode is malformed', () => {
+    const payload = {
+      ...commercialProducer,
+      address: { ...commercialProducer.address, postcode: 'NOTAPOSTCODE' }
+    }
+
+    test('the payload is rejected by the Joi schema', () => {
+      expect(validateJoi(payload).valid).toBe(false)
+    })
+
+    // Known gap: producer-commercial/municipal.schema.json's address.postcode
+    // has no format/pattern check yet (unlike Joi's addressSchema), so ajv
+    // currently accepts a malformed postcode here. Same gap already tracked
+    // in test/event-model/schema/common/address.test.js's postcode todo.
+    test.todo(
+      'the payload is rejected by the JSON schema (ajv) once postcode format is enforced in producer-*.schema.json'
+    )
+  })
+
+  describe('Scenario: sicCode is not five digits', () => {
+    test.each(['Commercial', 'Municipal'])(
+      'the payload is rejected for a %s producer with a malformed sicCode',
+      (wasteSource) => {
+        const base =
+          wasteSource === 'Commercial' ? commercialProducer : municipalProducer
+        const payload = { ...base, sicCode: '123' }
+        expect(validateJoi(payload).valid).toBe(false)
+        expect(validateAjv(payload).valid).toBe(false)
+      }
+    )
+  })
+
+  // -------------------------------------------------------------------------
+  // Coverage below isn't called out by any scenario in the feature file
+  // above, but existed in the previous version of this test file — kept so
+  // nothing is lost in the rewrite.
+  // -------------------------------------------------------------------------
+  describe('Additional coverage: Commercial producer', () => {
+    test('accepts a valid Commercial producer', () => {
+      expect(validateJoi(commercialProducer).valid).toBe(true)
+      expect(validateAjv(commercialProducer).valid).toBe(true)
+    })
+
+    test('rejects wasteSource given in lower/upper mismatched case', () => {
+      const payload = { ...commercialProducer, wasteSource: 'COMMERCIAL' }
+      expect(validateJoi(payload).valid).toBe(false)
+      expect(validateAjv(payload).valid).toBe(false)
+    })
+
+    test('does not require authorisationNumber', () => {
+      const { authorisationNumber, ...payload } = commercialProducer
+      expect(validateJoi(payload).valid).toBe(true)
+      expect(validateAjv(payload).valid).toBe(true)
+    })
+
+    test('accepts emailAddress only', () => {
+      const { phoneNumber, ...payload } = commercialProducer
+      expect(validateJoi(payload).valid).toBe(true)
+      expect(validateAjv(payload).valid).toBe(true)
+    })
+
+    test('accepts phoneNumber only', () => {
+      const { emailAddress, ...payload } = commercialProducer
+      expect(validateJoi(payload).valid).toBe(true)
+      expect(validateAjv(payload).valid).toBe(true)
+    })
+
+    test('does not require fullAddress', () => {
+      const { postcode } = commercialProducer.address
+      const payload = { ...commercialProducer, address: { postcode } }
+      expect(validateJoi(payload).valid).toBe(true)
+      expect(validateAjv(payload).valid).toBe(true)
+    })
+  })
+
+  describe('Additional coverage: Municipal producer', () => {
+    test('accepts a valid Municipal producer', () => {
+      expect(validateJoi(municipalProducer).valid).toBe(true)
+      expect(validateAjv(municipalProducer).valid).toBe(true)
+    })
+
+    test('does not require sicCode', () => {
+      expect(validateJoi(municipalProducer).valid).toBe(true)
+      expect(validateAjv(municipalProducer).valid).toBe(true)
+    })
   })
 })
