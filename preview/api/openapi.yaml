@@ -208,76 +208,6 @@ components:
           description: The reference value. Must be supplied together with its label.
           example: PO-98765
 
-    producerDetails:
-      type: object
-      description: |
-        Producer organisation and waste-source details, recorded at creation.
-
-        Conditional requiredness is driven by `wasteSource` and enforced
-        server-side:
-        - `Commercial` — `organisationName`, `address` and `sicCode` are
-          required; `authorisationNumber` is optional.
-        - `Household` — the business-only fields (`organisationName`,
-          `authorisationNumber`, `sicCode`, `emailAddress`, `phoneNumber`) and
-          `address` must NOT be provided.
-        - `Municipal` — `organisationName` and `address` are required;
-          `authorisationNumber` and `sicCode` remain optional.
-        - `Commercial` and `Municipal` — at least one of `emailAddress` or
-          `phoneNumber` must be provided (both may be supplied). Not
-          applicable for `Household`, where both remain forbidden.
-      required:
-        - wasteSource
-        - councilMovement
-      properties:
-        wasteSource:
-          type: string
-          enum: [Household, Commercial, Municipal]
-          description: Origin of the waste. Drives conditional requiredness of the business-only fields. Case-sensitive.
-          example: Commercial
-        organisationName:
-          type: string
-          description: Producer organisation name. Required for Commercial and Municipal; not applicable for Household.
-          example: ACME Waste Producers Ltd
-        authorisationNumber:
-          type: string
-          description: |
-            Environmental permit or exemption number the producer operates under.
-            Optional for Commercial and Municipal; not applicable for Household.
-            Validated against the same UK site-authorisation formats as
-            `receiver.authorisationNumber`.
-          example: EAS/P/123456
-        sicCode:
-          type: string
-          pattern: '^\d{5}$'
-          description: |
-            Five-digit Standard Industrial Classification code for the process
-            that created this waste. Required for Commercial; optional for
-            Municipal; not applicable for Household.
-          example: '38110'
-        emailAddress:
-          type: string
-          format: email
-          description: |
-            Producer contact email address. Not applicable for Household.
-            At least one of emailAddress or phoneNumber must be provided
-            for Commercial and Municipal waste.
-          example: producer@example.com
-        phoneNumber:
-          type: string
-          description: |
-            Producer contact phone number. Not applicable for Household.
-            At least one of emailAddress or phoneNumber must be provided
-            for Commercial and Municipal waste.
-          example: '01234567890'
-        address:
-          allOf:
-            - $ref: '#/components/schemas/address'
-          description: Producer site address. Required for Commercial and Municipal; not applicable for Household.
-        councilMovement:
-          type: boolean
-          description: Whether this movement is carried out by, or on behalf of, a council.
-          example: false
-
     intendedCarrierDetails:
       type: object
       description: |
@@ -754,7 +684,7 @@ components:
           maxLength: 5000
           description: Special handling instructions (e.g. fragile, hazardous, temperature-sensitive).
         producer:
-          $ref: '#/components/schemas/producerDetails'
+          $ref: '../event-model/schema/common/producer/producer.schema.json'
         carrier:
           allOf:
             - $ref: '#/components/schemas/intendedCarrierDetails'
