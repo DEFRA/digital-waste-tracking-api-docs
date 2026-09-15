@@ -1,0 +1,75 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "producer-commercial.schema.json",
+  "title": "Producer (Commercial)",
+  "description": "Producer fields specific to commercial waste. organisationName, sicCode and address are required; authorisationNumber is optional. At least one of emailAddress or phoneNumber must be provided.",
+  "type": "object",
+  "allOf": [
+    { "$ref": "producer-base.schema.json" },
+    {
+      "type": "object",
+      "anyOf": [
+        { "properties": { "emailAddress": {} }, "required": ["emailAddress"] },
+        { "properties": { "phoneNumber": {} }, "required": ["phoneNumber"] }
+      ],
+      "properties": {
+        "wasteSource": {
+          "const": "Commercial",
+          "description": "Waste originates from a commercial source."
+        },
+        "organisationName": {
+          "type": "string",
+          "description": "Producer organisation name."
+        },
+        "authorisationNumber": {
+          "type": "string",
+          "format": "authorisationNumber",
+          "description": "Producer environmental permit or exemption number, in a valid UK format."
+        },
+        "sicCode": {
+          "type": "string",
+          "pattern": "^\\d{5}$",
+          "description": "Five-digit Standard Industrial Classification code."
+        },
+        "emailAddress": {
+          "type": "string",
+          "format": "email",
+          "description": "Producer contact email address. At least one of emailAddress or phoneNumber must be provided."
+        },
+        "phoneNumber": {
+          "type": "string",
+          "format": "phoneNumber",
+          "description": "Producer contact phone number, in a valid format. At least one of emailAddress or phoneNumber must be provided."
+        },
+        "address": {
+          "type": "object",
+          "description": "Producer site address.",
+          "properties": {
+            "fullAddress": {
+              "type": "string",
+              "description": "Full address line."
+            },
+            "postcode": {
+              "type": "string",
+              "description": "Accepts UK postcodes and Irish Eircodes."
+            }
+          },
+          "required": ["postcode"]
+        }
+      },
+      "required": ["wasteSource", "organisationName", "sicCode", "address"]
+    }
+  ],
+  "propertyNames": {
+    "enum": [
+      "wasteSource",
+      "organisationName",
+      "authorisationNumber",
+      "sicCode",
+      "emailAddress",
+      "phoneNumber",
+      "address",
+      "councilMovement"
+    ]
+  }
+}

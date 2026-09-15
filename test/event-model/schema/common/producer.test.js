@@ -1,4 +1,18 @@
 import { producerSchema } from '../../../../docs/collections/data/creationJoi.js'
+import {
+  getErrors,
+  validate
+} from '../../../../docs/event-model/validate/index.js'
+
+const validateJoi = (payload) => {
+  const { error } = producerSchema.validate(payload)
+  return { valid: error === undefined, errors: error?.details ?? null }
+}
+
+const validateAjv = (payload) => {
+  const valid = validate('producer.schema.json', payload)
+  return { valid, errors: valid ? null : getErrors('producer.schema.json') }
+}
 
 describe('wasteSource = Commercial', () => {
   const producer = {
@@ -16,55 +30,58 @@ describe('wasteSource = Commercial', () => {
   }
 
   test('accepts a valid Commercial producer', () => {
-    const { error } = producerSchema.validate(producer)
-    expect(error).toBeUndefined()
+    expect(validateJoi(producer).valid).toBe(true)
+    expect(validateAjv(producer).valid).toBe(true)
   })
 
   test('rejects wasteSource given in lower/upper mismatched case', () => {
-    const { error } = producerSchema.validate({
+    const payload = {
       ...producer,
       wasteSource: 'COMMERCIAL'
-    })
-    expect(error).toBeDefined()
+    }
+    expect(validateJoi(payload).valid).toBe(false)
+    expect(validateAjv(payload).valid).toBe(false)
   })
 
   test('requires organisationName', () => {
     const { organisationName, ...withoutOrganisationName } = producer
-    const { error } = producerSchema.validate(withoutOrganisationName)
-    expect(error).toBeDefined()
+    expect(validateJoi(withoutOrganisationName).valid).toBe(false)
+    expect(validateAjv(withoutOrganisationName).valid).toBe(false)
   })
 
   test('does not require authorisationNumber', () => {
     const { authorisationNumber, ...withoutAuthorisationNumber } = producer
-    const { error } = producerSchema.validate(withoutAuthorisationNumber)
-    expect(error).toBeUndefined()
+    expect(validateJoi(withoutAuthorisationNumber).valid).toBe(true)
+    expect(validateAjv(withoutAuthorisationNumber).valid).toBe(true)
   })
 
   test('accepts emailAddress only', () => {
     const { phoneNumber, ...withoutPhoneNumber } = producer
-    const { error } = producerSchema.validate(withoutPhoneNumber)
-    expect(error).toBeUndefined()
+
+    expect(validateJoi(withoutPhoneNumber).valid).toBe(true)
+    expect(validateAjv(withoutPhoneNumber).valid).toBe(true)
   })
 
   test('accepts phoneNumber only', () => {
     const { emailAddress, ...withoutEmailAddress } = producer
-    const { error } = producerSchema.validate(withoutEmailAddress)
-    expect(error).toBeUndefined()
+    expect(validateJoi(withoutEmailAddress).valid).toBe(true)
+    expect(validateAjv(withoutEmailAddress).valid).toBe(true)
   })
 
   test('requires at least one of emailAddress or phoneNumber', () => {
     const { emailAddress, phoneNumber, ...withoutContactDetails } = producer
-    const { error } = producerSchema.validate(withoutContactDetails)
-    expect(error).toBeDefined()
+    expect(validateJoi(withoutContactDetails).valid).toBe(false)
+    expect(validateAjv(withoutContactDetails).valid).toBe(false)
   })
 
   test('does not require fullAddress', () => {
     const { postcode } = producer.address
-    const { error } = producerSchema.validate({
+    const payload = {
       ...producer,
       address: { postcode }
-    })
-    expect(error).toBeUndefined()
+    }
+    expect(validateJoi(payload).valid).toBe(true)
+    expect(validateAjv(payload).valid).toBe(true)
   })
 })
 
@@ -82,26 +99,26 @@ describe('wasteSource = Municipal', () => {
   }
 
   test('accepts a valid Municipal producer', () => {
-    const { error } = producerSchema.validate(municipalProducer)
-    expect(error).toBeUndefined()
+    expect(validateJoi(municipalProducer).valid).toBe(true)
+    expect(validateAjv(municipalProducer).valid).toBe(true)
   })
 
   test('requires organisationName', () => {
     const { organisationName, ...withoutOrganisationName } = municipalProducer
-    const { error } = producerSchema.validate(withoutOrganisationName)
-    expect(error).toBeDefined()
+    expect(validateJoi(withoutOrganisationName).valid).toBe(false)
+    expect(validateAjv(withoutOrganisationName).valid).toBe(false)
   })
 
   test('does not require sicCode', () => {
-    const { error } = producerSchema.validate(municipalProducer)
-    expect(error).toBeUndefined()
+    expect(validateJoi(municipalProducer).valid).toBe(true)
+    expect(validateAjv(municipalProducer).valid).toBe(true)
   })
 
   test('requires at least one of emailAddress or phoneNumber', () => {
     const { emailAddress, phoneNumber, ...withoutContactDetails } =
       municipalProducer
-    const { error } = producerSchema.validate(withoutContactDetails)
-    expect(error).toBeDefined()
+    expect(validateJoi(withoutContactDetails).valid).toBe(false)
+    expect(validateAjv(withoutContactDetails).valid).toBe(false)
   })
 })
 
@@ -112,39 +129,42 @@ describe('wasteSource = Household', () => {
   }
 
   test('accepts a valid Household producer', () => {
-    const { error } = producerSchema.validate(householdProducer)
-    expect(error).toBeUndefined()
+    expect(validateJoi(householdProducer).valid).toBe(true)
+    expect(validateAjv(householdProducer).valid).toBe(true)
   })
 
   test('rejects organisationName', () => {
-    const { error } = producerSchema.validate({
+    const payload = {
       ...householdProducer,
       organisationName: 'Acme'
-    })
-    expect(error).toBeDefined()
+    }
+    expect(validateJoi(payload).valid).toBe(false)
+    expect(validateAjv(payload).valid).toBe(false)
   })
 
   test('forbids authorisationNumber', () => {
-    const { error } = producerSchema.validate({
+    const payload = {
       ...householdProducer,
       authorisationNumber: 'EAS/P/123456'
-    })
-    expect(error).toBeDefined()
+    }
+    expect(validateJoi(payload).valid).toBe(false)
+    expect(validateAjv(payload).valid).toBe(false)
   })
 
   test('forbids an address', () => {
-    const { error } = producerSchema.validate({
+    const payload = {
       ...householdProducer,
       address: {
         fullAddress: '5 Elm Street, Test Town',
         postcode: 'TE2 4HH'
       }
-    })
-    expect(error).toBeDefined()
+    }
+    expect(validateJoi(payload).valid).toBe(false)
+    expect(validateAjv(payload).valid).toBe(false)
   })
 
   test('does not require emailAddress or phoneNumber, unlike Commercial and Municipal', () => {
-    const { error } = producerSchema.validate(householdProducer)
-    expect(error).toBeUndefined()
+    expect(validateJoi(householdProducer).valid).toBe(true)
+    expect(validateAjv(householdProducer).valid).toBe(true)
   })
 })
