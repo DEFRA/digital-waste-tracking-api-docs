@@ -204,6 +204,15 @@ export function isValidHazardousWasteConsignmentCode(code) {
   ].some((regex) => regex.test(trimmed))
 }
 
+export function isValidPostcode(postcode) {
+  const trimmed = normalize(postcode)
+  if (!trimmed) {
+    return false
+  }
+
+  return UK_POSTCODE_REGEX.test(trimmed) || IRL_POSTCODE_REGEX.test(trimmed)
+}
+
 export function isValidPhoneNumber(phoneNumber) {
   const trimmed = normalize(phoneNumber)
   if (!trimmed) {
