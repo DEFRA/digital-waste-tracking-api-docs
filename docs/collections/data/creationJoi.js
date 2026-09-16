@@ -18,7 +18,9 @@
  *   endpoint (POST /deliveries/{deliveryId}/receipt) does not — its wasteItem drops classification (D-042).
  * - Municipal is an accepted wasteSource.
  * - producer.organisationName and producer.address are required for Commercial and Municipal, forbidden
- *   for Household; producer.authorisationNumber is optional for Commercial and Municipal.
+ *   for Household; producer.authorisationNumber is mutually exclusive with
+ *   producer.reasonForNoAuthorisationNumber — exactly one of the two is required for Commercial and
+ *   Municipal (reasonForNoAuthorisationNumber enum values TBC), neither applies to Household.
  * - intendedReceivers (D-043; array, renamed from receiver, then from receivers) requires at least one
  *   entry only when the movement contains hazardous waste — a producer may declare waste heading to more
  *   than one receiving site. Each entry's siteName is mandatory whenever that entry is supplied, which
@@ -225,6 +227,41 @@ export const intendedReceiverSchema = Joi.object({
 
 const SIC_CODE_REGEX = /^\d{5}$/
 
+// Placeholder — real reason codes TBC pending BA/policy input.
+const REASONS_FOR_NO_AUTHORISATION_NUMBER = ['TBC']
+
+/**
+ * authorisationNumber / reasonForNoAuthorisationNumber mutual exclusivity for
+ * Commercial and Municipal producers (Household forbids both, unaffected).
+ * Implemented as a .custom() validator rather than object-level .or()/.xor()
+ * — chaining multiple .when()-scoped .messages() calls on the same object
+ * schema was tried first, but Joi's message keys (e.g. object.missing) are
+ * shared across the whole schema, not scoped per .when() branch, so the last
+ * .messages() call silently won for every branch's errors, including the
+ * unrelated emailAddress/phoneNumber rule below. A .custom() validator's
+ * helpers.message() call has no such collision.
+ */
+const validateProducerAuthorisationNumberRule = (producer, helpers) => {
+  const hasAuthorisationNumber = isProvided(producer.authorisationNumber)
+  const hasReasonForNoAuthorisationNumber = isProvided(
+    producer.reasonForNoAuthorisationNumber
+  )
+
+  if (hasAuthorisationNumber && hasReasonForNoAuthorisationNumber) {
+    return helpers.message(
+      'producer: authorisationNumber and reasonForNoAuthorisationNumber must not both be provided.'
+    )
+  }
+
+  if (!hasAuthorisationNumber && !hasReasonForNoAuthorisationNumber) {
+    return helpers.message(
+      'producer: exactly one of authorisationNumber or reasonForNoAuthorisationNumber must be provided for Commercial and Municipal waste.'
+    )
+  }
+
+  return producer
+}
+
 export const producerSchema = Joi.object({
   wasteSource: Joi.string()
     .valid('Household', 'Commercial', 'Municipal')
@@ -253,7 +290,17 @@ export const producerSchema = Joi.object({
       )
       .optional()
   }).description(
-    'Producer environmental permit or exemption number. Optional for Commercial and Municipal, not applicable for Household.'
+    'Producer environmental permit or exemption number. Mutually exclusive with reasonForNoAuthorisationNumber — exactly one of the two is required for Commercial and Municipal, not applicable for Household.'
+  ),
+
+  reasonForNoAuthorisationNumber: Joi.when('wasteSource', {
+    is: 'Household',
+    then: Joi.forbidden(),
+    otherwise: Joi.string()
+      .valid(...REASONS_FOR_NO_AUTHORISATION_NUMBER)
+      .optional()
+  }).description(
+    'Reason no authorisationNumber is held (enum values TBC). Mutually exclusive with authorisationNumber — exactly one of the two is required for Commercial and Municipal, not applicable for Household.'
   ),
 
   sicCode: Joi.when('wasteSource', {
@@ -313,6 +360,13 @@ export const producerSchema = Joi.object({
       'object.missing':
         'producer: at least one of emailAddress or phoneNumber must be provided for Commercial and Municipal waste.'
     })
+  })
+  .when(Joi.ref('wasteSource', { ancestor: 0 }), {
+    is: Joi.valid('Commercial', 'Municipal'),
+    then: Joi.object().custom(
+      validateProducerAuthorisationNumberRule,
+      'producer authorisationNumber/reasonForNoAuthorisationNumber mutual exclusivity'
+    )
   })
   .description('Producer organisation details.')
 

@@ -2,7 +2,7 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "producer-commercial.schema.json",
   "title": "Producer (Commercial)",
-  "description": "Producer fields specific to commercial waste. organisationName, sicCode and address are required; authorisationNumber is optional. At least one of emailAddress or phoneNumber must be provided.",
+  "description": "Producer fields specific to commercial waste. organisationName, sicCode and address are required. At least one of emailAddress or phoneNumber must be provided. Exactly one of authorisationNumber or reasonForNoAuthorisationNumber must be provided.",
   "type": "object",
   "allOf": [
     { "$ref": "producer-base.schema.json" },
@@ -11,6 +11,22 @@
       "anyOf": [
         { "properties": { "emailAddress": {} }, "required": ["emailAddress"] },
         { "properties": { "phoneNumber": {} }, "required": ["phoneNumber"] }
+      ],
+      "oneOf": [
+        {
+          "required": ["authorisationNumber"],
+          "properties": {
+            "authorisationNumber": {},
+            "reasonForNoAuthorisationNumber": false
+          }
+        },
+        {
+          "required": ["reasonForNoAuthorisationNumber"],
+          "properties": {
+            "authorisationNumber": false,
+            "reasonForNoAuthorisationNumber": {}
+          }
+        }
       ],
       "properties": {
         "wasteSource": {
@@ -24,7 +40,12 @@
         "authorisationNumber": {
           "type": "string",
           "format": "authorisationNumber",
-          "description": "Producer environmental permit or exemption number, in a valid UK format."
+          "description": "Producer environmental permit or exemption number, in a valid UK format. Mutually exclusive with reasonForNoAuthorisationNumber — exactly one of the two is required."
+        },
+        "reasonForNoAuthorisationNumber": {
+          "type": "string",
+          "enum": ["TBC"],
+          "description": "Reason no authorisationNumber is held (enum values TBC). Mutually exclusive with authorisationNumber — exactly one of the two is required."
         },
         "sicCode": {
           "type": "string",
@@ -66,6 +87,7 @@
       "wasteSource",
       "organisationName",
       "authorisationNumber",
+      "reasonForNoAuthorisationNumber",
       "sicCode",
       "emailAddress",
       "phoneNumber",

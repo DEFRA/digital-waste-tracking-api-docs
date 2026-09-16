@@ -18,7 +18,10 @@
  *   Creation requires only meansOfTransport and organisationName. Optional carrier fields still retain
  *   integrity rules when supplied. This example includes extra carrier details.
  * - producer.organisationName/address are required for Commercial and Municipal, forbidden for
- *   Household; producer.authorisationNumber is optional for Commercial and Municipal.
+ *   Household; producer.authorisationNumber is mutually exclusive with
+ *   producer.reasonForNoAuthorisationNumber — exactly one of the two is required for Commercial and
+ *   Municipal (enum values TBC), neither applies to Household. producerWithoutAuthorisationNumber
+ *   demonstrates the reasonForNoAuthorisationNumber path.
  * - brokerOrDealer.registrationNumber is required whenever brokerOrDealer is supplied, with
  *   reasonForNoRegistrationNumber required in its place when null/empty.
  * - intendedReceivers (D-043; array, renamed from receiver, then from receivers) requires at least one
@@ -55,6 +58,23 @@ export const municipalProducer = {
   emailAddress: 'waste.services@example.gov.uk',
   phoneNumber: '01234567890',
   councilMovement: true
+}
+
+// authorisationNumber and reasonForNoAuthorisationNumber are mutually exclusive —
+// exactly one of the two is required for Commercial and Municipal producers.
+// reasonForNoAuthorisationNumber's enum values are TBC; 'TBC' is a placeholder.
+export const producerWithoutAuthorisationNumber = {
+  wasteSource: 'Commercial',
+  organisationName: 'ACME Waste Producers Ltd',
+  reasonForNoAuthorisationNumber: 'TBC',
+  address: {
+    fullAddress: '10 Industrial Way, Test City',
+    postcode: 'TE1 2PQ'
+  },
+  emailAddress: 'producer@example.com',
+  phoneNumber: '01234567890',
+  sicCode: '38110',
+  councilMovement: false
 }
 
 export const carrier = {
