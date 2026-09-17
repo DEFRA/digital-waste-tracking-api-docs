@@ -54,6 +54,7 @@ At-a-glance view of every decision, sorted by status, then by impact (structural
 | D-040 | [Rename drop-off and Transfer ID to delivery and Delivery ID](#rename-drop-off-and-transfer-id-to-delivery-and-delivery-id) | ✅ Decided · Applied register-wide | 🟢 Low | **Naming** |
 | D-043 | [Creation's receiver becomes receivers: an array, min 1 when required](#creations-receiver-becomes-receivers-an-array-min-1-when-required) | ✅ Decided | 🟢 Low | **Creation** |
 | D-044 | [Hazardous/POP component concentrationThreshold flattened to an operator only — no value](#hazardouspop-component-concentrationthreshold-flattened-to-an-operator-only-no-value) | ✅ Decided | 🟢 Low | **Creation** |
+| D-045 | [Creation's carrier becomes intendedCarriers: an array, min 1](#creations-carrier-becomes-intendedcarriers-an-array-min-1) | ✅ Decided | 🟢 Low | **Creation** |
 | D-025 | [Receipt acceptance / rejection outcome (new in Phase 2)](#receipt-acceptance-rejection-outcome-new-in-phase-2) | ⏳ Open | 🔴 High | **Receipt** |
 | D-037 | [Phase 2 MongoDB storage model — three options under evaluation](#phase-2-mongodb-storage-model-three-options-under-evaluation) | ⏳ Open | 🔴 High | **Data model** |
 | D-019 | [Fate-of-waste GET — producer journey query (proposal)](#fate-of-waste-get-producer-journey-query-proposal) | ⏳ Open | 🟠 Medium | **Fate-of-waste** |
@@ -652,6 +653,18 @@ While implementing this, a related pre-existing gap was found and fixed: `hazard
 **Known asymmetry, flagged for Perry/BA follow-up.** POPs' `code` is already a controlled, validated reference field, so its WM3 threshold is resolvable today. Hazardous components' `name` is still free text with no reference list or endpoint — there is no `/reference-data/hazardous-component-names` equivalent to `/reference-data/pop-names`. Until one exists, "the threshold is implicit" cannot actually be resolved by the API for hazardous components; it stays a manual/regulatory-side lookup.
 
 **Consequences.** Ripples into `sharedTypes.ts` (`PopConcentrationThreshold`/`HazardousConcentrationThreshold` types removed, `PopComponent`/`HazardousComponent` gain `concentrationThresholdOperator`), `creationTypes.ts`'s re-exports, `openapi.yaml`'s `wasteItemClassification` POP/hazardous component schemas, the `creationEvent.js` worked examples (now demonstrating a named hazardous component using the threshold path), and `common/pops.test.js`/`common/hazardous.test.js`. The legacy, unreferenced `wasteItem` component in `openapi.yaml` (Phase 1, preserved verbatim) still carries the old `concentrationThreshold: { operator, value }` shape — deliberately left untouched, consistent with that block's preserved-verbatim convention.
+
+<a id="d-045"></a>
+
+### Creation's `carrier` becomes `intendedCarriers`: an array, min 1
+
+**D-045** · ✅ Decided · Impact: 🟢 Low · Area: **Creation** · Related: [D-043](#d-043)
+
+**Context.** Before this decision, `creationJoi.js` modelled `carrier` at Creation as a single, always-required object (`intendedCarrierSchema`) — the one carrier expected to collect the waste. That no longer holds: a producer may need to declare more than one prospective carrier at Creation time (for example, when the actual carrier for a multi-leg or as-yet-unconfirmed collection isn't settled), mirroring the same "may be more than one" reasoning that drove [D-043](#d-043)'s `receiver` → `receivers` change.
+
+**Decision.** Rename `carrier` → `intendedCarriers`, an array (`min(1)`, always required — unlike `receivers`, this array has no conditional gate) of the existing per-entry carrier shape (`intendedCarrierSchema`, unchanged: `meansOfTransport` and `organisationName` mandatory, other fields optional with their existing integrity rules, at least one of `emailAddress`/`phoneNumber` required per-entry).
+
+**Consequences.** Ripples into `creationTypes.ts` (`carrier: IntendedCarrier` → `intendedCarriers: IntendedCarrier[]`), the Creation test suite (`creation/create-movement.test.js`), the `creationEvent.js` worked examples, and `openapi.yaml`'s Creation request schema (`carrier` → an `intendedCarriers` array of `intendedCarrierDetails`, same pattern as `receivers`/`intendedReceiverDetails`). Every other event's `carrier` field (Collection, Delivery, Receipt, Receipt-without-Delivery — all the shared `carrierSchema`) is unaffected; this is Creation-only, same as D-043 left Receipt's `receiverSiteSchema` untouched.
 
 ## Open
 

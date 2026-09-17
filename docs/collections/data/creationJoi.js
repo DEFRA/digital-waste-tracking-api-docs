@@ -8,7 +8,7 @@
  * Creation-specific rules reflected here:
  * - apiCode is required, as per Receipt.
  * - plannedCollectionTime (renamed from estimatedDateTimeCollected) follows the same DateTime naming style as dateTimeReceived.
- * - Root objects are producer, carrier, brokerOrDealer and receivers.
+ * - Root objects are producer, intendedCarriers, brokerOrDealer and intendedReceivers.
  * - Creation wasteItems extend the shared wasteItemBaseSchema (sharedSchemas.js, D-042): weight,
  *   numberOfContainers, typeOfContainers and physicalForm are top-level; classification (ewcCodes,
  *   wasteDescription, containsPops/pops, containsHazardous/hazardous) is nested. intendedTreatments
@@ -18,17 +18,21 @@
  *   endpoint (POST /deliveries/{deliveryId}/receipt) does not — its wasteItem drops classification (D-042).
  * - Municipal is an accepted wasteSource.
  * - producer.organisationName and producer.address are required for Commercial and Municipal, forbidden
- *   for Household; producer.authorisationNumber is optional for Commercial and Municipal.
- * - receivers (D-043; array, renamed from receiver) requires at least one entry only when the movement
- *   contains hazardous waste — a producer may declare waste heading to more than one receiving site.
- *   Each entry's siteName is mandatory whenever that entry is supplied, which makes authorisationNumber
- *   and address mandatory too.
+ *   for Household; producer.authorisationNumber is mutually exclusive with
+ *   producer.reasonForNoAuthorisationNumber — exactly one of the two is required for Commercial and
+ *   Municipal (reasonForNoAuthorisationNumber enum values TBC), neither applies to Household.
+ * - intendedReceivers (D-043; array, renamed from receiver, then from receivers) requires at least one
+ *   entry only when the movement contains hazardous waste — a producer may declare waste heading to more
+ *   than one receiving site. Each entry's siteName is mandatory whenever that entry is supplied, which
+ *   makes authorisationNumber and address mandatory too.
  * - brokerOrDealer is optional, but registrationNumber is required whenever it is supplied (null/empty
  *   requires reasonForNoRegistrationNumber instead, mirroring carrier's mutual-exclusivity rule).
- * - carrier follows the Receipt carrier structure, but only carrier.meansOfTransport and
- *   carrier.organisationName are mandatory at Creation. Optional carrier fields still keep
- *   integrity rules when supplied: registrationNumber and reasonForNoRegistrationNumber are mutually
- *   exclusive; vehicleRegistration is only allowed for Road; otherMeansOfTransport is only allowed for Other.
+ * - intendedCarriers (D-045; array, renamed from carrier) is always required, min 1 — a producer may
+ *   declare more than one prospective carrier at Creation. Each entry follows the Receipt carrier
+ *   structure, but only meansOfTransport and organisationName are mandatory at Creation. Optional carrier
+ *   fields still keep integrity rules when supplied: registrationNumber and reasonForNoRegistrationNumber
+ *   are mutually exclusive; vehicleRegistration is only allowed for Road; otherMeansOfTransport is only
+ *   allowed for Other.
  * - producer.councilMovement uses the BA spreadsheet name.
  * - collectionAddressDifferentFromProducer / collectionSite: planning-time fields for where the waste will
  *   be collected from, if not the producer's address. Distinct from the Collection event's own
@@ -91,10 +95,13 @@ const validateCreationRules = (movement, helpers) => {
 
   if (
     containsHazardousEwcCode &&
-    !(Array.isArray(movement.receivers) && movement.receivers.length > 0)
+    !(
+      Array.isArray(movement.intendedReceivers) &&
+      movement.intendedReceivers.length > 0
+    )
   ) {
     return helpers.message(
-      'at least one receivers entry is required when the movement contains hazardous waste.'
+      'at least one intendedReceivers entry is required when the movement contains hazardous waste.'
     )
   }
 
@@ -209,7 +216,7 @@ export const intendedReceiverSchema = Joi.object({
       'receiver: at least one of emailAddress or phoneNumber must be provided.'
   })
   .description(
-    'A single receiving site entry within receivers (D-043). siteName is mandatory whenever an ' +
+    'A single receiving site entry within intendedReceivers (D-043). siteName is mandatory whenever an ' +
       'entry is supplied, which in turn makes authorisationNumber and address mandatory too (both ' +
       'are conditional on siteName being populated).'
   )
@@ -219,6 +226,41 @@ export const intendedReceiverSchema = Joi.object({
 // ---------------------------------------------------------------------------
 
 const SIC_CODE_REGEX = /^\d{5}$/
+
+// Placeholder — real reason codes TBC pending BA/policy input.
+const REASONS_FOR_NO_AUTHORISATION_NUMBER = ['TBC']
+
+/**
+ * authorisationNumber / reasonForNoAuthorisationNumber mutual exclusivity for
+ * Commercial and Municipal producers (Household forbids both, unaffected).
+ * Implemented as a .custom() validator rather than object-level .or()/.xor()
+ * — chaining multiple .when()-scoped .messages() calls on the same object
+ * schema was tried first, but Joi's message keys (e.g. object.missing) are
+ * shared across the whole schema, not scoped per .when() branch, so the last
+ * .messages() call silently won for every branch's errors, including the
+ * unrelated emailAddress/phoneNumber rule below. A .custom() validator's
+ * helpers.message() call has no such collision.
+ */
+const validateProducerAuthorisationNumberRule = (producer, helpers) => {
+  const hasAuthorisationNumber = isProvided(producer.authorisationNumber)
+  const hasReasonForNoAuthorisationNumber = isProvided(
+    producer.reasonForNoAuthorisationNumber
+  )
+
+  if (hasAuthorisationNumber && hasReasonForNoAuthorisationNumber) {
+    return helpers.message(
+      'producer: authorisationNumber and reasonForNoAuthorisationNumber must not both be provided.'
+    )
+  }
+
+  if (!hasAuthorisationNumber && !hasReasonForNoAuthorisationNumber) {
+    return helpers.message(
+      'producer: exactly one of authorisationNumber or reasonForNoAuthorisationNumber must be provided for Commercial and Municipal waste.'
+    )
+  }
+
+  return producer
+}
 
 export const producerSchema = Joi.object({
   wasteSource: Joi.string()
@@ -248,7 +290,17 @@ export const producerSchema = Joi.object({
       )
       .optional()
   }).description(
-    'Producer environmental permit or exemption number. Optional for Commercial and Municipal, not applicable for Household.'
+    'Producer environmental permit or exemption number. Mutually exclusive with reasonForNoAuthorisationNumber — exactly one of the two is required for Commercial and Municipal, not applicable for Household.'
+  ),
+
+  reasonForNoAuthorisationNumber: Joi.when('wasteSource', {
+    is: 'Household',
+    then: Joi.forbidden(),
+    otherwise: Joi.string()
+      .valid(...REASONS_FOR_NO_AUTHORISATION_NUMBER)
+      .optional()
+  }).description(
+    'Reason no authorisationNumber is held (enum values TBC). Mutually exclusive with authorisationNumber — exactly one of the two is required for Commercial and Municipal, not applicable for Household.'
   ),
 
   sicCode: Joi.when('wasteSource', {
@@ -309,10 +361,21 @@ export const producerSchema = Joi.object({
         'producer: at least one of emailAddress or phoneNumber must be provided for Commercial and Municipal waste.'
     })
   })
+  .when(Joi.ref('wasteSource', { ancestor: 0 }), {
+    is: Joi.valid('Commercial', 'Municipal'),
+    then: Joi.object().custom(
+      validateProducerAuthorisationNumberRule,
+      'producer authorisationNumber/reasonForNoAuthorisationNumber mutual exclusivity'
+    )
+  })
   .description('Producer organisation details.')
 
 // ---------------------------------------------------------------------------
 // Carrier at creation
+//
+// intendedCarriers (D-045; array, renamed from carrier) is always required,
+// min 1 — a producer may declare more than one prospective carrier at
+// Creation. intendedCarrierSchema below is the unchanged per-entry shape.
 // ---------------------------------------------------------------------------
 
 export const intendedCarrierSchema = Joi.object({
@@ -458,17 +521,21 @@ export const createMovementSchema = Joi.object({
 
   producer: producerSchema.required(),
 
-  carrier: intendedCarrierSchema
+  intendedCarriers: Joi.array()
+    .items(intendedCarrierSchema)
+    .min(1)
     .required()
     .description(
-      'Carrier details. Required object at Creation, using the Receipt carrier field structure with meansOfTransport as the only mandatory carrier field.'
+      'Prospective carrier(s) declared at Creation (D-045). Always required, min 1 — a producer may ' +
+        'declare more than one prospective carrier. Each entry follows the Receipt carrier field ' +
+        'structure with meansOfTransport as the only mandatory carrier field.'
     ),
 
   brokerOrDealer: brokerSchema
     .optional()
     .description('Optional broker/dealer details.'),
 
-  receivers: Joi.array()
+  intendedReceivers: Joi.array()
     .items(intendedReceiverSchema)
     .min(1)
     .description(

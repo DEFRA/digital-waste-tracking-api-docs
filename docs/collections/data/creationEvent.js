@@ -8,20 +8,24 @@
  * Creation-specific alignment notes:
  * - apiCode is present as per Receipt.
  * - plannedCollectionTime (renamed from estimatedDateTimeCollected) follows the Receipt date/time naming style.
- * - Object names are producer, carrier, brokerOrDealer and receivers.
+ * - Object names are producer, intendedCarriers, brokerOrDealer and intendedReceivers.
  * - wasteItems use Creation's own shape (D-042): classification is nested; weight, numberOfContainers,
  *   typeOfContainers and physicalForm stay top-level. intendedTreatments is mandatory at Creation
  *   (min 1) — the Intended Treatment. The receiver confirms actualTreatments (Actual Treatment) at
  *   Receipt (D-031 amended).
- * - carrier follows the Receipt carrier structure, but Creation requires only meansOfTransport and
- *   organisationName. Optional carrier fields still retain integrity rules when supplied.
- *   This example includes extra carrier details.
+ * - intendedCarriers (D-045; array, renamed from carrier) is always required, min 1 — a producer may
+ *   declare more than one prospective carrier. Each entry follows the Receipt carrier structure, but
+ *   Creation requires only meansOfTransport and organisationName. Optional carrier fields still retain
+ *   integrity rules when supplied. This example includes extra carrier details.
  * - producer.organisationName/address are required for Commercial and Municipal, forbidden for
- *   Household; producer.authorisationNumber is optional for Commercial and Municipal.
+ *   Household; producer.authorisationNumber is mutually exclusive with
+ *   producer.reasonForNoAuthorisationNumber — exactly one of the two is required for Commercial and
+ *   Municipal (enum values TBC), neither applies to Household. producerWithoutAuthorisationNumber
+ *   demonstrates the reasonForNoAuthorisationNumber path.
  * - brokerOrDealer.registrationNumber is required whenever brokerOrDealer is supplied, with
  *   reasonForNoRegistrationNumber required in its place when null/empty.
- * - receivers (D-043; array, renamed from receiver) requires at least one entry only for hazardous
- *   waste. Each entry's siteName is mandatory whenever that entry is supplied.
+ * - intendedReceivers (D-043; array, renamed from receiver, then from receivers) requires at least one
+ *   entry only for hazardous waste. Each entry's siteName is mandatory whenever that entry is supplied.
  * - collectionAddressDifferentFromProducer / collectionSite: planning-time fields for where the
  *   waste will be collected from, if not the producer's address.
  */
@@ -54,6 +58,23 @@ export const municipalProducer = {
   emailAddress: 'waste.services@example.gov.uk',
   phoneNumber: '01234567890',
   councilMovement: true
+}
+
+// authorisationNumber and reasonForNoAuthorisationNumber are mutually exclusive —
+// exactly one of the two is required for Commercial and Municipal producers.
+// reasonForNoAuthorisationNumber's enum values are TBC; 'TBC' is a placeholder.
+export const producerWithoutAuthorisationNumber = {
+  wasteSource: 'Commercial',
+  organisationName: 'ACME Waste Producers Ltd',
+  reasonForNoAuthorisationNumber: 'TBC',
+  address: {
+    fullAddress: '10 Industrial Way, Test City',
+    postcode: 'TE1 2PQ'
+  },
+  emailAddress: 'producer@example.com',
+  phoneNumber: '01234567890',
+  sicCode: '38110',
+  councilMovement: false
 }
 
 export const carrier = {
@@ -114,7 +135,7 @@ export const brokerOrDealerWithoutRegistrationNumber = {
   phoneNumber: '01112223333'
 }
 
-// A single receiving site entry within receivers (D-043). siteName is mandatory
+// A single receiving site entry within intendedReceivers (D-043). siteName is mandatory
 // whenever an entry is supplied, which makes authorisationNumber and address
 // mandatory too. At least one entry is required only for hazardous waste.
 export const receiver = {
@@ -213,10 +234,10 @@ export const wasteItems = [
         hazCodes: ['HP_8'],
         components: [
           {
-            // One of concentration or concentrationThresholdOperator is
-            // required when name is supplied — here the component states it's
-            // at-or-above the WM3-defined threshold for Cadmium rather than
-            // supplying a plain value.
+            // Exactly one of concentration or concentrationThresholdOperator
+            // is required — here the component states it's at-or-above the
+            // WM3-defined threshold for Cadmium rather than supplying a
+            // plain value.
             name: 'Cadmium',
             concentrationThresholdOperator: 'GREATER_THAN_OR_EQUAL'
           }
@@ -235,6 +256,42 @@ export const wasteItems = [
     ]
   }
 ]
+
+// A hazardous waste item where own testing found nothing above the WM3
+// threshold. noComponents: true lets the submitter skip components
+// entirely instead of the usual GUIDANCE/OWN_TESTING requirement to supply them.
+export const wasteItemWithNoHazardousComponents = {
+  weight: {
+    metric: 'Kilograms',
+    amount: 100,
+    isEstimate: false
+  },
+  numberOfContainers: 5,
+  typeOfContainers: 'DRU',
+  physicalForm: 'Solid',
+  classification: {
+    ewcCodes: ['170504'],
+    wasteDescription: 'Soil and stones from a contaminated site',
+    containsPops: false,
+    containsHazardous: true,
+    hazardous: {
+      sourceOfComponents: 'OWN_TESTING',
+      hazCodes: ['HP_8'],
+      noComponents: true
+      // components omitted — testing found nothing above the WM3 threshold
+    }
+  },
+  intendedTreatments: [
+    {
+      disposalOrRecoveryCode: 'R4',
+      weight: {
+        metric: 'Kilograms',
+        amount: 100,
+        isEstimate: false
+      }
+    }
+  ]
+}
 
 // ---------------------------------------------------------------------------
 // Request bodies
@@ -256,8 +313,8 @@ export const publicPostBody = {
   specialHandlingRequirements: 'Handle with care and keep upright.',
   isDeleted: false,
   producer,
-  carrier,
-  receivers: [receiver],
+  intendedCarriers: [carrier],
+  intendedReceivers: [receiver],
   wasteItems
   // brokerOrDealer omitted — optional
 }
@@ -271,7 +328,7 @@ export const brokerInitiatedPostBody = {
 // Minimal Creation carrier example inside an otherwise valid hazardous movement.
 export const minimalCarrierPostBody = {
   ...publicPostBody,
-  carrier: minimalCreationCarrier
+  intendedCarriers: [minimalCreationCarrier]
 }
 
 // collectionAddressDifferentFromProducer true — collectionSite is then required.
@@ -331,7 +388,7 @@ export const nonHazardousPostBodyWithoutReceiver = {
   yourUniqueReference: 'CARRIER-JOB-002',
   isDeleted: false,
   producer,
-  carrier: minimalCreationCarrier,
+  intendedCarriers: [minimalCreationCarrier],
   wasteItems: nonHazardousWasteItems
 }
 
@@ -349,10 +406,11 @@ export const createMovementResponseWithWarnings = {
   validation: {
     warnings: [
       {
-        // Indexed path into the receivers array (D-043) — no other warning key in
-        // this file addresses an array entry, so there's no established indexed-path
-        // convention to follow; this extends the existing dot-path style with [0].
-        key: 'receivers[0].authorisationNumber',
+        // Indexed path into the intendedReceivers array (D-043) — no other warning
+        // key in this file addresses an array entry, so there's no established
+        // indexed-path convention to follow; this extends the existing dot-path
+        // style with [0].
+        key: 'intendedReceivers[0].authorisationNumber',
         errorType: 'NotProvided',
         message: 'Receiver authorisation number was not provided at creation.'
       }

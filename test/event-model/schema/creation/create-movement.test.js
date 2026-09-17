@@ -13,6 +13,7 @@ import { createMovementSchema } from '../../../../docs/collections/data/creation
 const producer = {
   wasteSource: 'Commercial',
   organisationName: 'ACME Waste Producers Ltd',
+  authorisationNumber: 'EAS/P/123456',
   address: {
     fullAddress: '10 Industrial Way, Test City',
     postcode: 'TE1 2PQ'
@@ -78,7 +79,7 @@ const baseMovement = {
   apiCode: '123e4567-e89b-12d3-a456-426614174000',
   plannedCollectionTime: '2026-01-01T09:00:00Z',
   producer,
-  carrier,
+  intendedCarriers: [carrier],
   wasteItems: [nonHazardousWasteItem]
 }
 
@@ -87,9 +88,44 @@ const hazardousMovement = {
   wasteItems: [hazardousWasteItem]
 }
 
-test('accepts a valid non-hazardous movement with no receivers or consignment code', () => {
+test('accepts a valid non-hazardous movement with no intendedReceivers or consignment code', () => {
   const { error } = createMovementSchema.validate(baseMovement)
   expect(error).toBeUndefined()
+})
+
+describe('intendedCarriers', () => {
+  test('is required', () => {
+    const { intendedCarriers, ...withoutIntendedCarriers } = baseMovement
+    const { error } = createMovementSchema.validate(withoutIntendedCarriers)
+    expect(error).toBeDefined()
+  })
+
+  test('rejects an empty array', () => {
+    const { error } = createMovementSchema.validate({
+      ...baseMovement,
+      intendedCarriers: []
+    })
+    expect(error).toBeDefined()
+  })
+
+  test('rejects intendedCarriers supplied as a bare object instead of an array', () => {
+    const { error } = createMovementSchema.validate({
+      ...baseMovement,
+      intendedCarriers: carrier
+    })
+    expect(error).toBeDefined()
+  })
+
+  test('accepts more than one prospective carrier', () => {
+    const { error } = createMovementSchema.validate({
+      ...baseMovement,
+      intendedCarriers: [
+        carrier,
+        { ...carrier, organisationName: 'Second Carrier Ltd' }
+      ]
+    })
+    expect(error).toBeUndefined()
+  })
 })
 
 describe('hazardousWasteConsignmentCode and reasonForNoConsignmentCode', () => {
@@ -108,7 +144,7 @@ describe('hazardousWasteConsignmentCode and reasonForNoConsignmentCode', () => {
   })
 })
 
-describe('receivers', () => {
+describe('intendedReceivers', () => {
   test('is required when the movement contains a hazardous EWC code', () => {
     const { error } = createMovementSchema.validate({
       ...hazardousMovement,
@@ -117,29 +153,29 @@ describe('receivers', () => {
     expect(error).toBeDefined()
   })
 
-  test('rejects an empty receivers array on a hazardous movement', () => {
+  test('rejects an empty intendedReceivers array on a hazardous movement', () => {
     const { error } = createMovementSchema.validate({
       ...hazardousMovement,
       reasonForNoConsignmentCode: 'NON_HAZ_WASTE_TRANSFER',
-      receivers: []
+      intendedReceivers: []
     })
     expect(error).toBeDefined()
   })
 
-  test('rejects receivers supplied as a bare object instead of an array', () => {
+  test('rejects intendedReceivers supplied as a bare object instead of an array', () => {
     const { error } = createMovementSchema.validate({
       ...hazardousMovement,
       reasonForNoConsignmentCode: 'NON_HAZ_WASTE_TRANSFER',
-      receivers: receiver
+      intendedReceivers: receiver
     })
     expect(error).toBeDefined()
   })
 
-  test('accepts a hazardous movement when reasonForNoConsignmentCode and receivers are both provided', () => {
+  test('accepts a hazardous movement when reasonForNoConsignmentCode and intendedReceivers are both provided', () => {
     const { error } = createMovementSchema.validate({
       ...hazardousMovement,
       reasonForNoConsignmentCode: 'NON_HAZ_WASTE_TRANSFER',
-      receivers: [receiver]
+      intendedReceivers: [receiver]
     })
     expect(error).toBeUndefined()
   })
@@ -148,7 +184,10 @@ describe('receivers', () => {
     const { error } = createMovementSchema.validate({
       ...hazardousMovement,
       reasonForNoConsignmentCode: 'NON_HAZ_WASTE_TRANSFER',
-      receivers: [receiver, { ...receiver, siteName: 'Second Receiver Site' }]
+      intendedReceivers: [
+        receiver,
+        { ...receiver, siteName: 'Second Receiver Site' }
+      ]
     })
     expect(error).toBeUndefined()
   })

@@ -39,6 +39,7 @@ describe('Feature: Producer payload validation for the create endpoint', () => {
   const municipalProducer = {
     wasteSource: 'Municipal',
     organisationName: 'Test Council',
+    reasonForNoAuthorisationNumber: 'TBC',
     address: {
       fullAddress: 'Council Depot, Test City',
       postcode: 'TE1 5CD'
@@ -64,6 +65,7 @@ describe('Feature: Producer payload validation for the create endpoint', () => {
     test.each([
       ['organisationName', 'Acme'],
       ['authorisationNumber', 'EAS/P/123456'],
+      ['reasonForNoAuthorisationNumber', 'TBC'],
       ['sicCode', '38110'],
       ['emailAddress', 'producer@example.com'],
       ['phoneNumber', '01234567890'],
@@ -113,6 +115,40 @@ describe('Feature: Producer payload validation for the create endpoint', () => {
     )
   })
 
+  describe('Scenario: Commercial or Municipal producer provides neither authorisationNumber nor a reason', () => {
+    test.each(['Commercial', 'Municipal'])(
+      'the payload is rejected for a %s producer when neither authorisationNumber nor reasonForNoAuthorisationNumber is provided',
+      (wasteSource) => {
+        const base =
+          wasteSource === 'Commercial' ? commercialProducer : municipalProducer
+        const {
+          authorisationNumber,
+          reasonForNoAuthorisationNumber,
+          ...payload
+        } = base
+        expect(validateJoi(payload).valid).toBe(false)
+        expect(validateAjv(payload).valid).toBe(false)
+      }
+    )
+  })
+
+  describe('Scenario: Commercial or Municipal producer provides both authorisationNumber and a reason', () => {
+    test.each(['Commercial', 'Municipal'])(
+      'the payload is rejected for a %s producer when both authorisationNumber and reasonForNoAuthorisationNumber are provided',
+      (wasteSource) => {
+        const base =
+          wasteSource === 'Commercial' ? commercialProducer : municipalProducer
+        const payload = {
+          ...base,
+          authorisationNumber: 'EAS/P/123456',
+          reasonForNoAuthorisationNumber: 'TBC'
+        }
+        expect(validateJoi(payload).valid).toBe(false)
+        expect(validateAjv(payload).valid).toBe(false)
+      }
+    )
+  })
+
   describe('Scenario: Producer address postcode is malformed', () => {
     const payload = {
       ...commercialProducer,
@@ -155,10 +191,14 @@ describe('Feature: Producer payload validation for the create endpoint', () => {
       expect(validateAjv(payload).valid).toBe(false)
     })
 
-    test('does not require authorisationNumber', () => {
+    test('accepts reasonForNoAuthorisationNumber instead of authorisationNumber', () => {
       const { authorisationNumber, ...payload } = commercialProducer
-      expect(validateJoi(payload).valid).toBe(true)
-      expect(validateAjv(payload).valid).toBe(true)
+      const withReason = {
+        ...payload,
+        reasonForNoAuthorisationNumber: 'TBC'
+      }
+      expect(validateJoi(withReason).valid).toBe(true)
+      expect(validateAjv(withReason).valid).toBe(true)
     })
 
     test('accepts emailAddress only', () => {
@@ -220,6 +260,16 @@ describe('Feature: Producer payload validation for the create endpoint', () => {
       }
       expect(validateJoi(payload).valid).toBe(false)
       expect(validateAjv(payload).valid).toBe(false)
+    })
+
+    test('accepts authorisationNumber instead of reasonForNoAuthorisationNumber', () => {
+      const { reasonForNoAuthorisationNumber, ...payload } = municipalProducer
+      const withAuthorisationNumber = {
+        ...payload,
+        authorisationNumber: 'EAS/P/123456'
+      }
+      expect(validateJoi(withAuthorisationNumber).valid).toBe(true)
+      expect(validateAjv(withAuthorisationNumber).valid).toBe(true)
     })
   })
 })
