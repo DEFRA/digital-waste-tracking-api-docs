@@ -20,7 +20,8 @@
  * - producer.organisationName and producer.address are required for Commercial and Municipal, forbidden
  *   for Household; producer.authorisationNumber is mutually exclusive with
  *   producer.reasonForNoAuthorisationNumber — exactly one of the two is required for Commercial and
- *   Municipal (reasonForNoAuthorisationNumber enum values TBC), neither applies to Household.
+ *   Municipal (reasonForNoAuthorisationNumber is free text for now; enum values TBC pending BA/policy
+ *   input), neither applies to Household.
  * - intendedReceivers (D-043; array, renamed from receiver, then from receivers) requires at least one
  *   entry only when the movement contains hazardous waste — a producer may declare waste heading to more
  *   than one receiving site. Each entry's siteName is mandatory whenever that entry is supplied, which
@@ -227,9 +228,6 @@ export const intendedReceiverSchema = Joi.object({
 
 const SIC_CODE_REGEX = /^\d{5}$/
 
-// Placeholder — real reason codes TBC pending BA/policy input.
-const REASONS_FOR_NO_AUTHORISATION_NUMBER = ['TBC']
-
 /**
  * authorisationNumber / reasonForNoAuthorisationNumber mutual exclusivity for
  * Commercial and Municipal producers (Household forbids both, unaffected).
@@ -296,11 +294,9 @@ export const producerSchema = Joi.object({
   reasonForNoAuthorisationNumber: Joi.when('wasteSource', {
     is: 'Household',
     then: Joi.forbidden(),
-    otherwise: Joi.string()
-      .valid(...REASONS_FOR_NO_AUTHORISATION_NUMBER)
-      .optional()
+    otherwise: Joi.string().optional()
   }).description(
-    'Reason no authorisationNumber is held (enum values TBC). Mutually exclusive with authorisationNumber — exactly one of the two is required for Commercial and Municipal, not applicable for Household.'
+    'Reason no authorisationNumber is held. Free text for now — enum values TBC pending BA/policy input. Mutually exclusive with authorisationNumber — exactly one of the two is required for Commercial and Municipal, not applicable for Household.'
   ),
 
   sicCode: Joi.when('wasteSource', {

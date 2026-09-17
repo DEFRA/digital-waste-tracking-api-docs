@@ -45,8 +45,7 @@
         },
         "reasonForNoAuthorisationNumber": {
           "type": "string",
-          "enum": ["TBC"],
-          "description": "Reason no authorisationNumber is held (enum values TBC). Mutually exclusive with authorisationNumber — exactly one of the two is required."
+          "description": "Reason no authorisationNumber is held. Free text for now — enum values TBC pending BA/policy input. Mutually exclusive with authorisationNumber — exactly one of the two is required."
         },
         "sicCode": {
           "type": "string",
