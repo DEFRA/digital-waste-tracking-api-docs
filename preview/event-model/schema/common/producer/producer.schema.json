@@ -2,7 +2,7 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "producer.schema.json",
   "title": "Producer",
-  "description": "The organisation or party the waste originates from. Required fields vary by wasteSource — see the variants below. For Commercial and Municipal, at least one of emailAddress or phoneNumber must be provided; not applicable for Household, where both remain forbidden.",
+  "description": "The organisation or party the waste originates from. Required fields vary by wasteSource — see the variants below. For Commercial and Municipal, at least one of emailAddress or phoneNumber must be provided, and exactly one of authorisationNumber or reasonForNoAuthorisationNumber must be provided; not applicable for Household, where all four remain forbidden.",
   "oneOf": [
     { "$ref": "producer-household.schema.json" },
     { "$ref": "producer-commercial.schema.json" },

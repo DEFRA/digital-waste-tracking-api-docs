@@ -83,19 +83,23 @@ export type WasteSource = 'Household' | 'Commercial' | 'Municipal'
 /**
  * Producer information.
  *
- * Commercial waste requires organisationName, address and sicCode; authorisationNumber
- * is optional. Household waste must not provide any of the business-only fields
- * (organisationName, authorisationNumber, sicCode, emailAddress, phoneNumber) or address.
- * Municipal waste requires organisationName and address; authorisationNumber and sicCode
- * stay optional.
+ * Commercial waste requires organisationName, address and sicCode; exactly one of
+ * authorisationNumber or reasonForNoAuthorisationNumber is required. Household waste
+ * must not provide any of the business-only fields (organisationName, authorisationNumber,
+ * reasonForNoAuthorisationNumber, sicCode, emailAddress, phoneNumber) or address.
+ * Municipal waste requires organisationName and address, and the same
+ * authorisationNumber/reasonForNoAuthorisationNumber requirement as Commercial; sicCode
+ * stays optional.
  */
 export type Producer = {
   wasteSource: WasteSource
 
   /** Required for Commercial and Municipal; forbidden for Household. */
   organisationName?: string
-  /** Environmental permit or exemption number the producer operates under. Optional for Commercial and Municipal; forbidden for Household. */
+  /** Mutually exclusive with reasonForNoAuthorisationNumber — exactly one of the two is required for Commercial and Municipal; forbidden for Household. */
   authorisationNumber?: string
+  /** Reason no authorisationNumber is held (enum values TBC). Mutually exclusive with authorisationNumber — exactly one of the two is required for Commercial and Municipal; forbidden for Household. */
+  reasonForNoAuthorisationNumber?: string
   /** At least one of emailAddress or phoneNumber must be provided for Commercial and Municipal waste. Not applicable for Household (forbidden). */
   emailAddress?: string
   phoneNumber?: string

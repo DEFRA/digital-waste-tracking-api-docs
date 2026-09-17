@@ -157,11 +157,11 @@ export type HazardousConcentrationThresholdOperator =
  * threshold lookup against name is not resolvable from the API alone today.
  */
 export type HazardousComponent = {
-  name?: string
+  name: string
   /**
-   * One of concentration or concentrationThresholdOperator is required when
-   * name is supplied. Mutually exclusive with concentrationThresholdOperator
-   * — a component may state one or neither, never both.
+   * Exactly one of concentration or concentrationThresholdOperator is
+   * required. Mutually exclusive with concentrationThresholdOperator — a
+   * component may state one, never both or neither.
    */
   concentration?: number | null
   /**
@@ -178,8 +178,15 @@ export type Hazardous = {
   /** Valid codes from GET /reference-data/hazardous-property-codes. Duplicates removed. */
   hazCodes: string[]
   /**
-   * Required when sourceOfComponents is GUIDANCE or OWN_TESTING.
-   * Forbidden when sourceOfComponents is NOT_PROVIDED.
+   * Indicates hazardous properties were identified but no component was
+   * found above the WM3-defined threshold. When true, components must not
+   * be provided.
+   */
+  noComponents?: boolean
+  /**
+   * Forbidden when noComponents is true. Otherwise required when
+   * sourceOfComponents is GUIDANCE or OWN_TESTING, and forbidden when
+   * sourceOfComponents is NOT_PROVIDED.
    */
   components?: HazardousComponent[]
 }
