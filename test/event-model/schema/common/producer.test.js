@@ -219,6 +219,21 @@ describe('Feature: Producer payload validation for the create endpoint', () => {
       expect(validateJoi(payload).valid).toBe(true)
       expect(validateAjv(payload).valid).toBe(true)
     })
+
+    test('rejects an empty organisationName', () => {
+      const payload = { ...commercialProducer, organisationName: '' }
+      expect(validateJoi(payload).valid).toBe(false)
+      expect(validateAjv(payload).valid).toBe(false)
+    })
+
+    test('rejects an empty fullAddress', () => {
+      const payload = {
+        ...commercialProducer,
+        address: { ...commercialProducer.address, fullAddress: '' }
+      }
+      expect(validateJoi(payload).valid).toBe(false)
+      expect(validateAjv(payload).valid).toBe(false)
+    })
   })
 
   describe('Additional coverage: Municipal producer', () => {
@@ -230,6 +245,21 @@ describe('Feature: Producer payload validation for the create endpoint', () => {
     test('does not require sicCode', () => {
       expect(validateJoi(municipalProducer).valid).toBe(true)
       expect(validateAjv(municipalProducer).valid).toBe(true)
+    })
+
+    test('rejects an empty organisationName', () => {
+      const payload = { ...municipalProducer, organisationName: '' }
+      expect(validateJoi(payload).valid).toBe(false)
+      expect(validateAjv(payload).valid).toBe(false)
+    })
+
+    test('rejects an empty fullAddress', () => {
+      const payload = {
+        ...municipalProducer,
+        address: { ...municipalProducer.address, fullAddress: '' }
+      }
+      expect(validateJoi(payload).valid).toBe(false)
+      expect(validateAjv(payload).valid).toBe(false)
     })
 
     test('accepts authorisationNumber instead of reasonForNoAuthorisationNumber', () => {
