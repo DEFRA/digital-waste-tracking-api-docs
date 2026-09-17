@@ -676,12 +676,6 @@ export const receiverSiteSchema = Joi.object({
     .required()
     .description('Name of the site receiving the waste.'),
 
-  regulatoryPositionStatements: Joi.array()
-    .items(Joi.number().strict().integer().positive())
-    .description(
-      'RPS numbers where the regulator does not require a permit for certain activities. Each must be a positive integer.'
-    ),
-
   phoneNumber: Joi.string()
     .custom(
       validateWithBooleanHelper(

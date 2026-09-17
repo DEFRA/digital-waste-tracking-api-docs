@@ -39,7 +39,6 @@ export const receiverSite = {
   emailAddress: 'receiver@example.com',
   phoneNumber: '01234567890',
   authorisationNumber: 'HP3456XX',
-  regulatoryPositionStatements: [343],
   address: {
     fullAddress: '123 Test St, Test City',
     postcode: 'TE1 1ST'

@@ -105,7 +105,6 @@ export type HazardousComponent = {
 
 export type ReceiverSite = {
   siteName: string
-  regulatoryPositionStatements?: number[]
   phoneNumber?: string
   /** At least one of emailAddress or phoneNumber must be provided. */
   emailAddress?: string

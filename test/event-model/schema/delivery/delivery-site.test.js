@@ -40,6 +40,37 @@ describe('exemptionNumber', () => {
   })
 })
 
+describe('regulatoryPositionStatements', () => {
+  test('is optional', () => {
+    const { error } = deliverySiteSchema.validate(deliverySite)
+    expect(error).toBeUndefined()
+  })
+
+  test('accepts an array of positive integers', () => {
+    const { error } = deliverySiteSchema.validate({
+      ...deliverySite,
+      regulatoryPositionStatements: [343, 456]
+    })
+    expect(error).toBeUndefined()
+  })
+
+  test('rejects a non-integer value', () => {
+    const { error } = deliverySiteSchema.validate({
+      ...deliverySite,
+      regulatoryPositionStatements: [343.5]
+    })
+    expect(error).toBeDefined()
+  })
+
+  test('rejects a non-positive value', () => {
+    const { error } = deliverySiteSchema.validate({
+      ...deliverySite,
+      regulatoryPositionStatements: [0]
+    })
+    expect(error).toBeDefined()
+  })
+})
+
 describe('address', () => {
   test('is required', () => {
     const { address, ...withoutAddress } = deliverySite
