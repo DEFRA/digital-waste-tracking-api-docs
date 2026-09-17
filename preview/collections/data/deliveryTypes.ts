@@ -59,6 +59,13 @@ export type DeliverySite = {
    */
   exemptionNumber?: string;
 
+  /**
+   * RPS numbers where the regulator does not require a permit for certain
+   * activities. Each must be a positive integer. Moved here from Receipt's
+   * receiver — RPS is a delivery-site property.
+   */
+  regulatoryPositionStatements?: number[];
+
   /** Mandatory physical address where the waste was dropped off. Both fullAddress and postcode are required. */
   address: DeliverySiteAddress;
 };
