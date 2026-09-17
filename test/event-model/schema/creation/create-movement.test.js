@@ -13,6 +13,7 @@ import { createMovementSchema } from '../../../../docs/collections/data/creation
 const producer = {
   wasteSource: 'Commercial',
   organisationName: 'ACME Waste Producers Ltd',
+  authorisationNumber: 'EAS/P/123456',
   address: {
     fullAddress: '10 Industrial Way, Test City',
     postcode: 'TE1 2PQ'

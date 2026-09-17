@@ -60,7 +60,28 @@ describe('components', () => {
     const { error } = hazardousSchema.validate({
       sourceOfComponents: 'NOT_PROVIDED',
       hazCodes: ['HP_4'],
-      components: [{ name: 'Mercury' }]
+      components: [{ name: 'Mercury', concentration: 5 }]
+    })
+    expect(error).toBeDefined()
+  })
+})
+
+describe('noComponents', () => {
+  test('allows components to be omitted even when sourceOfComponents is GUIDANCE or OWN_TESTING', () => {
+    const { error } = hazardousSchema.validate({
+      sourceOfComponents: 'OWN_TESTING',
+      hazCodes: ['HP_4'],
+      noComponents: true
+    })
+    expect(error).toBeUndefined()
+  })
+
+  test('forbids components when true', () => {
+    const { error } = hazardousSchema.validate({
+      sourceOfComponents: 'OWN_TESTING',
+      hazCodes: ['HP_4'],
+      noComponents: true,
+      components: [{ name: 'Mercury', concentration: 5 }]
     })
     expect(error).toBeDefined()
   })
@@ -69,7 +90,12 @@ describe('components', () => {
 describe('hazardousComponent', () => {
   test.todo('accepts a null concentration')
 
-  test('accepts concentrationThresholdOperator instead of concentration when name is supplied', () => {
+  test('name is required', () => {
+    const { error } = hazardousComponentSchema.validate({ concentration: 5 })
+    expect(error).toBeDefined()
+  })
+
+  test('accepts concentrationThresholdOperator instead of concentration', () => {
     const { error } = hazardousComponentSchema.validate({
       name: 'Cadmium',
       concentrationThresholdOperator: 'GREATER_THAN_OR_EQUAL'
@@ -77,7 +103,7 @@ describe('hazardousComponent', () => {
     expect(error).toBeUndefined()
   })
 
-  test('requires one of concentration or concentrationThresholdOperator when name is supplied', () => {
+  test('requires one of concentration or concentrationThresholdOperator', () => {
     const { error } = hazardousComponentSchema.validate({ name: 'Cadmium' })
     expect(error).toBeDefined()
   })

@@ -331,6 +331,7 @@ export const hazardousComponentSchema = Joi.object({
   name: Joi.string()
     .empty('')
     .empty(null)
+    .required()
     .description('Name of the hazardous chemical or biological component.'),
 
   concentration: Joi.number()
@@ -338,7 +339,7 @@ export const hazardousComponentSchema = Joi.object({
     .positive()
     .allow(null)
     .description(
-      'Concentration value. If supplied, must be greater than 0. One of concentration or concentrationThresholdOperator is required when name is supplied.'
+      'Concentration value. If supplied, must be greater than 0. Exactly one of concentration or concentrationThresholdOperator is required.'
     ),
 
   concentrationThresholdOperator: Joi.string()
@@ -347,25 +348,13 @@ export const hazardousComponentSchema = Joi.object({
       'States that concentration is above/at the WM3-defined threshold for this ' +
         'component, without supplying an exact figure — the threshold value itself is not ' +
         'sent; it is resolved from WM3 guidance against name. Mutually exclusive with concentration. ' +
-        'One of concentration or concentrationThresholdOperator is required when name is supplied.'
+        'Exactly one of concentration or concentrationThresholdOperator is required.'
     )
 })
   .nand('concentration', 'concentrationThresholdOperator')
-  .custom((value, helpers) => {
-    if (
-      isProvided(value.name) &&
-      value.concentration === undefined &&
-      value.concentrationThresholdOperator === undefined
-    ) {
-      return helpers.message(
-        'One of concentration or concentrationThresholdOperator is required when name is supplied.'
-      )
-    }
-
-    return value
-  })
+  .or('concentration', 'concentrationThresholdOperator')
   .description(
-    'Hazardous component detail. concentration and concentrationThresholdOperator are mutually exclusive — a component may state one or neither, never both.'
+    'Hazardous component detail. name is mandatory. concentration and concentrationThresholdOperator are mutually exclusive and exactly one of the two is required.'
   )
 
 export const hazardousSchema = Joi.object({
@@ -383,19 +372,28 @@ export const hazardousSchema = Joi.object({
       'Valid codes from GET /reference-data/hazardous-property-codes. Duplicate values are removed.'
     ),
 
+  noComponents: Joi.boolean().description(
+    'Indicates hazardous properties were identified but no component was found above the ' +
+      'WM3-defined threshold. When true, components must not be provided.'
+  ),
+
   components: Joi.array()
     .items(hazardousComponentSchema)
     .empty(null)
-    .when('sourceOfComponents', {
-      switch: [
-        { is: Joi.valid('GUIDANCE', 'OWN_TESTING'), then: Joi.required() },
-        { is: 'NOT_PROVIDED', then: Joi.forbidden() }
-      ],
-      otherwise: Joi.optional()
+    .when('noComponents', {
+      is: true,
+      then: Joi.forbidden(),
+      otherwise: Joi.when('sourceOfComponents', {
+        switch: [
+          { is: Joi.valid('GUIDANCE', 'OWN_TESTING'), then: Joi.required() },
+          { is: 'NOT_PROVIDED', then: Joi.forbidden() }
+        ],
+        otherwise: Joi.optional()
+      })
     })
     .description(
-      'Required when sourceOfComponents is GUIDANCE or OWN_TESTING. ' +
-        'Forbidden when sourceOfComponents is NOT_PROVIDED.'
+      'Forbidden when noComponents is true. Otherwise required when sourceOfComponents is ' +
+        'GUIDANCE or OWN_TESTING, and forbidden when sourceOfComponents is NOT_PROVIDED.'
     )
 }).description('Hazardous details — required when containsHazardous is true.')
 

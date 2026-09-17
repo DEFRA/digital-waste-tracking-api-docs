@@ -140,4 +140,19 @@ describe('hazardous', () => {
     })
     expect(error).toBeDefined()
   })
+
+  test('accepts noComponents true instead of components when sourceOfComponents is OWN_TESTING', () => {
+    const { error } = createWasteItemSchema.validate({
+      ...wasteItemWithHazardousAndPops,
+      classification: {
+        ...wasteItemWithHazardousAndPops.classification,
+        hazardous: {
+          sourceOfComponents: 'OWN_TESTING',
+          hazCodes: ['HP_4'],
+          noComponents: true
+        }
+      }
+    })
+    expect(error).toBeUndefined()
+  })
 })
