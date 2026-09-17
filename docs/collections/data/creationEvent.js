@@ -20,8 +20,8 @@
  * - producer.organisationName/address are required for Commercial and Municipal, forbidden for
  *   Household; producer.authorisationNumber is mutually exclusive with
  *   producer.reasonForNoAuthorisationNumber — exactly one of the two is required for Commercial and
- *   Municipal (enum values TBC), neither applies to Household. producerWithoutAuthorisationNumber
- *   demonstrates the reasonForNoAuthorisationNumber path.
+ *   Municipal (free text for now; enum values TBC pending BA/policy input), neither applies to
+ *   Household. producerWithoutAuthorisationNumber demonstrates the reasonForNoAuthorisationNumber path.
  * - brokerOrDealer.registrationNumber is required whenever brokerOrDealer is supplied, with
  *   reasonForNoRegistrationNumber required in its place when null/empty.
  * - intendedReceivers (D-043; array, renamed from receiver, then from receivers) requires at least one
@@ -62,7 +62,7 @@ export const municipalProducer = {
 
 // authorisationNumber and reasonForNoAuthorisationNumber are mutually exclusive —
 // exactly one of the two is required for Commercial and Municipal producers.
-// reasonForNoAuthorisationNumber's enum values are TBC; 'TBC' is a placeholder.
+// reasonForNoAuthorisationNumber is free text for now; 'TBC' here is just an example value.
 export const producerWithoutAuthorisationNumber = {
   wasteSource: 'Commercial',
   organisationName: 'ACME Waste Producers Ltd',

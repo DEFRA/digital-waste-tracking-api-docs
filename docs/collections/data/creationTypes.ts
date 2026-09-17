@@ -98,7 +98,7 @@ export type Producer = {
   organisationName?: string
   /** Mutually exclusive with reasonForNoAuthorisationNumber — exactly one of the two is required for Commercial and Municipal; forbidden for Household. */
   authorisationNumber?: string
-  /** Reason no authorisationNumber is held (enum values TBC). Mutually exclusive with authorisationNumber — exactly one of the two is required for Commercial and Municipal; forbidden for Household. */
+  /** Reason no authorisationNumber is held. Free text for now — enum values TBC pending BA/policy input. Mutually exclusive with authorisationNumber — exactly one of the two is required for Commercial and Municipal; forbidden for Household. */
   reasonForNoAuthorisationNumber?: string
   /** At least one of emailAddress or phoneNumber must be provided for Commercial and Municipal waste. Not applicable for Household (forbidden). */
   emailAddress?: string
