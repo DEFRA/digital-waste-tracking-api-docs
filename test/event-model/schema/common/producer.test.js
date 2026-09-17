@@ -201,6 +201,16 @@ describe('Feature: Producer payload validation for the create endpoint', () => {
       expect(validateAjv(withReason).valid).toBe(true)
     })
 
+    test('accepts any free text for reasonForNoAuthorisationNumber (enum values TBC)', () => {
+      const { authorisationNumber, ...payload } = commercialProducer
+      const withReason = {
+        ...payload,
+        reasonForNoAuthorisationNumber: 'Exemption pending renewal'
+      }
+      expect(validateJoi(withReason).valid).toBe(true)
+      expect(validateAjv(withReason).valid).toBe(true)
+    })
+
     test('accepts emailAddress only', () => {
       const { phoneNumber, ...payload } = commercialProducer
       expect(validateJoi(payload).valid).toBe(true)
