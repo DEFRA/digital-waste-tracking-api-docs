@@ -509,9 +509,16 @@ components:
                 <li>Must be provided when containsHazardous is true</li>
                 <li>If sourceOfComponents is NOT_PROVIDED, components array must be empty or not provided</li>
                 <li>If sourceOfComponents is PROVIDED_WITH_WASTE, components are recommended but not required (validation warning if not provided)</li>
-                <li>If sourceOfComponents is GUIDANCE or OWN_TESTING, components are required (validation error if not provided)</li>
+                <li>If sourceOfComponents is GUIDANCE or OWN_TESTING, components are required (validation error if not provided), unless noComponents is true</li>
                 </ul>
               example: PROVIDED_WITH_WASTE
+            noComponents:
+              type: boolean
+              description: |
+                Indicates hazardous properties were identified but no component was found above the WM3-defined threshold.
+                <p><font color="green"><b>Business Rule:</b></font></p>
+                When true, components must not be provided.
+              example: false
             hazCodes:
               type: array
               description: |
@@ -531,25 +538,27 @@ components:
               items:
                 type: string
             components:
-              description: Required when sourceOfComponents is GUIDANCE or OWN_TESTING; forbidden when NOT_PROVIDED.
+              description: Forbidden when noComponents is true. Otherwise required when sourceOfComponents is GUIDANCE or OWN_TESTING; forbidden when NOT_PROVIDED.
               type: array
               items:
                 type: object
+                required:
+                  - name
                 properties:
                   name:
                     type: string
-                    description: Name of the hazardous component, e.g. Mercury. <p><font color="green"><b>Business Rule:</b></font></p> Optional field. If provided, must be a valid chemical or biological component name.
+                    description: Name of the hazardous component, e.g. Mercury. <p><font color="green"><b>Business Rule:</b></font></p> Mandatory field. Must be a valid chemical or biological component name.
                     example: lead
                   concentration:
                     type: number
                     minimum: 0
                     exclusiveMinimum: true
-                    description: The concentration of the hazardous component in milligrams per kilo, e.g. 30mg per kg. <p><font color="green"><b>Business Rule:</b></font></p> One of concentration or concentrationThresholdOperator is required when name is supplied. If provided, must be a positive numeric value (greater than 0). Mutually exclusive with concentrationThresholdOperator — a component may state one or neither, never both.
+                    description: The concentration of the hazardous component in milligrams per kilo, e.g. 30mg per kg. <p><font color="green"><b>Business Rule:</b></font></p> Exactly one of concentration or concentrationThresholdOperator is required. If provided, must be a positive numeric value (greater than 0). Mutually exclusive with concentrationThresholdOperator — a component must state exactly one, never both or neither.
                     example: 25.5
                   concentrationThresholdOperator:
                     type: string
                     enum: [EQUAL_TO, GREATER_THAN_OR_EQUAL]
-                    description: States that concentration is above/at the WM3-defined threshold for this component, without an exact figure — the threshold value itself is not sent; it is resolved from WM3 guidance against name. <p><font color="green"><b>Business Rule:</b></font></p> One of concentration or concentrationThresholdOperator is required when name is supplied. Mutually exclusive with concentration.
+                    description: States that concentration is above/at the WM3-defined threshold for this component, without an exact figure — the threshold value itself is not sent; it is resolved from WM3 guidance against name. <p><font color="green"><b>Business Rule:</b></font></p> Exactly one of concentration or concentrationThresholdOperator is required. Mutually exclusive with concentration.
                     example: GREATER_THAN_OR_EQUAL
 
     # Shared waste item base (D-042) — classification plus logistics fields.

@@ -234,10 +234,10 @@ export const wasteItems = [
         hazCodes: ['HP_8'],
         components: [
           {
-            // One of concentration or concentrationThresholdOperator is
-            // required when name is supplied — here the component states it's
-            // at-or-above the WM3-defined threshold for Cadmium rather than
-            // supplying a plain value.
+            // Exactly one of concentration or concentrationThresholdOperator
+            // is required — here the component states it's at-or-above the
+            // WM3-defined threshold for Cadmium rather than supplying a
+            // plain value.
             name: 'Cadmium',
             concentrationThresholdOperator: 'GREATER_THAN_OR_EQUAL'
           }
@@ -256,6 +256,42 @@ export const wasteItems = [
     ]
   }
 ]
+
+// A hazardous waste item where own testing found nothing above the WM3
+// threshold. noComponents: true lets the submitter skip components
+// entirely instead of the usual GUIDANCE/OWN_TESTING requirement to supply them.
+export const wasteItemWithNoHazardousComponents = {
+  weight: {
+    metric: 'Kilograms',
+    amount: 100,
+    isEstimate: false
+  },
+  numberOfContainers: 5,
+  typeOfContainers: 'DRU',
+  physicalForm: 'Solid',
+  classification: {
+    ewcCodes: ['170504'],
+    wasteDescription: 'Soil and stones from a contaminated site',
+    containsPops: false,
+    containsHazardous: true,
+    hazardous: {
+      sourceOfComponents: 'OWN_TESTING',
+      hazCodes: ['HP_8'],
+      noComponents: true
+      // components omitted — testing found nothing above the WM3 threshold
+    }
+  },
+  intendedTreatments: [
+    {
+      disposalOrRecoveryCode: 'R4',
+      weight: {
+        metric: 'Kilograms',
+        amount: 100,
+        isEstimate: false
+      }
+    }
+  ]
+}
 
 // ---------------------------------------------------------------------------
 // Request bodies
