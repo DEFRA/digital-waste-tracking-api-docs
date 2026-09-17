@@ -27,6 +27,9 @@ export const deliverySite = {
   // Optional; include when the place operates under an exemption, e.g. a WEX number.
   // This is distinct from receiver.authorisationNumber.
   exemptionNumber: 'WEX123456',
+  // RPS numbers where the regulator does not require a permit for certain
+  // activities. Moved here from Receipt's receiver.
+  regulatoryPositionStatements: [343],
   address: {
     fullAddress: '99 Receiver Road, Test City',
     postcode: 'TE1 3RX'

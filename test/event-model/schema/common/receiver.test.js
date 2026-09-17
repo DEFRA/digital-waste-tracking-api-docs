@@ -8,12 +8,15 @@
  * receiverSiteSchema (sharedSchemas.js, common to both receipt endpoints
  * since their two copies were confirmed byte-identical and merged), a
  * genuinely different shape: siteName and authorisationNumber are
- * unconditionally required, and it adds regulatoryPositionStatements. It
- * also carries a nested address (merged in from the former receiptSite
- * object), built from the same shared addressSchema as this one, but
- * unconditionally required rather than only when siteName is populated.
- * That split is pending a schema-side change to make Receipt import this
- * same intendedReceiverSchema instead.
+ * unconditionally required. It also carries a nested address (merged in
+ * from the former receiptSite object), built from the same shared
+ * addressSchema as this one, but unconditionally required rather than only
+ * when siteName is populated. That split is pending a schema-side change to
+ * make Receipt import this same intendedReceiverSchema instead.
+ *
+ * regulatoryPositionStatements was removed from receiverSiteSchema and moved
+ * to Delivery's deliverySiteSchema — it's a delivery-site property, not a
+ * receiver one.
  */
 import { intendedReceiverSchema } from '../../../../docs/collections/data/creationJoi.js'
 

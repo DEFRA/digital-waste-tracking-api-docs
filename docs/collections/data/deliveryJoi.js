@@ -7,7 +7,9 @@
  * - movementIds array: minimum 1; may mix hazardous and non-hazardous Movement IDs (D-010).
  * - actualDateTimeDelivered must be the actual drop-off time, not submission time.
  * - carrier is mandatory and uses the same required/optional carrier schema as Collection/Receipt.
- * - deliverySite contains the carrier-declared site/place name, optional exemption number, and mandatory address.
+ * - deliverySite contains the carrier-declared site/place name, optional exemption number,
+ *   optional regulatoryPositionStatements (RPS; moved here from Receipt's receiver),
+ *   and mandatory address.
  * - The drop-off place is a lighter site model than the receipt receiver.
  * - No driverDetails — driver is not part of the Delivery payload.
  * - No receiver details — receiver is identified at receipt time, not here.
@@ -56,6 +58,12 @@ export const deliverySiteSchema = Joi.object({
     .description(
       'Optional exemption number for exempt places that store, treat, use or dispose of waste. ' +
         'For example, a WEX number. This is distinct from receiver.authorisationNumber.'
+    ),
+
+  regulatoryPositionStatements: Joi.array()
+    .items(Joi.number().strict().integer().positive())
+    .description(
+      'RPS numbers where the regulator does not require a permit for certain activities. Each must be a positive integer.'
     ),
 
   address: deliverySiteAddressSchema
