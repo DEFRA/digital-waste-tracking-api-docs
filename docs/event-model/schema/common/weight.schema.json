@@ -1,0 +1,27 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "weight.schema.json",
+  "title": "Weight",
+  "description": "Weight block — shared across all events and waste item types.",
+  "type": "object",
+  "properties": {
+    "metric": {
+      "type": "string",
+      "enum": ["Grams", "Kilograms", "Tonnes"],
+      "description": "Unit of measurement. Allowed values: Grams, Kilograms, Tonnes."
+    },
+    "isEstimate": {
+      "type": "boolean",
+      "description": "Whether the weight value is an estimate."
+    },
+    "amount": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "description": "Total weight. Must be greater than 0."
+    }
+  },
+  "required": ["metric", "isEstimate", "amount"],
+  "propertyNames": {
+    "enum": ["metric", "isEstimate", "amount"]
+  }
+}

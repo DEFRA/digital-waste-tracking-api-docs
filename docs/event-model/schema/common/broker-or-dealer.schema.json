@@ -1,0 +1,107 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "broker-or-dealer.schema.json",
+  "title": "Broker or Dealer",
+  "description": "Broker or dealer details — required when the movement is broker-initiated. registrationNumber is required whenever this object is supplied (it may be null or empty), in which case reasonForNoRegistrationNumber becomes required in its place. At least one of emailAddress or phoneNumber must be provided.",
+  "type": "object",
+  "allOf": [
+    {
+      "type": "object",
+      "properties": {
+        "organisationName": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Broker or dealer organisation name. Required when the brokerDetails object is included."
+        },
+        "registrationNumber": {
+          "anyOf": [
+            { "type": "null" },
+            { "const": "" },
+            {
+              "type": "string",
+              "minLength": 1,
+              "format": "carrierRegistrationNumber"
+            }
+          ],
+          "description": "Required whenever the brokerOrDealer object is supplied. Null or empty → reasonForNoRegistrationNumber is required. Valid value → reasonForNoRegistrationNumber must not be provided. Must follow the same format rules as carrier.registrationNumber."
+        },
+        "reasonForNoRegistrationNumber": {
+          "type": "string",
+          "enum": ["ON_SITE", "ONE_OFF", "MARINE"],
+          "description": "Required when registrationNumber is null or empty. Forbidden when a valid registrationNumber is supplied."
+        },
+        "emailAddress": {
+          "type": "string",
+          "format": "email",
+          "description": "Broker/dealer contact email address."
+        },
+        "phoneNumber": {
+          "type": "string",
+          "format": "phoneNumber",
+          "description": "Broker/dealer contact phone number."
+        },
+        "address": {
+          "type": "object",
+          "description": "Broker or dealer business address.",
+          "properties": {
+            "fullAddress": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Full address line."
+            },
+            "postcode": {
+              "type": "string",
+              "format": "postcode",
+              "description": "Accepts UK postcodes and Irish Eircodes."
+            }
+          },
+          "required": ["postcode"]
+        }
+      },
+      "required": ["organisationName", "registrationNumber"]
+    },
+    {
+      "anyOf": [
+        { "required": ["emailAddress"] },
+        { "required": ["phoneNumber"] }
+      ]
+    },
+    {
+      "oneOf": [
+        {
+          "properties": {
+            "registrationNumber": {
+              "type": "string",
+              "minLength": 1,
+              "format": "carrierRegistrationNumber"
+            },
+            "reasonForNoRegistrationNumber": false
+          },
+          "required": ["registrationNumber"]
+        },
+        {
+          "properties": {
+            "registrationNumber": {
+              "anyOf": [{ "type": "null" }, { "const": "" }]
+            },
+            "reasonForNoRegistrationNumber": {
+              "type": "string",
+              "enum": ["ON_SITE", "ONE_OFF", "MARINE"]
+            }
+          },
+          "required": ["registrationNumber", "reasonForNoRegistrationNumber"]
+        }
+      ]
+    }
+  ],
+  "propertyNames": {
+    "enum": [
+      "organisationName",
+      "registrationNumber",
+      "reasonForNoRegistrationNumber",
+      "emailAddress",
+      "phoneNumber",
+      "address"
+    ]
+  }
+}

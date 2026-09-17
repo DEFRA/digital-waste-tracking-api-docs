@@ -1,0 +1,60 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "receiver.schema.json",
+  "title": "Receiver",
+  "description": "A single receiving site entry within intendedReceivers (D-043) — creationJoi.js's intendedReceiverSchema. siteName is mandatory whenever an entry is supplied, which in turn makes authorisationNumber and address mandatory too (both are technically conditional on siteName in the Joi schema, but siteName itself is unconditionally required, so in practice all three are always required together). At least one of emailAddress or phoneNumber must be provided. Not the same schema as sharedSchemas.js's receiverSiteSchema (used by the receipt endpoints) — see test/event-model/schema/common/receiver.test.js for the pending reconciliation between the two.",
+  "type": "object",
+  "anyOf": [
+    { "properties": { "emailAddress": {} }, "required": ["emailAddress"] },
+    { "properties": { "phoneNumber": {} }, "required": ["phoneNumber"] }
+  ],
+  "properties": {
+    "siteName": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Name of the intended receiving site. Required whenever the receiver object is supplied."
+    },
+    "authorisationNumber": {
+      "type": "string",
+      "format": "authorisationNumber",
+      "description": "Required when receiver.siteName is populated. Must be a valid site authorisation number."
+    },
+    "emailAddress": {
+      "type": "string",
+      "format": "email",
+      "description": "Receiver site contact email address."
+    },
+    "phoneNumber": {
+      "type": "string",
+      "format": "phoneNumber",
+      "description": "Receiver site contact phone number."
+    },
+    "address": {
+      "type": "object",
+      "description": "Required when receiver.siteName is populated. Must include postcode and fullAddress.",
+      "properties": {
+        "fullAddress": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Full receiver site address."
+        },
+        "postcode": {
+          "type": "string",
+          "format": "postcode",
+          "description": "Accepts UK postcodes and Irish Eircodes."
+        }
+      },
+      "required": ["fullAddress", "postcode"]
+    }
+  },
+  "required": ["siteName", "authorisationNumber", "address"],
+  "propertyNames": {
+    "enum": [
+      "siteName",
+      "authorisationNumber",
+      "emailAddress",
+      "phoneNumber",
+      "address"
+    ]
+  }
+}

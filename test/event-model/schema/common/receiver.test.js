@@ -19,66 +19,123 @@
  * receiver one.
  */
 import { intendedReceiverSchema } from '../../../../docs/collections/data/creationJoi.js'
+import {
+  getErrors,
+  validate
+} from '../../../../docs/event-model/validate/index.js'
 
-const receiver = {
-  siteName: 'Test Receiver Site',
-  authorisationNumber: 'HP3456XX',
-  emailAddress: 'receiver@example.com',
-  phoneNumber: '01234567890',
-  address: {
-    fullAddress: '99 Receiver Road, Test City',
-    postcode: 'TE1 3RX'
-  }
+const validateJoi = (payload) => {
+  const { error } = intendedReceiverSchema.validate(payload)
+  return { valid: error === undefined, errors: error?.details ?? null }
 }
 
-test('accepts a valid receiver', () => {
-  const { error } = intendedReceiverSchema.validate(receiver)
-  expect(error).toBeUndefined()
-})
+const validateAjv = (payload) => {
+  const valid = validate('receiver.schema.json', payload)
+  return { valid, errors: valid ? null : getErrors('receiver.schema.json') }
+}
 
-describe('siteName', () => {
-  test('is required', () => {
-    const { siteName, ...withoutSiteName } = receiver
-    const { error } = intendedReceiverSchema.validate(withoutSiteName)
-    expect(error).toBeDefined()
-  })
-})
+describe('Feature: Receiver payload validation', () => {
+  const receiver = {
+    siteName: 'Test Receiver Site',
+    authorisationNumber: 'HP3456XX',
+    emailAddress: 'receiver@example.com',
+    phoneNumber: '01234567890',
+    address: {
+      fullAddress: '99 Receiver Road, Test City',
+      postcode: 'TE1 3RX'
+    }
+  }
 
-describe('authorisationNumber', () => {
-  test('is required when siteName is populated', () => {
-    const { authorisationNumber, ...withoutAuthorisationNumber } = receiver
-    const { error } = intendedReceiverSchema.validate(
-      withoutAuthorisationNumber
-    )
-    expect(error).toBeDefined()
-  })
-})
-
-describe('address', () => {
-  test('is required when siteName is populated', () => {
-    const { address, ...withoutAddress } = receiver
-    const { error } = intendedReceiverSchema.validate(withoutAddress)
-    expect(error).toBeDefined()
-  })
-})
-
-describe('emailAddress and phoneNumber', () => {
-  test('accepts emailAddress only', () => {
-    const { phoneNumber, ...withoutPhoneNumber } = receiver
-    const { error } = intendedReceiverSchema.validate(withoutPhoneNumber)
-    expect(error).toBeUndefined()
+  describe('Scenario: A valid receiver is submitted', () => {
+    test('the receiver is accepted', () => {
+      expect(validateJoi(receiver).valid).toBe(true)
+      expect(validateAjv(receiver).valid).toBe(true)
+    })
   })
 
-  test('accepts phoneNumber only', () => {
-    const { emailAddress, ...withoutEmailAddress } = receiver
-    const { error } = intendedReceiverSchema.validate(withoutEmailAddress)
-    expect(error).toBeUndefined()
+  describe('Scenario: siteName is missing', () => {
+    test('the receiver is rejected', () => {
+      const { siteName, ...withoutSiteName } = receiver
+      expect(validateJoi(withoutSiteName).valid).toBe(false)
+      expect(validateAjv(withoutSiteName).valid).toBe(false)
+    })
   })
 
-  test('requires at least one of the two', () => {
-    const { emailAddress, phoneNumber, ...withoutContactDetails } = receiver
-    const { error } = intendedReceiverSchema.validate(withoutContactDetails)
-    expect(error).toBeDefined()
+  describe('Scenario: authorisationNumber is missing while siteName is populated', () => {
+    test('the receiver is rejected', () => {
+      const { authorisationNumber, ...withoutAuthorisationNumber } = receiver
+      expect(validateJoi(withoutAuthorisationNumber).valid).toBe(false)
+      expect(validateAjv(withoutAuthorisationNumber).valid).toBe(false)
+    })
+  })
+
+  describe('Scenario: address is missing while siteName is populated', () => {
+    test('the receiver is rejected', () => {
+      const { address, ...withoutAddress } = receiver
+      expect(validateJoi(withoutAddress).valid).toBe(false)
+      expect(validateAjv(withoutAddress).valid).toBe(false)
+    })
+  })
+
+  describe('Scenario: emailAddress and phoneNumber', () => {
+    test('accepts emailAddress only', () => {
+      const { phoneNumber, ...withoutPhoneNumber } = receiver
+      expect(validateJoi(withoutPhoneNumber).valid).toBe(true)
+      expect(validateAjv(withoutPhoneNumber).valid).toBe(true)
+    })
+
+    test('accepts phoneNumber only', () => {
+      const { emailAddress, ...withoutEmailAddress } = receiver
+      expect(validateJoi(withoutEmailAddress).valid).toBe(true)
+      expect(validateAjv(withoutEmailAddress).valid).toBe(true)
+    })
+
+    test('requires at least one of the two', () => {
+      const { emailAddress, phoneNumber, ...withoutContactDetails } = receiver
+      expect(validateJoi(withoutContactDetails).valid).toBe(false)
+      expect(validateAjv(withoutContactDetails).valid).toBe(false)
+    })
+  })
+
+  // ---------------------------------------------------------------------
+  // Additional coverage: not called out by a scenario above, but added to
+  // match the Producer resource's own coverage of free-text minLength and
+  // format-checked fields.
+  // ---------------------------------------------------------------------
+  describe('Additional coverage', () => {
+    test('rejects an empty siteName', () => {
+      const payload = { ...receiver, siteName: '' }
+      expect(validateJoi(payload).valid).toBe(false)
+      expect(validateAjv(payload).valid).toBe(false)
+    })
+
+    test('rejects a malformed authorisationNumber', () => {
+      const payload = { ...receiver, authorisationNumber: 'NOTVALID' }
+      expect(validateJoi(payload).valid).toBe(false)
+      expect(validateAjv(payload).valid).toBe(false)
+    })
+
+    test('rejects an address missing fullAddress', () => {
+      const { fullAddress, ...addressWithoutFullAddress } = receiver.address
+      const payload = { ...receiver, address: addressWithoutFullAddress }
+      expect(validateJoi(payload).valid).toBe(false)
+      expect(validateAjv(payload).valid).toBe(false)
+    })
+
+    test('rejects an address with a malformed postcode', () => {
+      const payload = {
+        ...receiver,
+        address: { ...receiver.address, postcode: 'NOTAPOSTCODE' }
+      }
+      expect(validateJoi(payload).valid).toBe(false)
+      expect(validateAjv(payload).valid).toBe(false)
+    })
+
+    test('rejects an unknown property', () => {
+      const payload = { ...receiver, extra: 'not allowed' }
+      expect(validateJoi(payload).valid).toBe(false)
+      expect(validateAjv(payload).valid).toBe(false)
+    })
   })
 })
 

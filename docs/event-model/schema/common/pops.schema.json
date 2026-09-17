@@ -1,0 +1,92 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "pops.schema.json",
+  "title": "POPs (Persistent Organic Pollutants) details",
+  "description": "Required when containsPops is true. components is required when sourceOfComponents is GUIDANCE or OWN_TESTING, forbidden when sourceOfComponents is NOT_PROVIDED, and optional when sourceOfComponents is PROVIDED_WITH_WASTE. A null components value is treated the same as an absent one, mirroring the Joi schema's .empty(null).",
+  "type": "object",
+  "definitions": {
+    "component": {
+      "type": "object",
+      "not": {
+        "properties": {
+          "concentration": {},
+          "concentrationThresholdOperator": {}
+        },
+        "required": ["concentration", "concentrationThresholdOperator"]
+      },
+      "properties": {
+        "concentration": {
+          "type": ["number", "null"],
+          "exclusiveMinimum": 0,
+          "description": "Concentration value. If supplied, must be greater than 0. Mutually exclusive with concentrationThresholdOperator."
+        },
+        "concentrationThresholdOperator": {
+          "type": "string",
+          "enum": ["LESS_THAN", "EQUAL_TO", "GREATER_THAN_OR_EQUAL"],
+          "description": "States that concentration is above/below/at the WM3-defined threshold for this component, without supplying an exact figure — the threshold value itself is not sent; it is resolved from WM3 guidance against code. Mutually exclusive with concentration."
+        },
+        "code": {
+          "description": "Valid code from GET /reference-data/pop-names. A null value is treated the same as omitting the field — note an empty string is NOT equivalent (the Joi schema's second .empty(null) call overrides its earlier .empty(''), so an empty string is rejected as a normal blank string, not treated as absent).",
+          "anyOf": [
+            { "type": "null" },
+            { "type": "string", "minLength": 1, "format": "popCode" }
+          ]
+        }
+      },
+      "propertyNames": {
+        "enum": ["concentration", "concentrationThresholdOperator", "code"]
+      },
+      "description": "POP component detail. concentration and concentrationThresholdOperator are mutually exclusive — a component may state one or neither, never both."
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "sourceOfComponents": { "enum": ["GUIDANCE", "OWN_TESTING"] }
+        },
+        "required": ["sourceOfComponents"]
+      },
+      "then": {
+        "required": ["components"],
+        "properties": {
+          "components": { "type": "array" }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "sourceOfComponents": { "const": "NOT_PROVIDED" }
+        },
+        "required": ["sourceOfComponents"]
+      },
+      "then": {
+        "properties": {
+          "components": { "type": "null" }
+        }
+      }
+    }
+  ],
+  "properties": {
+    "sourceOfComponents": {
+      "type": "string",
+      "enum": [
+        "NOT_PROVIDED",
+        "PROVIDED_WITH_WASTE",
+        "GUIDANCE",
+        "OWN_TESTING"
+      ],
+      "description": "Required when containsPops is true."
+    },
+    "components": {
+      "type": ["array", "null"],
+      "items": { "$ref": "#/definitions/component" },
+      "description": "Required when sourceOfComponents is GUIDANCE or OWN_TESTING. Forbidden when sourceOfComponents is NOT_PROVIDED. Optional when sourceOfComponents is PROVIDED_WITH_WASTE."
+    }
+  },
+  "required": ["sourceOfComponents"],
+  "propertyNames": {
+    "enum": ["sourceOfComponents", "components"]
+  }
+}

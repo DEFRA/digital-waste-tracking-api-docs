@@ -1,0 +1,146 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "hazardous.schema.json",
+  "title": "Hazardous details",
+  "description": "Required when containsHazardous is true. components is forbidden when noComponents is true. Otherwise, components is required when sourceOfComponents is GUIDANCE or OWN_TESTING, forbidden when sourceOfComponents is NOT_PROVIDED, and optional when sourceOfComponents is PROVIDED_WITH_WASTE. A null components value is treated the same as an absent one, mirroring the Joi schema's .empty(null).",
+  "type": "object",
+  "definitions": {
+    "component": {
+      "type": "object",
+      "oneOf": [
+        {
+          "required": ["concentration"],
+          "properties": {
+            "concentration": {},
+            "concentrationThresholdOperator": false
+          }
+        },
+        {
+          "required": ["concentrationThresholdOperator"],
+          "properties": {
+            "concentrationThresholdOperator": {},
+            "concentration": false
+          }
+        }
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Name of the hazardous chemical or biological component."
+        },
+        "concentration": {
+          "type": ["number", "null"],
+          "exclusiveMinimum": 0,
+          "description": "Concentration value. If supplied, must be greater than 0. Exactly one of concentration or concentrationThresholdOperator is required."
+        },
+        "concentrationThresholdOperator": {
+          "type": "string",
+          "enum": ["EQUAL_TO", "GREATER_THAN_OR_EQUAL"],
+          "description": "States that concentration is above/at the WM3-defined threshold for this component, without supplying an exact figure — the threshold value itself is not sent; it is resolved from WM3 guidance against name. Mutually exclusive with concentration. Exactly one of concentration or concentrationThresholdOperator is required."
+        }
+      },
+      "required": ["name"],
+      "propertyNames": {
+        "enum": ["name", "concentration", "concentrationThresholdOperator"]
+      },
+      "description": "Hazardous component detail. name is mandatory. concentration and concentrationThresholdOperator are mutually exclusive and exactly one of the two is required."
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "noComponents": { "const": true }
+        },
+        "required": ["noComponents"]
+      },
+      "then": {
+        "properties": {
+          "components": { "type": "null" }
+        }
+      },
+      "else": {
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "sourceOfComponents": { "enum": ["GUIDANCE", "OWN_TESTING"] }
+              },
+              "required": ["sourceOfComponents"]
+            },
+            "then": {
+              "required": ["components"],
+              "properties": {
+                "components": { "type": "array" }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "sourceOfComponents": { "const": "NOT_PROVIDED" }
+              },
+              "required": ["sourceOfComponents"]
+            },
+            "then": {
+              "properties": {
+                "components": { "type": "null" }
+              }
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "properties": {
+    "sourceOfComponents": {
+      "type": "string",
+      "enum": [
+        "NOT_PROVIDED",
+        "PROVIDED_WITH_WASTE",
+        "GUIDANCE",
+        "OWN_TESTING"
+      ],
+      "description": "Required when containsHazardous is true."
+    },
+    "hazCodes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "HP_1",
+          "HP_2",
+          "HP_3",
+          "HP_4",
+          "HP_5",
+          "HP_6",
+          "HP_7",
+          "HP_8",
+          "HP_9",
+          "HP_10",
+          "HP_11",
+          "HP_12",
+          "HP_13",
+          "HP_14",
+          "HP_15"
+        ]
+      },
+      "minItems": 1,
+      "description": "Valid codes from GET /reference-data/hazardous-property-codes. Duplicate values are removed."
+    },
+    "noComponents": {
+      "type": "boolean",
+      "description": "Indicates hazardous properties were identified but no component was found above the WM3-defined threshold. When true, components must not be provided."
+    },
+    "components": {
+      "type": ["array", "null"],
+      "items": { "$ref": "#/definitions/component" },
+      "description": "Forbidden when noComponents is true. Otherwise required when sourceOfComponents is GUIDANCE or OWN_TESTING, and forbidden when sourceOfComponents is NOT_PROVIDED."
+    }
+  },
+  "required": ["sourceOfComponents", "hazCodes"],
+  "propertyNames": {
+    "enum": ["sourceOfComponents", "hazCodes", "noComponents", "components"]
+  }
+}
