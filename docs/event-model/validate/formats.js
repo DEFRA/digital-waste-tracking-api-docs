@@ -2,12 +2,16 @@
 // `pattern` — reusing docs/collections/data/validators.js's existing pure,
 // Joi-independent, boolean-returning functions as-is (no rewrite).
 //
-// Registered here as each resource that needs one is ported — currently just
-// Producer's authorisationNumber/phoneNumber. Add more as later resources
-// (carrier, hazardous, receipt waste-item, …) are wired up.
+// Registered here as each resource that needs one is ported — currently
+// Producer's authorisationNumber/phoneNumber, carrier/broker-or-dealer's
+// carrierRegistrationNumber, intended-treatment/actual-treatment's
+// disposalOrRecoveryCode, and pops' popCode.
 import {
   isValidAuthorisationNumber,
+  isValidCarrierRegistrationNumber,
+  isValidDisposalOrRecoveryCode,
   isValidPhoneNumber,
+  isValidPopCode,
   isValidPostcode
 } from '../../collections/data/validators.js'
 
@@ -17,9 +21,24 @@ export function registerFormats(ajv) {
     validate: isValidAuthorisationNumber
   })
 
+  ajv.addFormat('carrierRegistrationNumber', {
+    type: 'string',
+    validate: isValidCarrierRegistrationNumber
+  })
+
+  ajv.addFormat('disposalOrRecoveryCode', {
+    type: 'string',
+    validate: isValidDisposalOrRecoveryCode
+  })
+
   ajv.addFormat('phoneNumber', {
     type: 'string',
     validate: isValidPhoneNumber
+  })
+
+  ajv.addFormat('popCode', {
+    type: 'string',
+    validate: isValidPopCode
   })
 
   ajv.addFormat('postcode', {

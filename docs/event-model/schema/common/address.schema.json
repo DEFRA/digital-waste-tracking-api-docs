@@ -1,0 +1,23 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "address.schema.json",
+  "title": "Address",
+  "description": "Address object used by every party and site across all events — carrier, broker, producer, receiver, collection site, delivery site and receipt site alike. postcode is required; fullAddress is optional here and promoted to required at the point of use (see the requiredFullAddress convention) for sites that are physically visited. Accepts both UK postcodes and Irish Eircodes.",
+  "type": "object",
+  "properties": {
+    "fullAddress": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Full address line."
+    },
+    "postcode": {
+      "type": "string",
+      "format": "postcode",
+      "description": "Accepts UK postcodes and Irish Eircodes."
+    }
+  },
+  "required": ["postcode"],
+  "propertyNames": {
+    "enum": ["fullAddress", "postcode"]
+  }
+}

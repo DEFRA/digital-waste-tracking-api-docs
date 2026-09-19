@@ -1,0 +1,164 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "carrier.schema.json",
+  "title": "Carrier",
+  "description": "Carrier organisation and transport details. Required on all events (D-008). vehicleRegistration is required when meansOfTransport is 'Road' and forbidden otherwise. registrationNumber is always required (it may be null or empty), in which case reasonForNoRegistrationNumber becomes required in its place. At least one of emailAddress or phoneNumber must be provided.",
+  "type": "object",
+  "allOf": [
+    {
+      "type": "object",
+      "properties": {
+        "meansOfTransport": {
+          "type": "string",
+          "enum": [
+            "Road",
+            "Rail",
+            "Air",
+            "Sea",
+            "Inland Waterway",
+            "Piped",
+            "Other"
+          ],
+          "description": "Controls conditionality of vehicleRegistration. 'Inland Waterway' includes a space — use exact case."
+        },
+        "organisationName": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Carrier organisation name."
+        },
+        "vehicleRegistration": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 10,
+          "description": "Required when meansOfTransport is 'Road'. Forbidden for all other modes."
+        },
+        "otherMeansOfTransport": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Description of transport method when meansOfTransport is 'Other'. Not otherwise constrained here."
+        },
+        "registrationNumber": {
+          "anyOf": [
+            { "type": "null" },
+            { "const": "" },
+            {
+              "type": "string",
+              "minLength": 1,
+              "format": "carrierRegistrationNumber"
+            }
+          ],
+          "description": "Null or empty → reasonForNoRegistrationNumber is required. Valid value → reasonForNoRegistrationNumber must not be provided. The two fields are mutually exclusive."
+        },
+        "reasonForNoRegistrationNumber": {
+          "type": "string",
+          "enum": ["ON_SITE", "ONE_OFF", "MARINE"],
+          "description": "Required when registrationNumber is null or empty. Forbidden when a valid registrationNumber is supplied."
+        },
+        "emailAddress": {
+          "type": "string",
+          "format": "email",
+          "description": "Carrier contact email address."
+        },
+        "phoneNumber": {
+          "type": "string",
+          "format": "phoneNumber",
+          "description": "Carrier contact phone number."
+        },
+        "address": {
+          "type": "object",
+          "description": "Carrier business address. postcode is required when address object is provided.",
+          "properties": {
+            "fullAddress": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Full address line."
+            },
+            "postcode": {
+              "type": "string",
+              "format": "postcode",
+              "description": "Accepts UK postcodes and Irish Eircodes."
+            }
+          },
+          "required": ["postcode"]
+        }
+      },
+      "required": ["meansOfTransport", "organisationName", "registrationNumber"]
+    },
+    {
+      "anyOf": [
+        { "required": ["emailAddress"] },
+        { "required": ["phoneNumber"] }
+      ]
+    },
+    {
+      "oneOf": [
+        {
+          "properties": {
+            "meansOfTransport": { "const": "Road" },
+            "vehicleRegistration": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 10
+            }
+          },
+          "required": ["vehicleRegistration"]
+        },
+        {
+          "properties": {
+            "meansOfTransport": {
+              "enum": [
+                "Rail",
+                "Air",
+                "Sea",
+                "Inland Waterway",
+                "Piped",
+                "Other"
+              ]
+            },
+            "vehicleRegistration": false
+          }
+        }
+      ]
+    },
+    {
+      "oneOf": [
+        {
+          "properties": {
+            "registrationNumber": {
+              "type": "string",
+              "minLength": 1,
+              "format": "carrierRegistrationNumber"
+            },
+            "reasonForNoRegistrationNumber": false
+          },
+          "required": ["registrationNumber"]
+        },
+        {
+          "properties": {
+            "registrationNumber": {
+              "anyOf": [{ "type": "null" }, { "const": "" }]
+            },
+            "reasonForNoRegistrationNumber": {
+              "type": "string",
+              "enum": ["ON_SITE", "ONE_OFF", "MARINE"]
+            }
+          },
+          "required": ["registrationNumber", "reasonForNoRegistrationNumber"]
+        }
+      ]
+    }
+  ],
+  "propertyNames": {
+    "enum": [
+      "meansOfTransport",
+      "organisationName",
+      "vehicleRegistration",
+      "otherMeansOfTransport",
+      "registrationNumber",
+      "reasonForNoRegistrationNumber",
+      "emailAddress",
+      "phoneNumber",
+      "address"
+    ]
+  }
+}

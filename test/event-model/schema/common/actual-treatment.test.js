@@ -8,48 +8,81 @@
  * weight is required only when disposalOrRecoveryCode is supplied.
  */
 import { actualTreatmentSchema } from '../../../../docs/collections/data/sharedSchemas.js'
+import {
+  getErrors,
+  validate
+} from '../../../../docs/event-model/validate/index.js'
 
-const actualTreatment = {
-  disposalOrRecoveryCode: 'R1',
-  weight: {
-    metric: 'Tonnes',
-    amount: 0.5,
-    isEstimate: true
+const validateJoi = (payload) => {
+  const { error } = actualTreatmentSchema.validate(payload)
+  return { valid: error === undefined, errors: error?.details ?? null }
+}
+
+const validateAjv = (payload) => {
+  const valid = validate('actual-treatment.schema.json', payload)
+  return {
+    valid,
+    errors: valid ? null : getErrors('actual-treatment.schema.json')
   }
 }
 
-test('accepts a valid actual treatment with a disposalOrRecoveryCode', () => {
-  const { error } = actualTreatmentSchema.validate(actualTreatment)
-  expect(error).toBeUndefined()
-})
+describe('Feature: Actual Treatment payload validation', () => {
+  const actualTreatment = {
+    disposalOrRecoveryCode: 'R1',
+    weight: {
+      metric: 'Tonnes',
+      amount: 0.5,
+      isEstimate: true
+    }
+  }
 
-test('accepts a valid actual treatment with no disposalOrRecoveryCode or weight', () => {
-  const { error } = actualTreatmentSchema.validate({})
-  expect(error).toBeUndefined()
-})
-
-describe('disposalOrRecoveryCode', () => {
-  test('is optional', () => {
-    const { disposalOrRecoveryCode, ...withoutCode } = actualTreatment
-    const { error } = actualTreatmentSchema.validate(withoutCode)
-    expect(error).toBeUndefined()
-  })
-})
-
-describe('weight', () => {
-  test('is required when disposalOrRecoveryCode is present', () => {
-    const { weight, ...withoutWeight } = actualTreatment
-    const { error } = actualTreatmentSchema.validate(withoutWeight)
-    expect(error).toBeDefined()
+  describe('Scenario: Actual treatment is submitted with a disposalOrRecoveryCode', () => {
+    test('the treatment is accepted', () => {
+      expect(validateJoi(actualTreatment).valid).toBe(true)
+      expect(validateAjv(actualTreatment).valid).toBe(true)
+    })
   })
 
-  test('is optional when disposalOrRecoveryCode is absent', () => {
-    const { disposalOrRecoveryCode, weight, ...rest } = actualTreatment
-    const { error } = actualTreatmentSchema.validate(rest)
-    expect(error).toBeUndefined()
+  describe('Scenario: Actual treatment is submitted with neither disposalOrRecoveryCode nor weight', () => {
+    test('the treatment is accepted', () => {
+      expect(validateJoi({}).valid).toBe(true)
+      expect(validateAjv({}).valid).toBe(true)
+    })
+  })
+
+  describe('Scenario: disposalOrRecoveryCode is optional', () => {
+    test('the payload is accepted when disposalOrRecoveryCode is omitted but weight is present', () => {
+      const { disposalOrRecoveryCode, ...payload } = actualTreatment
+      expect(validateJoi(payload).valid).toBe(true)
+      expect(validateAjv(payload).valid).toBe(true)
+    })
+  })
+
+  describe('Scenario: weight is required when disposalOrRecoveryCode is present', () => {
+    test('the payload is rejected when weight is omitted', () => {
+      const { weight, ...payload } = actualTreatment
+      expect(validateJoi(payload).valid).toBe(false)
+      expect(validateAjv(payload).valid).toBe(false)
+    })
+  })
+
+  describe('Scenario: weight is optional when disposalOrRecoveryCode is absent', () => {
+    test('the payload is accepted when both are omitted', () => {
+      const { disposalOrRecoveryCode, weight, ...payload } = actualTreatment
+      expect(validateJoi(payload).valid).toBe(true)
+      expect(validateAjv(payload).valid).toBe(true)
+    })
+  })
+
+  // ---------------------------------------------------------------------
+  // Resolves the previous test.todo now that actual-treatment.schema.json
+  // registers the disposalOrRecoveryCode format.
+  // ---------------------------------------------------------------------
+  describe('Additional coverage: disposalOrRecoveryCode format', () => {
+    test('rejects a disposalOrRecoveryCode not on the R1-R13/D1-D15 reference list', () => {
+      const payload = { ...actualTreatment, disposalOrRecoveryCode: 'X99' }
+      expect(validateJoi(payload).valid).toBe(false)
+      expect(validateAjv(payload).valid).toBe(false)
+    })
   })
 })
-
-test.todo(
-  'rejects a disposalOrRecoveryCode not on the R1-R13/D1-D15 reference list'
-)

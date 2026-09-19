@@ -1,4 +1,4 @@
-openapi: 3.0.3
+openapi: 3.1.0
 
 info:
   title: Digital Waste Tracking API
@@ -179,10 +179,20 @@ components:
     # deliveryJoi.js, sharedSchemas.js) and the worked examples in the
     # *Event.js fixtures.
     #
-    # Cross-field rules that OpenAPI 3.0 cannot express (mutual exclusivity,
-    # conditional requiredness, data-dependent checks such as the hazardous
-    # aggregation rule or the collection/creation length match) are stated in
-    # the field descriptions and enforced server-side.
+    # Common resources migrated to JSON Schema under
+    # docs/event-model/schema/common/ (address, weight, carrier,
+    # brokerOrDealer, otherReferenceForMovement, intendedTreatment,
+    # actualTreatment, hazardous, pops, the intended-receiver shape, and
+    # producer) are referenced here by file $ref rather than redefined
+    # inline, so their mutual-exclusivity/conditional-requiredness rules
+    # (if/then/else, oneOf) are expressed and ajv-validated directly in the
+    # schema rather than only in prose. Fields not yet migrated
+    # (intendedCarrierDetails, receiverSite, the waste-item logistics
+    # fields) still state their cross-field rules in the field descriptions
+    # only and are enforced server-side. Data-dependent checks that cannot
+    # be expressed in a standalone JSON Schema at all (the hazardous
+    # aggregation rule, the collection/creation length match) are likewise
+    # prose-only and server-enforced.
     #
     # Shared primitives (weight, address, validationResult) are reused
     # rather than redefined. Waste item shapes are no longer shared with the
@@ -193,20 +203,8 @@ components:
     # preserved verbatim but no longer referenced by any path.
 
     otherReferenceForMovement:
-      type: object
       description: A single label/reference pair. Both fields must be supplied together.
-      required: [label, reference]
-      properties:
-        label:
-          type: string
-          minLength: 1
-          description: The type/label of the reference (e.g. transferNoteNumber, purchaseOrderNumber). Must be supplied together with its reference.
-          example: purchaseOrderNumber
-        reference:
-          type: string
-          minLength: 1
-          description: The reference value. Must be supplied together with its label.
-          example: PO-98765
+      $ref: '../event-model/schema/common/other-reference.schema.json'
 
     intendedCarrierDetails:
       type: object
@@ -233,8 +231,7 @@ components:
           description: How the waste is transported. The only mandatory carrier field at creation. Case-sensitive; 'Inland Waterway' includes a space.
           example: Road
         registrationNumber:
-          type: string
-          nullable: true
+          type: [string, 'null']
           description: Carrier/Broker/Dealer registration number (e.g. CBDU123456). Optional at creation; if provided, must be a valid carrier registration format.
           example: CBDU123456
         reasonForNoRegistrationNumber:
@@ -269,46 +266,15 @@ components:
           $ref: '#/components/schemas/address'
 
     intendedReceiverDetails:
-      type: object
       description: |
         Intended receiver details recorded at creation. Required only when the
-        movement contains hazardous waste (enforced server-side). `siteName`
-        is mandatory whenever this object is supplied, which in turn
-        makes `authorisationNumber` and `address` (with fullAddress) mandatory
-        too. These are provisional — the authoritative receiver is confirmed
-        at receipt, where the receiver is modelled by the Phase 1 `receiver`
-        (which carries regulatoryPositionStatements and, since the former
+        movement contains hazardous waste (enforced server-side). These are
+        provisional — the authoritative receiver is confirmed at receipt,
+        where the receiver is modelled by the Phase 1 `receiver` (which
+        carries regulatoryPositionStatements and, since the former
         receiptSite object was merged in, the physical receipt address too —
-        see `receiverSite.address`). At least one of `emailAddress` or
-        `phoneNumber` must be provided.
-      required:
-        - siteName
-      properties:
-        siteName:
-          type: string
-          description: Name of the intended receiving site. Mandatory whenever the receiver object is supplied; authorisationNumber and address are required as a consequence.
-          example: Test Receiver Site
-        authorisationNumber:
-          type: string
-          description: Environmental permit/authorisation number for the receiving site, validated against UK site-authorisation formats. Required when siteName is supplied.
-          example: HP3456XX
-        emailAddress:
-          type: string
-          format: email
-          description: |
-            Receiver contact email address. At least one of emailAddress or
-            phoneNumber must be provided.
-        phoneNumber:
-          type: string
-          description: |
-            Receiver contact phone number. At least one of emailAddress or
-            phoneNumber must be provided.
-        address:
-          allOf:
-            - $ref: '#/components/schemas/address'
-            - type: object
-              required: [fullAddress]
-          description: Receiver site address. Required (with fullAddress) when siteName is supplied.
+        see `receiverSite.address`).
+      $ref: '../event-model/schema/common/receiver.schema.json'
 
     collectionSite:
       type: object
@@ -441,138 +407,14 @@ components:
           example: true
         pops:
           description: Required when containsPops is true; must not be provided when containsPops is false.
-          type: object
-          required:
-            - sourceOfComponents
-          properties:
-            sourceOfComponents:
-              type: string
-              enum: [NOT_PROVIDED, PROVIDED_WITH_WASTE, GUIDANCE, OWN_TESTING]
-              description: |
-                Indicates the source of POP component details.
-                - NOT_PROVIDED: Carrier did not provide component details
-                - PROVIDED_WITH_WASTE: Components provided with the waste
-                - GUIDANCE: Components determined from guidance
-                - OWN_TESTING: Components determined from own testing<br><br>
-                 <b>Note:</b> The field is case-sensitive, please use the case specified in the list above.
-                <p><font color="green"><b>Business Rules:</b></font></p>
-                <ul>
-                <li>Must be provided when containsPops is true</li>
-                <li>If sourceOfComponents is NOT_PROVIDED, components array must be empty or not provided</li>
-                <li>If sourceOfComponents is PROVIDED_WITH_WASTE, components are recommended but not required (validation warning if not provided)</li>
-                <li>If sourceOfComponents is GUIDANCE or OWN_TESTING, components are required (validation error if not provided)</li>
-                </ul>
-              example: PROVIDED_WITH_WASTE
-            components:
-              type: array
-              items:
-                type: object
-                properties:
-                  code:
-                    type: string
-                    description: |
-                      The code of the POP (Persistent Organic Pollutant) component.
-                      <b>Notes:</b><br>
-                      - A list of POP names and codes can be obtained using the GET pop-names method.<br>
-                      - The field is case-sensitive, please use the case specified for the code returned by the GET method.
-                      <p><font color="green"><b>Business Rule:</b></font></p>
-                      Optional field. If provided, it must be a valid POP code from the reference list returned by the GET method. The code is validated against reference data to ensure accuracy.
-                    example: PFHXS
-                  concentration:
-                    type: number
-                    minimum: 0
-                    exclusiveMinimum: true
-                    description: The concentration of the POP in mg per kg, e.g. 50 mg per kg of Chlordane. <p><font color="green"><b>Business Rule:</b></font></p> Optional field. If provided, must be a positive decimal number (greater than 0). Mutually exclusive with concentrationThresholdOperator — a component may state one or neither, never both.
-                    example: 12.5
-                  concentrationThresholdOperator:
-                    type: string
-                    enum: [LESS_THAN, EQUAL_TO, GREATER_THAN_OR_EQUAL]
-                    description: States that concentration is above/below/at the WM3-defined threshold for this component, without an exact figure — the threshold value itself is not sent; it is resolved from WM3 guidance against code. <p><font color="green"><b>Business Rule:</b></font></p> Optional field, mutually exclusive with concentration — a component may state one or neither, never both.
-                    example: LESS_THAN
-              description: |
-                The list of POP components.
-                <p><font color="green"><b>Business Rules:</b></font></p>
-                <ul>
-                <li>Must be provided when containsPops is true</li>
-                <li>If sourceOfComponents is NOT_PROVIDED, components array must be empty or not provided</li>
-                <li>If sourceOfComponents is PROVIDED_WITH_WASTE, an empty components array will generate a validation warning</li>
-                <li>If sourceOfComponents is GUIDANCE or OWN_TESTING, components are required and cannot be empty (validation error if not provided)</li>
-                </ul>
+          $ref: '../event-model/schema/common/pops.schema.json'
         containsHazardous:
           type: boolean
           description: Does the waste consignment contain <b>Hazardous Properties</b>, true or false?. This is a mandatory indication. This is a boolean value, i.e. true (contains hazardous properties) or false (does not contain hazardous properties).
           example: true
         hazardous:
           description: Required when containsHazardous is true; must not be provided when containsHazardous is false.
-          type: object
-          required:
-            - sourceOfComponents
-          properties:
-            sourceOfComponents:
-              type: string
-              enum: [NOT_PROVIDED, PROVIDED_WITH_WASTE, GUIDANCE, OWN_TESTING]
-              description: |
-                Indicates the source of hazardous component details.
-                - NOT_PROVIDED: Carrier did not provide component details
-                - PROVIDED_WITH_WASTE: Components provided with the waste
-                - GUIDANCE: Components determined from guidance
-                - OWN_TESTING: Components determined from own testing
-                <p><font color="green"><b>Business Rules:</b></font></p>
-                <ul>
-                <li>Must be provided when containsHazardous is true</li>
-                <li>If sourceOfComponents is NOT_PROVIDED, components array must be empty or not provided</li>
-                <li>If sourceOfComponents is PROVIDED_WITH_WASTE, components are recommended but not required (validation warning if not provided)</li>
-                <li>If sourceOfComponents is GUIDANCE or OWN_TESTING, components are required (validation error if not provided), unless noComponents is true</li>
-                </ul>
-              example: PROVIDED_WITH_WASTE
-            noComponents:
-              type: boolean
-              description: |
-                Indicates hazardous properties were identified but no component was found above the WM3-defined threshold.
-                <p><font color="green"><b>Business Rule:</b></font></p>
-                When true, components must not be provided.
-              example: false
-            hazCodes:
-              type: array
-              description: |
-                Hazardous property codes are a list of codes that identify the hazardous waste and the potential risks associated with waste materials, guiding their safe transportation and handling protocols. Common types could include codes, HP_1 - HP_15. The format of the code to be entered is HP_'number', e.g. HP_1 for Explosive, HP_2 for Oxidizing, etc.
-                 <p>The official hazardous code list is found here in Appendix C:
-                 <a href="https://assets.publishing.service.gov.uk/media/6152d0b78fa8f5610b9c222b/Waste_classification_technical_guidance_WM3.pdf">Waste Classification Technical Guidance WM3 document.</a></p>
-                 <b>Notes:</b><br>
-                <ul>
-                - A list of all Hazardous Property Codes can be obtained using the GET hazardous-property-codes method.<br>
-                - The field is case-sensitive, please use the case specified for the code returned by the GET method.
-                </ul>
-                 <p><font color="green"><b>Business Rule:</b></font></p>
-                 If containsHazardous is true then hazardous.hazCodes must be a valid code.
-              example:
-                - HP_5
-                - HP_10
-              items:
-                type: string
-            components:
-              description: Forbidden when noComponents is true. Otherwise required when sourceOfComponents is GUIDANCE or OWN_TESTING; forbidden when NOT_PROVIDED.
-              type: array
-              items:
-                type: object
-                required:
-                  - name
-                properties:
-                  name:
-                    type: string
-                    description: Name of the hazardous component, e.g. Mercury. <p><font color="green"><b>Business Rule:</b></font></p> Mandatory field. Must be a valid chemical or biological component name.
-                    example: lead
-                  concentration:
-                    type: number
-                    minimum: 0
-                    exclusiveMinimum: true
-                    description: The concentration of the hazardous component in milligrams per kilo, e.g. 30mg per kg. <p><font color="green"><b>Business Rule:</b></font></p> Exactly one of concentration or concentrationThresholdOperator is required. If provided, must be a positive numeric value (greater than 0). Mutually exclusive with concentrationThresholdOperator — a component must state exactly one, never both or neither.
-                    example: 25.5
-                  concentrationThresholdOperator:
-                    type: string
-                    enum: [EQUAL_TO, GREATER_THAN_OR_EQUAL]
-                    description: States that concentration is above/at the WM3-defined threshold for this component, without an exact figure — the threshold value itself is not sent; it is resolved from WM3 guidance against name. <p><font color="green"><b>Business Rule:</b></font></p> Exactly one of concentration or concentrationThresholdOperator is required. Mutually exclusive with concentration.
-                    example: GREATER_THAN_OR_EQUAL
+          $ref: '../event-model/schema/common/hazardous.schema.json'
 
     # Shared waste item base (D-042) — classification plus logistics fields.
     # Used by createWasteItem (Creation) and receiptWithoutDeliveryWasteItem
@@ -599,12 +441,10 @@ components:
         numberOfContainers:
           type: integer
           minimum: 0
-          nullable: false
           description: Number of containers for storing, transporting and disposing of waste materials. <p><font color="green"><b>Business Rule:</b></font></p> This must be a non-negative integer (0 or greater).
           example: 2
         typeOfContainers:
           type: string
-          nullable: false
           description: |
             Containers are receptacles used for storing, transporting and disposing of waste materials. They come in various sizes and types, ranging from small desk-side bins to large industrial skips. Enter the container code, e.g. DRU for Drum.<br><br>
             <b>Notes:</b><br>
@@ -1252,8 +1092,12 @@ components:
     # ------------------------------------------------------------------
     # Phase 1 schemas, preserved verbatim.
     # Lowercase naming distinguishes them from the PascalCase schemas
-    # introduced for the new endpoints. They are referenced by Phase 1
-    # paths only.
+    # introduced for the new endpoints. wasteItem and receiverSite are
+    # referenced by Phase 1 paths only; carrier, brokerOrDealer,
+    # intendedTreatment, actualTreatment, weight and address are shared
+    # across both generations (see "Shared primitives" above) and, where
+    # migrated, now delegate to the common JSON Schema files under
+    # docs/event-model/schema/common/ rather than redefining the shape here.
     # ------------------------------------------------------------------
     wasteItem:
       type: object
@@ -1299,12 +1143,10 @@ components:
         numberOfContainers:
           type: integer
           minimum: 0
-          nullable: false
           description: Number of containers for storing, transporting and disposing of waste materials. <p><font color="green"><b>Business Rule:</b></font></p> This must be a non-negative integer (0 or greater).
           example: 2
         typeOfContainers:
           type: string
-          nullable: false
           description: |
             Containers are receptacles used for 2storing, transporting and disposing of waste materials. They come in  various sizes and types, ranging from small desk-side bins to large industrial skips. Enter the container code, e.g. DRU for Drum.<br><br>
             <b>Notes:</b><br>
@@ -1364,8 +1206,7 @@ components:
                     example: PFHXS
                   concentration:
                     type: number
-                    minimum: 0
-                    exclusiveMinimum: true
+                    exclusiveMinimum: 0
                     description: The concentration of the POP in mg per kg, e.g. 50 mg per kg of Chlordane. <p><font color="green"><b>Business Rule:</b></font></p> Optional field. If provided, must be a positive decimal number (greater than 0). Mutually exclusive with concentrationThreshold — a component may state one or neither, never both.
                     example: 12.5
                   concentrationThreshold:
@@ -1382,8 +1223,7 @@ components:
                         example: LESS_THAN
                       value:
                         type: number
-                        minimum: 0
-                        exclusiveMinimum: true
+                        exclusiveMinimum: 0
                         description: Threshold value. Same units as concentration (%).
                         example: 0.1
               description: |
@@ -1450,8 +1290,7 @@ components:
                     example: lead
                   concentration:
                     type: number
-                    minimum: 0
-                    exclusiveMinimum: true
+                    exclusiveMinimum: 0
                     description: The concentration of the hazardous component in milligrams per kilo, e.g. 30mg per kg. <p><font color="green"><b>Business Rule:</b></font></p> Required when name is supplied. If provided, must be a positive numeric value (greater than 0). Mutually exclusive with concentrationThreshold — a component may state one or neither, never both.
                     example: 25.5
                   concentrationThreshold:
@@ -1468,8 +1307,7 @@ components:
                         example: GREATER_THAN_OR_EQUAL
                       value:
                         type: number
-                        minimum: 0
-                        exclusiveMinimum: true
+                        exclusiveMinimum: 0
                         description: Threshold value. Same units as concentration (%).
                         example: 0.5
         disposalOrRecoveryCodes:
@@ -1487,91 +1325,11 @@ components:
             `receiptWithoutDeliveryWasteItem`. Preserved verbatim rather than
             deleted, per this file's Phase 1 convention.
     carrier:
-      type: object
       description: |
         Carrier organisation and transport details. Required on every write
         event. At least one of emailAddress or phoneNumber must be provided.
-      required:
-        - registrationNumber
-        - organisationName
-        - meansOfTransport
-      properties:
-        registrationNumber:
-          type: string
-          nullable: true
-          description: |
-            <p>A waste carrier registration number is a legal requirement for businesses that transport, buy, sell or dispose of waste. This license ensures that waste is handled and transported in a responsible and environmentally friendly manner.</p>
-             <p><b>Home Nations Codes:</b></p>
-             <p><b>General Format</b> where 9 is a digit 0-9</p>
-             <p><font color="blue"><b>Wales NRW:</b></font></p>
-                CBDL9, CBDL99, CBDU999 (1+ digits)
-                <p>i.e. CBD<font color="red"><b>U</b></font>999999 (Upper Tier) or CBD<font color="red"><b>L</b></font>999999 (Lower Tier), where "CBD" stands for "Carrier, Broker, Dealer"</p>              
-             <p><font color="blue"><b>England:</b></font></p>
-                CBDL9, CBDL99, CBDU999 (1+ digits)
-                 <p>i.e. CBD<font color="red"><b>U</b></font>999999 (Upper Tier) or CBD<font color="red"><b>L</b></font>999999 (Lower Tier), where "CBD" stands for "Carrier, Broker, Dealer"</p>             
-             <p><font color="blue"><b>Scotland SEPA:</b></font></p>
-                WCR/R/9999999, SCO/999999, SEA/999999, SNO/999999, SWE/999999, WCR/999999
-                <p>Typically starts with WCR followed by numbers and potentially letters according to the Scottish Environment Protection Agency (SEPA).</p>  
-               <p>Current format – WCR/R/1234567</p>
-               <p>Previous formats – SCO/123456, SEA/123456, SNO/123456, SWE/123456, WCR/123456</p>
-             <p><font color="blue"><b>Northern Ireland NI</b></font></p>
-                <p></p><p>ROC UT 9,ROC UT 99,ROC UT 999,ROC UT 9999,ROC UT 99999,  ROC LT 9, ROC LT 99, ROC LT 999, ROC LT 9999, ROC LT 99999 </p>
-                Include a prefix like ROC followed by UT (Upper Tier) or LT (Lower Tier) and then numbers. Note the spaces are not mandatory.<p></p> For example:
-                ROC UT 9999
-                ROCLT9999<p></p><p></p>
-                <p><b>General Format</b> where 9 is a digit 0-9</p>
-          example: CBDL6
-        reasonForNoRegistrationNumber:
-          type: string
-          enum: [ON_SITE, ONE_OFF, MARINE]
-          description: |
-            If you have not provided a registration number, then here you must provide an appropriate reason code from the list below:
-            <ul>
-            <li><b>ON_SITE - Movement within the same premises</b> (e.g. waste transferred between different areas or authorisations on the same site)</li>
-            <li><b>ONE_OFF - One-off or infrequent waste transport</b> (carrier does not normally and regularly transport controlled waste)</li>
-            <li><b>MARINE - Marine transport covered by a marine licence/exemption</b> (waste moved by vessel in connection with a licensed marine operation)</li>
-            </ul>
-            <p><font color="green"><b>Business Rules:</b></font></p>
-            <ul>
-            <li>If either “Null” or an empty string are entered into carrier.registrationNumber then carrier.reasonForNoRegistrationNumber is required.</li>
-            <li>If a valid string is entered into carrier.registrationNumber then carrier.reasonForNoRegistrationNumber should not be provided.</li>
-            </ul>
-          example: ON_SITE
-        organisationName:
-          type: string
-          description: The business name of the carrier.
-          example: Waste Carriers Lite Ltd
-        address:
-          $ref: '#/components/schemas/address'
-        emailAddress:
-          type: string
-          format: email
-          description: |
-            The email address of the carrier. At least one of emailAddress
-            or phoneNumber must be provided.
-          example: mailbox@example.co.uk
-        phoneNumber:
-          type: string
-          description: |
-            The UK or international phone number of the carrier. At least
-            one of emailAddress or phoneNumber must be provided.
-          example: 020 4756 XXXX
-        vehicleRegistration:
-          type: string
-          maxLength: 10
-          description: This is the carrier's vehicle registration number. <p><font color="green"><b>Business Rules:</b></font></p> <ul> <li>If carrier.meansOfTransport is “Road” then carrier.vehicleRegistration is required.</li> <li>If carrier.meansOfTransport is not “Road” then carrier.vehicleRegistration is not applicable.</li> </ul>
-          example: RNT 493
-        meansOfTransport:
-          type: string
-          enum: [Road, Rail, Air, Sea, Inland Waterway, Piped, Other]
-          description: |
-            This describes how the waste is transported (road, rail, air, sea, piped, inland waterway, other)
-            <b>Note:</b> The field is case-sensitive, please use the case specified in the business rule.
-            <p><font color="green"><b>Business Rule:</b></font></p> 
-            Must be either Road, Rail, Air, Sea, “Inland Waterway”, Piped or Other.
-          example: Rail
+      $ref: '../event-model/schema/common/carrier.schema.json'
     brokerOrDealer:
-      type: object
       description: |
         Broker or dealer details — required when the movement is
         broker-initiated. registrationNumber is required whenever this
@@ -1579,62 +1337,7 @@ components:
         in its place when registrationNumber is null or empty, mirroring
         carrier's mutual-exclusivity rule. At least one of emailAddress or
         phoneNumber must be provided.
-      required:
-        - organisationName
-        - registrationNumber
-      properties:
-        organisationName:
-          type: string
-          description: The broker or dealer organisation name who arranged this transfer.
-          example: Waste Disposal Ltd
-        address:
-          $ref: '#/components/schemas/address'
-        emailAddress:
-          type: string
-          format: email
-          description: |
-            The email address of the broker or dealer. At least one of
-            emailAddress or phoneNumber must be provided.
-          example: mailbox@example.co.uk
-        phoneNumber:
-          type: string
-          description: |
-            The UK or international phone number of the broker or dealer.
-            At least one of emailAddress or phoneNumber must be provided.
-          example: 020 4756 XXXX
-        registrationNumber:
-          type: string
-          nullable: true
-          description: |
-            <p>A waste carrier registration number is a legal requirement for businesses that transport, buy, sell or dispose of waste. This license ensures that waste is handled and transported in a responsible and environmentally friendly manner.</p>
-            <p><b>Home Nations Codes:</b></p>
-            <p><b>General Format</b> where 9 is a digit 0-9</p>
-            <p><font color="blue"><b>Wales NRW:</b></font></p>
-               CBDL999999, CBDU999999
-               <p>i.e. CBD<font color="red"><b>U</b></font>999999 (Upper Tier) or CBD<font color="red"><b>L</b></font>999999 (Lower Tier), where "CBD" stands for "Carrier, Broker, Dealer"</p>              
-            <p><font color="blue"><b>England:</b></font></p>
-               CBDL999999, CBDU999999
-                <p>i.e. CBD<font color="red"><b>U</b></font>999999 (Upper Tier) or CBD<font color="red"><b>L</b></font>999999 (Lower Tier), where "CBD" stands for "Carrier, Broker, Dealer"</p>             
-            <p><font color="blue"><b>Scotland SEPA:</b></font></p>
-               WCR/R/9999999, SCO/999999, SEA/999999, SNO/999999, SWE/999999, WCR/999999
-               <p>Typically starts with WCR followed by numbers and potentially letters according to the Scottish Environment Protection Agency (SEPA).</p>  
-              <p>Current format – WCR/R/1234567</p>
-              <p>Previous formats – SCO/123456, SEA/123456, SNO/123456, SWE/123456, WCR/123456</p>
-            <p><font color="blue"><b>Northern Ireland (NI)</b></font></p>
-               ROC UT 9,ROC UT 99,ROC UT 999, ROC UT 9999, ROC UT 99999, ROC LT 9, ROC LT 99, ROC LT 999, ROC LT 9999, ROC LT 99999<p></p><p></p>
-               Include a prefix like ROC followed by UT (Upper Tier) or LT (Lower Tier) and then numbers. Note that spaces are not mandatory.<p></p>
-               ROC UT 9999
-               ROCLT9999<p></p><p></p>
-               <p><b>Note:</b> where 9 is a digit 0-9</p>
-          example: CBDL6
-        reasonForNoRegistrationNumber:
-          type: string
-          enum: [ON_SITE, ONE_OFF, MARINE]
-          description: |
-            Reason a registration number is not supplied. Required when
-            registrationNumber is null or empty. Must not be supplied
-            alongside a valid registrationNumber.
-          example: ONE_OFF
+      $ref: '../event-model/schema/common/broker-or-dealer.schema.json'
     receiverSite:
       type: object
       description: |
@@ -1733,28 +1436,8 @@ components:
     # disposalOrRecoveryCode itself is optional and weight is conditional on
     # the code being present.
     intendedTreatment:
-      type: object
       description: Disposal or recovery treatment planned at creation.
-      required:
-        - disposalOrRecoveryCode
-        - weight
-      properties:
-        disposalOrRecoveryCode:
-          type: string
-          description: |
-            Disposal and Recovery Codes play a crucial role in categorising the methods by which waste is managed, whether through recovery or disposal processes. These codes (Recovery (R) and Disposal (D)) serve as a standardised system to ensure proper handling and treatment of waste materials. Specifically, they aid in classifying whether waste is to be recovered for further use or disposed of in a safe and environmentally responsible manner.
-
-              <p><b>Notes:</b>
-              <ul>
-              - The field is case-sensitive, please use the case specified for the code returned by the GET method.<br>
-              - A complete list of Disposal and Recovery Codes can be obtained using the GET Disposal and Recovery Codes method.<br>
-             </ul>
-             <p><font color="green"><b>Business Rule:</b></font></p>
-             If intendedTreatment.disposalOrRecoveryCode entered, then it should be in the intendedTreatment.disposalOrRecoveryCode listed in EUR-Lex.
-          example: |
-            "R1"
-        weight:
-          $ref: '#/components/schemas/weight'
+      $ref: '../event-model/schema/common/intended-treatment.schema.json'
 
     # Actual Treatment (D-031 amended) — used by receiptWasteItem.actualTreatments
     # (POST /deliveries/{deliveryId}/receipt) and receiptWithoutDeliveryWasteItem.
@@ -1764,50 +1447,11 @@ components:
     # required only when disposalOrRecoveryCode is supplied. Distinct from
     # intendedTreatment (Creation), where both fields are always required.
     actualTreatment:
-      type: object
       description: Disposal or recovery treatment confirmed at receipt.
-      properties:
-        disposalOrRecoveryCode:
-          type: string
-          description: |
-            Disposal and Recovery Codes play a crucial role in categorising the methods by which waste is managed, whether through recovery or disposal processes. These codes (Recovery (R) and Disposal (D)) serve as a standardised system to ensure proper handling and treatment of waste materials. Specifically, they aid in classifying whether waste is to be recovered for further use or disposed of in a safe and environmentally responsible manner.
-
-              <p><b>Notes:</b>
-              <ul>
-              - The field is case-sensitive, please use the case specified for the code returned by the GET method.<br>
-              - A complete list of Disposal and Recovery Codes can be obtained using the GET Disposal and Recovery Codes method.<br>
-             </ul>
-             <p><font color="green"><b>Business Rule:</b></font></p>
-             Optional — a receiving site may need to inspect or weigh before confirming the code. Omitting it produces a warning, not a rejection. If entered, it should be in the disposalOrRecoveryCode listed in EUR-Lex.
-          example: |
-            "R1"
-        weight:
-          allOf:
-            - $ref: '#/components/schemas/weight'
-          description: Required when disposalOrRecoveryCode is supplied.
+      $ref: '../event-model/schema/common/actual-treatment.schema.json'
     weight:
-      type: object
       description: Weight of a waste item, or of the amount treated under a specific disposal/recovery code.
-      required:
-        - metric
-        - amount
-        - isEstimate
-      properties:
-        metric:
-          type: string
-          enum: [Grams, Kilograms, Tonnes]
-          description: Unit of measurement in which the waste is being accepted. <p><font color="green"><b>Business Rule:</b></font></p> Must be “Grams”, “Kilograms” or “Tonnes”
-          example: Tonnes
-        amount:
-          type: number
-          minimum: 0
-          exclusiveMinimum: true
-          description: Total weight of the waste in a unit specified - Grams - Kilograms - Tonnes <p><font color="green">Business Rule:</font></p> Must be a positive number (greater than 0). <b>Note-</b><p> Weight in terms of the Waste Item is the total weight of the waste being received.</p> <p> Weight in terms of the Treatment is the total weight of the waste being disposed of or recovered for final treatment.</p>
-          example: 150
-        isEstimate:
-          type: boolean
-          description: Specifies whether the weight of waste is estimated. This a boolean value, i.e. true for estimated or false for not estimated.
-          example: true
+      $ref: '../event-model/schema/common/weight.schema.json'
     validationResult:
       type: object
       description: One validation warning or error entry.
@@ -1833,19 +1477,8 @@ components:
           example: Success/Failure
           description: Waste description is/is not successfully stored.
     address:
-      type: object
       description: Business address of a carrier, broker/dealer, producer or receiver.
-      required:
-        - postcode
-      properties:
-        fullAddress:
-          type: string
-          description: The business location address of the carrier or broker/dealer.
-          example: 26a Oil Drum Lane, London, UK
-        postcode:
-          type: string
-          description: A valid postcode must be included. <p><b>Note-</b></p> Carriers, Brokers/Dealers accept UK and Irish post codes.
-          example: W12 7ZL
+      $ref: '../event-model/schema/common/address.schema.json'
     # Waste item for the ordinary Receipt endpoint (D-042) — logistics
     # fields plus actualTreatments only. Classification is dropped entirely;
     # a prior Creation record already has it. Does not extend wasteItemBase
@@ -1865,12 +1498,10 @@ components:
         numberOfContainers:
           type: integer
           minimum: 0
-          nullable: false
           description: Number of containers for storing, transporting and disposing of waste materials. <p><font color="green"><b>Business Rule:</b></font></p> This must be a non-negative integer (0 or greater).
           example: 2
         typeOfContainers:
           type: string
-          nullable: false
           description: |
             Containers are receptacles used for storing, transporting and disposing of waste materials. They come in various sizes and types, ranging from small desk-side bins to large industrial skips. Enter the container code, e.g. DRU for Drum.<br><br>
             <b>Notes:</b><br>

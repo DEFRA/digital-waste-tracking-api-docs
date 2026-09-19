@@ -1,0 +1,28 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "actual-treatment.schema.json",
+  "title": "Actual Treatment",
+  "description": "Actual Treatment entry (D-031 amended), used at receipt where the confirmed outcome may not be known yet. disposalOrRecoveryCode is optional — omitting it produces a warning, not a rejection — with weight required only when disposalOrRecoveryCode is supplied. Distinct from Creation's intended-treatment.schema.json, where both fields are always required.",
+  "type": "object",
+  "properties": {
+    "disposalOrRecoveryCode": {
+      "type": "string",
+      "format": "disposalOrRecoveryCode",
+      "description": "Must be a valid code from GET /reference-data/disposal-or-recovery-codes. Optional — a receiving site may need to inspect or weigh before confirming the code. Omitting it produces a warning, not a rejection."
+    },
+    "weight": {
+      "$ref": "weight.schema.json"
+    }
+  },
+  "if": {
+    "properties": { "disposalOrRecoveryCode": {} },
+    "required": ["disposalOrRecoveryCode"]
+  },
+  "then": {
+    "properties": { "weight": {} },
+    "required": ["weight"]
+  },
+  "propertyNames": {
+    "enum": ["disposalOrRecoveryCode", "weight"]
+  }
+}

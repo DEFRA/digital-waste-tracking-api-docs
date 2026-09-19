@@ -1,0 +1,21 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "intended-treatment.schema.json",
+  "title": "Intended Treatment",
+  "description": "Each treatment entry must include both a valid disposalOrRecoveryCode and a weight. Used as intendedTreatments (Creation, mandatory, min 1) — both fields always required, unlike Receipt's actualTreatment (actual-treatment.schema.json) where disposalOrRecoveryCode is optional and weight is conditional on it.",
+  "type": "object",
+  "properties": {
+    "disposalOrRecoveryCode": {
+      "type": "string",
+      "format": "disposalOrRecoveryCode",
+      "description": "Must be a valid code from GET /reference-data/disposal-or-recovery-codes."
+    },
+    "weight": {
+      "$ref": "weight.schema.json"
+    }
+  },
+  "required": ["disposalOrRecoveryCode", "weight"],
+  "propertyNames": {
+    "enum": ["disposalOrRecoveryCode", "weight"]
+  }
+}

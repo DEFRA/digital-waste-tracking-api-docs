@@ -1,0 +1,23 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "other-reference.schema.json",
+  "title": "Other Reference",
+  "description": "Additional label/reference pair for the movement. Both reference and label are required whenever an entry is supplied.",
+  "type": "object",
+  "properties": {
+    "reference": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Reference value — must be supplied together with its label."
+    },
+    "label": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Label identifying the reference type, e.g. transferNoteNumber, purchaseOrderNumber."
+    }
+  },
+  "required": ["reference", "label"],
+  "propertyNames": {
+    "enum": ["reference", "label"]
+  }
+}
