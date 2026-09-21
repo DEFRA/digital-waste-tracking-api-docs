@@ -155,17 +155,17 @@ Each of these is a separate piece of work with its own questions. They are named
 
 The concern is fair: anything new has to be defensible.
 
-The position is that this **removes** a dependency rather than adding one. Runtime validation moves from `joi` to `ajv`. Neither library appears on the Defra technology radar, so this is not a move from an approved tool to an unapproved one. JSON Schema itself is an open standard, not a product.
+The argument is not that this removes a dependency — `joi` stays in the service for the existing endpoints. It is that **the rules stop being tied to a library at all**. With Joi the rules _are_ the library: they are expressed in one vendor's chained-call API, and moving off it means rewriting every rule. With JSON Schema the rules are an open standard and the validator is an implementation detail. `ajv` is the current choice and already what the tests run against, but if it ever became a problem we would change the validator, not the rules.
+
+That also means the proposal does not rest on winning an approval argument. Neither `joi` nor `ajv` appears on the Defra technology radar. JSON Schema itself is an open standard, not a product.
 
 The wider intent behind the policy — that any engineer can pick the work up — is served better by this than by the status quo, because the rules end up in a declarative file with prose descriptions rather than in chained library calls.
-
-If a blocker does appear, generating Joi files from the schema is available as a fallback. We should not design for that now.
 
 ### Versioning
 
 If one file feeds several outputs, what does a version mean?
 
-The schema files are the version. Everything generated from them carries the same stamp, which is the point: a spreadsheet, a diagram and a running service can all be traced back to one numbered version of the model. Today they cannot be traced to anything.
+The schema files are the version. Everything generated from them carries the same stamp, which is the point: the business rules spreadsheet, a diagram and a running service can all be traced back to one numbered version of the model. Today they cannot be traced to anything.
 
 Whether a change is made in place or carried across two beta versions stays a case-by-case call, unchanged by this proposal. What changes is that there is a single thing to version.
 
@@ -186,7 +186,7 @@ We should pick one before building much beyond Producer, and not let the choice 
 - **The live Receipt of Waste endpoints are not touched.** Their code stays as it is.
 - **No cross-resource or cross-endpoint rules move into the schema.** They stay in service code.
 - **We do not split the event model from the API payload yet.** One shape serves both until there is a real rule that forces them apart.
-- **No regulator spreadsheet or diagram generation in the first delivery.** Both are attractive and both are distractions until the core path works end to end.
+- **No business rules spreadsheet or diagram generation in the first delivery.** Both are attractive and both are distractions until the core path works end to end.
 
 ## References
 
