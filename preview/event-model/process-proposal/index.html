@@ -478,8 +478,8 @@
 <li><strong>One file per resource.</strong> <code>producer</code>, <code>carrier</code>, <code>address</code>, and so on. That file is the source of truth.</li>
 <li><strong>Unit tests sit beside it</strong>, written in plain English, one per business scenario. They pin the rules so a later change cannot quietly break an agreed one.</li>
 <li><strong><code>openapi.yaml</code> points at the same file.</strong> No second copy to keep in step.</li>
-<li><strong>The API service validates against the same file.</strong> This replaces the hand-written Joi schemas.</li>
-<li><strong>First delivery is the schema, the tests, the OpenAPI spec, the validation, and the API service consuming them.</strong> The developer documentation, the regulator spreadsheet and the model diagram can come from the same source later.</li>
+<li><strong>The API service validates against the same file.</strong> For the event model this replaces the hand-written Joi schemas; Joi stays where the existing endpoints already use it.</li>
+<li><strong>First delivery is the schema, the tests, the OpenAPI spec, the validation, and the API service consuming them.</strong> The developer documentation, the business rules spreadsheet and the model diagram can come from the same source later.</li>
 </ul>
 <h2 id="baseline">Baseline</h2>
 <h3 id="what-the-event-model-is">What the event model is</h3>
@@ -502,7 +502,7 @@
 </thead>
 <tbody>
 <tr>
-<td>Regulator spreadsheet</td>
+<td>Business rules spreadsheet</td>
 <td>Business analysis</td>
 <td>Agreeing the field list with regulators</td>
 </tr>
@@ -528,13 +528,14 @@
 </tr>
 </tbody>
 </table>
-<p>Each of these is good at its job. The spreadsheet is how we talk to regulators. The diagram is how we explain a shape to someone who will never open a code editor. The ticket is how work gets picked up.</p>
+<p>Throughout this page, <strong>the business rules spreadsheet</strong> means that first row — the regulator-facing document listing fields and rules. It is not the waste receipt submission spreadsheet that operators without API access use to send us receipts; that is a different thing entirely, and nothing in this proposal touches it.</p>
+<p>Each of these is good at its job. The business rules spreadsheet is how we talk to regulators. The diagram is how we explain a shape to someone who will never open a code editor. The ticket is how work gets picked up.</p>
 <p><img alt="The event model today: five disconnected places, only one of which runs" src="before.png" /></p>
 <p>Only the last row actually runs. When a real request arrives, the Joi schemas decide whether it is accepted. The other four describe what we <em>intend</em>. Nothing checks that they still agree with each other, or with the code.</p>
 <h2 id="problem">Problem</h2>
 <p><strong>Every rule is written five times.</strong> Adding one field means five edits, by three different people, in three different tools. Miss one and the copies drift apart. Nobody notices until someone asks a question the artefacts answer differently.</p>
 <p><strong>The only true answer is in the code.</strong> If you want to know what the API really accepts, you read the Joi schemas. That rules out most of the people who need the answer — regulators, Software Providers, business analysis, QA.</p>
-<p><strong>The feedback loop with regulators is slow and manual.</strong> We hand over a spreadsheet, wait, take comments back, and then type the result into the other four places by hand.</p>
+<p><strong>The feedback loop with regulators is slow and manual.</strong> We hand over the business rules spreadsheet, wait, take comments back, and then type the result into the other four places by hand.</p>
 <p><strong>The files are too big to work in.</strong> <code>openapi.yaml</code> is one file of roughly 2,900 lines. Two people cannot comfortably change it at the same time.</p>
 <p>Left alone, this gets worse. Phase 1 covered one event. Phase 2 covers four, sharing most of their resources between them. The cost of keeping five copies honest grows with every event we add.</p>
 <h2 id="solution">Solution</h2>
@@ -568,7 +569,7 @@
 </code></pre></div>
 <p>This is already in place. There is no second copy of the producer rules, so there is nothing to drift.</p>
 <h3 id="4-validation-runs-the-same-file">4. Validation runs the same file</h3>
-<p>The service checks incoming requests against the same schema files, using <code>ajv</code>. Nobody re-types the rules into Joi.</p>
+<p>The service checks incoming requests against the same schema files, using a JSON Schema validator — <code>ajv</code> today, though that choice is not load-bearing (see <a href="#tech-radar-and-third-party-libraries">Tech Radar and third-party libraries</a>). Nobody re-types the event model's rules into Joi.</p>
 <p>The honest limit: a schema describes one resource. A rule that spans two resources, or two endpoints, still lives in service code. This proposal does not change that.</p>
 <h3 id="5-the-api-service-consumes-it">5. The API service consumes it</h3>
 <p>The schema, the validation, the tests and the OpenAPI spec are defined in one repository and consumed by <code>waste-movement-external-api</code> and <code>waste-movement-backend</code>. This is the part that makes the rest real — a source of truth that the running service does not use is just another document. How the services get hold of it is still open; see <a href="#rabbit-holes">Rabbit holes</a>.</p>
@@ -578,24 +579,24 @@
 <p><strong>A rule change</strong> — is one edit in one file. The spec, the validation and the running service follow from it.</p>
 <p><strong>Review</strong> — the diff shows the rule that changed and the test that pins it, side by side.</p>
 <p><strong>QA</strong> — tests a service whose rules can be read without opening the code.</p>
-<p><strong>Regulators</strong> — keep the spreadsheet conversation, but the spreadsheet eventually becomes something we generate rather than something we maintain.</p>
+<p><strong>Regulators</strong> — keep the same conversation, but the business rules spreadsheet eventually becomes something we generate rather than something we maintain.</p>
 <h2 id="what-this-unlocks">What this unlocks</h2>
 <p>Not in the first delivery, but possible from the same source, with no new source of truth:</p>
 <ul>
 <li><strong>Developer documentation</strong> for Software Providers, generated from the schema descriptions.</li>
-<li><strong>The regulator spreadsheet</strong>, generated read-only, so the field list and the service can never disagree.</li>
+<li><strong>The business rules spreadsheet</strong>, generated read-only, so the field list and the service can never disagree.</li>
 <li><strong>The model diagram</strong>, generated from how the resources reference each other.</li>
 </ul>
 <p>Each of these is a separate piece of work with its own questions. They are named here to show what the approach makes possible, not to commit to them now.</p>
 <h2 id="rabbit-holes">Rabbit holes</h2>
 <h3 id="tech-radar-and-third-party-libraries">Tech Radar and third-party libraries</h3>
 <p>The concern is fair: anything new has to be defensible.</p>
-<p>The position is that this <strong>removes</strong> a dependency rather than adding one. Runtime validation moves from <code>joi</code> to <code>ajv</code>. Neither library appears on the Defra technology radar, so this is not a move from an approved tool to an unapproved one. JSON Schema itself is an open standard, not a product.</p>
+<p>The argument is not that this removes a dependency — <code>joi</code> stays in the service for the existing endpoints. It is that <strong>the rules stop being tied to a library at all</strong>. With Joi the rules <em>are</em> the library: they are expressed in one vendor's chained-call API, and moving off it means rewriting every rule. With JSON Schema the rules are an open standard and the validator is an implementation detail. <code>ajv</code> is the current choice and already what the tests run against, but if it ever became a problem we would change the validator, not the rules.</p>
+<p>That also means the proposal does not rest on winning an approval argument. Neither <code>joi</code> nor <code>ajv</code> appears on the Defra technology radar. JSON Schema itself is an open standard, not a product.</p>
 <p>The wider intent behind the policy — that any engineer can pick the work up — is served better by this than by the status quo, because the rules end up in a declarative file with prose descriptions rather than in chained library calls.</p>
-<p>If a blocker does appear, generating Joi files from the schema is available as a fallback. We should not design for that now.</p>
 <h3 id="versioning">Versioning</h3>
 <p>If one file feeds several outputs, what does a version mean?</p>
-<p>The schema files are the version. Everything generated from them carries the same stamp, which is the point: a spreadsheet, a diagram and a running service can all be traced back to one numbered version of the model. Today they cannot be traced to anything.</p>
+<p>The schema files are the version. Everything generated from them carries the same stamp, which is the point: the business rules spreadsheet, a diagram and a running service can all be traced back to one numbered version of the model. Today they cannot be traced to anything.</p>
 <p>Whether a change is made in place or carried across two beta versions stays a case-by-case call, unchanged by this proposal. What changes is that there is a single thing to version.</p>
 <h3 id="how-the-services-consume-it">How the services consume it</h3>
 <p>This is genuinely undecided, and is the biggest open question in the proposal.</p>
@@ -611,7 +612,7 @@
 <li><strong>The live Receipt of Waste endpoints are not touched.</strong> Their code stays as it is.</li>
 <li><strong>No cross-resource or cross-endpoint rules move into the schema.</strong> They stay in service code.</li>
 <li><strong>We do not split the event model from the API payload yet.</strong> One shape serves both until there is a real rule that forces them apart.</li>
-<li><strong>No regulator spreadsheet or diagram generation in the first delivery.</strong> Both are attractive and both are distractions until the core path works end to end.</li>
+<li><strong>No business rules spreadsheet or diagram generation in the first delivery.</strong> Both are attractive and both are distractions until the core path works end to end.</li>
 </ul>
 <h2 id="references">References</h2>
 <ul>
