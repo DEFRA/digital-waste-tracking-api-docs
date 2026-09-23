@@ -746,6 +746,8 @@ Phase 1 has no rejection model — recording a receipt means the waste was accep
 
 If a driver has no signal at the delivery, they cannot call `POST /deliveries` to mint a Delivery ID in the moment — yet they need one to hand to the receiver (typically on paper) so the receipt can be recorded against it. Open: can software vendors be issued a pool of pre-generated Delivery IDs that a driver's app assigns offline and reconciles/POSTs when signal returns? Sub-questions: how are pre-generated IDs reserved without collision; do they draw from the same per-year sqids space (see _Identifier format and capacity_); how long does a reservation stay valid; what happens to a reserved ID that is never used; and does the same need apply to Movement IDs (created earlier, usually with signal) or only to Delivery IDs (minted at the delivery moment, the most likely offline point)? Connects to the deferred/retrospective collection-recording scenarios, which are the offline case generally.
 
+**Proposed answer:** [Option A — Pre-reserved Delivery IDs](phase2/option-a-pre-reserved-delivery-IDs.md), a draft design (not yet reviewed or decided) covering the reservation endpoint, per-org quota, ownership verification and the validity-lookup contract.
+
 <a id="d-035"></a>
 
 ### Addressing an individual collection event for correction
