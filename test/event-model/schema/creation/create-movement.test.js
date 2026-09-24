@@ -2,9 +2,11 @@
  * Placeholder — creationJoi.js's createMovementSchema root and its
  * validateCreationRules custom validator, the only place these cross-field
  * rules can be exercised (they're not reachable through any sub-schema
- * test). Sub-schema field-level rules are covered elsewhere: producer
- * (common/producer.test.js), receiver (common/receiver.test.js), waste items
- * (creation/waste-item.test.js). Uses ewcCode 200121, the one hazardous code
+ * test). Sub-schema field-level rules are covered elsewhere: receiver
+ * (common/receiver.test.js), waste items (creation/waste-item.test.js).
+ * Producer is no longer covered here — its schema moved to
+ * waste-movement-backend and is tested there; see the @deprecated note on
+ * creationJoi.js's producerSchema. Uses ewcCode 200121, the one hazardous code
  * in the doc-side reference subset (see validators.js), to drive the
  * hazardous-EWC branches.
  */
