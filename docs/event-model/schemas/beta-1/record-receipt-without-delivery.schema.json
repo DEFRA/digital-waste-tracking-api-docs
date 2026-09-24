@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Record receipt without delivery",
+  "description": "Payload for POST /beta-1/receipts.",
+  "type": "object",
+  "properties": {
+    "apiCode": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Unique identifier of the submitting organisation.",
+      "examples": ["25b14080-5e77-4f91-9957-2482a0cb8775"]
+    },
+    "reason": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Mandatory explanation for why this receipt is being recorded without a Delivery ID.",
+      "examples": [
+        "No delivery was recorded prior to receipt; waste received directly from the producer."
+      ]
+    }
+  },
+  "required": ["apiCode", "reason"],
+  "additionalProperties": false
+}

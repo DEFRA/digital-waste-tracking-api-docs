@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Record receipt",
+  "description": "Payload for POST /beta-1/deliveries/{deliveryId}/receipt.",
+  "type": "object",
+  "properties": {
+    "apiCode": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Unique identifier of the submitting organisation.",
+      "examples": ["25b14080-5e77-4f91-9957-2482a0cb8775"]
+    }
+  },
+  "required": ["apiCode"],
+  "additionalProperties": false
+}
