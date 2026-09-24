@@ -3,3 +3,7 @@ site/
 node_modules
 coverage
 package-lock.json
+
+# Pulled verbatim from waste-movement-backend by `npm run schemas:sync`.
+# Reformatting them here would make the schemas:sync check report drift forever.
+docs/event-model/schemas/
