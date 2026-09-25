@@ -1,4 +1,4 @@
-openapi: 3.0.3
+openapi: 3.1.0
 
 info:
   title: Digital Waste Tracking API
@@ -233,8 +233,7 @@ components:
           description: How the waste is transported. The only mandatory carrier field at creation. Case-sensitive; 'Inland Waterway' includes a space.
           example: Road
         registrationNumber:
-          type: string
-          nullable: true
+          type: [string, 'null']
           description: Carrier/Broker/Dealer registration number (e.g. CBDU123456). Optional at creation; if provided, must be a valid carrier registration format.
           example: CBDU123456
         reasonForNoRegistrationNumber:
@@ -480,8 +479,7 @@ components:
                     example: PFHXS
                   concentration:
                     type: number
-                    minimum: 0
-                    exclusiveMinimum: true
+                    exclusiveMinimum: 0
                     description: The concentration of the POP in mg per kg, e.g. 50 mg per kg of Chlordane. <p><font color="green"><b>Business Rule:</b></font></p> Optional field. If provided, must be a positive decimal number (greater than 0). Mutually exclusive with concentrationThresholdOperator — a component may state one or neither, never both.
                     example: 12.5
                   concentrationThresholdOperator:
@@ -564,8 +562,7 @@ components:
                     example: lead
                   concentration:
                     type: number
-                    minimum: 0
-                    exclusiveMinimum: true
+                    exclusiveMinimum: 0
                     description: The concentration of the hazardous component in milligrams per kilo, e.g. 30mg per kg. <p><font color="green"><b>Business Rule:</b></font></p> Exactly one of concentration or concentrationThresholdOperator is required. If provided, must be a positive numeric value (greater than 0). Mutually exclusive with concentrationThresholdOperator — a component must state exactly one, never both or neither.
                     example: 25.5
                   concentrationThresholdOperator:
@@ -599,12 +596,10 @@ components:
         numberOfContainers:
           type: integer
           minimum: 0
-          nullable: false
           description: Number of containers for storing, transporting and disposing of waste materials. <p><font color="green"><b>Business Rule:</b></font></p> This must be a non-negative integer (0 or greater).
           example: 2
         typeOfContainers:
           type: string
-          nullable: false
           description: |
             Containers are receptacles used for storing, transporting and disposing of waste materials. They come in various sizes and types, ranging from small desk-side bins to large industrial skips. Enter the container code, e.g. DRU for Drum.<br><br>
             <b>Notes:</b><br>
@@ -1299,12 +1294,10 @@ components:
         numberOfContainers:
           type: integer
           minimum: 0
-          nullable: false
           description: Number of containers for storing, transporting and disposing of waste materials. <p><font color="green"><b>Business Rule:</b></font></p> This must be a non-negative integer (0 or greater).
           example: 2
         typeOfContainers:
           type: string
-          nullable: false
           description: |
             Containers are receptacles used for 2storing, transporting and disposing of waste materials. They come in  various sizes and types, ranging from small desk-side bins to large industrial skips. Enter the container code, e.g. DRU for Drum.<br><br>
             <b>Notes:</b><br>
@@ -1364,8 +1357,7 @@ components:
                     example: PFHXS
                   concentration:
                     type: number
-                    minimum: 0
-                    exclusiveMinimum: true
+                    exclusiveMinimum: 0
                     description: The concentration of the POP in mg per kg, e.g. 50 mg per kg of Chlordane. <p><font color="green"><b>Business Rule:</b></font></p> Optional field. If provided, must be a positive decimal number (greater than 0). Mutually exclusive with concentrationThreshold — a component may state one or neither, never both.
                     example: 12.5
                   concentrationThreshold:
@@ -1382,8 +1374,7 @@ components:
                         example: LESS_THAN
                       value:
                         type: number
-                        minimum: 0
-                        exclusiveMinimum: true
+                        exclusiveMinimum: 0
                         description: Threshold value. Same units as concentration (%).
                         example: 0.1
               description: |
@@ -1450,8 +1441,7 @@ components:
                     example: lead
                   concentration:
                     type: number
-                    minimum: 0
-                    exclusiveMinimum: true
+                    exclusiveMinimum: 0
                     description: The concentration of the hazardous component in milligrams per kilo, e.g. 30mg per kg. <p><font color="green"><b>Business Rule:</b></font></p> Required when name is supplied. If provided, must be a positive numeric value (greater than 0). Mutually exclusive with concentrationThreshold — a component may state one or neither, never both.
                     example: 25.5
                   concentrationThreshold:
@@ -1468,8 +1458,7 @@ components:
                         example: GREATER_THAN_OR_EQUAL
                       value:
                         type: number
-                        minimum: 0
-                        exclusiveMinimum: true
+                        exclusiveMinimum: 0
                         description: Threshold value. Same units as concentration (%).
                         example: 0.5
         disposalOrRecoveryCodes:
@@ -1497,8 +1486,7 @@ components:
         - meansOfTransport
       properties:
         registrationNumber:
-          type: string
-          nullable: true
+          type: [string, 'null']
           description: |
             <p>A waste carrier registration number is a legal requirement for businesses that transport, buy, sell or dispose of waste. This license ensures that waste is handled and transported in a responsible and environmentally friendly manner.</p>
              <p><b>Home Nations Codes:</b></p>
@@ -1603,8 +1591,7 @@ components:
             At least one of emailAddress or phoneNumber must be provided.
           example: 020 4756 XXXX
         registrationNumber:
-          type: string
-          nullable: true
+          type: [string, 'null']
           description: |
             <p>A waste carrier registration number is a legal requirement for businesses that transport, buy, sell or dispose of waste. This license ensures that waste is handled and transported in a responsible and environmentally friendly manner.</p>
             <p><b>Home Nations Codes:</b></p>
@@ -1800,8 +1787,7 @@ components:
           example: Tonnes
         amount:
           type: number
-          minimum: 0
-          exclusiveMinimum: true
+          exclusiveMinimum: 0
           description: Total weight of the waste in a unit specified - Grams - Kilograms - Tonnes <p><font color="green">Business Rule:</font></p> Must be a positive number (greater than 0). <b>Note-</b><p> Weight in terms of the Waste Item is the total weight of the waste being received.</p> <p> Weight in terms of the Treatment is the total weight of the waste being disposed of or recovered for final treatment.</p>
           example: 150
         isEstimate:
@@ -1865,12 +1851,10 @@ components:
         numberOfContainers:
           type: integer
           minimum: 0
-          nullable: false
           description: Number of containers for storing, transporting and disposing of waste materials. <p><font color="green"><b>Business Rule:</b></font></p> This must be a non-negative integer (0 or greater).
           example: 2
         typeOfContainers:
           type: string
-          nullable: false
           description: |
             Containers are receptacles used for storing, transporting and disposing of waste materials. They come in various sizes and types, ranging from small desk-side bins to large industrial skips. Enter the container code, e.g. DRU for Drum.<br><br>
             <b>Notes:</b><br>
