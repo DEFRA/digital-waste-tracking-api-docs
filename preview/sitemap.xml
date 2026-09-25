@@ -128,4 +128,32 @@
          <loc>https://defra.github.io/digital-waste-tracking-api-docs/preview/event-model/process-proposal/</loc>
          <lastmod>2026-09-25</lastmod>
     </url>
+    <url>
+         <loc>https://defra.github.io/digital-waste-tracking-api-docs/preview/problems/</loc>
+         <lastmod>2026-09-25</lastmod>
+    </url>
+    <url>
+         <loc>https://defra.github.io/digital-waste-tracking-api-docs/preview/problems/bad-request/</loc>
+         <lastmod>2026-09-25</lastmod>
+    </url>
+    <url>
+         <loc>https://defra.github.io/digital-waste-tracking-api-docs/preview/problems/internal-server-error/</loc>
+         <lastmod>2026-09-25</lastmod>
+    </url>
+    <url>
+         <loc>https://defra.github.io/digital-waste-tracking-api-docs/preview/problems/not-found/</loc>
+         <lastmod>2026-09-25</lastmod>
+    </url>
+    <url>
+         <loc>https://defra.github.io/digital-waste-tracking-api-docs/preview/problems/request-entity-too-large/</loc>
+         <lastmod>2026-09-25</lastmod>
+    </url>
+    <url>
+         <loc>https://defra.github.io/digital-waste-tracking-api-docs/preview/problems/unauthorized/</loc>
+         <lastmod>2026-09-25</lastmod>
+    </url>
+    <url>
+         <loc>https://defra.github.io/digital-waste-tracking-api-docs/preview/problems/unsupported-media-type/</loc>
+         <lastmod>2026-09-25</lastmod>
+    </url>
 </urlset>

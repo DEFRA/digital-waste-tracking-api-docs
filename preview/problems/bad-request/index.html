@@ -8,7 +8,7 @@
       
       
       
-        <link rel="canonical" href="https://defra.github.io/digital-waste-tracking-api-docs/preview/event-model/process-proposal/">
+        <link rel="canonical" href="https://defra.github.io/digital-waste-tracking-api-docs/preview/problems/bad-request/">
       
       
       
@@ -21,7 +21,7 @@
     
     
       
-        <title>Index - Digital Waste Tracking - API Docs</title>
+        <title>Bad Request - Digital Waste Tracking - API Docs</title>
       
     
     
@@ -121,8 +121,6 @@
     
   
   
-    <meta name="robots" content="noindex, nofollow">
-  
 
   </head>
   
@@ -141,7 +139,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#a-process-for-event-model-documentation-and-distribution" class="md-skip">
+        <a href="#bad-request" class="md-skip">
           Skip to content
         </a>
       
@@ -180,7 +178,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Index
+              Bad Request
             
           </span>
         </div>
@@ -439,7 +437,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../problems/" class="md-nav__link">
+      <a href="../" class="md-nav__link">
         
   
   
@@ -489,164 +487,167 @@
     
       
     
-    <a href="https://github.com/DEFRA/digital-waste-tracking-api-docs/raw/main/docs/event-model/process-proposal/index.md" title="View source of this page" class="md-content__button md-icon">
+    <a href="https://github.com/DEFRA/digital-waste-tracking-api-docs/raw/main/docs/problems/bad-request.md" title="View source of this page" class="md-content__button md-icon">
       
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17 18c.56 0 1 .44 1 1s-.44 1-1 1-1-.44-1-1 .44-1 1-1m0-3c-2.73 0-5.06 1.66-6 4 .94 2.34 3.27 4 6 4s5.06-1.66 6-4c-.94-2.34-3.27-4-6-4m0 6.5a2.5 2.5 0 0 1-2.5-2.5 2.5 2.5 0 0 1 2.5-2.5 2.5 2.5 0 0 1 2.5 2.5 2.5 2.5 0 0 1-2.5 2.5M9.27 20H6V4h7v5h5v4.07c.7.08 1.36.25 2 .49V8l-6-6H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h4.5a8.2 8.2 0 0 1-1.23-2"/></svg>
     </a>
   
 
 
-<!-- prettier-ignore -->
-<div class="admonition warning">
-<p class="admonition-title">Internal documentation</p>
-<p>This page is internal design/planning material for the delivery team, not published guidance for Software Providers integrating with the Digital Waste Tracking API. Content here may be incomplete, in-progress, or superseded.</p>
-</div>
-<h1 id="a-process-for-event-model-documentation-and-distribution">A Process for Event Model Documentation and Distribution</h1>
-<h2 id="tldr">TL;DR</h2>
-<p>The <strong>event model</strong> is the record of a waste movement that we pass on to the regulators. Today the fields and rules that make it up are written out in five different places, and none of them is the source of truth. This proposes we write each resource <strong>once</strong>, as a JSON Schema file, and generate the rest from it.</p>
-<ul>
-<li><strong>One file per resource.</strong> <code>producer</code>, <code>carrier</code>, <code>address</code>, and so on. That file is the source of truth.</li>
-<li><strong>Unit tests sit beside it</strong>, written in plain English, one per business scenario. They pin the rules so a later change cannot quietly break an agreed one.</li>
-<li><strong><code>openapi.yaml</code> points at the same file.</strong> No second copy to keep in step.</li>
-<li><strong>The API service validates against the same file.</strong> For the event model this replaces the hand-written Joi schemas; Joi stays where the existing endpoints already use it.</li>
-<li><strong>First delivery is the schema, the tests, the OpenAPI spec, the validation, and the API service consuming them.</strong> The developer documentation, the business rules spreadsheet and the model diagram can come from the same source later.</li>
-</ul>
-<h2 id="baseline">Baseline</h2>
-<h3 id="what-the-event-model-is">What the event model is</h3>
-<p>Two things are easy to confuse, so it is worth separating them.</p>
-<ul>
-<li>The <strong>API payload</strong> is what a Software Provider sends us.</li>
-<li>The <strong>event model</strong> is what we send on to the regulators.</li>
-</ul>
-<p>They are not the same thing, and we expect them to drift apart as the service grows — a regulator will want something we do not ask a Software Provider for, or the other way round.</p>
-<p><strong>For now we treat them as one shape, by agreement.</strong> Everything in this proposal describes a single set of resources serving both purposes. When the two do need to differ, the work is to split one well-described file into two, which is a far smaller job than reconciling ten loosely-related documents. See <a href="#no-gos">No-gos</a>.</p>
-<h3 id="where-it-lives-today">Where it lives today</h3>
-<p>The event model already exists. It is just spread out.</p>
+<h1 id="bad-request">Bad Request</h1>
 <table>
 <thead>
 <tr>
-<th>Where the rules live</th>
-<th>Who keeps it</th>
-<th>What it is for</th>
+<th></th>
+<th></th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>Business rules spreadsheet</td>
-<td>Business analysis</td>
-<td>Agreeing the field list with regulators</td>
+<td>Type</td>
+<td><code>https://defra.github.io/digital-waste-tracking-api-docs/preview/problems/bad-request</code></td>
 </tr>
 <tr>
-<td>Model diagrams</td>
-<td>Business analysis</td>
-<td>Explaining the shape to people</td>
+<td>Title</td>
+<td>Bad Request</td>
 </tr>
 <tr>
-<td>Jira tickets</td>
-<td>The whole team</td>
-<td>Driving the next piece of work</td>
-</tr>
-<tr>
-<td><code>openapi.yaml</code></td>
-<td>Engineers</td>
-<td>The contract we show Software Providers</td>
-</tr>
-<tr>
-<td>Joi schemas</td>
-<td>Engineers</td>
-<td>Checking real requests at runtime</td>
+<td>Status</td>
+<td><code>400</code></td>
 </tr>
 </tbody>
 </table>
-<p>Throughout this page, <strong>the business rules spreadsheet</strong> means that first row — the regulator-facing document listing fields and rules. It is not the waste receipt submission spreadsheet that operators without API access use to send us receipts; that is a different thing entirely, and nothing in this proposal touches it.</p>
-<p>Each of these is good at its job. The business rules spreadsheet is how we talk to regulators. The diagram is how we explain a shape to someone who will never open a code editor. The ticket is how work gets picked up.</p>
-<p><img alt="The event model today: five disconnected places, only one of which runs" src="before.png" /></p>
-<p>Only the last row actually runs. When a real request arrives, the Joi schemas decide whether it is accepted. The other four describe what we <em>intend</em>. Nothing checks that they still agree with each other, or with the code.</p>
-<h2 id="problem">Problem</h2>
-<p><strong>Every rule is written five times.</strong> Adding one field means five edits, by three different people, in three different tools. Miss one and the copies drift apart. Nobody notices until someone asks a question the artefacts answer differently.</p>
-<p><strong>The only true answer is in the code.</strong> If you want to know what the API really accepts, you read the Joi schemas. That rules out most of the people who need the answer — regulators, Software Providers, business analysis, QA.</p>
-<p><strong>The feedback loop with regulators is slow and manual.</strong> We hand over the business rules spreadsheet, wait, take comments back, and then type the result into the other four places by hand.</p>
-<p><strong>The files are too big to work in.</strong> <code>openapi.yaml</code> is one file of roughly 2,900 lines. Two people cannot comfortably change it at the same time.</p>
-<p>Left alone, this gets worse. Phase 1 covered one event. Phase 2 covers four, sharing most of their resources between them. The cost of keeping five copies honest grows with every event we add.</p>
-<h2 id="solution">Solution</h2>
-<p>Write each resource once, in a format that is both readable by people and executable by machines, and generate everything else from it.</p>
-<p><img alt="The proposed flow: one JSON Schema per resource, everything else generated from it" src="after.png" /></p>
-<p>The picture shows the end state. The rest of this section covers what we build first; <strong><a href="#what-this-unlocks">What this unlocks</a></strong> covers the parts that come later.</p>
-<h3 id="1-one-json-schema-file-per-resource">1. One JSON Schema file per resource</h3>
-<p>A resource is a thing the event model talks about: a producer, a carrier, an address, a weight. Each one gets its own small file, and files reference each other rather than repeating themselves. A resource with variants gets one file per variant.</p>
-<p>Producer is already built this way:</p>
-<div class="highlight"><pre><span></span><code>docs/event-model/schema/common/producer/
-  producer.schema.json             # the choice: household, commercial or municipal
-  producer-base.schema.json        # the fields all three share
-  producer-household.schema.json
-  producer-commercial.schema.json
-  producer-municipal.schema.json
+<p>The request was rejected and nothing was stored. Correct the request before you send it again. Sending the same request again will fail in the same way.</p>
+<h2 id="when-this-happens">When this happens</h2>
+<table>
+<thead>
+<tr>
+<th>Cause</th>
+<th>Example <code>detail</code></th>
+<th><code>errors</code> present</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>The request body does not match the endpoint's schema, for example a required field is missing or a value has the wrong type or format</td>
+<td><code>2 validation errors occurred</code></td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>The <code>apiCode</code> is not recognised</td>
+<td><code>the API Code supplied is invalid</code></td>
+<td>No</td>
+</tr>
+<tr>
+<td>A Movement ID in a <code>POST /deliveries</code> request does not exist</td>
+<td><code>No movement exists for movement ID(s): 25HRA0B2, 25HRA0B3</code></td>
+<td>No</td>
+</tr>
+<tr>
+<td>The request body is not valid JSON</td>
+<td><code>Invalid request payload JSON format</code></td>
+<td>No</td>
+</tr>
+<tr>
+<td>The <code>Authorization</code> header is malformed</td>
+<td><code>Bad HTTP authentication header format</code></td>
+<td>No</td>
+</tr>
+</tbody>
+</table>
+<h2 id="validation-errors">Validation errors</h2>
+<p>If the request body fails schema validation, the response includes an <code>errors</code> array with one entry for each problem found. All problems are reported together, so you can fix them in one go.</p>
+<table>
+<thead>
+<tr>
+<th>Member</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>message</code></td>
+<td>Human-readable description of the problem.</td>
+</tr>
+<tr>
+<td><code>pointer</code></td>
+<td><a href="https://www.rfc-editor.org/rfc/rfc6901">JSON Pointer</a> to the field in the request body, for example <code>/wasteItems/0/ewcCodes</code>.</td>
+</tr>
+<tr>
+<td><code>errorType</code></td>
+<td>Category of the problem. One of the values in the table below.</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th><code>errorType</code></th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>NotProvided</code></td>
+<td>A required field is missing.</td>
+</tr>
+<tr>
+<td><code>NotAllowed</code></td>
+<td>A field is present that the endpoint does not accept.</td>
+</tr>
+<tr>
+<td><code>InvalidType</code></td>
+<td>A value has the wrong JSON type, for example a string instead of a number.</td>
+</tr>
+<tr>
+<td><code>InvalidFormat</code></td>
+<td>A value does not match the required format or pattern, for example a date.</td>
+</tr>
+<tr>
+<td><code>InvalidValue</code></td>
+<td>A value is not one of the allowed values.</td>
+</tr>
+<tr>
+<td><code>OutOfRange</code></td>
+<td>A value, string length or number of items is above the maximum or below the minimum.</td>
+</tr>
+<tr>
+<td><code>BusinessRuleViolation</code></td>
+<td>A value breaks a business rule.</td>
+</tr>
+<tr>
+<td><code>UnexpectedError</code></td>
+<td>Any other validation problem.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="example">Example</h2>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://defra.github.io/digital-waste-tracking-api-docs/preview/problems/bad-request"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"title"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Bad Request"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"detail"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2 validation errors occurred"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"instance"</span><span class="p">:</span><span class="w"> </span><span class="s2">"/beta-1/movements"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"requestId"</span><span class="p">:</span><span class="w"> </span><span class="s2">"4f6c1f0e9a3b4c2d8e7f6a5b4c3d2e1f"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"errors"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">"message"</span><span class="p">:</span><span class="w"> </span><span class="s2">"\"apiCode\" is required"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"pointer"</span><span class="p">:</span><span class="w"> </span><span class="s2">"/apiCode"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"errorType"</span><span class="p">:</span><span class="w"> </span><span class="s2">"NotProvided"</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">"message"</span><span class="p">:</span><span class="w"> </span><span class="s2">"must NOT have additional properties"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"pointer"</span><span class="p">:</span><span class="w"> </span><span class="s2">"/unknownField"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"errorType"</span><span class="p">:</span><span class="w"> </span><span class="s2">"NotAllowed"</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">]</span>
+<span class="p">}</span>
 </code></pre></div>
-<p>Every file carries its own description, in prose, next to the rule it describes. Small files also mean two people can work on two resources without touching the same lines.</p>
-<h3 id="2-unit-tests-sit-beside-the-schema">2. Unit tests sit beside the schema</h3>
-<p>The tests are named after business scenarios, not after code. This is what they look like today:</p>
-<div class="highlight"><pre><span></span><code>Feature: Producer payload validation for the create endpoint
-  Scenario: Household producer is submitted correctly
-    the Movement is created successfully when only wasteSource and councilMovement are provided
-  Scenario: Household producer includes a forbidden field
-    the Movement is rejected when organisationName is provided
-</code></pre></div>
-<p>These read as the rules themselves. That makes them the place where a requirement lands: a ticket says what should happen, the test says it in one line, and the schema is changed until the test passes. A rule that has been agreed stays agreed, because removing it breaks a named test.</p>
-<h3 id="3-openapiyaml-points-at-the-schema">3. <code>openapi.yaml</code> points at the schema</h3>
-<p>Instead of describing the producer again in the OpenAPI file, it references the schema file:</p>
-<div class="highlight"><pre><span></span><code><span class="nt">producer</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">$ref</span><span class="p">:</span><span class="w"> </span><span class="s">'../event-model/schema/common/producer/producer.schema.json'</span>
-</code></pre></div>
-<p>This is already in place. There is no second copy of the producer rules, so there is nothing to drift.</p>
-<h3 id="4-validation-runs-the-same-file">4. Validation runs the same file</h3>
-<p>The service checks incoming requests against the same schema files, using a JSON Schema validator — <code>ajv</code> today, though that choice is not load-bearing (see <a href="#tech-radar-and-third-party-libraries">Tech Radar and third-party libraries</a>). Nobody re-types the event model's rules into Joi.</p>
-<p>The honest limit: a schema describes one resource. A rule that spans two resources, or two endpoints, still lives in service code. This proposal does not change that.</p>
-<h3 id="5-the-api-service-consumes-it">5. The API service consumes it</h3>
-<p>The schema, the validation, the tests and the OpenAPI spec are defined in one repository and consumed by <code>waste-movement-external-api</code> and <code>waste-movement-backend</code>. This is the part that makes the rest real — a source of truth that the running service does not use is just another document. How the services get hold of it is still open; see <a href="#rabbit-holes">Rabbit holes</a>.</p>
-<h2 id="what-changes-for-us">What changes for us</h2>
-<p><strong>Refinement</strong> — we discuss the shape of a resource, rather than the shape of an endpoint. Stories can still be sliced smaller than a resource, down to a single field, when that is the right size.</p>
-<p><strong>A requirement</strong> — is written once, as a named scenario, and that scenario is what the schema has to satisfy.</p>
-<p><strong>A rule change</strong> — is one edit in one file. The spec, the validation and the running service follow from it.</p>
-<p><strong>Review</strong> — the diff shows the rule that changed and the test that pins it, side by side.</p>
-<p><strong>QA</strong> — tests a service whose rules can be read without opening the code.</p>
-<p><strong>Regulators</strong> — keep the same conversation, but the business rules spreadsheet eventually becomes something we generate rather than something we maintain.</p>
-<h2 id="what-this-unlocks">What this unlocks</h2>
-<p>Not in the first delivery, but possible from the same source, with no new source of truth:</p>
+<h2 id="how-to-fix-it">How to fix it</h2>
 <ul>
-<li><strong>Developer documentation</strong> for Software Providers, generated from the schema descriptions.</li>
-<li><strong>The business rules spreadsheet</strong>, generated read-only, so the field list and the service can never disagree.</li>
-<li><strong>The model diagram</strong>, generated from how the resources reference each other.</li>
-</ul>
-<p>Each of these is a separate piece of work with its own questions. They are named here to show what the approach makes possible, not to commit to them now.</p>
-<h2 id="rabbit-holes">Rabbit holes</h2>
-<h3 id="tech-radar-and-third-party-libraries">Tech Radar and third-party libraries</h3>
-<p>The concern is fair: anything new has to be defensible.</p>
-<p>The argument is not that this removes a dependency — <code>joi</code> stays in the service for the existing endpoints. It is that <strong>the rules stop being tied to a library at all</strong>. With Joi the rules <em>are</em> the library: they are expressed in one vendor's chained-call API, and moving off it means rewriting every rule. With JSON Schema the rules are an open standard and the validator is an implementation detail. <code>ajv</code> is the current choice and already what the tests run against, but if it ever became a problem we would change the validator, not the rules.</p>
-<p>That also means the proposal does not rest on winning an approval argument. Neither <code>joi</code> nor <code>ajv</code> appears on the Defra technology radar. JSON Schema itself is an open standard, not a product.</p>
-<p>The wider intent behind the policy — that any engineer can pick the work up — is served better by this than by the status quo, because the rules end up in a declarative file with prose descriptions rather than in chained library calls.</p>
-<h3 id="versioning">Versioning</h3>
-<p>If one file feeds several outputs, what does a version mean?</p>
-<p>The schema files are the version. Everything generated from them carries the same stamp, which is the point: the business rules spreadsheet, a diagram and a running service can all be traced back to one numbered version of the model. Today they cannot be traced to anything.</p>
-<p>Whether a change is made in place or carried across two beta versions stays a case-by-case call, unchanged by this proposal. What changes is that there is a single thing to version.</p>
-<h3 id="how-the-services-consume-it">How the services consume it</h3>
-<p>This is genuinely undecided, and is the biggest open question in the proposal.</p>
-<p>The nearest precedent is <code>@defra/waste-movement-utils</code>, a published package that both movement services already depend on at a pinned version. The candidates are:</p>
-<ol>
-<li><strong>Its own published package</strong> — clean boundary, another thing to publish and pin.</li>
-<li><strong>Folded into <code>waste-movement-utils</code></strong> — reuses a path that already works, at the cost of mixing two concerns in one package.</li>
-<li><strong>Schema files fetched from GitHub Pages</strong> — no publishing step, but the services take a build-time or boot-time dependency on a website.</li>
-</ol>
-<p>We should pick one before building much beyond Producer, and not let the choice block resource-by-resource progress in the meantime.</p>
-<h2 id="no-gos">No-gos</h2>
-<ul>
-<li><strong>The live Receipt of Waste endpoints are not touched.</strong> Their code stays as it is.</li>
-<li><strong>No cross-resource or cross-endpoint rules move into the schema.</strong> They stay in service code.</li>
-<li><strong>We do not split the event model from the API payload yet.</strong> One shape serves both until there is a real rule that forces them apart.</li>
-<li><strong>No business rules spreadsheet or diagram generation in the first delivery.</strong> Both are attractive and both are distractions until the core path works end to end.</li>
-</ul>
-<h2 id="references">References</h2>
-<ul>
-<li><a href="../../collections/decisions/">Decisions register</a> — D-002 (single OpenAPI file) and D-003 (OpenAPI 3.0.3) both predate this and will need qualifying notes.</li>
+<li>Check each entry in <code>errors</code> and correct the field that <code>pointer</code> refers to.</li>
+<li>Check the request against the <a href="../../api/openapi/">API spec</a>.</li>
+<li>Check that you are using the <code>apiCode</code> you were given for your organisation.</li>
+<li>For <code>POST /deliveries</code>, check that every Movement ID was returned by an earlier <code>POST /movements</code> request.</li>
 </ul>
 
 
@@ -654,9 +655,6 @@
 
 
 
-
-  
-  
 
 
 
