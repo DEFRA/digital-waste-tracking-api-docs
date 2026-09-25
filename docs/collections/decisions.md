@@ -48,6 +48,7 @@ At-a-glance view of every decision, sorted by status, then by impact (structural
 | D-034 | [PUT operations use history/revision pattern across all events](#put-operations-use-historyrevision-pattern-across-all-events) | ✅ Decided | 🟠 Medium | **Lifecycle** |
 | D-027 | [Per-organisation vs per-actor API credentials](#per-organisation-vs-per-actor-api-credentials) | ✅ Decided | 🟠 Medium | **Onboarding** |
 | D-042 | [Waste item classification: separated from logistics at Creation, reused at the no-prior-delivery Receipt endpoint, dropped at the ordinary Receipt endpoint](#waste-item-classification-separated-from-logistics-at-creation-reused-at-the-no-prior-delivery-receipt-endpoint-dropped-at-the-ordinary-receipt-endpoint) | ✅ Decided | 🟠 Medium | **Creation** |
+| D-046 | [OpenAPI 3.1.0 for the beta specs](#openapi-310-for-the-beta-specs) | ✅ Decided | 🟠 Medium | **Spec structure** |
 | D-002 | [Single OpenAPI file, not `$ref`-split](#single-openapi-file-not-ref-split) | ✅ Decided | 🟢 Low | **Spec structure** |
 | D-003 | [OpenAPI 3.0.3, not 3.1](#openapi-303-not-31) | ✅ Decided | 🟢 Low | **Spec structure** |
 | D-011 | [Static and transit collection collapsed into a single endpoint](#static-and-transit-collection-collapsed-into-a-single-endpoint) | ✅ Decided | 🟢 Low | **Collection** |
@@ -96,11 +97,11 @@ At-a-glance view of every decision, sorted by status, then by impact (structural
 
 ### OpenAPI 3.0.3, not 3.1
 
-**D-003** · ✅ Decided · Impact: 🟢 Low · Area: **Spec structure**
+**D-003** · ✅ Decided · Impact: 🟢 Low · Area: **Spec structure** · Related: [D-046](#d-046)
 
 **Context.** The Phase 1 Receipt API is OpenAPI 3.0.3. The new spec could either match Phase 1 or move to 3.1, which has better JSON Schema alignment.
 
-**Decision.** Stay on 3.0.3 for now.
+**Decision.** Superseded by [D-046](#d-046). At the time: stay on 3.0.3 for now, matching Phase 1. The `beta-n` specs later came to rely on JSON Schema rule files that 3.0.3 cannot express — see D-046.
 
 **Consequences.** Both specs share a version; tooling reading one can read the other. Worth revisiting once the spec stabilises.
 
@@ -665,6 +666,22 @@ While implementing this, a related pre-existing gap was found and fixed: `hazard
 **Decision.** Rename `carrier` → `intendedCarriers`, an array (`min(1)`, always required — unlike `receivers`, this array has no conditional gate) of the existing per-entry carrier shape (`intendedCarrierSchema`, unchanged: `meansOfTransport` and `organisationName` mandatory, other fields optional with their existing integrity rules, at least one of `emailAddress`/`phoneNumber` required per-entry).
 
 **Consequences.** Ripples into `creationTypes.ts` (`carrier: IntendedCarrier` → `intendedCarriers: IntendedCarrier[]`), the Creation test suite (`creation/create-movement.test.js`), the `creationEvent.js` worked examples, and `openapi.yaml`'s Creation request schema (`carrier` → an `intendedCarriers` array of `intendedCarrierDetails`, same pattern as `receivers`/`intendedReceiverDetails`). Every other event's `carrier` field (Collection, Delivery, Receipt, Receipt-without-Delivery — all the shared `carrierSchema`) is unaffected; this is Creation-only, same as D-043 left Receipt's `receiverSiteSchema` untouched.
+
+<a id="d-046"></a>
+
+### OpenAPI 3.1.0 for the beta specs
+
+**D-046** · ✅ Decided · Impact: 🟠 Medium · Area: **Spec structure** · Related: [D-002](#d-002), [D-003](#d-003)
+
+**Context.** We decided to write the business rules as JSON Schema files rather than as Joi code, so that each rule is stated once, in a file a person can read, instead of being buried in the service. For that to be worth anything, the API spec has to point at those same files, so the spec and the service are describing one set of rules rather than two.
+
+The version of JSON Schema that OpenAPI 3.0.3 understands is an older one than the version we write our rules in, and it cannot express much of what we need — rules like "for a household producer these fields are not allowed", or "give one of these two fields but not both". A spec on 3.0.3 silently drops those rules and tells the reader the API accepts more than it really does.
+
+**Decision.** Move the `beta-n` specs to OpenAPI 3.1.0, the version built on the same JSON Schema we write our rules in. Lining the two up is the point: it lets the spec use the rule files as they are, so what we publish and what the service enforces stay the same thing instead of drifting apart. Supersedes [D-003](#d-003).
+
+This covers the `beta-n` specs only. The existing Receipt of Waste endpoints and their documentation are not touched.
+
+**Consequences.** The spec now describes the API as it really behaves, so a software provider reading it sees the rules the service will actually apply. Every future `beta-n` spec starts on 3.1.0. The rule files and the specs are now tied to matching versions — if one moves, the other has to move with it. This is about what software reads from the spec; how it looks in the API viewer is largely unchanged.
 
 ## Open
 
