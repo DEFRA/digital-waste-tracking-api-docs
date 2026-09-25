@@ -1,4 +1,4 @@
-// Guards the OpenAPI 3.1.0 / JSON Schema 2020-12 alignment recorded in D-046.
+// Guards the OpenAPI 3.1.0 / JSON Schema 2020-12 alignment recorded in D-003.
 //
 // Both specs are hand-edited, so the risk this covers is a 3.0-ism creeping
 // back in later rather than a mistake in the original migration: `nullable:`
@@ -70,7 +70,7 @@ function collectSchemaFiles(dir) {
   })
 }
 
-// D-046 holds only while the schemas the specs $ref stay on 2020-12 — the
+// D-003 holds only while the schemas the specs $ref stay on 2020-12 — the
 // dialect OpenAPI 3.1 defaults to. Skipped, not deleted: the schemas on this
 // branch are still draft-07, so enabling it here would be a red build for a
 // state we already know about. Unskip on the branch that brings the 2020-12
