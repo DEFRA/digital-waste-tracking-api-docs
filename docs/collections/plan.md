@@ -61,7 +61,7 @@ Phase 1 captures waste at the point it arrives at a receiver site. Phase 2 broad
 | --- | --- | --- |
 | [D-022](decisions.md#d-022) | Whether to implement `POST /deliveries/{deliveryId}/receipt` or extend `POST /movements/receive`. Spec leans toward the new endpoint (Option 1). | Tech lead + BA |
 | [D-025](decisions.md#d-025) | Receipt acceptance / rejection outcome schema. No rejection model exists in Phase 1. | BA + policy |
-| [D-028](decisions.md#d-028) | Pre-generated Delivery IDs for offline drivers — affects whether `waste-tracking-id-backend` needs a reservation mechanism. | Team C |
+| [D-028](decisions.md#d-028) | Pre-generated Delivery IDs for offline drivers — affects whether `waste-tracking-id-backend` needs a reservation mechanism. See [proposed design](phase2/option-a-pre-reserved-delivery-IDs.md). | Team C |
 | [D-019](decisions.md#d-019) | `GET /movements/{movementId}/fate-of-waste` response schema. URL and key are agreed; what it returns is not. | BA |
 
 ---
