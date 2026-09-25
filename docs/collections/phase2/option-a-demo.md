@@ -26,11 +26,12 @@ Nothing here is merged to `main` or intended to be. These are prototype branches
 ```
 git checkout feat/DWTC-129-option-a-pre-reserved-delivery-ids
 ```
+
 in each repo. The commit messages on each branch summarise what changed and point back to the outcome doc.
 
 ## A known local-only blocker you'll hit
 
-`waste-movement-backend/src/config.js` unconditionally overwrites `services.wasteTracking` with a templated CDP hostname (`https://waste-tracking-id-backend.${ENVIRONMENT}.cdp-int.defra.cloud`) *after* convict has already read `WASTE_TRACKING_SERVICE_URL` from the environment. With `ENVIRONMENT=local` (what `compose.yml` sets), this silently discards the docker-compose value and points at a hostname that doesn't resolve — which blocks ID minting (`GET /next`) entirely, so nothing in this demo works until it's patched.
+`waste-movement-backend/src/config.js` unconditionally overwrites `services.wasteTracking` with a templated CDP hostname (`https://waste-tracking-id-backend.${ENVIRONMENT}.cdp-int.defra.cloud`) _after_ convict has already read `WASTE_TRACKING_SERVICE_URL` from the environment. With `ENVIRONMENT=local` (what `compose.yml` sets), this silently discards the docker-compose value and points at a hostname that doesn't resolve — which blocks ID minting (`GET /next`) entirely, so nothing in this demo works until it's patched.
 
 This is a **pre-existing bug, unrelated to Option A** — it isn't part of either feature branch, and hits anyone doing local dev regardless of this spike. Patch it locally, uncommitted, before starting:
 
@@ -88,34 +89,43 @@ Only worth it if you specifically want to exercise the thin-proxy layer. You'll 
 Run these against whichever base URL you chose above (`/beta-1` prefix either way).
 
 **1. Reserve a batch**
+
 ```
 POST /deliveries/reserve
 Headers: Idempotency-Key: <any-fresh-string>
 Body: { "apiCode": "<your-apiCode>", "count": 3 }
 ```
+
 → `201`, a `reservations[]` array of `{ deliveryId, expiresAt }`. Pick one `deliveryId` for the rest of the script.
 
 **2. Check validity — expect `reserved`**
+
 ```
 GET /deliveries/{deliveryId}/validity
 ```
+
 → `{ "known": true, "state": "reserved", "acceptable": true }`
 
 **3. Receipt against it before any delivery exists — the interesting bit**
+
 ```
 POST /deliveries/{deliveryId}/receipt
 Body: { "apiCode": "<your-apiCode>" }
 ```
+
 → `202`, not `404` — creates the `awaiting_delivery` shell. This is the "receipt arrives before delivery" case Option A is built around.
 
 **4. Validity again — expect `awaiting_delivery`**
 
 **5. Submit the delivery.** First mint a `movementId`:
+
 ```
 POST /movements
 Body: { "apiCode": "<your-apiCode>" }
 ```
+
 Then:
+
 ```
 POST /deliveries
 Body: {
@@ -124,6 +134,7 @@ Body: {
   "deliveryId": "<reservedDeliveryId>"
 }
 ```
+
 → `201`. Reservation flips to `used`, delivery to `complete`.
 
 **6. Validity again — expect `complete`**
