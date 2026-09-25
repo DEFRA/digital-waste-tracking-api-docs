@@ -38,6 +38,7 @@ nav:
   - Digital Waste Tracking:
       - About: index.md
       - API spec: api/openapi.md
+      - Problem types: problems/index.md
 edit_uri: edit/main/docs/
 plugins:
   - material/search
