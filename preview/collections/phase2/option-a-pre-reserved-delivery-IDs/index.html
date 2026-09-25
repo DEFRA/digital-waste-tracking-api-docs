@@ -1,0 +1,1212 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+        <link rel="canonical" href="https://defra.github.io/digital-waste-tracking-api-docs/preview/collections/phase2/option-a-pre-reserved-delivery-IDs/">
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../../favicons/moj.ico">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>Option A — Pre-reserved Delivery IDs - Digital Waste Tracking - API Docs</title>
+      
+    
+    
+  
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+  
+  
+    
+      
+      
+    
+  
+  
+  <style>:root{--md-admonition-icon--quote:url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2016%2016%22%3E%3Cpath%20d%3D%22M1.75%202.5h10.5a.75.75%200%200%201%200%201.5H1.75a.75.75%200%200%201%200-1.5m4%205h8.5a.75.75%200%200%201%200%201.5h-8.5a.75.75%200%200%201%200-1.5m0%205h8.5a.75.75%200%200%201%200%201.5h-8.5a.75.75%200%200%201%200-1.5M2.5%207.75v6a.75.75%200%200%201-1.5%200v-6a.75.75%200%200%201%201.5%200%22/%3E%3C/svg%3E');}</style>
+
+
+
+  
+  
+    
+      
+      
+        
+      
+      
+    
+  
+    
+      
+      
+        
+      
+      
+    
+  
+    
+      
+      
+        
+      
+      
+    
+  
+    
+      
+      
+        
+      
+      
+    
+  
+    
+      
+      
+        
+      
+      
+    
+  
+    
+      
+      
+        
+      
+      
+    
+  
+  
+  <style>:root{.md-tag.md-tag--draft{--md-tag-icon:url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cpath%20d%3D%22M5.5%202C3.6%202%202%203.6%202%205.5v13C2%2020.4%203.6%2022%205.5%2022H16l6-6V5.5C22%203.6%2020.4%202%2018.5%202zm.3%202h12.5c1%200%201.8.8%201.8%201.8V15h-1.5c-1.9%200-3.5%201.6-3.5%203.5V20H5.8c-1%200-1.8-.8-1.8-1.8V5.8C4%204.8%204.8%204%205.8%204%22/%3E%3C/svg%3E');}.md-tag.md-tag--accepted{--md-tag-icon:url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cpath%20d%3D%22M18.5%202h-13C3.6%202%202%203.6%202%205.5v13C2%2020.4%203.6%2022%205.5%2022H16l6-6V5.5C22%203.6%2020.4%202%2018.5%202M20%2015h-1.5c-1.9%200-3.5%201.6-3.5%203.5V20H5.8c-1%200-1.8-.8-1.8-1.8V5.8C4%204.8%204.8%204%205.8%204h12.5c1%200%201.8.8%201.8%201.8V15m-4.9-6.8%201.5%201.5-6%206-3.5-3.5%201.5-1.5%202%202z%22/%3E%3C/svg%3E');}.md-tag.md-tag--proposed{--md-tag-icon:url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cpath%20d%3D%22M13%2011h3v2h-3v3h-2v-3H8v-2h3V8h2zm9-5.5V16l-6%206H5.5C3.6%2022%202%2020.4%202%2018.5v-13C2%203.6%203.6%202%205.5%202h13C20.4%202%2022%203.6%2022%205.5m-2%20.3c0-1-.8-1.8-1.8-1.8H5.8C4.8%204%204%204.8%204%205.8v12.5c0%201%20.8%201.8%201.8%201.8H15v-1.5c0-1.9%201.6-3.5%203.5-3.5H20z%22/%3E%3C/svg%3E');}.md-tag.md-tag--deprecated{--md-tag-icon:url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cpath%20d%3D%22M8%2011h8v2H8zm14-5.5V16l-6%206H5.5C3.6%2022%202%2020.4%202%2018.5v-13C2%203.6%203.6%202%205.5%202h13C20.4%202%2022%203.6%2022%205.5m-2%20.3c0-1-.8-1.8-1.8-1.8H5.8C4.8%204%204%204.8%204%205.8v12.5c0%201%20.8%201.8%201.8%201.8H15v-1.5c0-1.9%201.6-3.5%203.5-3.5H20z%22/%3E%3C/svg%3E');}.md-tag.md-tag--superseded{--md-tag-icon:url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cpath%20d%3D%22M11%2015h2v2h-2zm0-2h2V7h-2zm11-7.5V16l-6%206H5.5C3.6%2022%202%2020.4%202%2018.5v-13C2%203.6%203.6%202%205.5%202h13C20.4%202%2022%203.6%2022%205.5m-2%20.3c0-1-.8-1.8-1.8-1.8H5.8C4.8%204%204%204.8%204%205.8v12.5c0%201%20.8%201.8%201.8%201.8H15v-1.5c0-1.9%201.6-3.5%203.5-3.5H20z%22/%3E%3C/svg%3E');}.md-tag.md-tag--rejected{--md-tag-icon:url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cpath%20d%3D%22M16%209.4%2013.4%2012l2.6%202.6-1.4%201.4-2.6-2.6L9.4%2016%208%2014.6l2.6-2.6L8%209.4%209.4%208l2.6%202.6L14.6%208zm6-3.9V16l-6%206H5.5C3.6%2022%202%2020.4%202%2018.5v-13C2%203.6%203.6%202%205.5%202h13C20.4%202%2022%203.6%2022%205.5m-2%20.3c0-1-.8-1.8-1.8-1.8H5.8C4.8%204%204%204.8%204%205.8v12.5c0%201%20.8%201.8%201.8%201.8H15v-1.5c0-1.9%201.6-3.5%203.5-3.5H20z%22/%3E%3C/svg%3E');}}</style>
+
+    
+<link rel="stylesheet" href="../../../assets/stylesheets/extra.css" />
+
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  
+  
+
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#option-a-pre-reserved-delivery-ids" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <div data-md-color-scheme="default" data-md-component="outdated" hidden>
+        
+      </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../.." title="Digital Waste Tracking - API Docs" class="md-header__button md-logo" aria-label="Digital Waste Tracking - API Docs" data-md-component="logo">
+      
+  <img src="../../../logos/moj.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Digital Waste Tracking - API Docs
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Option A — Pre-reserved Delivery IDs
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Share" aria-label="Share" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/DEFRA/digital-waste-tracking-api-docs" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+    
+      
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../.." class="md-tabs__link">
+          
+  
+  
+    
+  
+  Digital Waste Tracking
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+    
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+  
+    
+    <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation">
+      <div class="md-sidebar__scrollwrap">
+        <div class="md-sidebar__inner">
+          <nav class="md-nav md-nav--primary" aria-label="Collections navigation" data-md-level="0">
+            <label class="md-nav__title" for="__drawer">
+              <span class="md-nav__icon md-icon"></span>
+              Collections
+            </label>
+            <ul class="md-nav__list" data-md-scrollfix>
+              
+              
+                
+                <li class="md-nav__item">
+                  <a href="../../" class="md-nav__link">Overview</a>
+                </li>
+              
+                
+                <li class="md-nav__item">
+                  <a href="../../decisions/" class="md-nav__link">Decisions</a>
+                </li>
+              
+                
+                <li class="md-nav__item">
+                  <a href="../../glossary/" class="md-nav__link">Glossary</a>
+                </li>
+              
+                
+                <li class="md-nav__item">
+                  <a href="../../plan/" class="md-nav__link">Plan</a>
+                </li>
+              
+                
+                <li class="md-nav__item">
+                  <a href="../../registration/" class="md-nav__link">Registration</a>
+                </li>
+              
+                
+                <li class="md-nav__item">
+                  <a href="../../docs/" class="md-nav__link">Notes</a>
+                </li>
+              
+                
+                  
+                    <li class="md-nav__item"><span class="md-nav__link md-nav__link--group-title">API</span></li>
+                  
+                  
+                
+                <li class="md-nav__item collections-nav__item--grouped">
+                  <a href="../../../api/" class="md-nav__link">Overview</a>
+                </li>
+              
+                
+                <li class="md-nav__item collections-nav__item--grouped">
+                  <a href="../../../api/openapi/" class="md-nav__link">OpenAPI viewer</a>
+                </li>
+              
+                
+                  
+                    <li class="md-nav__item"><span class="md-nav__link md-nav__link--group-title">Data model</span></li>
+                  
+                  
+                
+                <li class="md-nav__item collections-nav__item--grouped">
+                  <a href="../../model/" class="md-nav__link">Overview</a>
+                </li>
+              
+                
+                <li class="md-nav__item collections-nav__item--grouped">
+                  <a href="../../model/phase1-waste-inputs/" class="md-nav__link">Phase 1: current waste-inputs model</a>
+                </li>
+              
+                
+                <li class="md-nav__item collections-nav__item--grouped">
+                  <a href="../../model/mongo-schema-proposal/" class="md-nav__link">Mongo schema proposal (Option A)</a>
+                </li>
+              
+                
+                <li class="md-nav__item collections-nav__item--grouped">
+                  <a href="../../model/mongo-schema-proposal-per-event/" class="md-nav__link">Mongo schema proposal — per event (Option B)</a>
+                </li>
+              
+                
+                <li class="md-nav__item collections-nav__item--grouped">
+                  <a href="../../model/mongo-schema-proposal-CQRS/" class="md-nav__link">Mongo schema proposal — CQRS (Option C)</a>
+                </li>
+              
+                
+                  
+                    <li class="md-nav__item"><span class="md-nav__link md-nav__link--group-title">Phase 1 reference</span></li>
+                  
+                  
+                
+                <li class="md-nav__item collections-nav__item--grouped">
+                  <a href="../../phase1/receipt-api-implemented-data-model/" class="md-nav__link">Receipt API implemented data model</a>
+                </li>
+              
+                
+                <li class="md-nav__item collections-nav__item--grouped">
+                  <a href="../../phase1/receipt-data-definitions/" class="md-nav__link">Receipt data definitions</a>
+                </li>
+              
+                
+                  
+                    <li class="md-nav__item"><span class="md-nav__link md-nav__link--group-title">Phase 2</span></li>
+                  
+                  
+                
+                <li class="md-nav__item collections-nav__item--grouped">
+                  <a href="../assessment-feedback/" class="md-nav__link">GDS Alpha assessment feedback</a>
+                </li>
+              
+                
+                  
+                    <li class="md-nav__item"><span class="md-nav__link md-nav__link--group-title">Scenarios</span></li>
+                  
+                  
+                
+                <li class="md-nav__item collections-nav__item--grouped">
+                  <a href="../../scenarios/beta-1/" class="md-nav__link">beta-1</a>
+                </li>
+              
+            </ul>
+          </nav>
+        </div>
+      </div>
+    </div>
+  
+  
+
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+    
+      
+    
+    <a href="https://github.com/DEFRA/digital-waste-tracking-api-docs/raw/main/docs/collections/phase2/option-a-pre-reserved-delivery-IDs.md" title="View source of this page" class="md-content__button md-icon">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17 18c.56 0 1 .44 1 1s-.44 1-1 1-1-.44-1-1 .44-1 1-1m0-3c-2.73 0-5.06 1.66-6 4 .94 2.34 3.27 4 6 4s5.06-1.66 6-4c-.94-2.34-3.27-4-6-4m0 6.5a2.5 2.5 0 0 1-2.5-2.5 2.5 2.5 0 0 1 2.5-2.5 2.5 2.5 0 0 1 2.5 2.5 2.5 2.5 0 0 1-2.5 2.5M9.27 20H6V4h7v5h5v4.07c.7.08 1.36.25 2 .49V8l-6-6H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h4.5a8.2 8.2 0 0 1-1.23-2"/></svg>
+    </a>
+  
+
+
+<h1 id="option-a-pre-reserved-delivery-ids">Option A — Pre-reserved Delivery IDs</h1>
+<p>2026-09-21 · DWTC-129 / <a href="../../decisions/#d-028">D-028</a></p>
+<h2 id="spike-outcome-2026-09-23">Spike outcome (2026-09-23)</h2>
+<p><strong>Status:</strong> prototyped and manually verified locally; not yet reviewed or decided. This document started as a design proposal (drafted 2026-09-21); the sections below it are that original design, unchanged. This section reports what actually building it showed.</p>
+<p><strong>What was built.</strong> A working prototype of all four API-contract changes and the two-collection data model described below, on two branches:</p>
+<ul>
+<li><code>waste-movement-backend@feat/DWTC-129-option-a-pre-reserved-delivery-ids</code></li>
+<li><code>waste-movement-external-api@feat/DWTC-129-option-a-pre-reserved-delivery-ids</code></li>
+</ul>
+<p>See <a href="../option-a-demo/">option-a-demo.md</a> to pull and run it yourself.</p>
+<p><strong>What the spike confirmed.</strong> Every factual claim this design rests on ("What the current system actually does", below) checked out against the real code before a line was written, and held up once built: the shared per-year Movement/Delivery ID counter, <code>POST /receipts</code> already building an empty delivery shell for the no-delivery-yet case, IDs already exceeding 8 characters at current counter values, and <code>deliveries</code> genuinely having no indexes today. The mechanism works end-to-end as designed — reserve → validity check → out-of-order receipt → delivery submission → idempotent replay → conflict → wrong-org rejection — all verified manually and with Jest coverage (52 passing tests across both repos). Nothing surfaced during the build that contradicts the design below.</p>
+<p><strong>What was simplified for the prototype, and must not be mistaken for the production design:</strong></p>
+<ul>
+<li><strong>Outstanding-reservation cap</strong>: hardcoded flat 50 per org, not the self-scaling <code>max(50, 14 × mean daily deliveries)</code> formula proposed below — no real per-org volume data exists yet to derive it from.</li>
+<li><strong>Duplicate-submission handling</strong>: an application-level find-before-insert in <code>services/delivery.js</code>, not the unique <code>deliveries.deliveryId</code> index this design calls a blocking prerequisite. A single-operator manual demo has no concurrency to expose the race this leaves open; real use would.</li>
+<li><strong>Idempotency-Key replay matching</strong>: compares only <code>count</code>, not the full request body as described below.</li>
+</ul>
+<p><strong>What it doesn't resolve.</strong> None of the six items under "Decisions that are yours" was answered by building this — they're still open. Nor does the prototype implement either blocking prerequisite (unique index, 8–14 character format assumptions); it works around both for demo purposes only.</p>
+<h2 id="scope">Scope/</h2>
+<p>Option A gives a vendor a supply of Delivery IDs minted in advance, so a driver can hand one to a receiving site with no signal — and the site, which is online, can confirm at the counter that the ID is a live reservation before accepting the waste.</p>
+<p>That last part is the whole reason to prefer reservations over letting the app generate an ID to a pattern. A generated ID can be checked for shape; only a reserved ID can be checked for existence. Everything below is in service of making that counter-time check real and keeping the outstanding stock of printed IDs bounded and traceable.</p>
+<p><strong>In scope</strong></p>
+<ul>
+<li>A reservation endpoint and store, drawing from the existing ID counter</li>
+<li>A per-organisation cap on outstanding reservations, and expiry that reclaims it</li>
+<li>Ownership verification when a reserved ID is used to submit a delivery</li>
+<li>A validity lookup the receiving site calls before accepting</li>
+<li>The receipt-arrives-before-delivery path, which reservations make routine rather than exceptional</li>
+</ul>
+<p><strong>Out of scope</strong></p>
+<ul>
+<li>The ID character format, length and alphabet — that is the sibling format spike; this design changes neither</li>
+<li>Reserving Movement IDs. D-028 asks the question; the recommendation here is to defer it until an offline movement-creation case is evidenced, since creation happens during arrangement, not at the roadside</li>
+<li>Rate limiting per client. Needed, but not specific to Option A — coupling them delays both</li>
+<li>Offline classification and grouping of movements, which is a separate strand of DWTC-129</li>
+</ul>
+<h2 id="what-the-current-system-actually-does">What the current system actually does</h2>
+<p>Four facts from the code shape this design more than any preference does.</p>
+<p><strong>Movement and Delivery IDs share one per-year counter.</strong> They are drawn from the same sequence, so a Delivery ID can never equal a Movement ID. That answers D-028's sub-question directly: reservations must keep drawing from the same <code>GET /next</code>, because the no-collision property is a consequence of the shared counter and nothing else. A separate reservation sequence would destroy it.</p>
+<p><strong>IDs are not eight characters.</strong> The format is <code>YY</code> + sqids with <code>minLength 6</code>, so 8 characters covers counters 1–35,936 in a year, then 9, then 10. At programme volumes the counter passes 35,936 within the first hours of January, so in practice almost every ID is 9 characters or longer. Any regex of the form <code>^\d{2}[A-Z0-9]{6}$</code> is already wrong. Printed artefacts, vendor validation and receiving-site input fields must accept 8–14.</p>
+<p><strong><code>POST /receipts</code> already creates delivery shells.</strong> A receipt submitted with no delivery mints an ID and writes a delivery with <code>movementIds: []</code>. The out-of-order case this design needs is therefore not new machinery — it is the existing shell, reached by a different route. Option A should reuse it rather than build a parallel path.</p>
+<p><strong>The <code>deliveries</code> collection has no indexes at all</strong>, including no unique index on <code>deliveryId</code>. Today that is latent; under Option A it is dangerous, because reservations create a real window in which the same ID can be submitted twice. See the prerequisites at the end.</p>
+<h3 id="identity-and-what-it-is-good-for">Identity, and what it is good for</h3>
+<p><code>apiCode</code> maps to a UUID <code>orgId</code> through config; the Cognito <code>client_id</code> arrives as <code>x-dwt-client-id</code> and already tags metrics as <code>tenant.id</code>. So both identities are available at every call with no new plumbing, and the telemetry to answer "who is over-pulling" partly exists already.</p>
+<h3 id="a-defect-reservations-happen-to-fix">A defect reservations happen to fix</h3>
+<p>When a delivery insert fails after the ID is minted, the ID is burned and only logged. Splitting minting from use makes that impossible: an ID that is reserved but never used stays visible, countable and reclaimable instead of vanishing into a log line.</p>
+<h2 id="lifecycle-and-states">Lifecycle and states</h2>
+<p>Keep two state fields, not one. A reservation's status is about <strong>custody of the ID</strong>; a delivery's status is about <strong>completeness of the record</strong>. Folding them into a single field produces a combinatorial mess as soon as a receipt arrives before its delivery — which, offline, is the normal case rather than the exception.</p>
+<h3 id="reservation-status">Reservation status</h3>
+<div class="highlight"><pre><span></span><code>stateDiagram-v2
+    [*] --&gt; reserved: POST reserve
+    reserved --&gt; used: delivery submitted
+    reserved --&gt; expired: TTL passes
+    expired --&gt; used: late submission, flagged
+    reserved --&gt; void: revoked by ops
+</code></pre></div>
+<p><code>expired</code> reclaims quota and marks the ID as stale stock. It does <strong>not</strong> reject a later use. Because IDs are drawn from a monotonic per-year counter and are never recycled, an expired ID is never reassigned to anyone else, so accepting it late is safe — and rejecting it would mean a driver hands over waste against an ID the site cannot receipt. That is the failure this whole option exists to prevent. The transition is recorded as <code>usedAfterExpiry</code> for reporting.</p>
+<p><code>void</code> exists for the one case leniency cannot cover: a batch known to be compromised or printed in error. It is an ops action, not a timer, and it does reject use.</p>
+<h3 id="delivery-record-state">Delivery record state</h3>
+<div class="highlight"><pre><span></span><code>stateDiagram-v2
+    [*] --&gt; awaiting_delivery: receipt arrives first
+    [*] --&gt; complete: delivery submitted normally
+    awaiting_delivery --&gt; complete: carrier submits movements
+</code></pre></div>
+<p><code>awaiting_delivery</code> is the existing empty-shell record given a name. It means the receiving site has signed for waste and the carrier has not yet said what it was. It is the state a regulator most needs to see, and the one with no defined expiry today.</p>
+<h3 id="how-the-two-combine">How the two combine</h3>
+<table>
+<thead>
+<tr>
+<th>Reservation</th>
+<th>Delivery record</th>
+<th>What has happened</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>reserved</code></td>
+<td>absent</td>
+<td>Printed, not yet handed over</td>
+</tr>
+<tr>
+<td><code>reserved</code></td>
+<td><code>awaiting_delivery</code></td>
+<td>Handed over and receipted; carrier still offline</td>
+</tr>
+<tr>
+<td><code>used</code></td>
+<td><code>complete</code></td>
+<td>Normal completion</td>
+</tr>
+<tr>
+<td><code>expired</code></td>
+<td>absent</td>
+<td>Stale stock; quota reclaimed</td>
+</tr>
+<tr>
+<td><code>expired</code></td>
+<td><code>complete</code></td>
+<td>Late but accepted, flagged</td>
+</tr>
+</tbody>
+</table>
+<p>The second row is the offline case. Note that the reservation stays <code>reserved</code> there — it flips to <code>used</code> only when the <strong>carrier</strong> submits, because it is the carrier's custody of the ID that is being discharged, not the receiver's.</p>
+<h2 id="api-contract">API contract</h2>
+<p>Four changes, one of them new to this design.</p>
+<h3 id="1-reserve-a-batch">1. Reserve a batch</h3>
+<p><code>POST /deliveries/reserve</code> — <code>Idempotency-Key</code> header <strong>required</strong>.</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span><span class="w"> </span><span class="nt">"count"</span><span class="p">:</span><span class="w"> </span><span class="mi">25</span><span class="w"> </span><span class="p">}</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">"reservations"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="nt">"deliveryId"</span><span class="p">:</span><span class="w"> </span><span class="s2">"26KMT4Z9A"</span><span class="p">,</span><span class="w"> </span><span class="nt">"expiresAt"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2026-12-20T00:00:00Z"</span><span class="w"> </span><span class="p">}</span>
+<span class="w">  </span><span class="p">],</span>
+<span class="w">  </span><span class="nt">"outstanding"</span><span class="p">:</span><span class="w"> </span><span class="mi">68</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"cap"</span><span class="p">:</span><span class="w"> </span><span class="mi">140</span>
+<span class="p">}</span>
+</code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Code</th>
+<th>When</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>201</td>
+<td>Created</td>
+</tr>
+<tr>
+<td>400</td>
+<td><code>count</code> absent, below 1 or above 100</td>
+</tr>
+<tr>
+<td>409 <code>QUOTA_EXCEEDED</code></td>
+<td>Outstanding reservations would exceed the cap; body carries <code>outstanding</code> and <code>cap</code></td>
+</tr>
+<tr>
+<td>409 <code>IDEMPOTENCY_CONFLICT</code></td>
+<td>Key replayed with a different body</td>
+</tr>
+<tr>
+<td>200</td>
+<td>Key replayed with the same body — returns the original batch, mints nothing</td>
+</tr>
+</tbody>
+</table>
+<p>Quota exhaustion is a state conflict, not a rate, so it is 409 rather than 429. Reserve 429 for the rate limiter when that lands, so vendors can tell "you are asking too fast" from "you are holding too many".</p>
+<h3 id="2-validity-lookup-for-the-receiving-site">2. Validity lookup, for the receiving site</h3>
+<p><code>GET /deliveries/{deliveryId}/validity</code> — <strong>new, and the point of Option A.</strong></p>
+<p>Without this the receiving site has no way to act on the fact that the ID was reserved, and Option A degrades into an expensive version of a generated ID.</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span><span class="w"> </span><span class="nt">"known"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"> </span><span class="nt">"state"</span><span class="p">:</span><span class="w"> </span><span class="s2">"reserved"</span><span class="p">,</span><span class="w"> </span><span class="nt">"acceptable"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w"> </span><span class="p">}</span>
+</code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Code</th>
+<th>When</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>200</td>
+<td>ID is known; <code>state</code> is <code>reserved</code>, <code>expired</code>, <code>awaiting_delivery</code> or <code>complete</code></td>
+</tr>
+<tr>
+<td>404</td>
+<td>Not known, or voided</td>
+</tr>
+</tbody>
+</table>
+<p><code>acceptable</code> is the single boolean a weighbridge operator's screen should act on: true for <code>reserved</code>, <code>expired</code> and <code>awaiting_delivery</code>, false only for <code>void</code>. Deliberately no carrier name in the response — see the open decision on disclosure.</p>
+<h3 id="3-submit-a-delivery-against-a-reserved-id">3. Submit a delivery against a reserved ID</h3>
+<p><code>POST /deliveries</code> gains an optional <code>deliveryId</code>. Absent, behaviour is exactly as today: mint and insert.</p>
+<table>
+<thead>
+<tr>
+<th>Code</th>
+<th>When</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>201</td>
+<td>Bound; reservation → <code>used</code>, delivery → <code>complete</code></td>
+</tr>
+<tr>
+<td>404</td>
+<td>ID unknown, voided, <strong>or reserved by another org</strong></td>
+</tr>
+<tr>
+<td>409 <code>ALREADY_USED</code></td>
+<td>A complete delivery already exists for this ID</td>
+</tr>
+<tr>
+<td>200</td>
+<td>Byte-identical resubmission — returns the existing delivery</td>
+</tr>
+</tbody>
+</table>
+<p>The 404-for-another-org choice is deliberate: returning 403 would confirm to a prober which IDs exist. Unknown and not-yours must be indistinguishable.</p>
+<h3 id="4-receipt-against-a-reserved-id">4. Receipt against a reserved ID</h3>
+<p><code>POST /deliveries/{deliveryId}/receipt</code> today only checks that the delivery exists. It must also accept an ID that is <em>reserved but has no delivery record</em>, creating the <code>awaiting_delivery</code> shell — the same shell <code>POST /receipts</code> already builds.</p>
+<table>
+<thead>
+<tr>
+<th>Code</th>
+<th>When</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>201</td>
+<td>Receipt recorded against a complete delivery</td>
+</tr>
+<tr>
+<td>202</td>
+<td>Receipt recorded; delivery still <code>awaiting_delivery</code></td>
+</tr>
+<tr>
+<td>404</td>
+<td>ID unknown or voided</td>
+</tr>
+</tbody>
+</table>
+<p>The 202 is worth having. It tells the receiving site's software, truthfully, that the record is incomplete through no fault of theirs, and gives it something to poll or display.</p>
+<h2 id="data-model-and-indexes">Data model and indexes</h2>
+<h3 id="id-reservations-new"><code>id-reservations</code> (new)</h3>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>deliveryId</code></td>
+<td>string</td>
+<td>8–14 chars; unique</td>
+</tr>
+<tr>
+<td><code>orgId</code></td>
+<td>UUID</td>
+<td>Owner. The ownership check uses this</td>
+</tr>
+<tr>
+<td><code>reservedByClientId</code></td>
+<td>string</td>
+<td>Cognito client that pulled the batch; audit only</td>
+</tr>
+<tr>
+<td><code>usedByClientId</code></td>
+<td>string</td>
+<td>Set at use; may differ from the above</td>
+</tr>
+<tr>
+<td><code>status</code></td>
+<td>enum</td>
+<td><code>reserved</code> / <code>used</code> / <code>expired</code> / <code>void</code></td>
+</tr>
+<tr>
+<td><code>batchId</code></td>
+<td>UUID</td>
+<td>Groups a printed sheet; lets ops void a batch</td>
+</tr>
+<tr>
+<td><code>idempotencyKey</code></td>
+<td>string</td>
+<td>The key that created the batch</td>
+</tr>
+<tr>
+<td><code>reservedAt</code> / <code>expiresAt</code> / <code>usedAt</code></td>
+<td>date</td>
+<td></td>
+</tr>
+<tr>
+<td><code>usedAfterExpiry</code></td>
+<td>bool</td>
+<td>Set when a late use is accepted</td>
+</tr>
+</tbody>
+</table>
+<p>Indexes: unique on <code>deliveryId</code>; <code>{orgId, status}</code> for quota and ops queries; <code>{status, expiresAt}</code> for the expiry job; unique on <code>{orgId, idempotencyKey}</code> with a 24-hour TTL.</p>
+<h3 id="deliveries-changed"><code>deliveries</code> (changed)</h3>
+<p>Add <code>status</code> (<code>awaiting_delivery</code> / <code>complete</code>), <code>clientId</code>, and <code>receiptedAt</code>. Then add the indexes the collection has never had: <strong>unique on <code>deliveryId</code></strong>, plus <code>{orgId, createdAt}</code> and <code>{status, createdAt}</code> for reporting.</p>
+<p>The unique index is a prerequisite, not a nice-to-have. Without it, two submissions of the same printed ID both succeed and the register silently holds two deliveries with one identity. Backfill and index creation must land before the reserve endpoint is exposed — see risks.</p>
+<h3 id="why-reservations-keep-using-get-next">Why reservations keep using <code>GET /next</code></h3>
+<p>A reserved ID must come from the same counter as an online one. It costs nothing, and it is the only thing guaranteeing a reserved Delivery ID can never collide with a Movement ID. A separate sequence for reservations would be the single most expensive mistake available here.</p>
+<h2 id="ownership-and-verification">Ownership and verification</h2>
+<p>The rule that matters: <strong>ownership is checked when the delivery is submitted, never when the receipt is filed.</strong> The receiving site is a different organisation from the carrier by definition — that is what a waste transfer is. Enforcing an org match on the receipt route would break every legitimate handover.</p>
+<table>
+<thead>
+<tr>
+<th>Route</th>
+<th>Org check</th>
+<th>Rationale</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>POST /deliveries/reserve</code></td>
+<td>Caller's org owns the batch</td>
+<td>Establishes custody</td>
+</tr>
+<tr>
+<td><code>POST /deliveries</code> with <code>deliveryId</code></td>
+<td>Must equal <code>reservation.orgId</code></td>
+<td>The delivery is the carrier's own record</td>
+</tr>
+<tr>
+<td><code>GET /.../validity</code></td>
+<td>None beyond being onboarded</td>
+<td>Any receiving site may need to check any ID</td>
+</tr>
+<tr>
+<td><code>POST /.../receipt</code></td>
+<td><strong>None</strong></td>
+<td>The receiver is always a different org</td>
+</tr>
+</tbody>
+</table>
+<h3 id="org-level-not-client-level">Org-level, not client-level</h3>
+<p>Match on <code>orgId</code>, not <code>clientId</code>. A carrier may change software vendor, or run two products, between printing a sheet and using it; a client-level match would strand printed stock in a cab and produce exactly the failure this design exists to avoid. Record <code>usedByClientId</code> alongside <code>reservedByClientId</code> so a vendor switch is visible in audit without being an error.</p>
+<p>This is the same stance as D-036: attribute the write, do not gatekeep it.</p>
+<h3 id="what-the-checks-do-and-do-not-prove">What the checks do and do not prove</h3>
+<p>A successful validity lookup proves the ID was issued by the service to a real organisation and has not been voided. It does not prove the waste on the vehicle matches what the carrier will eventually submit, and it cannot — nothing at the counter can. The residual sits with the carrier, named by their own authenticated write when it lands.</p>
+<h2 id="defaults-and-why">Defaults, and why</h2>
+<table>
+<thead>
+<tr>
+<th>Knob</th>
+<th>Default</th>
+<th>Reasoning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Max per request</td>
+<td>100</td>
+<td>Bounds the response and fits a printable sheet</td>
+</tr>
+<tr>
+<td>Suggested batch</td>
+<td>25</td>
+<td>One page of tear-offs per vehicle</td>
+</tr>
+<tr>
+<td>Outstanding cap per org</td>
+<td><code>max(50, 14 × mean daily deliveries over 28 days)</code></td>
+<td>Self-scaling, so no manual tiering of 160k orgs; two weeks of offline cover is generous</td>
+</tr>
+<tr>
+<td>Floor for new orgs</td>
+<td>50</td>
+<td>Lets a new carrier operate from day one with no usage history</td>
+</tr>
+<tr>
+<td>Reservation TTL</td>
+<td>90 days</td>
+<td>Matches a realistic cab-refresh cycle</td>
+</tr>
+<tr>
+<td>Use after expiry</td>
+<td>Accepted, flagged</td>
+<td>Never reject a printed ID</td>
+</tr>
+<tr>
+<td>Idempotency key</td>
+<td>Required</td>
+<td>A silent double-pull is permanent and invisible</td>
+</tr>
+<tr>
+<td>Key retention</td>
+<td>24 hours</td>
+<td>Covers any realistic retry window</td>
+</tr>
+</tbody>
+</table>
+<h3 id="on-the-cap-formula">On the cap formula</h3>
+<p>A flat cap is wrong across a population running from owner-drivers to national operators. Deriving it from the org's own recent volume scales automatically, penalises hoarding without a policy conversation, and needs no one to maintain a tier list. The floor carries orgs with no history.</p>
+<p>It does depend on usage data that does not exist yet for a service still in beta. Until it does, the floor is doing all the work — expect to revisit the multiplier once Private Beta produces real volumes.</p>
+<h3 id="on-the-ttl-being-low-stakes">On the TTL being low-stakes</h3>
+<p>Because expiry never rejects a use, the TTL is a quota-recovery knob rather than a safety control. Getting it wrong costs some quota churn, not a failed handover. That is deliberate: every control here that could block a handover has been moved to somewhere it cannot.</p>
+<h3 id="a-shared-resource-argument-for-the-cap">A shared-resource argument for the cap</h3>
+<p>Reservations consume the same per-year counter as live traffic. Hoarded IDs push the counter higher, and the counter's height is what drives ID length from 8 to 9 to 10 characters. Over-pulling therefore makes everyone else's IDs longer to read aloud. Minor at current volumes, but it is a real externality and worth stating when a vendor asks why the cap exists.</p>
+<h2 id="edge-cases">Edge cases</h2>
+<table>
+<thead>
+<tr>
+<th>Case</th>
+<th>Behaviour</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Two concurrent reserves from one org</td>
+<td>Each mints from the atomic counter, so no ID collision. The quota check and insert run in one transaction; if that proves costly, accept bounded overshoot — the cap is a control, not a safety property — and reconcile in the expiry job</td>
+</tr>
+<tr>
+<td>Receiver is a different org</td>
+<td>Expected, always. No org check on the receipt route</td>
+</tr>
+<tr>
+<td>Expired ID already printed</td>
+<td>Accepted, flipped to <code>used</code>, <code>usedAfterExpiry</code> set. Never rejected</td>
+</tr>
+<tr>
+<td>Voided ID presented</td>
+<td>Rejected at validity lookup and at use. The only hard stop</td>
+</tr>
+<tr>
+<td>Duplicate delivery submission</td>
+<td>Unique index rejects the second. Byte-identical payload returns 200 with the existing delivery; anything else is 409 <code>ALREADY_USED</code></td>
+</tr>
+<tr>
+<td>Reserved by client A, used by client B, same org</td>
+<td>Allowed. Both client ids recorded</td>
+</tr>
+<tr>
+<td>Used by a different org</td>
+<td>404, indistinguishable from unknown</td>
+</tr>
+<tr>
+<td>Receipt arrives, delivery never does</td>
+<td>Delivery stays <code>awaiting_delivery</code> indefinitely until a policy window is set. <strong>This is the open hole — see risks</strong></td>
+</tr>
+<tr>
+<td>Delivery arrives for an ID with no receipt</td>
+<td>Normal. Nothing special; receipts are not required to precede anything</td>
+</tr>
+</tbody>
+</table>
+<h3 id="year-rollover">Year rollover</h3>
+<p>The counter and the <code>YY</code> prefix reset each January, so an ID reserved on 30 December carries the old year's prefix and may be used in the new one. That is safe — the prefix differs, so the new year's counter cannot reproduce it, and IDs are never recycled.</p>
+<p>Two consequences worth writing down rather than special-casing:</p>
+<ol>
+<li>Reservations must be allowed to cross the year boundary. Expiring a batch at midnight on 31 December would invalidate printed stock for no reason.</li>
+<li>Any reporting that infers the activity year from the <code>YY</code> prefix will mis-attribute a December reservation used in January. Report on <code>usedAt</code> and <code>createdAt</code>, never on the prefix. This is worth checking in the existing Power BI views, which predate the question.</li>
+</ol>
+<h2 id="audit-reporting-and-ops">Audit, reporting and ops</h2>
+<p>The two questions the prompt named map to single queries, provided the indexes above exist.</p>
+<p><strong>Who holds unused IDs</strong> — aggregate <code>id-reservations</code> on <code>{orgId, status: reserved}</code>, sorted descending, with <code>batchId</code> and <code>reservedAt</code> so ops can see whether it is one stale sheet or steady accumulation.</p>
+<p><strong>Who is over-pulling</strong> — per org over a rolling 28 days: reserved, used, expired, and the ratio of used to reserved. A healthy vendor sits near 1. A vendor whose expired count dominates is printing more than it needs; a vendor repeatedly hitting <code>QUOTA_EXCEEDED</code> may genuinely need an uplift rather than a telling-off.</p>
+<h3 id="two-further-signals-worth-surfacing">Two further signals worth surfacing</h3>
+<p><code>usedAfterExpiry</code> counts stale printed stock reaching sites — the leading indicator that the TTL is too short for how vendors actually work.</p>
+<p>Deliveries sitting in <code>awaiting_delivery</code>, aged, grouped by carrier org. This is the regulator-facing number: waste signed for with no carrier record behind it. Nothing today reports it, because the state has no name today.</p>
+<h3 id="where-it-should-live">Where it should live</h3>
+<p>A small materialised aggregate refreshed by the same scheduled job that expires reservations, rather than ad-hoc queries against production. It keeps the ops view and the expiry pass consistent with each other, and it gives Power BI something stable to read.</p>
+<h2 id="risks-prerequisites-and-open-decisions">Risks, prerequisites and open decisions</h2>
+<h3 id="blocking-prerequisites">Blocking prerequisites</h3>
+<ol>
+<li><strong>Unique index on <code>deliveries.deliveryId</code>.</strong> Must land, with a duplicate audit of existing data, before the reserve endpoint is exposed. Reservations create a genuine window for double submission of the same printed ID.</li>
+<li><strong>Fix the 8-character assumptions.</strong> <code>^\d{2}[A-Z0-9]{6}$</code> and anything like it rejects the 9-character IDs that are already the norm. Every consumer, document and printed template must accept 8–14 before more parties depend on the format.</li>
+</ol>
+<h3 id="risks">Risks</h3>
+<table>
+<thead>
+<tr>
+<th>Risk</th>
+<th>Note</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Printed stock outlives the design</td>
+<td>Paper survives in cabs for years. Mitigated by never recycling IDs and never hard-rejecting an expired one</td>
+</tr>
+<tr>
+<td>No expiry on <code>awaiting_delivery</code></td>
+<td>A receipt with no delivery can sit forever. The state is new, so nothing currently ages or escalates it — the largest gap in this design</td>
+</tr>
+<tr>
+<td>Cap formula has no data behind it</td>
+<td>Beta volumes will show whether 14 days of cover is right. Until then the floor is doing the work</td>
+</tr>
+<tr>
+<td>Reserved-and-lost is indistinguishable from reserved-and-unprinted</td>
+<td>Both look like <code>reserved</code>. Only the vendor knows which, and nothing obliges them to say</td>
+</tr>
+<tr>
+<td>Validity lookup enables enumeration</td>
+<td>A caller can probe IDs to learn which exist. Mitigated by returning nothing but <code>known</code> and <code>state</code>, and by rate limiting when it lands</td>
+</tr>
+</tbody>
+</table>
+<h3 id="decisions-that-are-yours">Decisions that are yours</h3>
+<ol>
+<li><strong>Org-level ownership</strong> — proposed above, so a vendor change does not strand printed stock. Confirm, or restrict to client-level and accept the stranding.</li>
+<li><strong>Is there an outer bound on accepting an expired ID?</strong> The design says never reject. A policy view might prefer a hard stop at, say, two years. Whoever decides owns the consequence at the weighbridge.</li>
+<li><strong>How long may a delivery sit in <code>awaiting_delivery</code>,</strong> what escalates, and to whom. This is the one genuinely unanswered question, and it is policy rather than engineering.</li>
+<li><strong>Should the validity lookup disclose the carrier's name?</strong> It would let an operator sanity-check the ID against the vehicle in front of them. It also tells any caller who holds which IDs. Currently proposed as no — worth a view from Darren given the DPIA re-screening is open.</li>
+<li><strong>Who owns quota uplift</strong> when an org legitimately needs more than the formula allows.</li>
+<li><strong>Movement IDs — confirm deferral.</strong> D-028 asks; nothing in the current journey suggests an offline movement-creation case.</li>
+</ol>
+<h3 id="what-this-does-not-solve">What this does not solve</h3>
+<p>A reserved ID proves the service issued it. It does not prove a delivery will follow. If the carrier never submits, the receiving site is left holding a receipt against an <code>awaiting_delivery</code> record — correctly attributed to a named carrier, but incomplete. Option A moves that residual to the right party; it does not remove it.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+  <footer class="md-footer">
+    <div class="md-footer-meta__inner md-grid">
+       <div class="md-copyright">
+       
+<div class="md-social">
+  
+    
+    
+    
+    
+    <a href="mailto:wasteuserresearch@defra.gov.uk" target="_blank" rel="noopener" title="Contact us here" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M536.4-26.3c9.8-3.5 20.6-1 28 6.3s9.8 18.2 6.3 28l-178 496.9c-5 13.9-18.1 23.1-32.8 23.1-14.2 0-27-8.6-32.3-21.7l-64.2-158c-4.5-11-2.5-23.6 5.2-32.6l94.5-112.4c5.1-6.1 4.7-15-.9-20.6s-14.6-6-20.6-.9l-112.4 94.3c-9.1 7.6-21.6 9.6-32.6 5.2L38.1 216.8c-13.1-5.3-21.7-18.1-21.7-32.3 0-14.7 9.2-27.8 23.1-32.8z"/></svg>
+    </a>
+  
+    
+    
+    
+    
+    <a href="https://github.com/defra/waste-tracking-service" target="_blank" rel="noopener" title="Our DWT service is available here" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+</div>  Made with
+      <a
+        href="https://squidfunk.github.io/mkdocs-material/"
+        target="_blank"
+        rel="noopener"
+      >
+        Material for MkDocs
+      </a>
+      <br /><br />
+      <img
+        src="../../../assets/images/ogl.png"
+        alt="Open Government Licence logo"
+      />
+      All content is available under the
+      <a
+        href="https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/"
+        target="_blank"
+        rel="noopener"
+      >
+        Open Government Licence v3.0</a
+      >
+      , except where otherwise stated <br><br><br>
+      <a href="/waste-tracking-service/api-accessibility-statement" target="_blank" rel="noopener">Accessibility Statement</a>
+    </div>
+
+    <div class="md-copyright">
+      <a
+        href="https://www.nationalarchives.gov.uk/information-management/re-using-public-sector-information/uk-government-licensing-framework/crown-copyright/"
+        target="_blank"
+        rel="noopener"
+      >
+        <img
+          src="../../../assets/images/govuk-crest-2x.png"
+          width="125"
+          height="102"
+          alt="Gov UK Crest"
+        />
+        <br />
+        © Crown copyright
+      </a>
+    </div>
+  </div>
+</footer>
+
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["announce.dismiss", "navigation.tabs", "navigation.tabs.sticky", "navigation.indexes", "content.code.copy", "search.suggest", "search.share", "content.action.view", "toc.integrate"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": {"Accepted": "accepted", "Deprecated": "deprecated", "Draft": "draft", "Proposed": "proposed", "Rejected": "rejected", "Superseded": "superseded"}, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": "production", "provider": "mike"}}</script>
+    
+    
+  
+      <script src="../../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  <script>
+    (function () {
+      function fixAccessibility() {
+        // 1. Search dialog accessible name (AXE fix)
+        var dlg = document.querySelector('.md-search[role="dialog"]');
+        if (dlg) {
+          var hasName = dlg.hasAttribute('aria-label') || dlg.hasAttribute('aria-labelledby');
+          if (!hasName) {
+            dlg.setAttribute('aria-label', 'Search this site');
+          }
+        }
+
+        // 2. Empty form labels — add visually-hidden text to icon-only labels
+        function addLabelText(selector, text) {
+          document.querySelectorAll(selector).forEach(function (label) {
+            if (label.querySelector('.visually-hidden')) return;
+            var span = document.createElement('span');
+            span.className = 'visually-hidden';
+            span.textContent = text;
+            label.appendChild(span);
+          });
+        }
+
+        addLabelText('label[for="__drawer"]', 'Toggle navigation');
+        // Not label[for="__search"]: Material's search icon label holds two
+        // <svg> children (magnifier / back-arrow) and toggles which one is
+        // visible via svg:first-child/:last-child CSS depending on
+        // viewport. Appending a span here would become the new last child
+        // and break that selector, leaving both icons visible at once.
+
+        // Palette toggle labels
+        document.querySelectorAll('label[for^="__palette"]').forEach(function (label) {
+          if (label.querySelector('.visually-hidden')) return;
+          var title = label.getAttribute('title') || 'Toggle colour scheme';
+          var span = document.createElement('span');
+          span.className = 'visually-hidden';
+          span.textContent = title;
+          label.appendChild(span);
+        });
+
+        // Navigation section toggle labels
+        document.querySelectorAll('label[for^="__nav"], label[for^="nav-"]').forEach(function (label) {
+          if (label.querySelector('.visually-hidden')) return;
+          var nav = label.closest('.md-nav__item');
+          var link = nav ? nav.querySelector('.md-nav__link') : null;
+          var text = link ? 'Toggle ' + link.textContent.trim() : 'Toggle section';
+          var span = document.createElement('span');
+          span.className = 'visually-hidden';
+          span.textContent = text;
+          label.appendChild(span);
+        });
+
+        // Catch any remaining labels that only contain SVG/icons
+        document.querySelectorAll('label[for]').forEach(function (label) {
+          if (label.getAttribute('for') === '__search') return;
+          if (label.querySelector('.visually-hidden')) return;
+          var clone = label.cloneNode(true);
+          var els = clone.querySelectorAll('svg, img, .md-icon');
+          for (var i = 0; i < els.length; i++) { els[i].parentNode.removeChild(els[i]); }
+          if (!clone.textContent.trim()) {
+            var span = document.createElement('span');
+            span.className = 'visually-hidden';
+            span.textContent = label.getAttribute('title') || 'Toggle';
+            label.appendChild(span);
+          }
+        });
+
+        // Catch any inputs/selects without any label (missing form label)
+        document.querySelectorAll('input, select, textarea').forEach(function (input) {
+          if (input.type === 'hidden') return;
+          if (input.getAttribute('aria-label') || input.getAttribute('aria-labelledby')) return;
+          var id = input.id;
+          if (id && document.querySelector('label[for="' + id + '"]')) return;
+          // No label found — add aria-label
+          var name = input.getAttribute('name') || input.getAttribute('placeholder') || input.type || 'input';
+          input.setAttribute('aria-label', name.charAt(0).toUpperCase() + name.slice(1));
+        });
+
+        // 3. Multiple form labels — replace duplicate labels with spans
+        // Material intentionally ships three <label for="__search"> elements
+        // (mobile toggle button, search overlay, and the input icon) and
+        // shows only one at a time via CSS depending on viewport — that's
+        // not a duplicate-label bug, so leave those alone.
+        var labelsByFor = {};
+        document.querySelectorAll('label[for]').forEach(function (label) {
+          var forId = label.getAttribute('for');
+          if (forId === '__search') return;
+          if (!labelsByFor[forId]) labelsByFor[forId] = [];
+          labelsByFor[forId].push(label);
+        });
+        Object.keys(labelsByFor).forEach(function (forId) {
+          var labels = labelsByFor[forId];
+          if (labels.length > 1) {
+            for (var i = 1; i < labels.length; i++) {
+              var span = document.createElement('span');
+              span.innerHTML = labels[i].innerHTML;
+              span.className = labels[i].className;
+              span.setAttribute('aria-hidden', 'true');
+              labels[i].parentNode.replaceChild(span, labels[i]);
+            }
+          }
+        });
+
+        // 6. Empty links — add aria-label to social icon links
+        document.querySelectorAll('.md-social__link').forEach(function (link) {
+          if (!link.textContent.trim() && !link.getAttribute('aria-label')) {
+            var href = link.getAttribute('href') || '';
+            if (href.indexOf('mailto:') !== -1) {
+              link.setAttribute('aria-label', 'Send email');
+            } else if (href.indexOf('github') !== -1) {
+              link.setAttribute('aria-label', 'GitHub repository');
+            } else {
+              link.setAttribute('aria-label', 'External link');
+            }
+          }
+        });
+
+        // 7. Missing fieldset — wrap palette toggles in a fieldset
+        var palette = document.querySelector('.md-header__option');
+        if (palette && palette.tagName !== 'FIELDSET' && !palette.querySelector('fieldset')) {
+          var fieldset = document.createElement('fieldset');
+          fieldset.className = palette.className;
+          fieldset.style.border = 'none';
+          fieldset.style.padding = '0';
+          fieldset.style.margin = '0';
+          var legend = document.createElement('legend');
+          legend.className = 'visually-hidden';
+          legend.textContent = 'Colour scheme';
+          fieldset.appendChild(legend);
+          while (palette.firstChild) {
+            fieldset.appendChild(palette.firstChild);
+          }
+          palette.parentNode.replaceChild(fieldset, palette);
+        }
+
+        // 8. Palette toggle labels — remove title to avoid redundant title text
+        document.querySelectorAll('.md-header__option label, fieldset label').forEach(function (el) {
+          if (el.getAttribute('title') && el.querySelector('.visually-hidden')) {
+            el.removeAttribute('title');
+          }
+        });
+
+        // 9. Suspicious alt text — fix theme logo if generic
+        document.querySelectorAll('.md-header__button img, .md-logo img').forEach(function (img) {
+          var alt = img.getAttribute('alt') || '';
+          if (!alt || /^(logo|image|img|icon|picture)$/i.test(alt.trim())) {
+            img.setAttribute('alt', 'Defra Digital Waste Tracking home');
+          }
+        });
+      }
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', fixAccessibility);
+      } else {
+        fixAccessibility();
+      }
+      document.addEventListener('navigationend', fixAccessibility);
+    })();
+  </script>
+
+  </body>
+</html>
