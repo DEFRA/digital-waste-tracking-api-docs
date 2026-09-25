@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Record delivery",
+  "description": "Payload for POST /beta-1/deliveries.",
+  "type": "object",
+  "properties": {
+    "apiCode": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Unique identifier of the submitting organisation.",
+      "examples": ["25b14080-5e77-4f91-9957-2482a0cb8775"]
+    },
+    "movementIds": {
+      "type": "array",
+      "items": { "type": "string" },
+      "minItems": 1,
+      "description": "One or more Movement IDs delivered together at this delivery."
+    }
+  },
+  "required": ["apiCode", "movementIds"],
+  "additionalProperties": false
+}

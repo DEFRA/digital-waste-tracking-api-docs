@@ -10,7 +10,8 @@
     "test": "node --no-experimental-require-module ./node_modules/jest/bin/jest.js --coverage --verbose --runInBand",
     "test:watch": "node --no-experimental-require-module ./node_modules/jest/bin/jest.js --watch",
     "format": "prettier --write \"**/*.{js,json,md,yaml,yml}\"",
-    "format:check": "prettier --check \"**/*.{js,json,md,yaml,yml}\""
+    "format:check": "prettier --check \"**/*.{js,json,md,yaml,yml}\"",
+    "schemas:sync": "bash scripts/sync-schemas.sh"
   },
   "devDependencies": {
     "@babel/preset-env": "^7.29.7",

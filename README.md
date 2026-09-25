@@ -11,6 +11,16 @@ mkdocs serve
 
 Open http://127.0.0.1:8000/digital-waste-tracking-api-docs/
 
+## Syncing the event-model schemas
+
+The JSON Schemas under `docs/event-model/schemas/` are a committed copy of `waste-movement-backend`'s `src/schemas/`, which is the source of truth. `docs/api/openapi.yaml` `$ref`s them, so the copy is what makes the spec render. To pull the latest from the backend's `main`:
+
+```
+npm run schemas:sync
+```
+
+Commit whatever it changes. **Do not edit anything under that folder by hand** — a rule change is a PR against `waste-movement-backend`, then a sync. A CI check re-runs the sync on every PR and fails visibly when the committed copy has fallen behind. See `docs/event-model/schemas/README.md` for the details.
+
 ## Prettifying markdown files
 
 Formatting rules live in `.prettierrc`. To format all markdown files in the repo:

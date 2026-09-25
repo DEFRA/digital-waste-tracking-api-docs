@@ -38,6 +38,12 @@
  * - collectionAddressDifferentFromProducer / collectionSite: planning-time fields for where the waste will
  *   be collected from, if not the producer's address. Distinct from the Collection event's own
  *   collectionSite, which records the actual collection.
+ *
+ * Producer is the exception to all of the above: `producerSchema` is deprecated,
+ * superseded by the JSON Schema mirrored at
+ * `docs/event-model/schemas/beta-2/common/producer/`. The producer bullets
+ * in this header describe what this fixture does, not what the service enforces —
+ * see the note on the export itself.
  */
 
 import Joi from 'joi'
@@ -260,6 +266,22 @@ const validateProducerAuthorisationNumberRule = (producer, helpers) => {
   return producer
 }
 
+/**
+ * @deprecated Superseded by the JSON Schema in `waste-movement-backend`, mirrored
+ * here at `docs/event-model/schemas/beta-2/common/producer/`. That is now
+ * the source of truth for Producer, it is what the running service validates
+ * against, and `openapi.yaml` `$ref`s it directly. Its rules are tested upstream,
+ * beside the schema files.
+ *
+ * Kept only because `createMovementSchema` below still composes it, so the rest of
+ * the Creation fixture stays whole and readable. Do not extend it, and do not treat
+ * a difference between it and the synced schema as a bug here — the synced
+ * one wins. Expect it to go when the remaining Creation resources follow Producer
+ * across to the backend.
+ *
+ * Note the shapes have already diverged: the synced schema nests emailAddress
+ * and phoneNumber under `contactDetails`, where this one has them at the top level.
+ */
 export const producerSchema = Joi.object({
   wasteSource: Joi.string()
     .valid('Household', 'Commercial', 'Municipal')

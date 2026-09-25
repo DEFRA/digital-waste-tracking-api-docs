@@ -1,0 +1,67 @@
+name: Schemas
+
+# Re-runs `npm run schemas:sync` and reports when the committed snapshot in
+# docs/event-model/schemas/ no longer matches waste-movement-backend's
+# `main`.
+#
+# Deliberately NOT in branch protection's required checks: the job fails so the
+# PR shows a red X and the Checks tab names it, but a merge is never gated on
+# it. Because the sync tracks latest `main` rather than a pinned SHA, a PR here
+# can go red for a schema change someone else made in the backend — that is the
+# trade for tracking latest, and is the signal this check exists to give.
+#
+# PRs only, by choice — no cron. A backend-side change made while no PR is open
+# is not reported until the next PR opens, which is the point at which anyone
+# would act on it anyway. `workflow_dispatch` is there to check on demand.
+on:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  schemas-sync:
+    # Named for the command that fixes a failure — the red X reads
+    # "Schemas / schemas:sync", which is what you run.
+    name: 'schemas:sync'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Sync schemas from waste-movement-backend
+        run: npm run schemas:sync
+
+      - name: Check the committed snapshot is current
+        run: |
+          # Stage first: a schema newly added upstream lands here as an
+          # untracked file, which a plain `git diff` would not report.
+          git add --all -- docs/event-model/schemas
+
+          if git diff --cached --quiet -- docs/event-model/schemas; then
+            echo "Committed schemas match waste-movement-backend@main."
+            echo '### Schemas are current' >> "$GITHUB_STEP_SUMMARY"
+            echo '`docs/event-model/schemas/` matches `waste-movement-backend@main`.' >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+
+          {
+            echo '### Schemas are out of date'
+            echo
+            echo 'The committed snapshot in `docs/event-model/schemas/` no longer matches `waste-movement-backend@main`.'
+            echo
+            echo 'Fix: run `npm run schemas:sync` and commit the result.'
+            echo
+            echo '<details><summary>What changed</summary>'
+            echo
+            echo '```diff'
+            git diff --cached -- docs/event-model/schemas
+            echo '```'
+            echo
+            echo '</details>'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          echo "::error title=Schemas out of date::docs/event-model/schemas/ is behind waste-movement-backend@main. Run 'npm run schemas:sync' and commit the result. See the job summary for the diff."
+          exit 1

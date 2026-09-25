@@ -701,7 +701,7 @@ components:
           maxLength: 5000
           description: Special handling instructions (e.g. fragile, hazardous, temperature-sensitive).
         producer:
-          $ref: '../event-model/schema/common/producer/producer.schema.json'
+          $ref: '../event-model/schemas/beta-2/common/producer/producer.schema.json'
         intendedCarriers:
           type: array
           minItems: 1

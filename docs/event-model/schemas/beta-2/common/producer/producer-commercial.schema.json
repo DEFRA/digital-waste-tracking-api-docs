@@ -1,17 +1,12 @@
 {
-  "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "producer-commercial.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Producer (Commercial)",
-  "description": "Producer fields specific to commercial waste. organisationName, sicCode and address are required. At least one of emailAddress or phoneNumber must be provided. Exactly one of authorisationNumber or reasonForNoAuthorisationNumber must be provided.",
+  "description": "Producer fields specific to commercial waste. organisationName, sicCode, address and contactDetails are required. Exactly one of authorisationNumber or reasonForNoAuthorisationNumber must be provided.",
   "type": "object",
   "allOf": [
     { "$ref": "producer-base.schema.json" },
     {
       "type": "object",
-      "anyOf": [
-        { "properties": { "emailAddress": {} }, "required": ["emailAddress"] },
-        { "properties": { "phoneNumber": {} }, "required": ["phoneNumber"] }
-      ],
       "oneOf": [
         {
           "required": ["authorisationNumber"],
@@ -40,7 +35,7 @@
         },
         "authorisationNumber": {
           "type": "string",
-          "format": "authorisationNumber",
+          "pattern": "^\\s*(?:(?:[A-Za-z]{2}\\d{4}[A-Za-z]{2})|(?:[A-Za-z]{2}\\d{4}[A-Za-z]{2}\\/[Dd]\\d{4,5})|(?:[Ee][Pp][Rr]\\/[A-Za-z]{2}\\d{4}[A-Za-z]{2})|(?:[Ee][Pp][Rr]\\/[A-Za-z]{2}\\d{4}[A-Za-z]{2}\\/[Dd]\\d{4,5})|(?:[Ee][Aa][Ww][Mm][Ll]\\d{5,6})|(?:[Ww][Mm][Ll]\\d{5,6})|(?:[Pp][Pp][Cc]\\/[AaWwEeNn]\\/\\d{7})|(?:[Ww][Mm][Ll]\\/[LlWwEeNn]\\/\\d{7})|(?:[Ww][Mm][Ll]\\/[LlWwEeNn]\\/\\d{7}\\/\\d{2})|(?:[Pp][Pp][Cc]\\/[Aa]\\/[Ss][Ee][Pp][Aa]\\d{4}-\\d{4})|(?:[Ww][Mm][Ll]\\/[Ll]\\/[Ss][Ee][Pp][Aa]\\d{4}-\\d{4})|(?:[Ee][Aa][Ss]\\/[Pp]\\/\\d{6})|(?:[Pp]\\d{4}\\/\\d{2}[A-Za-z])|(?:[Pp]\\d{4}\\/\\d{2}[A-Za-z]\\/[Vv]\\d+)|(?:[Ww][Pp][Pp][Cc] \\d{2}\\/\\d{2})|(?:[Ww][Pp][Pp][Cc] \\d{2}\\/\\d{2}\\/[Vv]\\d+)|(?:[Ww][Mm][Ll] \\d{2}\\/\\d+(\\/[Tt])? [Ll][Nn]\\/\\d{2}\\/\\d+(\\/([MmTtCcNn]|[Vv]\\d+))*)|(?:[Ww][Mm][Ll] \\d{2}\\/\\d+ [Pp][Aa][Cc]\\/\\d{4}\\/[Ww][Cc][Ll]\\d{3}))\\s*$",
           "description": "Producer environmental permit or exemption number, in a valid UK format. Mutually exclusive with reasonForNoAuthorisationNumber — exactly one of the two is required."
         },
         "reasonForNoAuthorisationNumber": {
@@ -52,35 +47,20 @@
           "pattern": "^\\d{5}$",
           "description": "Five-digit Standard Industrial Classification code."
         },
-        "emailAddress": {
-          "type": "string",
-          "format": "email",
-          "description": "Producer contact email address. At least one of emailAddress or phoneNumber must be provided."
-        },
-        "phoneNumber": {
-          "type": "string",
-          "format": "phoneNumber",
-          "description": "Producer contact phone number, in a valid format. At least one of emailAddress or phoneNumber must be provided."
+        "contactDetails": {
+          "$ref": "../contact-details.schema.json"
         },
         "address": {
-          "type": "object",
-          "description": "Producer site address.",
-          "properties": {
-            "fullAddress": {
-              "type": "string",
-              "minLength": 1,
-              "description": "Full address line."
-            },
-            "postcode": {
-              "type": "string",
-              "format": "postcode",
-              "description": "Accepts UK postcodes and Irish Eircodes."
-            }
-          },
-          "required": ["postcode"]
+          "$ref": "../address.schema.json"
         }
       },
-      "required": ["wasteSource", "organisationName", "sicCode", "address"]
+      "required": [
+        "wasteSource",
+        "organisationName",
+        "sicCode",
+        "address",
+        "contactDetails"
+      ]
     }
   ],
   "propertyNames": {
@@ -90,8 +70,7 @@
       "authorisationNumber",
       "reasonForNoAuthorisationNumber",
       "sicCode",
-      "emailAddress",
-      "phoneNumber",
+      "contactDetails",
       "address",
       "councilMovement"
     ]

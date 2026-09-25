@@ -17,7 +17,7 @@ const schemaRoot = path.join(
   '..',
   'docs',
   'event-model',
-  'schema'
+  'schemas'
 )
 
 const specs = ['openapi.yaml', 'openapi-beta-1.yaml']
@@ -71,12 +71,11 @@ function collectSchemaFiles(dir) {
 }
 
 // D-003 holds only while the schemas the specs $ref stay on 2020-12 — the
-// dialect OpenAPI 3.1 defaults to. Skipped, not deleted: the schemas on this
-// branch are still draft-07, so enabling it here would be a red build for a
-// state we already know about. Unskip on the branch that brings the 2020-12
-// schemas across.
-// eslint-disable-next-line jest/no-disabled-tests
-describe.skip('event-model schemas', () => {
+// dialect OpenAPI 3.1 defaults to. These files are not edited here: they are
+// mirrored from waste-movement-backend by `npm run schemas:sync`, so what this
+// guards is an upstream dialect change arriving silently on the next sync and
+// quietly breaking the alignment D-003 rests on.
+describe('event-model schemas', () => {
   it('all declare the 2020-12 dialect', () => {
     const wrong = collectSchemaFiles(schemaRoot)
       .map((f) => [
@@ -85,5 +84,21 @@ describe.skip('event-model schemas', () => {
       ])
       .filter(([, s]) => s !== 'https://json-schema.org/draft/2020-12/schema')
     expect(wrong).toEqual([])
+  })
+
+  // Upstream declares no `$id` deliberately — the loader keys each schema by
+  // its path under src/schemas/, so a path-relative `$id` restated inside the
+  // file would be resolved against the retrieval URL when served over HTTP and
+  // append the path a second time, 404ing every relative $ref beneath it. That
+  // was a live defect here until upstream removed them; nothing on either side
+  // asserts they stay out, so this catches one arriving back on the next sync.
+  it('declare no `$id` (the file path is its identity — see the mirror README)', () => {
+    const withId = collectSchemaFiles(schemaRoot)
+      .map((f) => [
+        path.relative(schemaRoot, f),
+        JSON.parse(readFileSync(f, 'utf-8')).$id
+      ])
+      .filter(([, id]) => id !== undefined)
+    expect(withId).toEqual([])
   })
 })
