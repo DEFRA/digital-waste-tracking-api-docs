@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Create collection",
+  "description": "Payload for POST /beta-1/movements/{movementId}/collection.",
+  "type": "object",
+  "properties": {
+    "apiCode": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Unique identifier of the submitting organisation.",
+      "examples": ["25b14080-5e77-4f91-9957-2482a0cb8775"]
+    }
+  },
+  "required": ["apiCode"],
+  "additionalProperties": false
+}

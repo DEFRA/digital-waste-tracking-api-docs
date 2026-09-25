@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Delivery ID params",
+  "description": "Path params for POST /beta-1/deliveries/{deliveryId}/receipt.",
+  "type": "object",
+  "properties": {
+    "deliveryId": {
+      "type": "string",
+      "description": "Delivery ID minted by `POST /deliveries`.",
+      "examples": ["25KMT4Z9"]
+    }
+  },
+  "required": ["deliveryId"],
+  "additionalProperties": false
+}

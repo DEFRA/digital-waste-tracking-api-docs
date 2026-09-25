@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Contact details",
+  "description": "Contact details for a party. At least one of emailAddress or phoneNumber must be provided.",
+  "type": "object",
+  "properties": {
+    "emailAddress": {
+      "type": "string",
+      "format": "email",
+      "description": "Contact email address."
+    },
+    "phoneNumber": {
+      "type": "string",
+      "pattern": "^\\s*(?=(?:\\D*\\d){7,15}\\D*$)\\+?[0-9()\\-\\s]+$",
+      "description": "Contact phone number, in a valid format."
+    }
+  },
+  "anyOf": [
+    { "properties": { "emailAddress": {} }, "required": ["emailAddress"] },
+    { "properties": { "phoneNumber": {} }, "required": ["phoneNumber"] }
+  ]
+}
