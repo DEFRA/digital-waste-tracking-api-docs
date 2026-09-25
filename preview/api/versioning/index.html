@@ -21,7 +21,7 @@
     
     
       
-        <title>API Versioning - Digital Waste Tracking - API Docs</title>
+        <title>Versioning - Digital Waste Tracking - API Docs</title>
       
     
     
@@ -180,7 +180,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              API Versioning
+              Versioning
             
           </span>
         </div>
@@ -448,12 +448,12 @@
   
 
 
-<h1 id="api-versioning">API Versioning</h1>
 <!-- prettier-ignore -->
 <div class="admonition warning">
 <p class="admonition-title">Internal documentation</p>
 <p>This page is internal design/planning material for the delivery team, not published guidance for Software Providers integrating with the Digital Waste Tracking API. Content here may be incomplete, in-progress, or superseded.</p>
 </div>
+<h1 id="api-versioning">API Versioning</h1>
 <h2 id="tldr">TL;DR</h2>
 <p>Version the API <strong>during beta</strong> (path-based milestones, <code>/beta-N</code>, e.g. <code>/beta-1/waste-movements/{id}</code>, run in parallel) to iterate on shape while breaking changes are frequent; at <strong>GA drop the version</strong> and publish a single stable <strong>unversioned</strong> API that evolves <strong>additive-only</strong> thereafter. Within a given <code>/beta-N</code>, software providers get the <strong>full endpoint surface</strong> — never a split where some endpoints sit on one version and some on another. Beta versions are retired by usage, signalled in-band with a <code>Deprecation: true</code> header.</p>
 <h2 id="baseline">Baseline</h2>
