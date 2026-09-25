@@ -34,6 +34,7 @@ At-a-glance view of every decision, sorted by status, then by impact (structural
 | D-038 | [API versioning: versioned during beta, unversioned at GA](#api-versioning-versioned-during-beta-unversioned-at-ga) | ✅ Decided | 🔴 High | **Versioning** |
 | D-039 | [Cross-cutting API standards for new endpoints](#cross-cutting-api-standards-for-new-endpoints) | ✅ Decided | 🔴 High | **API conventions** |
 | D-041 | [Receipt without a prior delivery: separate endpoint, an empty Delivery created server-side to have a reference](#receipt-without-a-prior-delivery-separate-endpoint-an-empty-delivery-created-server-side-to-have-a-reference) | ✅ Decided | 🔴 High | **Receipt** |
+| D-003 | [OpenAPI 3.1.0, not 3.0.3](#openapi-310-not-303) | ✅ Decided | 🟠 Medium | **Spec structure** |
 | D-004 | [Receipt path parameter stays `{wasteTrackingId}`](#receipt-path-parameter-stays-wastetrackingid) | ✅ Decided | 🟠 Medium | **Identifiers** |
 | D-006 | [Cross-check of receipt details against the linked delivery](#cross-check-of-receipt-details-against-the-linked-delivery) | ✅ Decided | 🟠 Medium | **Receipt** |
 | D-008 | [Carrier always required; broker or dealer optional, at every stage](#carrier-always-required-broker-or-dealer-optional-at-every-stage) | ✅ Decided | 🟠 Medium | **Actors** |
@@ -49,7 +50,6 @@ At-a-glance view of every decision, sorted by status, then by impact (structural
 | D-027 | [Per-organisation vs per-actor API credentials](#per-organisation-vs-per-actor-api-credentials) | ✅ Decided | 🟠 Medium | **Onboarding** |
 | D-042 | [Waste item classification: separated from logistics at Creation, reused at the no-prior-delivery Receipt endpoint, dropped at the ordinary Receipt endpoint](#waste-item-classification-separated-from-logistics-at-creation-reused-at-the-no-prior-delivery-receipt-endpoint-dropped-at-the-ordinary-receipt-endpoint) | ✅ Decided | 🟠 Medium | **Creation** |
 | D-002 | [Single OpenAPI file, not `$ref`-split](#single-openapi-file-not-ref-split) | ✅ Decided | 🟢 Low | **Spec structure** |
-| D-003 | [OpenAPI 3.0.3, not 3.1](#openapi-303-not-31) | ✅ Decided | 🟢 Low | **Spec structure** |
 | D-011 | [Static and transit collection collapsed into a single endpoint](#static-and-transit-collection-collapsed-into-a-single-endpoint) | ✅ Decided | 🟢 Low | **Collection** |
 | D-040 | [Rename drop-off and Transfer ID to delivery and Delivery ID](#rename-drop-off-and-transfer-id-to-delivery-and-delivery-id) | ✅ Decided · Applied register-wide | 🟢 Low | **Naming** |
 | D-043 | [Creation's receiver becomes receivers: an array, min 1 when required](#creations-receiver-becomes-receivers-an-array-min-1-when-required) | ✅ Decided | 🟢 Low | **Creation** |
@@ -94,15 +94,21 @@ At-a-glance view of every decision, sorted by status, then by impact (structural
 
 <a id="d-003"></a>
 
-### OpenAPI 3.0.3, not 3.1
+### OpenAPI 3.1.0, not 3.0.3
 
-**D-003** · ✅ Decided · Impact: 🟢 Low · Area: **Spec structure**
+**D-003** · ✅ Decided · Impact: 🟠 Medium · Area: **Spec structure**
 
-**Context.** The Phase 1 Receipt API is OpenAPI 3.0.3. The new spec could either match Phase 1 or move to 3.1, which has better JSON Schema alignment.
+**Context.** The specs were OpenAPI 3.0.3, matching the Phase 1 Receipt API. That held while everything the spec described was written out inside it.
 
-**Decision.** Stay on 3.0.3 for now.
+It stopped holding once the specs began referencing the JSON Schema files that hold the business rules. The version of JSON Schema that OpenAPI 3.0.3 understands is an older one than the version we write our rules in, and it cannot express much of what we need — rules like "for a household producer these fields are not allowed", or "give one of these two fields but not both". A spec on 3.0.3 silently drops those rules and tells the reader the API accepts more than it really does.
 
-**Consequences.** Both specs share a version; tooling reading one can read the other. Worth revisiting once the spec stabilises.
+**Decision.** The `beta-n` specs are OpenAPI 3.1.0, the version built on the same JSON Schema we write our rules in. Lining the two up is the point: it lets the spec use the rule files as they are, so what we publish and what the service enforces stay the same thing instead of drifting apart.
+
+This covers the `beta-n` specs only. The existing Receipt of Waste endpoints and their documentation are not touched.
+
+**Consequences.** The spec now describes the API as it really behaves, so a software provider reading it sees the rules the service will actually apply. Every future `beta-n` spec starts on 3.1.0. The rule files and the specs are tied to matching versions from here on — if one moves, the other has to move with it. This is about what software reads from the spec; how it looks in the API viewer is largely unchanged.
+
+One open risk. Some software providers generate their client code from our spec, and we do not yet know whether the tools they use can read 3.1. Worth asking the integrators already onboarded during beta-1 contract testing, which is when they will be generating clients anyway.
 
 <a id="d-004"></a>
 

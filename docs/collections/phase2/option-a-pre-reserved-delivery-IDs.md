@@ -1,3 +1,13 @@
+---
+search:
+  exclude: true
+robots: noindex, nofollow
+---
+
+<!-- prettier-ignore -->
+!!! warning "Internal documentation"
+    This page is internal design/planning material for the delivery team, not published guidance for Software Providers integrating with the Digital Waste Tracking API. Content here may be incomplete, in-progress, or superseded.
+
 # Option A — Pre-reserved Delivery IDs
 
 2026-09-21 · DWTC-129 / [D-028](../decisions.md#d-028)
