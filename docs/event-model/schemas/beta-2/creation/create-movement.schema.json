@@ -12,6 +12,9 @@
     },
     "producer": {
       "$ref": "../common/producer/producer.schema.json"
+    },
+    "brokerOrDealer": {
+      "$ref": "../common/broker-or-dealer/broker-or-dealer.schema.json"
     }
   },
   "required": ["apiCode", "producer"],
