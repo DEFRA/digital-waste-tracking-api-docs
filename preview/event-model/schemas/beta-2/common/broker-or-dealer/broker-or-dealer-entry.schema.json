@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Broker or dealer",
+  "description": "A single broker or dealer who arranged the transfer. organisationName and contactDetails are required, and exactly one of registrationNumber or reasonForNoRegistrationNumber must be provided. address is optional.",
+  "type": "object",
+  "oneOf": [
+    {
+      "required": ["registrationNumber"],
+      "properties": {
+        "registrationNumber": {},
+        "reasonForNoRegistrationNumber": false
+      }
+    },
+    {
+      "required": ["reasonForNoRegistrationNumber"],
+      "properties": {
+        "registrationNumber": false,
+        "reasonForNoRegistrationNumber": {}
+      }
+    }
+  ],
+  "properties": {
+    "organisationName": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Name of the broker or dealer organisation who arranged this transfer."
+    },
+    "registrationNumber": {
+      "type": "string",
+      "pattern": "^\\s*(?:[Cc][Bb][Dd][LlUu]\\d{3,}|[Ww][Cc][Rr]/[Rr]/\\d{7}|(?:[Ss][Cc][Oo]|[Ss][Ee][Aa]|[Ss][Nn][Oo]|[Ss][Ww][Ee]|[Ww][Cc][Rr])/\\d{6}|[Pp][Cc][Tt]-[A-Za-z]-\\d{3,7}|[Rr][Oo][Cc]\\W*[UuLl][Tt]\\W*\\d{1,5})\\s*$",
+      "description": "Waste carrier, broker or dealer registration number, in a valid UK home-nation format (England and NRW CBDU/CBDL, SEPA WCR/SCO/SEA/SNO/SWE and PCT, NI ROC UT/LT). Mutually exclusive with reasonForNoRegistrationNumber — exactly one of the two is required."
+    },
+    "reasonForNoRegistrationNumber": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Reason no registrationNumber is held. Free text for now — enum values TBC pending BA/policy input. Mutually exclusive with registrationNumber — exactly one of the two is required."
+    },
+    "contactDetails": {
+      "$ref": "../contact-details.schema.json"
+    },
+    "address": {
+      "$ref": "../address.schema.json"
+    }
+  },
+  "required": ["organisationName", "contactDetails"],
+  "additionalProperties": false
+}

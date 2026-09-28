@@ -604,6 +604,27 @@ export const carrierSchema = Joi.object({
  * Broker schema — required when the movement is broker-initiated (D-008).
  * Shares the same registration number format as the carrier, and the same
  * registrationNumber/reasonForNoRegistrationNumber mutual-exclusivity rule.
+ *
+ * @deprecated Superseded by the JSON Schema in `waste-movement-backend`, mirrored
+ * here at `docs/event-model/schemas/beta-2/common/broker-or-dealer/`. That is now
+ * the source of truth for Broker or Dealer, it is what the running service validates
+ * against, and `openapi.yaml` `$ref`s it directly. Its rules are tested upstream,
+ * beside the schema files.
+ *
+ * Kept only because creationJoi.js, collectionJoi.js, receiptJoi.js and
+ * receiptWithoutDeliveryJoi.js still compose it, so those fixtures stay whole and
+ * readable. Do not extend it, and do not treat a difference between it and the
+ * synced schema as a bug here — the synced one wins. Expect it to go when the
+ * remaining resources follow Broker or Dealer across to the backend.
+ *
+ * Note the shapes have already diverged, further than Producer's did. The synced
+ * schema wraps the party in an `isPresent`/`items[]` object, so more than one broker
+ * may be declared, where this one is a single bare object; it nests emailAddress and
+ * phoneNumber under `contactDetails`, where this one has them at the top level; it
+ * requires exactly one of registrationNumber or reasonForNoRegistrationNumber, where
+ * this one requires registrationNumber whenever the object is supplied; its
+ * reasonForNoRegistrationNumber is free text pending BA/policy input, where this one
+ * takes the REASONS_FOR_NO_REGISTRATION_NUMBER enum; and its address is optional.
  */
 export const brokerSchema = Joi.object({
   registrationNumber: carrierRegistrationNumberSchema
