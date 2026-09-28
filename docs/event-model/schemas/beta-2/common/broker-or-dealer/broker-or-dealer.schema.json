@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Broker or dealer involvement",
+  "description": "Declares whether any broker or dealer was involved in the movement, and their details. isPresent gates the items array: when true at least one entry is required, when false or absent entries are forbidden.",
+  "type": "object",
+  "oneOf": [
+    {
+      "required": ["isPresent", "items"],
+      "properties": {
+        "isPresent": { "const": true },
+        "items": { "type": "array", "minItems": 1 }
+      }
+    },
+    {
+      "properties": {
+        "isPresent": { "const": false },
+        "items": false
+      }
+    }
+  ],
+  "properties": {
+    "isPresent": {
+      "type": "boolean",
+      "description": "Whether a broker or dealer was involved in arranging the movement. Absent is equivalent to false."
+    },
+    "items": {
+      "type": "array",
+      "items": { "$ref": "broker-or-dealer-entry.schema.json" },
+      "description": "The brokers or dealers involved. Required with at least one entry when isPresent is true, and must not be provided otherwise. More than one may be declared."
+    }
+  },
+  "additionalProperties": false
+}

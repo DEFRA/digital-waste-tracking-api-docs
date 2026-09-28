@@ -4,9 +4,11 @@
  * rules can be exercised (they're not reachable through any sub-schema
  * test). Sub-schema field-level rules are covered elsewhere: receiver
  * (common/receiver.test.js), waste items (creation/waste-item.test.js).
- * Producer is no longer covered here — its schema moved to
- * waste-movement-backend and is tested there; see the @deprecated note on
- * creationJoi.js's producerSchema. Uses ewcCode 200121, the one hazardous code
+ * Producer and brokerOrDealer are no longer covered here — their schemas moved
+ * to waste-movement-backend and are tested there; see the @deprecated notes on
+ * creationJoi.js's producerSchema and sharedSchemas.js's brokerSchema. The
+ * latter is still composed by Collection, Receipt and Receipt-without-Delivery,
+ * which have no synced schema yet. Uses ewcCode 200121, the one hazardous code
  * in the doc-side reference subset (see validators.js), to drive the
  * hazardous-EWC branches.
  */
