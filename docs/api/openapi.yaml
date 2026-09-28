@@ -641,8 +641,9 @@ components:
     # --- 4. Request and response bodies per endpoint --------------------
 
     # POST /movements — single request shape (D-030: no discriminated union).
-    # `carrier` is always required (D-008); `brokerOrDealer` is present only
-    # when the movement is broker/dealer-initiated. `apiCode` identifies the
+    # `carrier` is always required (D-008); `brokerOrDealer` is gated by its own
+    # `isPresent` flag, which must be true for `items` to be supplied and allows
+    # more than one broker to be declared. `apiCode` identifies the
     # submitting organisation — at creation the initiator, carrier or broker
     # (D-027). Field names and shapes match the createMovement worked example.
 
@@ -709,9 +710,7 @@ components:
             $ref: '#/components/schemas/intendedCarrierDetails'
           description: Prospective carrier(s) declared at creation (D-045). Always required, min 1 — a producer may declare more than one prospective carrier; meansOfTransport and organisationName are the only mandatory fields per entry at this stage.
         brokerOrDealer:
-          allOf:
-            - $ref: '#/components/schemas/brokerOrDealer'
-          description: Broker or dealer details. Required only when the movement is broker/dealer-initiated; omitted otherwise. Reuses the Phase 1 brokerOrDealer shape.
+          $ref: '../event-model/schemas/beta-2/common/broker-or-dealer/broker-or-dealer.schema.json'
         intendedReceivers:
           type: array
           minItems: 1
@@ -888,11 +887,7 @@ components:
             <li>Captured for the record only — it is not cross-checked against the preceding event's `carrier`; any discrepancy is left for regulators to detect.</li>
             </ul>
         brokerOrDealer:
-          allOf:
-            - $ref: '#/components/schemas/brokerOrDealer'
-          description: |
-            Broker or dealer details, when relevant to confirm or re-confirm at
-            collection. Optional; same shared shape as Creation and Receipt.
+          $ref: '../event-model/schemas/beta-2/common/broker-or-dealer/broker-or-dealer.schema.json'
         collectionSite:
           $ref: '#/components/schemas/collectionSite'
         isDeleted:
@@ -1209,7 +1204,7 @@ components:
         carrier:
           $ref: '#/components/schemas/carrier'
         brokerOrDealer:
-          $ref: '#/components/schemas/brokerOrDealer'
+          $ref: '../event-model/schemas/beta-2/common/broker-or-dealer/broker-or-dealer.schema.json'
         receiverSite:
           $ref: '#/components/schemas/receiverSite'
         reasonForNoDeliveryId:

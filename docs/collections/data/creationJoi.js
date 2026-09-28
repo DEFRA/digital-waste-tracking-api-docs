@@ -39,11 +39,12 @@
  *   be collected from, if not the producer's address. Distinct from the Collection event's own
  *   collectionSite, which records the actual collection.
  *
- * Producer is the exception to all of the above: `producerSchema` is deprecated,
- * superseded by the JSON Schema mirrored at
- * `docs/event-model/schemas/beta-2/common/producer/`. The producer bullets
- * in this header describe what this fixture does, not what the service enforces —
- * see the note on the export itself.
+ * Producer and brokerOrDealer are the exceptions to all of the above. `producerSchema`
+ * (below) and `brokerSchema` (sharedSchemas.js) are both deprecated, superseded by the
+ * JSON Schemas mirrored at `docs/event-model/schemas/beta-2/common/producer/` and
+ * `.../broker-or-dealer/`. The producer and brokerOrDealer bullets in this header
+ * describe what these fixtures do, not what the service enforces — see the notes on
+ * the exports themselves.
  */
 
 import Joi from 'joi'
