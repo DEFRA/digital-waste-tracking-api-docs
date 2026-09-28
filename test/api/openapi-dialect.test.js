@@ -20,7 +20,7 @@ const schemaRoot = path.join(
   'schemas'
 )
 
-const specs = ['openapi.yaml', 'openapi-beta-1.yaml']
+const specs = ['openapi.yaml', 'openapi-beta-1.yaml', 'openapi-beta-2.yaml']
 
 /** Every key/value pair in the document, flattened, so keyword checks don't
  *  depend on where in the tree a schema object happens to sit. */
