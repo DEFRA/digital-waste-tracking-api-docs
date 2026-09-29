@@ -1,0 +1,951 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+        <link rel="canonical" href="https://defra.github.io/digital-waste-tracking-api-docs/preview/api/validation-confirmation/">
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../favicons/moj.ico">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>Validation confirmation - Digital Waste Tracking - API Docs</title>
+      
+    
+    
+  
+      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+  
+  
+    
+      
+      
+    
+  
+  
+  <style>:root{--md-admonition-icon--quote:url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2016%2016%22%3E%3Cpath%20d%3D%22M1.75%202.5h10.5a.75.75%200%200%201%200%201.5H1.75a.75.75%200%200%201%200-1.5m4%205h8.5a.75.75%200%200%201%200%201.5h-8.5a.75.75%200%200%201%200-1.5m0%205h8.5a.75.75%200%200%201%200%201.5h-8.5a.75.75%200%200%201%200-1.5M2.5%207.75v6a.75.75%200%200%201-1.5%200v-6a.75.75%200%200%201%201.5%200%22/%3E%3C/svg%3E');}</style>
+
+
+
+  
+  
+    
+      
+      
+        
+      
+      
+    
+  
+    
+      
+      
+        
+      
+      
+    
+  
+    
+      
+      
+        
+      
+      
+    
+  
+    
+      
+      
+        
+      
+      
+    
+  
+    
+      
+      
+        
+      
+      
+    
+  
+    
+      
+      
+        
+      
+      
+    
+  
+  
+  <style>:root{.md-tag.md-tag--draft{--md-tag-icon:url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cpath%20d%3D%22M5.5%202C3.6%202%202%203.6%202%205.5v13C2%2020.4%203.6%2022%205.5%2022H16l6-6V5.5C22%203.6%2020.4%202%2018.5%202zm.3%202h12.5c1%200%201.8.8%201.8%201.8V15h-1.5c-1.9%200-3.5%201.6-3.5%203.5V20H5.8c-1%200-1.8-.8-1.8-1.8V5.8C4%204.8%204.8%204%205.8%204%22/%3E%3C/svg%3E');}.md-tag.md-tag--accepted{--md-tag-icon:url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cpath%20d%3D%22M18.5%202h-13C3.6%202%202%203.6%202%205.5v13C2%2020.4%203.6%2022%205.5%2022H16l6-6V5.5C22%203.6%2020.4%202%2018.5%202M20%2015h-1.5c-1.9%200-3.5%201.6-3.5%203.5V20H5.8c-1%200-1.8-.8-1.8-1.8V5.8C4%204.8%204.8%204%205.8%204h12.5c1%200%201.8.8%201.8%201.8V15m-4.9-6.8%201.5%201.5-6%206-3.5-3.5%201.5-1.5%202%202z%22/%3E%3C/svg%3E');}.md-tag.md-tag--proposed{--md-tag-icon:url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cpath%20d%3D%22M13%2011h3v2h-3v3h-2v-3H8v-2h3V8h2zm9-5.5V16l-6%206H5.5C3.6%2022%202%2020.4%202%2018.5v-13C2%203.6%203.6%202%205.5%202h13C20.4%202%2022%203.6%2022%205.5m-2%20.3c0-1-.8-1.8-1.8-1.8H5.8C4.8%204%204%204.8%204%205.8v12.5c0%201%20.8%201.8%201.8%201.8H15v-1.5c0-1.9%201.6-3.5%203.5-3.5H20z%22/%3E%3C/svg%3E');}.md-tag.md-tag--deprecated{--md-tag-icon:url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cpath%20d%3D%22M8%2011h8v2H8zm14-5.5V16l-6%206H5.5C3.6%2022%202%2020.4%202%2018.5v-13C2%203.6%203.6%202%205.5%202h13C20.4%202%2022%203.6%2022%205.5m-2%20.3c0-1-.8-1.8-1.8-1.8H5.8C4.8%204%204%204.8%204%205.8v12.5c0%201%20.8%201.8%201.8%201.8H15v-1.5c0-1.9%201.6-3.5%203.5-3.5H20z%22/%3E%3C/svg%3E');}.md-tag.md-tag--superseded{--md-tag-icon:url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cpath%20d%3D%22M11%2015h2v2h-2zm0-2h2V7h-2zm11-7.5V16l-6%206H5.5C3.6%2022%202%2020.4%202%2018.5v-13C2%203.6%203.6%202%205.5%202h13C20.4%202%2022%203.6%2022%205.5m-2%20.3c0-1-.8-1.8-1.8-1.8H5.8C4.8%204%204%204.8%204%205.8v12.5c0%201%20.8%201.8%201.8%201.8H15v-1.5c0-1.9%201.6-3.5%203.5-3.5H20z%22/%3E%3C/svg%3E');}.md-tag.md-tag--rejected{--md-tag-icon:url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cpath%20d%3D%22M16%209.4%2013.4%2012l2.6%202.6-1.4%201.4-2.6-2.6L9.4%2016%208%2014.6l2.6-2.6L8%209.4%209.4%208l2.6%202.6L14.6%208zm6-3.9V16l-6%206H5.5C3.6%2022%202%2020.4%202%2018.5v-13C2%203.6%203.6%202%205.5%202h13C20.4%202%2022%203.6%2022%205.5m-2%20.3c0-1-.8-1.8-1.8-1.8H5.8C4.8%204%204%204.8%204%205.8v12.5c0%201%20.8%201.8%201.8%201.8H15v-1.5c0-1.9%201.6-3.5%203.5-3.5H20z%22/%3E%3C/svg%3E');}}</style>
+
+    
+<link rel="stylesheet" href="../../assets/stylesheets/extra.css" />
+
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  
+  
+    <meta name="robots" content="noindex, nofollow">
+  
+
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#validation-confirmation" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <div data-md-color-scheme="default" data-md-component="outdated" hidden>
+        
+      </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="Digital Waste Tracking - API Docs" class="md-header__button md-logo" aria-label="Digital Waste Tracking - API Docs" data-md-component="logo">
+      
+  <img src="../../logos/moj.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Digital Waste Tracking - API Docs
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Validation confirmation
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Share" aria-label="Share" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/DEFRA/digital-waste-tracking-api-docs" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+    
+      
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../.." class="md-tabs__link">
+          
+  
+  
+    
+  
+  Digital Waste Tracking
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+    
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+  
+    
+    <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation">
+      <div class="md-sidebar__scrollwrap">
+        <div class="md-sidebar__inner">
+          <nav class="md-nav md-nav--primary" aria-label="Collections navigation" data-md-level="0">
+            <label class="md-nav__title" for="__drawer">
+              <span class="md-nav__icon md-icon"></span>
+              Collections
+            </label>
+            <ul class="md-nav__list" data-md-scrollfix>
+              
+              
+                
+                <li class="md-nav__item">
+                  <a href="../../collections/" class="md-nav__link">Overview</a>
+                </li>
+              
+                
+                <li class="md-nav__item">
+                  <a href="../../collections/decisions/" class="md-nav__link">Decisions</a>
+                </li>
+              
+                
+                <li class="md-nav__item">
+                  <a href="../../collections/glossary/" class="md-nav__link">Glossary</a>
+                </li>
+              
+                
+                <li class="md-nav__item">
+                  <a href="../../collections/plan/" class="md-nav__link">Plan</a>
+                </li>
+              
+                
+                <li class="md-nav__item">
+                  <a href="../../collections/registration/" class="md-nav__link">Registration</a>
+                </li>
+              
+                
+                <li class="md-nav__item">
+                  <a href="../../collections/docs/" class="md-nav__link">Notes</a>
+                </li>
+              
+                
+                  
+                    <li class="md-nav__item"><span class="md-nav__link md-nav__link--group-title">API</span></li>
+                  
+                  
+                
+                <li class="md-nav__item collections-nav__item--grouped">
+                  <a href="../" class="md-nav__link">Overview</a>
+                </li>
+              
+                
+                <li class="md-nav__item collections-nav__item--grouped">
+                  <a href="../openapi/" class="md-nav__link">OpenAPI viewer</a>
+                </li>
+              
+                
+                  
+                    <li class="md-nav__item"><span class="md-nav__link md-nav__link--group-title">Data model</span></li>
+                  
+                  
+                
+                <li class="md-nav__item collections-nav__item--grouped">
+                  <a href="../../collections/model/" class="md-nav__link">Overview</a>
+                </li>
+              
+                
+                <li class="md-nav__item collections-nav__item--grouped">
+                  <a href="../../collections/model/phase1-waste-inputs/" class="md-nav__link">Phase 1: current waste-inputs model</a>
+                </li>
+              
+                
+                <li class="md-nav__item collections-nav__item--grouped">
+                  <a href="../../collections/model/mongo-schema-proposal/" class="md-nav__link">Mongo schema proposal (Option A)</a>
+                </li>
+              
+                
+                <li class="md-nav__item collections-nav__item--grouped">
+                  <a href="../../collections/model/mongo-schema-proposal-per-event/" class="md-nav__link">Mongo schema proposal — per event (Option B)</a>
+                </li>
+              
+                
+                <li class="md-nav__item collections-nav__item--grouped">
+                  <a href="../../collections/model/mongo-schema-proposal-CQRS/" class="md-nav__link">Mongo schema proposal — CQRS (Option C)</a>
+                </li>
+              
+                
+                  
+                    <li class="md-nav__item"><span class="md-nav__link md-nav__link--group-title">Phase 1 reference</span></li>
+                  
+                  
+                
+                <li class="md-nav__item collections-nav__item--grouped">
+                  <a href="../../collections/phase1/receipt-api-implemented-data-model/" class="md-nav__link">Receipt API implemented data model</a>
+                </li>
+              
+                
+                <li class="md-nav__item collections-nav__item--grouped">
+                  <a href="../../collections/phase1/receipt-data-definitions/" class="md-nav__link">Receipt data definitions</a>
+                </li>
+              
+                
+                  
+                    <li class="md-nav__item"><span class="md-nav__link md-nav__link--group-title">Phase 2</span></li>
+                  
+                  
+                
+                <li class="md-nav__item collections-nav__item--grouped">
+                  <a href="../../collections/phase2/assessment-feedback/" class="md-nav__link">GDS Alpha assessment feedback</a>
+                </li>
+              
+                
+                  
+                    <li class="md-nav__item"><span class="md-nav__link md-nav__link--group-title">Scenarios</span></li>
+                  
+                  
+                
+                <li class="md-nav__item collections-nav__item--grouped">
+                  <a href="../../collections/scenarios/beta-1/" class="md-nav__link">beta-1</a>
+                </li>
+              
+            </ul>
+          </nav>
+        </div>
+      </div>
+    </div>
+  
+  
+
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+    
+      
+    
+    <a href="https://github.com/DEFRA/digital-waste-tracking-api-docs/raw/main/docs/api/validation-confirmation.md" title="View source of this page" class="md-content__button md-icon">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17 18c.56 0 1 .44 1 1s-.44 1-1 1-1-.44-1-1 .44-1 1-1m0-3c-2.73 0-5.06 1.66-6 4 .94 2.34 3.27 4 6 4s5.06-1.66 6-4c-.94-2.34-3.27-4-6-4m0 6.5a2.5 2.5 0 0 1-2.5-2.5 2.5 2.5 0 0 1 2.5-2.5 2.5 2.5 0 0 1 2.5 2.5 2.5 2.5 0 0 1-2.5 2.5M9.27 20H6V4h7v5h5v4.07c.7.08 1.36.25 2 .49V8l-6-6H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h4.5a8.2 8.2 0 0 1-1.23-2"/></svg>
+    </a>
+  
+
+
+<!-- prettier-ignore -->
+<div class="admonition warning">
+<p class="admonition-title">Internal documentation</p>
+<p>This page is internal design/planning material for the delivery team, not published guidance for Software Providers integrating with the Digital Waste Tracking API. Content here may be incomplete, in-progress, or superseded.</p>
+</div>
+<!-- prettier-ignore -->
+<div class="admonition info">
+<p class="admonition-title">Draft proposal — not decided</p>
+<p>This is a <strong>draft proposal for team discussion</strong>, not an agreed position. Nothing here is decided, and no entry exists for it in the <a href="../../collections/decisions/">decisions register</a> — the register still records the accept-with-warnings behaviour this pitch proposes to replace (<a href="../../collections/decisions/#d-031">D-031</a>, <a href="../../collections/decisions/#d-039">D-039</a>). The current behaviour stands until this is agreed and recorded. The <a href="#follow-up-if-adopted">follow-up</a> section lists what would need to change if it is.</p>
+</div>
+<h1 id="validation-confirmation">Validation Confirmation</h1>
+<h2 id="tldr">TL;DR</h2>
+<p>Replace <strong>accept-with-warnings</strong> on new endpoints with <strong>reject-and-confirm</strong>. A request with soft data-quality issues is rejected with <code>400</code> and a server-issued confirmation token; resubmitting the same payload with that token in a header stores the record.</p>
+<ul>
+<li><strong><code>2xx</code> means accepted with nothing outstanding.</strong> The <code>validation.warnings</code> block leaves the success envelope entirely.</li>
+<li><strong>Soft issues are reported as a rejection</strong> — a new <code>confirmation-required</code> problem type, with the issues in <code>errors[]</code> and a <code>confirmationToken</code> extension member.</li>
+<li><strong>No dead ends.</strong> This is not "stricter validation": every rejection offers a route forward, correct it or confirm it. Some issues genuinely cannot be corrected by the submitting party, and those must stay filable.</li>
+<li><strong>Confirming is an explicit, per-submission act.</strong> The token is bound to the payload, the issues, the calling organisation and a short expiry, so it cannot be hardcoded or reused.</li>
+<li><strong>Nothing new to store.</strong> Soft issues are a pure function of the payload, so "which receipts have no confirmed treatment code" is a query over the records themselves. No warnings log, no confirmation log.</li>
+<li><strong>New endpoints only.</strong> The live Receipt of Waste endpoints are untouched, consistent with <a href="../standards/">API Standards</a>.</li>
+<li><strong>No integrator impact today, which is the point.</strong> No <code>beta</code> endpoint has ever produced a warning — the envelope is empty scaffolding. Changing it now is free; once warning logic is wired in and vendors depend on it, it is not.</li>
+</ul>
+<h2 id="baseline">Baseline</h2>
+<p>The service accepts a request that has soft, data-quality problems, stores the record, and returns those problems as <code>validation.warnings</code> on a <code>201</code>/<code>200</code>. This was inherited from the Phase 1 Receipt of Waste API when the <a href="../standards/">API Standards</a> pitch was written, and carried forward into the <code>beta</code> contract: <code>api/openapi-beta-2.yaml</code> marks <code>validation</code> as <code>required</code> on every success response schema, so a warnings array is part of the promised shape whether or not there are warnings.</p>
+<p>Four things about that baseline are worth stating precisely, because the argument turns on them.</p>
+<p><strong>No decision establishes it.</strong> <a href="../standards/">API Standards</a> describes accept-with-warnings as "the decided, current implementation" and cites <a href="../../collections/decisions/#d-006">D-006</a>, <a href="../../collections/decisions/#d-009">D-009</a> and <a href="../../collections/decisions/#d-036">D-036</a>. <a href="../../collections/decisions/#d-039">D-039</a> in turn says reject-vs-warn "follows the accept-with-warnings model" and defers the detail back to this document. The three cited decisions do not contain it: D-006 decides that one receipt cross-check surfaces as warnings, D-009 states the opposite for its own case ("a <code>BusinessRuleViolation</code> validation error, not a warning — the operation is rejected (400)"), and D-036 does not discuss response semantics at all. The one entry that does decide it, for a single field, is <a href="../../collections/decisions/#d-031">D-031</a>: "Omitting the code produces a warning, not a rejection."</p>
+<p><strong>Every warning is a missing field.</strong> All ten warning validators in <code>waste-movement-utils</code> (<code>src/validation-warnings/validators/</code>) use one <code>errorType</code>: <code>NotProvided</code>. The <code>TBC</code> type is defined and never used. Nothing warns about a value being wrong, out of range, or inconsistent with an earlier event. So what the standards document frames as a general model for soft data-quality issues is, in practice, one rule — "you did not provide this" — applied to three field groups: actual treatments, POPs/hazardous components, and carrier registration number.</p>
+<p><strong>Warnings are never stored.</strong> <code>generateAllValidationWarnings</code> runs in the gateway (<code>waste-movement-external-api/src/handlers/create-receipt-movement.js</code>) <em>after</em> the write to the backend, purely to decorate the response. <code>waste-movement-backend</code> has no notion of a warning in its domain, services or Mongo schemas. A warning exists for the duration of one HTTP response and is then gone. This matters less than it appears — the issue itself is re-derivable from the stored record (<a href="#nothing-extra-to-persist">Nothing extra to persist</a>) — but it does mean a warning has no effect of any kind beyond the response it rides on.</p>
+<p><strong>No warning states an obligation.</strong> The full set of messages in <code>waste-movement-utils/src/constants/validation-warning-messages.js</code> is "{{#label}} is required", "{{#label}} is required for proper waste tracking and compliance", and two variants of "{{#label}} are recommended when source of components is …". None cites a legal or regulatory requirement, and two say <em>recommended</em>.</p>
+<p><strong>And on the new endpoints, nothing is generated at all.</strong> Every <code>validation.warnings</code> in the <code>beta-1</code> and <code>beta-2</code> routes is a hardcoded empty array — six occurrences in <code>waste-movement-backend/src/routes/beta-*/</code> — and neither the backend nor the gateway calls any warning generator on a <code>beta</code> path. Warning generation is wired only to the Phase 1 receipt handlers. So for the endpoints these standards actually govern, <code>validation</code> is a field the contract marks <code>required</code> and guarantees to be empty.</p>
+<h2 id="problem">Problem</h2>
+<p>Returning <code>200</code> with a body full of entries labelled <code>errorType</code> reads as an error reported with a success code. It has drawn repeated review feedback, and the objection is sound on its own terms: a <code>2xx</code> should mean the request was accepted and there is nothing for the caller to deal with.</p>
+<p>The deeper problem is that the mechanism does not do the job it is there to do. Take the case it exists for — a receiving site cannot always know the actual treatment at the point of receipt, because the waste may need inspecting or weighing first, and the treatment is still required. Under accept-with-warnings:</p>
+<ul>
+<li><strong>The warning can be ignored at no cost.</strong> The record is already stored by the time the caller reads it. Nothing further is required of them and nothing happens if they do nothing.</li>
+<li><strong>Nothing is chased.</strong> The warning asks for no response and triggers nothing. Whether the missing code is ever supplied depends entirely on the integrator choosing to send a later <code>PUT</code>, and nothing in the exchange prompts them to. (Note this is <em>not</em> an argument that the gap is invisible — see <a href="#nothing-extra-to-persist">Nothing extra to persist</a>. The records can be found; nothing acts on them.)</li>
+<li><strong>"Not yet known" and "not supplied" are indistinguishable.</strong> Both produce a byte-identical <code>NotProvided</code> entry. The distinction that makes the case legitimate is the distinction the mechanism discards — and confirmation does not recover it either, which is the strongest argument for the reason-for-absence alternative in <a href="#no-gos">No-gos</a>.</li>
+<li><strong>The obligation is never stated.</strong> If the requirement is that the integrator is told the field is a legal requirement, the current messages do not say so.</li>
+</ul>
+<p>And the boundary was never definable. Which discrepancies are warnings and which are errors is still open in <a href="../../collections/decisions/#d-021">D-021</a>, and D-006 records that the granularity of its own cross-check — "string match, field-by-field, weight tolerance, etc." — remains undefined. That is not an oversight waiting to be closed; it is a sign that "soft issue" is not a category the contract can carry cleanly.</p>
+<p><strong>Why now.</strong> The <code>beta</code> endpoints carry the envelope but have never filled it: no soft validation is implemented on any of them, so no integrator has received a warning from one. Nothing has to be migrated, deprecated or dual-run, and no vendor code has to change — the cost of this decision is as low as it will ever be. That inverts once warning logic is written against the current envelope, because the shape then has real dependants and the same change becomes a breaking one. The decision is cheap today and expensive shortly.</p>
+<h2 id="solution">Solution</h2>
+<p>Reject the request, tell the caller what is wrong, and let them confirm it deliberately.</p>
+<h3 id="the-exchange">The exchange</h3>
+<p>A request with soft issues is rejected. Nothing is stored.</p>
+<div class="highlight"><pre><span></span><code><span class="err">POST /beta-2/deliveries/25HRA0B2/receipt</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span> <span class="m">400</span> <span class="ne">Bad Request</span>
+<span class="na">Content-Type</span><span class="o">:</span> <span class="l">application/problem+json</span>
+<span class="na">x-request-id</span><span class="o">:</span> <span class="l">4f6c1f0e9a3b4c2d8e7f6a5b4c3d2e1f</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://defra.github.io/digital-waste-tracking-api-docs/preview/problems/confirmation-required"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"title"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Confirmation Required"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"detail"</span><span class="p">:</span><span class="w"> </span><span class="s2">"1 field needs confirmation before the receipt can be stored."</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"instance"</span><span class="p">:</span><span class="w"> </span><span class="s2">"/beta-2/deliveries/25HRA0B2/receipt"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"requestId"</span><span class="p">:</span><span class="w"> </span><span class="s2">"4f6c1f0e9a3b4c2d8e7f6a5b4c3d2e1f"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"confirmationToken"</span><span class="p">:</span><span class="w"> </span><span class="s2">"eyJ2IjoxLCJwIjoiYTk0ZTc3…"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"errors"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">"pointer"</span><span class="p">:</span><span class="w"> </span><span class="s2">"/wasteItems/0/actualTreatments/0/disposalOrRecoveryCode"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"errorType"</span><span class="p">:</span><span class="w"> </span><span class="s2">"NotProvided"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"message"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Recording the actual treatment applied is a legal requirement under [regulation reference]. Supply the code, or confirm to record this receipt without it."</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">]</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>The caller either corrects the payload and resubmits, or resubmits the same payload with the token to confirm.</p>
+<div class="highlight"><pre><span></span><code><span class="err">POST /beta-2/deliveries/25HRA0B2/receipt</span>
+<span class="err">X-Confirm-Warnings: eyJ2IjoxLCJwIjoiYTk0ZTc3…</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span> <span class="m">201</span> <span class="ne">Created</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><span class="p">{</span><span class="w"> </span><span class="nt">"data"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">"deliveryId"</span><span class="p">:</span><span class="w"> </span><span class="s2">"25HRA0B2"</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="p">}</span>
+</code></pre></div>
+<p>The success body is now unambiguous: a <code>2xx</code> carries no outstanding issues, and the <code>validation</code> block is gone from the success envelope.</p>
+<h3 id="no-dead-ends">No dead ends</h3>
+<p>Some issues cannot be corrected by the party submitting. A receiver cannot change what a producer declared at Creation, so a weight or carrier cross-check mismatch (<a href="../../collections/decisions/#d-006">D-006</a>) may be accurate and permanent. A carrier may genuinely have no registration number. POPs or hazardous components may not have been supplied with the waste. The treatment may not be knowable until the load is inspected.</p>
+<p>This gives the mechanism its governing principle: <strong>every rejection must offer a route forward — correct it, or confirm it.</strong> A rejection with neither is a dead end, and a dead end means a legitimate operational record cannot be filed at all. That is a worse outcome than any data-quality problem it prevents, in a service whose purpose is to have the movement recorded.</p>
+<p>It also means "the caller cannot avoid this" is not on its own a reason to make something confirmable, because two very different situations produce it:</p>
+<table>
+<thead>
+<tr>
+<th>The issue is unavoidable because…</th>
+<th>Right response</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Reality is like that — the discrepancy is genuine, the data does not exist yet, the exemption applies</td>
+<td><strong>Confirmable.</strong> The caller acknowledges it and the record is filed with the gap visible in the data.</td>
+</tr>
+<tr>
+<td><strong>We</strong> are wrong — a rule stricter than the regulation, a validator bug, a legitimate EWC code missing from our reference data</td>
+<td><strong>Not confirmable. Fix it.</strong> A confirm token here buys silence: the defect is hidden, and the records carry an acknowledgement of a problem that was never the operator's.</td>
+</tr>
+</tbody>
+</table>
+<p>Keeping the second category out of the confirm path is a standing obligation, not a one-off design step, because the only way to tell the two apart is to look. Which gives the confirmation rate a second use beyond the accountability argument above: <strong>a spike in confirmations on one <code>pointer</code> is far more likely to mean our rule is wrong than that operators have collectively become careless.</strong> Monitored per pointer rather than per organisation, it is a defect detector for our own validation.</p>
+<h3 id="the-token">The token</h3>
+<p>The token is a signed value the caller cannot mint and cannot usefully keep. It is an HMAC over four things, with no server-side state:</p>
+<table>
+<thead>
+<tr>
+<th>Bound to</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Canonical hash of the request payload</td>
+<td>A token issued for one submission cannot confirm a different one, so it cannot be cached and replayed.</td>
+</tr>
+<tr>
+<td>The set of issue pointers</td>
+<td>A new, unanticipated issue is not covered by an existing token and produces a fresh <code>400</code>.</td>
+</tr>
+<tr>
+<td>The authenticated organisation (<code>apiCode</code>)</td>
+<td>A token cannot be shared between integrators.</td>
+</tr>
+<tr>
+<td>Issued-at timestamp, short expiry</td>
+<td>Tokens cannot be stockpiled ahead of time.</td>
+</tr>
+</tbody>
+</table>
+<p>Verification is recomputation, so there is no pending-submission store to keep, expire or replicate across instances.</p>
+<p>The two bindings do different jobs, and both are needed. <strong>Binding to the payload</strong> is what stops a token being cached and replayed across submissions — a token for one receipt cannot confirm another. <strong>Keying the hash</strong> is what stops the token being forged. Neither substitutes for the other.</p>
+<p>That second point is the one to be deliberate about, because a plain unkeyed hash of the payload is the obvious simplification and it quietly defeats the purpose. <code>sha256(canonical(payload))</code> is computable by the caller, so an integrator could skip the rejected call entirely and send <code>X-Confirm-Warnings</code> on every request from the start — reinstating exactly the confirm-by-default behaviour the mechanism exists to prevent, while looking like it prevents it. An HMAC cannot be computed without the server secret, so the first call is unavoidable and the caller has to be shown the issues before confirming them. The cost of the difference is one signing secret in CDP Secrets Manager and a rotation overlap; the property bought is the whole point of the design.</p>
+<h3 id="what-this-does-and-does-not-enforce">What this does and does not enforce</h3>
+<p>The token prevents a software provider from turning confirmation on by default. It does <strong>not</strong> prevent one from scripting the retry — catch the <code>400</code>, read the token, resubmit — and no mechanism at this layer can.</p>
+<p>What it gives instead is attribution and measurability, which is the argument <a href="../../collections/decisions/#d-036">D-036</a> already makes for write integrity generally: "integrity is by attribution, not prevention". Each confirmation is a discrete act tied to one payload, one organisation and one timestamp, so blanket auto-confirmation becomes a visible, reportable pattern rather than an invisible default. This is a deterrent backed by accountability, not a control, and the distinction should be recorded as such rather than discovered later.</p>
+<h3 id="nothing-extra-to-persist">Nothing extra to persist</h3>
+<p>An earlier draft of this pitch proposed storing each confirmation — what was confirmed, by whom, when. That is unnecessary, and worth stating explicitly so it does not get built.</p>
+<p>Soft issues are <strong>derived</strong>, not declared. Each one is a pure function of the payload, computed by the validators in <code>waste-movement-utils</code>. So everything a stored confirmation log would hold is already recoverable from the record:</p>
+<table>
+<thead>
+<tr>
+<th>Question</th>
+<th>Answered by</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Which receipts have no confirmed treatment code?</td>
+<td>A query over the records — <code>actualTreatments[].disposalOrRecoveryCode</code> is absent. The issue list never needed storing to be findable.</td>
+</tr>
+<tr>
+<td>Was this record confirmed?</td>
+<td>The record exists and has a soft issue. Confirmation is the only route to storing it, so the answer is implied.</td>
+</tr>
+<tr>
+<td>Which organisation confirmed it?</td>
+<td>The writing organisation already stamped on every write as immutable provenance (<a href="../../collections/decisions/#d-036">D-036</a>).</td>
+</tr>
+<tr>
+<td>When?</td>
+<td>The record's own timestamp.</td>
+</tr>
+</tbody>
+</table>
+<p>This removes the largest piece of new work the mechanism would otherwise need, and it means the change is confined to the request/response exchange: no new collection, no new fields on the stored document, nothing to migrate.</p>
+<p>The one thing recomputation does not preserve is <strong>what the operator was shown at the time</strong>. If a validator is added or changed later, re-deriving today's issues under tomorrow's rules answers "does this record have a gap now", not "what did we tell them then". For the compliance question — which records have gaps — current rules are the right rules and recomputation is the better answer. For a hypothetical dispute about what a specific operator was shown on a specific day, it is not. That is not a use case anyone has asked for, so it is noted in <a href="#rabbit-holes">Rabbit holes</a> rather than designed for.</p>
+<h3 id="why-400-and-not-422">Why <code>400</code> and not <code>422</code></h3>
+<p><code>422</code> is arguably the better semantic fit, since the request is well-formed and acceptable rather than malformed. <code>400</code> is chosen anyway because <a href="../standards/">API Standards</a> already defers <code>409</code> and <code>422</code> as future refinements and keeps <code>400</code> for all client validation. Using <code>400</code> here keeps that deferral intact instead of reopening it as a side effect of this change.</p>
+<h3 id="a-new-problem-type-not-a-reuse-of-bad-request">A new problem type, not a reuse of <code>bad-request</code></h3>
+<p>The existing <a href="../../problems/bad-request/"><code>bad-request</code></a> page states that "sending the same request again will fail in the same way". That is precisely what does not hold here: the same request, with a token, succeeds. Confirmation therefore needs its own <code>type</code> URI and its own page. Note this makes <code>confirmation-required</code> the second problem type at <code>400</code>, where the <a href="../../problems/">problem types</a> index currently lists one type per status code.</p>
+<h3 id="a-non-standard-extension">A non-standard extension</h3>
+<p><code>confirmationToken</code> and <code>X-Confirm-Warnings</code> are our own invention. They are not drawn from the <a href="https://www.gov.uk/guidance/gds-api-technical-and-data-standards">GOV.UK API standards</a> that this API otherwise adopts, and RFC 9457 sanctions extension members without describing this use of one. That should be stated explicitly wherever the mechanism is documented, so a future reader does not mistake it for something inherited.</p>
+<p>One open question is narrowed rather than answered. <a href="../../collections/decisions/#d-021">D-021</a> asks which discrepancies warn and which reject; under this proposal everything soft takes the same route, so what remains of D-021 is only which checks run at all — a smaller question than the one it currently poses.</p>
+<h2 id="rabbit-holes">Rabbit holes</h2>
+<ul>
+<li><strong>Payload canonicalisation.</strong> The payload hash needs stable key ordering, whitespace and number formatting, or a byte-different but semantically identical resubmission breaks its own token. Pick a canonical JSON form and treat it as part of the contract. This is the fiddliest part of the mechanism and the one most likely to generate support traffic.</li>
+<li><strong>Signing key rotation.</strong> Tokens signed under an outgoing key must still verify for the length of their expiry window, so rotation needs an overlap rather than a cutover.</li>
+<li><strong>Doubled request volume on the confirm path.</strong> Every confirmed submission is two calls. This affects request metrics, any rate limiting, and the existing validation metrics in <code>waste-movement-utils</code> — a rejected-then-confirmed submission should not read as one failure plus one success.</li>
+<li><strong>The issue vocabulary outgrows <code>NotProvided</code>.</strong> Every soft issue today is a missing field, but the uncorrectable cases above are not: a cross-check mismatch is a discrepancy between two supplied values, and the published <code>errorType</code> enum in <a href="../../problems/bad-request/">Bad Request</a> has no value for that — it would land in <code>BusinessRuleViolation</code> by default, which reads as the caller breaking a rule rather than two records disagreeing. Whether to add a value, and what it means for the shared item shape, is deferred until the D-006 cross-checks are specified.</li>
+<li><strong>Validator drift versus recomputation.</strong> Because soft issues are re-derived rather than stored (<a href="#nothing-extra-to-persist">Nothing extra to persist</a>), changing a validator changes the answer retrospectively: a record confirmed under one rule set reads differently under the next. This is correct for "which records have gaps today" and wrong for "what was this operator shown last March". Decide whether the second question is ever asked before concluding it does not matter — the answer is probably no, but it should be an answer rather than an oversight.</li>
+<li><strong>The bulk/spreadsheet path.</strong> Per-row issues across a batch do not map onto one token per request. Out of scope for this pitch, since the standards apply to new endpoints only, but it should not be assumed to fall out for free.</li>
+</ul>
+<h2 id="no-gos">No-gos</h2>
+<ul>
+<li><strong>No retrofit of Phase 1.</strong> <code>POST /movements/receive</code> and <code>PUT /movements/{wasteTrackingId}/receive</code> keep returning warnings. Changing them is breaking for live integrators and is not proposed.</li>
+<li><strong>No blanket override flag.</strong> A boolean <code>X-Force-Submit: true</code> is the obvious alternative and is rejected: it would be set permanently in vendor client configuration, leaving accept-with-warnings behaviour at twice the request volume with no record of what was acknowledged.</li>
+<li><strong>No server-side pending-submission store.</strong> The token is self-contained. Nothing is held between the two calls.</li>
+<li><strong>No per-field reason enums, for now.</strong> Requiring a structured reason for each absent obligated field (<code>PENDING_INSPECTION</code> and similar, extending the <code>reasonForNoRegistrationNumber</code> pattern) is a real alternative and would cost one round trip instead of two. It is not proposed here because it needs a reason enum agreed per field with policy, and confirmation covers every case with one mechanism. Worth revisiting if the confirm path proves too costly on high-volume receipt submission.</li>
+<li><strong>No stored confirmation log.</strong> Recording what was confirmed, by whom and when was in an earlier draft and is dropped: it is all derivable from the record, so it would be a second copy of data the service already holds. See <a href="#nothing-extra-to-persist">Nothing extra to persist</a>.</li>
+<li><strong>No attempt to prevent scripted auto-confirmation.</strong> Addressed by attribution and monitoring, not by the contract.</li>
+</ul>
+<h2 id="follow-up-if-adopted">Follow-up if adopted</h2>
+<p>Nothing below has been done. Grouped by where the work lands, because a decision recorded in this repo has no effect until the sibling service repos are changed to match.</p>
+<h3 id="this-repo-the-contract">This repo — the contract</h3>
+<ul>
+<li><strong>Remove <code>validation</code> from every success response schema.</strong> Four schemas in <code>api/openapi-beta-2.yaml</code> — <code>createMovementResponse</code>, <code>recordCollectionResponse</code>, <code>deliveryResponse</code>, <code>recordReceiptResponse</code> — declare <code>required: [data, validation]</code> and carry a <code>validation</code> property. Drop both, and delete the now-unused <code>validation</code> schema. The same four-schema change applies to <code>api/openapi-beta-1.yaml</code>, which has the identical envelope. This is behaviour-neutral: the field is hardcoded empty in every <code>beta</code> route, so removing it changes the documented contract and no observed response.</li>
+<li><strong>Add <code>confirmationToken</code></strong> to the <code>problemDetails</code> schema in both <code>beta</code> specs, as an optional member present only on <code>confirmation-required</code> responses.</li>
+<li><strong>Document the <code>X-Confirm-Warnings</code> request header</strong> on every write operation in both <code>beta</code> specs.</li>
+<li><strong>Decide whether <code>beta-1</code> changes at all</strong>, or whether this lands only in <code>beta-2</code> and later. <a href="../../collections/decisions/#d-038">D-038</a> requires a breaking change to be copied forward into a new milestone rather than amended in place — but removing an always-empty field, and adding an optional member and an optional header, is arguably not breaking. Worth settling explicitly rather than assuming either way.</li>
+</ul>
+<h3 id="this-repo-the-published-problem-types">This repo — the published problem types</h3>
+<ul>
+<li><strong>Add <code>docs/problems/confirmation-required.md</code></strong>, following the shape of the existing pages: type URI, title, status, when it happens, the <code>confirmationToken</code> member, how to confirm, and worked examples of both calls.</li>
+<li><strong>Add the row</strong> to the table in <code>docs/problems/index.md</code>, and note that <code>400</code> now has two types where the table currently implies one type per status.</li>
+<li><strong>Add <code>confirmationToken</code></strong> to the response-members table in <code>docs/problems/index.md</code>.</li>
+<li><strong>Amend <code>docs/problems/bad-request.md</code></strong>, which states "sending the same request again will fail in the same way" — true of <code>bad-request</code>, not of <code>confirmation-required</code>, so the two should cross-reference.</li>
+</ul>
+<h3 id="this-repo-standards-and-register">This repo — standards and register</h3>
+<ul>
+<li><strong>Rework <a href="../standards/">API Standards</a></strong>: the accept-with-warnings bullet in TL;DR, the "Accept-with-warnings" paragraph in Solution, the reject-vs-warn bullet in Topic 1, and the whole of Topic 2 including its <code>validation</code> examples and the shared warning/error item shape.</li>
+<li><strong>Add a new decision entry.</strong> Next free ID is <strong>D-046</strong> (D-045 is the current highest). Per the register's conventions this needs both the body entry in ID order and a row in the ranked Index table near the top.</li>
+<li><strong>Amend <a href="../../collections/decisions/#d-031">D-031</a></strong>, whose last sentence reads "Omitting the code produces a warning, not a rejection".</li>
+<li><strong>Update <a href="../../collections/decisions/#d-039">D-039</a></strong>'s summary bullets, which describe the reject-vs-warn model and the <code>2xx</code> envelope.</li>
+<li><strong>Update <a href="../../collections/decisions/#d-006">D-006</a></strong> and the glossary entry it drives (<code>collections/glossary.md</code>, cross-check definition: "Mismatches return validation warnings rather than hard errors"), plus the matching claim in <code>collections/plan.md</code> for <code>POST /deliveries/{deliveryId}/receipt</code>.</li>
+<li><strong>Update the <code>data/</code> fixtures</strong> that describe warning behaviour in their comments: <code>receiptJoi.js</code> ("produces a warning, not a rejection"), <code>collectionJoi.js</code>, <code>creationJoi.js</code> and <code>deliveryJoi.js</code> (the <code>isDeleted</code>-on-POST note), and the <code>warnings</code> arrays in the <code>collectionEvent.js</code> and <code>creationEvent.js</code> example payloads.</li>
+<li><strong>Leave <code>collections/phase1/</code> alone.</strong> Those pages describe the implemented Phase 1 model as it is, and Phase 1 is explicitly out of scope.</li>
+</ul>
+<h3 id="sibling-repos-the-implementation">Sibling repos — the implementation</h3>
+<ul>
+<li><strong><code>waste-movement-utils</code></strong> — the warning validators become issue producers on the rejection path; the messages need the legal-obligation wording they currently lack; a shared token sign/verify helper and canonical-payload-hash helper belong here, since both the gateway and any other caller need them.</li>
+<li><strong><code>waste-movement-external-api</code></strong> — issue the token on rejection, verify it on the confirming call, and stop decorating <code>2xx</code> responses in <code>handlers/create-receipt-movement.js</code> and the <code>beta</code> handlers.</li>
+<li><strong><code>waste-movement-backend</code></strong> — drop <code>validation: { warnings: [] }</code> from the six <code>beta</code> route responses. That is the whole of it: because nothing extra is persisted, the stored document, the Mongo schemas and the domain layer are untouched.</li>
+<li><strong>A signing secret</strong> in CDP Secrets Manager, with the rotation overlap noted in <a href="#rabbit-holes">Rabbit holes</a>.</li>
+<li><strong><code>digital-waste-tracking-docs</code></strong> — run its <code>/drift-audit</code> once the contract changes, to catch anything in the architecture model that assumed the old envelope.</li>
+</ul>
+<h2 id="references">References</h2>
+<ul>
+<li><a href="../standards/">API Standards</a> — the cross-cutting conventions this pitch amends.</li>
+<li><a href="../../problems/">Problem types</a> and <a href="../../problems/bad-request/">Bad Request</a> — the published problem-type pages a new type would join.</li>
+<li><a href="../../collections/decisions/">Decisions register</a> — <a href="../../collections/decisions/#d-006">D-006</a>, <a href="../../collections/decisions/#d-009">D-009</a>, <a href="../../collections/decisions/#d-021">D-021</a>, <a href="../../collections/decisions/#d-031">D-031</a>, <a href="../../collections/decisions/#d-036">D-036</a>, <a href="../../collections/decisions/#d-039">D-039</a>.</li>
+<li><a href="https://www.gov.uk/guidance/gds-api-technical-and-data-standards">GOV.UK — API technical and data standards</a> — the baseline government guidance; this pitch adds an extension it does not cover.</li>
+<li><a href="https://www.rfc-editor.org/rfc/rfc9457">RFC 9457 — Problem Details for HTTP APIs</a> — the error envelope the new problem type uses.</li>
+<li><a href="https://www.rfc-editor.org/rfc/rfc6901">RFC 6901 — JSON Pointer</a> — the field-path syntax in <code>errors[].pointer</code>.</li>
+</ul>
+
+
+
+
+
+
+
+  
+  
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+  <footer class="md-footer">
+    <div class="md-footer-meta__inner md-grid">
+       <div class="md-copyright">
+       
+<div class="md-social">
+  
+    
+    
+    
+    
+    <a href="mailto:wasteuserresearch@defra.gov.uk" target="_blank" rel="noopener" title="Contact us here" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M536.4-26.3c9.8-3.5 20.6-1 28 6.3s9.8 18.2 6.3 28l-178 496.9c-5 13.9-18.1 23.1-32.8 23.1-14.2 0-27-8.6-32.3-21.7l-64.2-158c-4.5-11-2.5-23.6 5.2-32.6l94.5-112.4c5.1-6.1 4.7-15-.9-20.6s-14.6-6-20.6-.9l-112.4 94.3c-9.1 7.6-21.6 9.6-32.6 5.2L38.1 216.8c-13.1-5.3-21.7-18.1-21.7-32.3 0-14.7 9.2-27.8 23.1-32.8z"/></svg>
+    </a>
+  
+    
+    
+    
+    
+    <a href="https://github.com/defra/waste-tracking-service" target="_blank" rel="noopener" title="Our DWT service is available here" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+</div>  Made with
+      <a
+        href="https://squidfunk.github.io/mkdocs-material/"
+        target="_blank"
+        rel="noopener"
+      >
+        Material for MkDocs
+      </a>
+      <br /><br />
+      <img
+        src="../../assets/images/ogl.png"
+        alt="Open Government Licence logo"
+      />
+      All content is available under the
+      <a
+        href="https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/"
+        target="_blank"
+        rel="noopener"
+      >
+        Open Government Licence v3.0</a
+      >
+      , except where otherwise stated <br><br><br>
+      <a href="/waste-tracking-service/api-accessibility-statement" target="_blank" rel="noopener">Accessibility Statement</a>
+    </div>
+
+    <div class="md-copyright">
+      <a
+        href="https://www.nationalarchives.gov.uk/information-management/re-using-public-sector-information/uk-government-licensing-framework/crown-copyright/"
+        target="_blank"
+        rel="noopener"
+      >
+        <img
+          src="../../assets/images/govuk-crest-2x.png"
+          width="125"
+          height="102"
+          alt="Gov UK Crest"
+        />
+        <br />
+        © Crown copyright
+      </a>
+    </div>
+  </div>
+</footer>
+
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["announce.dismiss", "navigation.tabs", "navigation.tabs.sticky", "navigation.indexes", "content.code.copy", "search.suggest", "search.share", "content.action.view", "toc.integrate"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": {"Accepted": "accepted", "Deprecated": "deprecated", "Draft": "draft", "Proposed": "proposed", "Rejected": "rejected", "Superseded": "superseded"}, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": "production", "provider": "mike"}}</script>
+    
+    
+  
+      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  <script>
+    (function () {
+      function fixAccessibility() {
+        // 1. Search dialog accessible name (AXE fix)
+        var dlg = document.querySelector('.md-search[role="dialog"]');
+        if (dlg) {
+          var hasName = dlg.hasAttribute('aria-label') || dlg.hasAttribute('aria-labelledby');
+          if (!hasName) {
+            dlg.setAttribute('aria-label', 'Search this site');
+          }
+        }
+
+        // 2. Empty form labels — add visually-hidden text to icon-only labels
+        function addLabelText(selector, text) {
+          document.querySelectorAll(selector).forEach(function (label) {
+            if (label.querySelector('.visually-hidden')) return;
+            var span = document.createElement('span');
+            span.className = 'visually-hidden';
+            span.textContent = text;
+            label.appendChild(span);
+          });
+        }
+
+        addLabelText('label[for="__drawer"]', 'Toggle navigation');
+        // Not label[for="__search"]: Material's search icon label holds two
+        // <svg> children (magnifier / back-arrow) and toggles which one is
+        // visible via svg:first-child/:last-child CSS depending on
+        // viewport. Appending a span here would become the new last child
+        // and break that selector, leaving both icons visible at once.
+
+        // Palette toggle labels
+        document.querySelectorAll('label[for^="__palette"]').forEach(function (label) {
+          if (label.querySelector('.visually-hidden')) return;
+          var title = label.getAttribute('title') || 'Toggle colour scheme';
+          var span = document.createElement('span');
+          span.className = 'visually-hidden';
+          span.textContent = title;
+          label.appendChild(span);
+        });
+
+        // Navigation section toggle labels
+        document.querySelectorAll('label[for^="__nav"], label[for^="nav-"]').forEach(function (label) {
+          if (label.querySelector('.visually-hidden')) return;
+          var nav = label.closest('.md-nav__item');
+          var link = nav ? nav.querySelector('.md-nav__link') : null;
+          var text = link ? 'Toggle ' + link.textContent.trim() : 'Toggle section';
+          var span = document.createElement('span');
+          span.className = 'visually-hidden';
+          span.textContent = text;
+          label.appendChild(span);
+        });
+
+        // Catch any remaining labels that only contain SVG/icons
+        document.querySelectorAll('label[for]').forEach(function (label) {
+          if (label.getAttribute('for') === '__search') return;
+          if (label.querySelector('.visually-hidden')) return;
+          var clone = label.cloneNode(true);
+          var els = clone.querySelectorAll('svg, img, .md-icon');
+          for (var i = 0; i < els.length; i++) { els[i].parentNode.removeChild(els[i]); }
+          if (!clone.textContent.trim()) {
+            var span = document.createElement('span');
+            span.className = 'visually-hidden';
+            span.textContent = label.getAttribute('title') || 'Toggle';
+            label.appendChild(span);
+          }
+        });
+
+        // Catch any inputs/selects without any label (missing form label)
+        document.querySelectorAll('input, select, textarea').forEach(function (input) {
+          if (input.type === 'hidden') return;
+          if (input.getAttribute('aria-label') || input.getAttribute('aria-labelledby')) return;
+          var id = input.id;
+          if (id && document.querySelector('label[for="' + id + '"]')) return;
+          // No label found — add aria-label
+          var name = input.getAttribute('name') || input.getAttribute('placeholder') || input.type || 'input';
+          input.setAttribute('aria-label', name.charAt(0).toUpperCase() + name.slice(1));
+        });
+
+        // 3. Multiple form labels — replace duplicate labels with spans
+        // Material intentionally ships three <label for="__search"> elements
+        // (mobile toggle button, search overlay, and the input icon) and
+        // shows only one at a time via CSS depending on viewport — that's
+        // not a duplicate-label bug, so leave those alone.
+        var labelsByFor = {};
+        document.querySelectorAll('label[for]').forEach(function (label) {
+          var forId = label.getAttribute('for');
+          if (forId === '__search') return;
+          if (!labelsByFor[forId]) labelsByFor[forId] = [];
+          labelsByFor[forId].push(label);
+        });
+        Object.keys(labelsByFor).forEach(function (forId) {
+          var labels = labelsByFor[forId];
+          if (labels.length > 1) {
+            for (var i = 1; i < labels.length; i++) {
+              var span = document.createElement('span');
+              span.innerHTML = labels[i].innerHTML;
+              span.className = labels[i].className;
+              span.setAttribute('aria-hidden', 'true');
+              labels[i].parentNode.replaceChild(span, labels[i]);
+            }
+          }
+        });
+
+        // 6. Empty links — add aria-label to social icon links
+        document.querySelectorAll('.md-social__link').forEach(function (link) {
+          if (!link.textContent.trim() && !link.getAttribute('aria-label')) {
+            var href = link.getAttribute('href') || '';
+            if (href.indexOf('mailto:') !== -1) {
+              link.setAttribute('aria-label', 'Send email');
+            } else if (href.indexOf('github') !== -1) {
+              link.setAttribute('aria-label', 'GitHub repository');
+            } else {
+              link.setAttribute('aria-label', 'External link');
+            }
+          }
+        });
+
+        // 7. Missing fieldset — wrap palette toggles in a fieldset
+        var palette = document.querySelector('.md-header__option');
+        if (palette && palette.tagName !== 'FIELDSET' && !palette.querySelector('fieldset')) {
+          var fieldset = document.createElement('fieldset');
+          fieldset.className = palette.className;
+          fieldset.style.border = 'none';
+          fieldset.style.padding = '0';
+          fieldset.style.margin = '0';
+          var legend = document.createElement('legend');
+          legend.className = 'visually-hidden';
+          legend.textContent = 'Colour scheme';
+          fieldset.appendChild(legend);
+          while (palette.firstChild) {
+            fieldset.appendChild(palette.firstChild);
+          }
+          palette.parentNode.replaceChild(fieldset, palette);
+        }
+
+        // 8. Palette toggle labels — remove title to avoid redundant title text
+        document.querySelectorAll('.md-header__option label, fieldset label').forEach(function (el) {
+          if (el.getAttribute('title') && el.querySelector('.visually-hidden')) {
+            el.removeAttribute('title');
+          }
+        });
+
+        // 9. Suspicious alt text — fix theme logo if generic
+        document.querySelectorAll('.md-header__button img, .md-logo img').forEach(function (img) {
+          var alt = img.getAttribute('alt') || '';
+          if (!alt || /^(logo|image|img|icon|picture)$/i.test(alt.trim())) {
+            img.setAttribute('alt', 'Defra Digital Waste Tracking home');
+          }
+        });
+      }
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', fixAccessibility);
+      } else {
+        fixAccessibility();
+      }
+      document.addEventListener('navigationend', fixAccessibility);
+    })();
+  </script>
+
+  </body>
+</html>
