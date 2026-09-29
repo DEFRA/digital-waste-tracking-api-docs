@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Supporting references",
+  "description": "Up to 6 label/reference pairs for the movement. Both reference and label are required for every entry.",
+  "type": "array",
+  "minItems": 1,
+  "items": {
+    "type": "object",
+    "properties": {
+      "reference": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 50,
+        "description": "Reference value — must be supplied together with its label."
+      },
+      "label": {
+        "type": "string",
+        "enum": [
+          "Weighbridge Number",
+          "PO Number",
+          "Job Number",
+          "Invoice Number",
+          "Waste Ticket Number",
+          "Other"
+        ],
+        "description": "Label identifying the reference type."
+      }
+    },
+    "required": ["reference", "label"],
+    "additionalProperties": false
+  }
+}
