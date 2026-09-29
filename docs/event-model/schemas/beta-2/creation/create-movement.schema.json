@@ -15,6 +15,9 @@
     },
     "brokerOrDealer": {
       "$ref": "../common/broker-or-dealer/broker-or-dealer.schema.json"
+    },
+    "supportingReferences": {
+      "$ref": "../common/supporting-references.schema.json"
     }
   },
   "required": ["apiCode", "producer"],
