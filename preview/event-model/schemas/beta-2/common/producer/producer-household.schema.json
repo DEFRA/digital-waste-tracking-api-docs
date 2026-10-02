@@ -17,6 +17,6 @@
     }
   ],
   "propertyNames": {
-    "enum": ["wasteSource", "councilMovement"]
+    "enum": ["wasteSource"]
   }
 }

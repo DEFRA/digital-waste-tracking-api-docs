@@ -3,11 +3,5 @@
   "title": "Producer base fields",
   "description": "Fields present on every Producer, regardless of wasteSource.",
   "type": "object",
-  "properties": {
-    "councilMovement": {
-      "type": "boolean",
-      "description": "Whether this movement is carried out by, or on behalf of, a council."
-    }
-  },
-  "required": ["councilMovement"]
+  "properties": {}
 }
