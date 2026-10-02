@@ -72,8 +72,7 @@
       "reasonForNoAuthorisationNumber",
       "sicCode",
       "contactDetails",
-      "address",
-      "councilMovement"
+      "address"
     ]
   }
 }

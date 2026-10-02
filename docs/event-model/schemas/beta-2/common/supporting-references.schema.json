@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Supporting references",
-  "description": "Up to 6 label/reference pairs for the movement. Both reference and label are required for every entry.",
+  "description": "label/reference pairs for the movement. Both reference and label are required for every entry.",
   "type": "array",
   "minItems": 1,
   "items": {

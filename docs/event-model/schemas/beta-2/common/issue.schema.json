@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Issue",
+  "description": "A single problem with a submitted field, located by JSON Pointer.",
+  "type": "object",
+  "required": ["pointer", "errorType", "message"],
+  "properties": {
+    "pointer": {
+      "type": "string",
+      "description": "RFC 6901 JSON Pointer to the field this issue relates to.",
+      "examples": ["/apiCode"]
+    },
+    "errorType": {
+      "type": "string",
+      "enum": [
+        "NotProvided",
+        "NotAllowed",
+        "InvalidType",
+        "InvalidFormat",
+        "InvalidValue",
+        "OutOfRange",
+        "BusinessRuleViolation",
+        "UnexpectedError"
+      ],
+      "description": "The type of issue.",
+      "examples": ["NotProvided"]
+    },
+    "message": {
+      "type": "string",
+      "description": "Human-readable description of the issue.",
+      "examples": ["apiCode is required."]
+    }
+  }
+}

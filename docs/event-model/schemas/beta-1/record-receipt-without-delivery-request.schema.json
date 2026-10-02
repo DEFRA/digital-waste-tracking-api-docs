@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "Record receipt without delivery",
+  "title": "Record receipt without delivery request",
   "description": "Payload for POST /beta-1/receipts.",
   "type": "object",
   "properties": {

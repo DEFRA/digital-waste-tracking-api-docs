@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Validation",
+  "description": "Data-quality feedback returned alongside a successful response.",
+  "type": "object",
+  "required": ["warnings"],
+  "properties": {
+    "warnings": {
+      "type": "array",
+      "items": { "$ref": "issue.schema.json" },
+      "description": "Data-quality warnings. Empty when there are none."
+    }
+  }
+}

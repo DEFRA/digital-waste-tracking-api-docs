@@ -1,0 +1,7 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Delivery ID",
+  "description": "Unique identifier for a delivery, minted by the server on `POST /deliveries`.",
+  "type": "string",
+  "examples": ["25KMT4Z9"]
+}
