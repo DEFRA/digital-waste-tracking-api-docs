@@ -16,22 +16,31 @@ Both API versions are mirrored, each keeping its version prefix:
 
 ```
 beta-1/                             # the live Receipt of Waste endpoints
-  create-movement.schema.json
-  record-receipt.schema.json
+  common/                           # ids, wasteType, delivery-item, issue, validation
+  create-movement-request.schema.json
+  create-movement-response.schema.json
+  record-receipt-request.schema.json
+  record-receipt-response.schema.json
   …
 beta-2/                             # the Phase 2 event model
   common/
     address.schema.json
     contact-details.schema.json
+    movement-id.schema.json
     producer/
       producer.schema.json          # the choice: household, commercial or municipal
       producer-base.schema.json     # the fields all three share
       producer-household.schema.json
       producer-commercial.schema.json
       producer-municipal.schema.json
+    …
   creation/
-    create-movement.schema.json
+    create-movement-request.schema.json
+    create-movement-response.schema.json
+  …
 ```
+
+Every whole request or response body is named after the backend route it belongs to, with a `-request` or `-response` suffix; the resources they are built from keep resource names.
 
 The version prefix is not decoration: each file's path from this folder matches its own `$id` (`"beta-2/common/producer/producer.schema.json"`), which is the relationship the backend's loader asserts. Every `$ref` between these files is relative and stays within its version, so the tree resolves standalone. A future `beta-3` is picked up by the sync with no change to the script.
 
