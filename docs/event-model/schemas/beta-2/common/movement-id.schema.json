@@ -1,0 +1,7 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Movement ID",
+  "description": "Unique identifier for a waste movement, minted by the server on `POST /movements`.",
+  "type": "string",
+  "examples": ["25HRA0B2"]
+}

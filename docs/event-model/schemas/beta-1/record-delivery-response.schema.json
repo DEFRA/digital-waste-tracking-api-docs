@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Record delivery response",
+  "description": "Response returned when a delivery is recorded.",
+  "type": "object",
+  "required": ["data", "validation"],
+  "properties": {
+    "data": {
+      "type": "object",
+      "description": "The Deliveries minted by the request.",
+      "required": ["deliveries"],
+      "properties": {
+        "deliveries": {
+          "type": "array",
+          "items": {
+            "$ref": "common/delivery-item.schema.json"
+          },
+          "description": "One Delivery per distinct waste type represented in the submitted Movement IDs. Most requests produce a single-item list."
+        }
+      }
+    },
+    "validation": {
+      "$ref": "common/validation.schema.json"
+    }
+  }
+}

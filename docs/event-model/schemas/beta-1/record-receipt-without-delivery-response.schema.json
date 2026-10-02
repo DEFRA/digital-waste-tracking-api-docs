@@ -1,0 +1,6 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Record receipt without delivery response",
+  "description": "Response returned when a receipt is recorded without a Delivery ID. Same shape as recording a receipt against a delivery: `data.deliveryId` is the new empty Delivery minted for it.",
+  "$ref": "record-receipt-response.schema.json"
+}

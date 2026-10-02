@@ -46,120 +46,28 @@ components:
 
   schemas:
     movementId:
-      type: string
-      description: Unique identifier for a waste movement, minted by the server on `POST /movements`.
-      example: 25HRA0B2
+      $ref: '../event-model/schemas/beta-1/common/movement-id.schema.json'
 
     deliveryId:
-      type: string
-      description: Unique identifier for a delivery, minted by the server on `POST /deliveries`.
-      example: 25KMT4Z9
-
-    wasteType:
-      type: string
-      enum:
-        - HAZARDOUS
-        - NON_HAZARDOUS
-      description: Whether the waste covered by this delivery is hazardous or non-hazardous.
-      example: NON_HAZARDOUS
+      $ref: '../event-model/schemas/beta-1/common/delivery-id.schema.json'
 
     createMovementRequest:
-      type: object
-      required: [apiCode]
-      properties:
-        apiCode:
-          type: string
-          format: uuid
-          description: Unique identifier of the submitting organisation.
-          example: 25b14080-5e77-4f91-9957-2482a0cb8775
+      $ref: '../event-model/schemas/beta-1/create-movement-request.schema.json'
 
     recordCollectionRequest:
-      type: object
-      required: [apiCode]
-      properties:
-        apiCode:
-          type: string
-          format: uuid
-          description: Unique identifier of the submitting organisation.
-          example: 25b14080-5e77-4f91-9957-2482a0cb8775
+      $ref: '../event-model/schemas/beta-1/create-collection-request.schema.json'
 
     recordDeliveryRequest:
-      type: object
-      required: [apiCode, movementIds]
-      properties:
-        apiCode:
-          type: string
-          format: uuid
-          description: Unique identifier of the submitting organisation.
-          example: 25b14080-5e77-4f91-9957-2482a0cb8775
-        movementIds:
-          type: array
-          minItems: 1
-          items:
-            $ref: '#/components/schemas/movementId'
-          description: >-
-            One or more Movement IDs delivered together. The server groups these into one Delivery per distinct waste type — see the response — so a single request may mint more than one Delivery ID.
-
+      $ref: '../event-model/schemas/beta-1/record-delivery-request.schema.json'
 
     recordReceiptRequest:
-      type: object
-      required: [apiCode]
-      properties:
-        apiCode:
-          type: string
-          format: uuid
-          description: Unique identifier of the submitting organisation.
-          example: 25b14080-5e77-4f91-9957-2482a0cb8775
+      $ref: '../event-model/schemas/beta-1/record-receipt-request.schema.json'
 
     recordReceiptWithoutDeliveryRequest:
-      type: object
-      required: [apiCode, reason]
-      properties:
-        apiCode:
-          type: string
-          format: uuid
-          description: Unique identifier of the submitting organisation.
-          example: 25b14080-5e77-4f91-9957-2482a0cb8775
-        reason:
-          type: string
-          description: Mandatory explanation for why this receipt is being recorded without a Delivery ID.
-          example: No delivery was recorded prior to receipt; waste received directly from the producer.
+      $ref: '../event-model/schemas/beta-1/record-receipt-without-delivery-request.schema.json'
 
     issue:
-      type: object
-      required: [pointer, errorType, message]
-      properties:
-        pointer:
-          type: string
-          description: RFC 6901 JSON Pointer to the field this issue relates to.
-          example: /apiCode
-        errorType:
-          type: string
-          enum:
-            - NotProvided
-            - NotAllowed
-            - InvalidType
-            - InvalidFormat
-            - InvalidValue
-            - OutOfRange
-            - BusinessRuleViolation
-            - UnexpectedError
-          description: The type of issue.
-          example: NotProvided
-        message:
-          type: string
-          description: Human-readable description of the issue.
-          example: apiCode is required.
-
-    validation:
-      type: object
-      required: [warnings]
-      properties:
-        warnings:
-          type: array
-          items:
-            $ref: '#/components/schemas/issue'
-          description: Data-quality warnings. Empty when there are none.
+      $ref: '../event-model/schemas/beta-1/common/issue.schema.json'
 
     problemDetails:
       type: object
@@ -193,84 +101,19 @@ components:
           description: Field-level problems. Present on 400 responses; omitted otherwise.
 
     createMovementResponse:
-      type: object
-      description: Response returned when a movement is created.
-      required: [data, validation]
-      properties:
-        data:
-          type: object
-          required: [movementId]
-          properties:
-            movementId:
-              $ref: '#/components/schemas/movementId'
-        validation:
-          $ref: '#/components/schemas/validation'
+      $ref: '../event-model/schemas/beta-1/create-movement-response.schema.json'
 
     recordCollectionResponse:
-      type: object
-      description: Response returned when a collection event is recorded.
-      required: [data, validation]
-      properties:
-        data:
-          type: [object, 'null']
-          description: No resource id is returned for a collection event; always null.
-          example: null
-        validation:
-          $ref: '#/components/schemas/validation'
-
-    deliveryItem:
-      type: object
-      description: A single Delivery minted from a `POST /deliveries` request, covering the Movements sharing one waste type.
-      required: [deliveryId, movementIds, wasteType]
-      properties:
-        deliveryId:
-          $ref: '#/components/schemas/deliveryId'
-        movementIds:
-          type: array
-          minItems: 1
-          items:
-            $ref: '#/components/schemas/movementId'
-          description: The subset of the submitted Movement IDs covered by this Delivery.
-        wasteType:
-          $ref: '#/components/schemas/wasteType'
+      $ref: '../event-model/schemas/beta-1/create-collection-response.schema.json'
 
     deliveryResponse:
-      type: object
-      description: Response returned when a delivery is recorded.
-      required: [data, validation]
-      properties:
-        data:
-          type: object
-          required: [deliveries]
-          properties:
-            deliveries:
-              type: array
-              items:
-                $ref: '#/components/schemas/deliveryItem'
-              description: >-
-                One Delivery per distinct waste type represented in the submitted Movement IDs. Most requests produce a single-item list.
-
-
-        validation:
-          $ref: '#/components/schemas/validation'
+      $ref: '../event-model/schemas/beta-1/record-delivery-response.schema.json'
 
     recordReceiptResponse:
-      type: object
-      description: Response returned when a receipt is recorded.
-      required: [data, validation]
-      properties:
-        data:
-          type: object
-          required: [deliveryId]
-          properties:
-            deliveryId:
-              $ref: '#/components/schemas/deliveryId'
-          description: >-
-            The Delivery the receipt is recorded against — echoed from the path on `POST /deliveries/{deliveryId}/receipt`, or a new empty Delivery minted by `POST /receipts`.
+      $ref: '../event-model/schemas/beta-1/record-receipt-response.schema.json'
 
-
-        validation:
-          $ref: '#/components/schemas/validation'
+    recordReceiptWithoutDeliveryResponse:
+      $ref: '../event-model/schemas/beta-1/record-receipt-without-delivery-response.schema.json'
 
   responses:
     '400':
@@ -441,7 +284,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/recordReceiptResponse'
+                $ref: '#/components/schemas/recordReceiptWithoutDeliveryResponse'
         '400':
           $ref: '#/components/responses/400'
         '401':
