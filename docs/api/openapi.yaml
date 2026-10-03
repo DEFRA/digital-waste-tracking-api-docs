@@ -688,15 +688,8 @@ components:
             Required when the movement contains hazardous waste and no
             hazardousWasteConsignmentCode is provided. Mutually exclusive with
             hazardousWasteConsignmentCode. Case-sensitive.
-        yourUniqueReference:
-          type: string
-          description: Caller's own reference. No format rules enforced.
-          example: CARRIER-JOB-001
-        otherReferencesForMovement:
-          type: array
-          items:
-            $ref: '#/components/schemas/otherReferenceForMovement'
-          description: Additional label/reference pairs for this movement.
+        supportingReferences:
+          $ref: '../event-model/schemas/beta-2/common/supporting-references.schema.json'
         specialHandlingRequirements:
           type: string
           maxLength: 5000

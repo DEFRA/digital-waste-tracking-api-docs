@@ -45,6 +45,10 @@
  * `.../broker-or-dealer/`. The producer and brokerOrDealer bullets in this header
  * describe what these fixtures do, not what the service enforces — see the notes on
  * the exports themselves.
+ *
+ * yourUniqueReference and otherReferencesForMovement on `createMovementSchema` are
+ * likewise deprecated, superseded by `supportingReferences`
+ * (`docs/event-model/schemas/beta-2/common/supporting-references.schema.json`).
  */
 
 import Joi from 'joi'
@@ -515,6 +519,21 @@ export const createMovementSchema = Joi.object({
       'Required when waste is hazardous and no hazardousWasteConsignmentCode is provided. Must not be provided alongside hazardousWasteConsignmentCode.'
     ),
 
+  // @deprecated yourUniqueReference and otherReferencesForMovement are both
+  // superseded on Creation by `supportingReferences`, the JSON Schema in
+  // `waste-movement-backend` mirrored here at
+  // `docs/event-model/schemas/beta-2/common/supporting-references.schema.json`.
+  // `openapi.yaml` `$ref`s that schema for Create Movement and no longer lists
+  // these two fields. Kept only so existing Creation fixtures stay valid; do not
+  // extend them. Collection, Delivery and Receipt still carry their own copies,
+  // which are not deprecated.
+  //
+  // Note the shapes have already diverged:
+  // - yourUniqueReference has no counterpart; it is dropped, not folded in.
+  // - label is an enum (Weighbridge Number, PO Number, Job Number, Invoice
+  //   Number, Waste Ticket Number, Other), where this one takes any string.
+  // - reference has maxLength 50, where this one has no upper bound.
+  // - the array has minItems 1, where this one accepts an empty array.
   yourUniqueReference: Joi.string().description(
     "Caller's own reference — no format rules enforced."
   ),
