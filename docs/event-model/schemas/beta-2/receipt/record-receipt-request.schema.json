@@ -9,6 +9,12 @@
       "format": "uuid",
       "description": "Unique identifier of the submitting organisation.",
       "examples": ["25b14080-5e77-4f91-9957-2482a0cb8775"]
+    },
+    "brokerOrDealer": {
+      "$ref": "../common/broker-or-dealer/broker-or-dealer.schema.json"
+    },
+    "supportingReferences": {
+      "$ref": "../common/supporting-references.schema.json"
     }
   },
   "required": ["apiCode"],

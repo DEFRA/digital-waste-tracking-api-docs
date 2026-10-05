@@ -15,6 +15,9 @@
     },
     "supportingReferences": {
       "$ref": "../common/supporting-references.schema.json"
+    },
+    "specialHandlingRequirements": {
+      "$ref": "../common/special-handling-requirements.schema.json"
     }
   },
   "required": ["apiCode"],
