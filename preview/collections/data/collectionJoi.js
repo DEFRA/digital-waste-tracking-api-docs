@@ -115,6 +115,10 @@ export const recordCollectionSchema = Joi.object({
     .items(otherReferenceSchema)
     .description('Additional label/reference pairs for this collection event.'),
 
+  // Deprecated — superseded by the synced JSON Schema at
+  // docs/event-model/schemas/beta-2/common/special-handling-requirements.schema.json,
+  // which openapi.yaml $refs directly. That one wins: it caps the field at 500
+  // characters (not 5000) and rejects an empty string.
   specialHandlingRequirements: Joi.string()
     .max(5000)
     .description(
