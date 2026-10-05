@@ -2,6 +2,28 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Broker or dealer involvement",
   "description": "Declares whether any broker or dealer was involved in the movement, and their details. isPresent gates the items array: when true at least one entry is required, when false or absent entries are forbidden.",
+  "examples": [
+    {
+      "isPresent": true,
+      "items": [
+        {
+          "organisationName": "Broker Demo Ltd",
+          "registrationNumber": "CBDU654321",
+          "contactDetails": {
+            "emailAddress": "broker@example.com",
+            "phoneNumber": "01112223333"
+          },
+          "address": {
+            "fullAddress": "2 Broker Yard, Test City",
+            "postcode": "TE1 1ST"
+          }
+        }
+      ]
+    },
+    {
+      "isPresent": false
+    }
+  ],
   "type": "object",
   "oneOf": [
     {

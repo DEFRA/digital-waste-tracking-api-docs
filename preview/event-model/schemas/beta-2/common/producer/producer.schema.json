@@ -2,6 +2,38 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Producer",
   "description": "The organisation or party the waste originates from. Required fields vary by wasteSource — see the variants below. For Commercial and Municipal, contactDetails is required (with at least one of emailAddress or phoneNumber within it), and exactly one of authorisationNumber or reasonForNoAuthorisationNumber must be provided; not applicable for Household, where contactDetails and the rest remain forbidden.",
+  "examples": [
+    {
+      "wasteSource": "Commercial",
+      "organisationName": "ACME Waste Producers Ltd",
+      "authorisationNumber": "EAS/P/123456",
+      "sicCode": "38110",
+      "address": {
+        "fullAddress": "10 Industrial Way, Test City",
+        "postcode": "TE1 2PQ"
+      },
+      "contactDetails": {
+        "emailAddress": "producer@example.com",
+        "phoneNumber": "01234567890"
+      }
+    },
+    {
+      "wasteSource": "Municipal",
+      "organisationName": "Test Council",
+      "reasonForNoAuthorisationNumber": "TBC",
+      "address": {
+        "fullAddress": "Council Depot, Test City",
+        "postcode": "TE1 5CD"
+      },
+      "contactDetails": {
+        "emailAddress": "waste.services@example.gov.uk",
+        "phoneNumber": "01234567890"
+      }
+    },
+    {
+      "wasteSource": "Household"
+    }
+  ],
   "oneOf": [
     { "$ref": "producer-household.schema.json" },
     { "$ref": "producer-commercial.schema.json" },

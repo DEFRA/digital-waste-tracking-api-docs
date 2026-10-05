@@ -2,6 +2,21 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Producer (Municipal)",
   "description": "Producer fields specific to municipal waste. organisationName, address and contactDetails are required; sicCode is optional. Exactly one of authorisationNumber or reasonForNoAuthorisationNumber must be provided.",
+  "examples": [
+    {
+      "wasteSource": "Municipal",
+      "organisationName": "Test Council",
+      "reasonForNoAuthorisationNumber": "TBC",
+      "address": {
+        "fullAddress": "Council Depot, Test City",
+        "postcode": "TE1 5CD"
+      },
+      "contactDetails": {
+        "emailAddress": "waste.services@example.gov.uk",
+        "phoneNumber": "01234567890"
+      }
+    }
+  ],
   "type": "object",
   "allOf": [
     { "$ref": "producer-base.schema.json" },

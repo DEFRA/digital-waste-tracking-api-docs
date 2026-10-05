@@ -1,0 +1,13 @@
+{
+  "withBrokerAndReferences": {
+    "summary": "With broker or dealer and a weighbridge reference",
+    "value": {
+      "data": {
+        "deliveryId": "25KMT4Z9"
+      },
+      "validation": {
+        "warnings": []
+      }
+    }
+  }
+}

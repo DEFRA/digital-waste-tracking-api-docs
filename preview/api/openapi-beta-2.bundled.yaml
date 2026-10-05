@@ -79,10 +79,33 @@ components:
           $schema: https://json-schema.org/draft/2020-12/schema
           title: Producer
           description: The organisation or party the waste originates from. Required fields vary by wasteSource — see the variants below. For Commercial and Municipal, contactDetails is required (with at least one of emailAddress or phoneNumber within it), and exactly one of authorisationNumber or reasonForNoAuthorisationNumber must be provided; not applicable for Household, where contactDetails and the rest remain forbidden.
+          examples:
+            - wasteSource: Commercial
+              organisationName: ACME Waste Producers Ltd
+              authorisationNumber: EAS/P/123456
+              sicCode: '38110'
+              address:
+                fullAddress: 10 Industrial Way, Test City
+                postcode: TE1 2PQ
+              contactDetails:
+                emailAddress: producer@example.com
+                phoneNumber: '01234567890'
+            - wasteSource: Municipal
+              organisationName: Test Council
+              reasonForNoAuthorisationNumber: TBC
+              address:
+                fullAddress: Council Depot, Test City
+                postcode: TE1 5CD
+              contactDetails:
+                emailAddress: waste.services@example.gov.uk
+                phoneNumber: '01234567890'
+            - wasteSource: Household
           oneOf:
             - $schema: https://json-schema.org/draft/2020-12/schema
               title: Producer (Household)
               description: Producer fields specific to household waste. organisationName, authorisationNumber, sicCode, contactDetails and address do not apply and must not be provided.
+              examples:
+                - wasteSource: Household
               type: object
               allOf:
                 - $schema: https://json-schema.org/draft/2020-12/schema
@@ -103,6 +126,17 @@ components:
             - $schema: https://json-schema.org/draft/2020-12/schema
               title: Producer (Commercial)
               description: Producer fields specific to commercial waste. organisationName, sicCode, address and contactDetails are required. Exactly one of authorisationNumber or reasonForNoAuthorisationNumber must be provided.
+              examples:
+                - wasteSource: Commercial
+                  organisationName: ACME Waste Producers Ltd
+                  authorisationNumber: EAS/P/123456
+                  sicCode: '38110'
+                  address:
+                    fullAddress: 10 Industrial Way, Test City
+                    postcode: TE1 2PQ
+                  contactDetails:
+                    emailAddress: producer@example.com
+                    phoneNumber: '01234567890'
               type: object
               allOf:
                 - $schema: https://json-schema.org/draft/2020-12/schema
@@ -150,6 +184,10 @@ components:
                       $schema: https://json-schema.org/draft/2020-12/schema
                       title: Contact details
                       description: Contact details for a party. At least one of emailAddress or phoneNumber must be provided.
+                      examples:
+                        - emailAddress: producer@example.com
+                          phoneNumber: '01234567890'
+                        - emailAddress: producer@example.com
                       type: object
                       properties:
                         emailAddress:
@@ -173,6 +211,9 @@ components:
                       $schema: https://json-schema.org/draft/2020-12/schema
                       title: Address
                       description: A UK or Irish postal address. fullAddress is optional; postcode is required.
+                      examples:
+                        - fullAddress: 10 Industrial Way, Test City
+                          postcode: TE1 2PQ
                       type: object
                       properties:
                         fullAddress:
@@ -203,6 +244,16 @@ components:
             - $schema: https://json-schema.org/draft/2020-12/schema
               title: Producer (Municipal)
               description: Producer fields specific to municipal waste. organisationName, address and contactDetails are required; sicCode is optional. Exactly one of authorisationNumber or reasonForNoAuthorisationNumber must be provided.
+              examples:
+                - wasteSource: Municipal
+                  organisationName: Test Council
+                  reasonForNoAuthorisationNumber: TBC
+                  address:
+                    fullAddress: Council Depot, Test City
+                    postcode: TE1 5CD
+                  contactDetails:
+                    emailAddress: waste.services@example.gov.uk
+                    phoneNumber: '01234567890'
               type: object
               allOf:
                 - $schema: https://json-schema.org/draft/2020-12/schema
@@ -250,6 +301,10 @@ components:
                       $schema: https://json-schema.org/draft/2020-12/schema
                       title: Contact details
                       description: Contact details for a party. At least one of emailAddress or phoneNumber must be provided.
+                      examples:
+                        - emailAddress: producer@example.com
+                          phoneNumber: '01234567890'
+                        - emailAddress: producer@example.com
                       type: object
                       properties:
                         emailAddress:
@@ -273,6 +328,9 @@ components:
                       $schema: https://json-schema.org/draft/2020-12/schema
                       title: Address
                       description: A UK or Irish postal address. fullAddress is optional; postcode is required.
+                      examples:
+                        - fullAddress: 10 Industrial Way, Test City
+                          postcode: TE1 2PQ
                       type: object
                       properties:
                         fullAddress:
@@ -303,6 +361,18 @@ components:
           $schema: https://json-schema.org/draft/2020-12/schema
           title: Broker or dealer involvement
           description: 'Declares whether any broker or dealer was involved in the movement, and their details. isPresent gates the items array: when true at least one entry is required, when false or absent entries are forbidden.'
+          examples:
+            - isPresent: true
+              items:
+                - organisationName: Broker Demo Ltd
+                  registrationNumber: CBDU654321
+                  contactDetails:
+                    emailAddress: broker@example.com
+                    phoneNumber: '01112223333'
+                  address:
+                    fullAddress: 2 Broker Yard, Test City
+                    postcode: TE1 1ST
+            - isPresent: false
           type: object
           oneOf:
             - required:
@@ -330,6 +400,19 @@ components:
                 $schema: https://json-schema.org/draft/2020-12/schema
                 title: Broker or dealer
                 description: A single broker or dealer who arranged the transfer. organisationName and contactDetails are required, and exactly one of registrationNumber or reasonForNoRegistrationNumber must be provided. address is optional.
+                examples:
+                  - organisationName: Broker Demo Ltd
+                    registrationNumber: CBDU654321
+                    contactDetails:
+                      emailAddress: broker@example.com
+                      phoneNumber: '01112223333'
+                    address:
+                      fullAddress: 2 Broker Yard, Test City
+                      postcode: TE1 1ST
+                  - organisationName: Broker Demo Ltd
+                    reasonForNoRegistrationNumber: ONE_OFF
+                    contactDetails:
+                      emailAddress: broker@example.com
                 type: object
                 oneOf:
                   - required:
@@ -363,6 +446,10 @@ components:
                     $schema: https://json-schema.org/draft/2020-12/schema
                     title: Contact details
                     description: Contact details for a party. At least one of emailAddress or phoneNumber must be provided.
+                    examples:
+                      - emailAddress: producer@example.com
+                        phoneNumber: '01234567890'
+                      - emailAddress: producer@example.com
                     type: object
                     properties:
                       emailAddress:
@@ -386,6 +473,9 @@ components:
                     $schema: https://json-schema.org/draft/2020-12/schema
                     title: Address
                     description: A UK or Irish postal address. fullAddress is optional; postcode is required.
+                    examples:
+                      - fullAddress: 10 Industrial Way, Test City
+                        postcode: TE1 2PQ
                     type: object
                     properties:
                       fullAddress:
@@ -408,6 +498,11 @@ components:
           $schema: https://json-schema.org/draft/2020-12/schema
           title: Supporting references
           description: label/reference pairs for the movement. Both reference and label are required for every entry.
+          examples:
+            - - label: PO Number
+                reference: PO-123456
+              - label: Job Number
+                reference: CARRIER-JOB-001
           type: array
           minItems: 1
           items:
@@ -436,6 +531,8 @@ components:
           $schema: https://json-schema.org/draft/2020-12/schema
           title: Special handling requirements
           description: Free-text operational handling instructions for the movement — for example fragile, temperature-sensitive, or keep upright. Limited to 500 characters. Omit the field entirely when there are none.
+          examples:
+            - Handle with care and keep upright.
           type: string
           minLength: 1
           maxLength: 500
@@ -459,6 +556,18 @@ components:
           $schema: https://json-schema.org/draft/2020-12/schema
           title: Broker or dealer involvement
           description: 'Declares whether any broker or dealer was involved in the movement, and their details. isPresent gates the items array: when true at least one entry is required, when false or absent entries are forbidden.'
+          examples:
+            - isPresent: true
+              items:
+                - organisationName: Broker Demo Ltd
+                  registrationNumber: CBDU654321
+                  contactDetails:
+                    emailAddress: broker@example.com
+                    phoneNumber: '01112223333'
+                  address:
+                    fullAddress: 2 Broker Yard, Test City
+                    postcode: TE1 1ST
+            - isPresent: false
           type: object
           oneOf:
             - required:
@@ -486,6 +595,19 @@ components:
                 $schema: https://json-schema.org/draft/2020-12/schema
                 title: Broker or dealer
                 description: A single broker or dealer who arranged the transfer. organisationName and contactDetails are required, and exactly one of registrationNumber or reasonForNoRegistrationNumber must be provided. address is optional.
+                examples:
+                  - organisationName: Broker Demo Ltd
+                    registrationNumber: CBDU654321
+                    contactDetails:
+                      emailAddress: broker@example.com
+                      phoneNumber: '01112223333'
+                    address:
+                      fullAddress: 2 Broker Yard, Test City
+                      postcode: TE1 1ST
+                  - organisationName: Broker Demo Ltd
+                    reasonForNoRegistrationNumber: ONE_OFF
+                    contactDetails:
+                      emailAddress: broker@example.com
                 type: object
                 oneOf:
                   - required:
@@ -519,6 +641,10 @@ components:
                     $schema: https://json-schema.org/draft/2020-12/schema
                     title: Contact details
                     description: Contact details for a party. At least one of emailAddress or phoneNumber must be provided.
+                    examples:
+                      - emailAddress: producer@example.com
+                        phoneNumber: '01234567890'
+                      - emailAddress: producer@example.com
                     type: object
                     properties:
                       emailAddress:
@@ -542,6 +668,9 @@ components:
                     $schema: https://json-schema.org/draft/2020-12/schema
                     title: Address
                     description: A UK or Irish postal address. fullAddress is optional; postcode is required.
+                    examples:
+                      - fullAddress: 10 Industrial Way, Test City
+                        postcode: TE1 2PQ
                     type: object
                     properties:
                       fullAddress:
@@ -564,6 +693,11 @@ components:
           $schema: https://json-schema.org/draft/2020-12/schema
           title: Supporting references
           description: label/reference pairs for the movement. Both reference and label are required for every entry.
+          examples:
+            - - label: PO Number
+                reference: PO-123456
+              - label: Job Number
+                reference: CARRIER-JOB-001
           type: array
           minItems: 1
           items:
@@ -592,6 +726,8 @@ components:
           $schema: https://json-schema.org/draft/2020-12/schema
           title: Special handling requirements
           description: Free-text operational handling instructions for the movement — for example fragile, temperature-sensitive, or keep upright. Limited to 500 characters. Omit the field entirely when there are none.
+          examples:
+            - Handle with care and keep upright.
           type: string
           minLength: 1
           maxLength: 500
@@ -620,6 +756,11 @@ components:
           $schema: https://json-schema.org/draft/2020-12/schema
           title: Supporting references
           description: label/reference pairs for the movement. Both reference and label are required for every entry.
+          examples:
+            - - label: PO Number
+                reference: PO-123456
+              - label: Job Number
+                reference: CARRIER-JOB-001
           type: array
           minItems: 1
           items:
@@ -664,6 +805,18 @@ components:
           $schema: https://json-schema.org/draft/2020-12/schema
           title: Broker or dealer involvement
           description: 'Declares whether any broker or dealer was involved in the movement, and their details. isPresent gates the items array: when true at least one entry is required, when false or absent entries are forbidden.'
+          examples:
+            - isPresent: true
+              items:
+                - organisationName: Broker Demo Ltd
+                  registrationNumber: CBDU654321
+                  contactDetails:
+                    emailAddress: broker@example.com
+                    phoneNumber: '01112223333'
+                  address:
+                    fullAddress: 2 Broker Yard, Test City
+                    postcode: TE1 1ST
+            - isPresent: false
           type: object
           oneOf:
             - required:
@@ -691,6 +844,19 @@ components:
                 $schema: https://json-schema.org/draft/2020-12/schema
                 title: Broker or dealer
                 description: A single broker or dealer who arranged the transfer. organisationName and contactDetails are required, and exactly one of registrationNumber or reasonForNoRegistrationNumber must be provided. address is optional.
+                examples:
+                  - organisationName: Broker Demo Ltd
+                    registrationNumber: CBDU654321
+                    contactDetails:
+                      emailAddress: broker@example.com
+                      phoneNumber: '01112223333'
+                    address:
+                      fullAddress: 2 Broker Yard, Test City
+                      postcode: TE1 1ST
+                  - organisationName: Broker Demo Ltd
+                    reasonForNoRegistrationNumber: ONE_OFF
+                    contactDetails:
+                      emailAddress: broker@example.com
                 type: object
                 oneOf:
                   - required:
@@ -724,6 +890,10 @@ components:
                     $schema: https://json-schema.org/draft/2020-12/schema
                     title: Contact details
                     description: Contact details for a party. At least one of emailAddress or phoneNumber must be provided.
+                    examples:
+                      - emailAddress: producer@example.com
+                        phoneNumber: '01234567890'
+                      - emailAddress: producer@example.com
                     type: object
                     properties:
                       emailAddress:
@@ -747,6 +917,9 @@ components:
                     $schema: https://json-schema.org/draft/2020-12/schema
                     title: Address
                     description: A UK or Irish postal address. fullAddress is optional; postcode is required.
+                    examples:
+                      - fullAddress: 10 Industrial Way, Test City
+                        postcode: TE1 2PQ
                     type: object
                     properties:
                       fullAddress:
@@ -769,6 +942,11 @@ components:
           $schema: https://json-schema.org/draft/2020-12/schema
           title: Supporting references
           description: label/reference pairs for the movement. Both reference and label are required for every entry.
+          examples:
+            - - label: PO Number
+                reference: PO-123456
+              - label: Job Number
+                reference: CARRIER-JOB-001
           type: array
           minItems: 1
           items:
@@ -818,6 +996,18 @@ components:
           $schema: https://json-schema.org/draft/2020-12/schema
           title: Broker or dealer involvement
           description: 'Declares whether any broker or dealer was involved in the movement, and their details. isPresent gates the items array: when true at least one entry is required, when false or absent entries are forbidden.'
+          examples:
+            - isPresent: true
+              items:
+                - organisationName: Broker Demo Ltd
+                  registrationNumber: CBDU654321
+                  contactDetails:
+                    emailAddress: broker@example.com
+                    phoneNumber: '01112223333'
+                  address:
+                    fullAddress: 2 Broker Yard, Test City
+                    postcode: TE1 1ST
+            - isPresent: false
           type: object
           oneOf:
             - required:
@@ -845,6 +1035,19 @@ components:
                 $schema: https://json-schema.org/draft/2020-12/schema
                 title: Broker or dealer
                 description: A single broker or dealer who arranged the transfer. organisationName and contactDetails are required, and exactly one of registrationNumber or reasonForNoRegistrationNumber must be provided. address is optional.
+                examples:
+                  - organisationName: Broker Demo Ltd
+                    registrationNumber: CBDU654321
+                    contactDetails:
+                      emailAddress: broker@example.com
+                      phoneNumber: '01112223333'
+                    address:
+                      fullAddress: 2 Broker Yard, Test City
+                      postcode: TE1 1ST
+                  - organisationName: Broker Demo Ltd
+                    reasonForNoRegistrationNumber: ONE_OFF
+                    contactDetails:
+                      emailAddress: broker@example.com
                 type: object
                 oneOf:
                   - required:
@@ -878,6 +1081,10 @@ components:
                     $schema: https://json-schema.org/draft/2020-12/schema
                     title: Contact details
                     description: Contact details for a party. At least one of emailAddress or phoneNumber must be provided.
+                    examples:
+                      - emailAddress: producer@example.com
+                        phoneNumber: '01234567890'
+                      - emailAddress: producer@example.com
                     type: object
                     properties:
                       emailAddress:
@@ -901,6 +1108,9 @@ components:
                     $schema: https://json-schema.org/draft/2020-12/schema
                     title: Address
                     description: A UK or Irish postal address. fullAddress is optional; postcode is required.
+                    examples:
+                      - fullAddress: 10 Industrial Way, Test City
+                        postcode: TE1 2PQ
                     type: object
                     properties:
                       fullAddress:
@@ -923,6 +1133,11 @@ components:
           $schema: https://json-schema.org/draft/2020-12/schema
           title: Supporting references
           description: label/reference pairs for the movement. Both reference and label are required for every entry.
+          examples:
+            - - label: PO Number
+                reference: PO-123456
+              - label: Job Number
+                reference: CARRIER-JOB-001
           type: array
           minItems: 1
           items:
@@ -1078,6 +1293,8 @@ components:
           $schema: https://json-schema.org/draft/2020-12/schema
           title: Validation
           description: Data-quality feedback returned alongside a successful response.
+          examples:
+            - warnings: []
           type: object
           required:
             - warnings
@@ -1139,6 +1356,8 @@ components:
           $schema: https://json-schema.org/draft/2020-12/schema
           title: Validation
           description: Data-quality feedback returned alongside a successful response.
+          examples:
+            - warnings: []
           type: object
           required:
             - warnings
@@ -1201,6 +1420,12 @@ components:
                 $schema: https://json-schema.org/draft/2020-12/schema
                 title: Delivery item
                 description: A single Delivery minted from a `POST /deliveries` request, covering the Movements sharing one waste type.
+                examples:
+                  - deliveryId: 25KMT4Z9
+                    movementIds:
+                      - 25HRA0B2
+                      - 25HRA0B3
+                    wasteType: NON_HAZARDOUS
                 type: object
                 required:
                   - deliveryId
@@ -1240,6 +1465,8 @@ components:
           $schema: https://json-schema.org/draft/2020-12/schema
           title: Validation
           description: Data-quality feedback returned alongside a successful response.
+          examples:
+            - warnings: []
           type: object
           required:
             - warnings
@@ -1307,6 +1534,8 @@ components:
           $schema: https://json-schema.org/draft/2020-12/schema
           title: Validation
           description: Data-quality feedback returned alongside a successful response.
+          examples:
+            - warnings: []
           type: object
           required:
             - warnings
@@ -1374,6 +1603,8 @@ components:
           $schema: https://json-schema.org/draft/2020-12/schema
           title: Validation
           description: Data-quality feedback returned alongside a successful response.
+          examples:
+            - warnings: []
           type: object
           required:
             - warnings
@@ -1675,10 +1906,33 @@ paths:
                   $schema: https://json-schema.org/draft/2020-12/schema
                   title: Producer
                   description: The organisation or party the waste originates from. Required fields vary by wasteSource — see the variants below. For Commercial and Municipal, contactDetails is required (with at least one of emailAddress or phoneNumber within it), and exactly one of authorisationNumber or reasonForNoAuthorisationNumber must be provided; not applicable for Household, where contactDetails and the rest remain forbidden.
+                  examples:
+                    - wasteSource: Commercial
+                      organisationName: ACME Waste Producers Ltd
+                      authorisationNumber: EAS/P/123456
+                      sicCode: '38110'
+                      address:
+                        fullAddress: 10 Industrial Way, Test City
+                        postcode: TE1 2PQ
+                      contactDetails:
+                        emailAddress: producer@example.com
+                        phoneNumber: '01234567890'
+                    - wasteSource: Municipal
+                      organisationName: Test Council
+                      reasonForNoAuthorisationNumber: TBC
+                      address:
+                        fullAddress: Council Depot, Test City
+                        postcode: TE1 5CD
+                      contactDetails:
+                        emailAddress: waste.services@example.gov.uk
+                        phoneNumber: '01234567890'
+                    - wasteSource: Household
                   oneOf:
                     - $schema: https://json-schema.org/draft/2020-12/schema
                       title: Producer (Household)
                       description: Producer fields specific to household waste. organisationName, authorisationNumber, sicCode, contactDetails and address do not apply and must not be provided.
+                      examples:
+                        - wasteSource: Household
                       type: object
                       allOf:
                         - $schema: https://json-schema.org/draft/2020-12/schema
@@ -1699,6 +1953,17 @@ paths:
                     - $schema: https://json-schema.org/draft/2020-12/schema
                       title: Producer (Commercial)
                       description: Producer fields specific to commercial waste. organisationName, sicCode, address and contactDetails are required. Exactly one of authorisationNumber or reasonForNoAuthorisationNumber must be provided.
+                      examples:
+                        - wasteSource: Commercial
+                          organisationName: ACME Waste Producers Ltd
+                          authorisationNumber: EAS/P/123456
+                          sicCode: '38110'
+                          address:
+                            fullAddress: 10 Industrial Way, Test City
+                            postcode: TE1 2PQ
+                          contactDetails:
+                            emailAddress: producer@example.com
+                            phoneNumber: '01234567890'
                       type: object
                       allOf:
                         - $schema: https://json-schema.org/draft/2020-12/schema
@@ -1746,6 +2011,10 @@ paths:
                               $schema: https://json-schema.org/draft/2020-12/schema
                               title: Contact details
                               description: Contact details for a party. At least one of emailAddress or phoneNumber must be provided.
+                              examples:
+                                - emailAddress: producer@example.com
+                                  phoneNumber: '01234567890'
+                                - emailAddress: producer@example.com
                               type: object
                               properties:
                                 emailAddress:
@@ -1769,6 +2038,9 @@ paths:
                               $schema: https://json-schema.org/draft/2020-12/schema
                               title: Address
                               description: A UK or Irish postal address. fullAddress is optional; postcode is required.
+                              examples:
+                                - fullAddress: 10 Industrial Way, Test City
+                                  postcode: TE1 2PQ
                               type: object
                               properties:
                                 fullAddress:
@@ -1799,6 +2071,16 @@ paths:
                     - $schema: https://json-schema.org/draft/2020-12/schema
                       title: Producer (Municipal)
                       description: Producer fields specific to municipal waste. organisationName, address and contactDetails are required; sicCode is optional. Exactly one of authorisationNumber or reasonForNoAuthorisationNumber must be provided.
+                      examples:
+                        - wasteSource: Municipal
+                          organisationName: Test Council
+                          reasonForNoAuthorisationNumber: TBC
+                          address:
+                            fullAddress: Council Depot, Test City
+                            postcode: TE1 5CD
+                          contactDetails:
+                            emailAddress: waste.services@example.gov.uk
+                            phoneNumber: '01234567890'
                       type: object
                       allOf:
                         - $schema: https://json-schema.org/draft/2020-12/schema
@@ -1846,6 +2128,10 @@ paths:
                               $schema: https://json-schema.org/draft/2020-12/schema
                               title: Contact details
                               description: Contact details for a party. At least one of emailAddress or phoneNumber must be provided.
+                              examples:
+                                - emailAddress: producer@example.com
+                                  phoneNumber: '01234567890'
+                                - emailAddress: producer@example.com
                               type: object
                               properties:
                                 emailAddress:
@@ -1869,6 +2155,9 @@ paths:
                               $schema: https://json-schema.org/draft/2020-12/schema
                               title: Address
                               description: A UK or Irish postal address. fullAddress is optional; postcode is required.
+                              examples:
+                                - fullAddress: 10 Industrial Way, Test City
+                                  postcode: TE1 2PQ
                               type: object
                               properties:
                                 fullAddress:
@@ -1899,6 +2188,18 @@ paths:
                   $schema: https://json-schema.org/draft/2020-12/schema
                   title: Broker or dealer involvement
                   description: 'Declares whether any broker or dealer was involved in the movement, and their details. isPresent gates the items array: when true at least one entry is required, when false or absent entries are forbidden.'
+                  examples:
+                    - isPresent: true
+                      items:
+                        - organisationName: Broker Demo Ltd
+                          registrationNumber: CBDU654321
+                          contactDetails:
+                            emailAddress: broker@example.com
+                            phoneNumber: '01112223333'
+                          address:
+                            fullAddress: 2 Broker Yard, Test City
+                            postcode: TE1 1ST
+                    - isPresent: false
                   type: object
                   oneOf:
                     - required:
@@ -1926,6 +2227,19 @@ paths:
                         $schema: https://json-schema.org/draft/2020-12/schema
                         title: Broker or dealer
                         description: A single broker or dealer who arranged the transfer. organisationName and contactDetails are required, and exactly one of registrationNumber or reasonForNoRegistrationNumber must be provided. address is optional.
+                        examples:
+                          - organisationName: Broker Demo Ltd
+                            registrationNumber: CBDU654321
+                            contactDetails:
+                              emailAddress: broker@example.com
+                              phoneNumber: '01112223333'
+                            address:
+                              fullAddress: 2 Broker Yard, Test City
+                              postcode: TE1 1ST
+                          - organisationName: Broker Demo Ltd
+                            reasonForNoRegistrationNumber: ONE_OFF
+                            contactDetails:
+                              emailAddress: broker@example.com
                         type: object
                         oneOf:
                           - required:
@@ -1959,6 +2273,10 @@ paths:
                             $schema: https://json-schema.org/draft/2020-12/schema
                             title: Contact details
                             description: Contact details for a party. At least one of emailAddress or phoneNumber must be provided.
+                            examples:
+                              - emailAddress: producer@example.com
+                                phoneNumber: '01234567890'
+                              - emailAddress: producer@example.com
                             type: object
                             properties:
                               emailAddress:
@@ -1982,6 +2300,9 @@ paths:
                             $schema: https://json-schema.org/draft/2020-12/schema
                             title: Address
                             description: A UK or Irish postal address. fullAddress is optional; postcode is required.
+                            examples:
+                              - fullAddress: 10 Industrial Way, Test City
+                                postcode: TE1 2PQ
                             type: object
                             properties:
                               fullAddress:
@@ -2004,6 +2325,11 @@ paths:
                   $schema: https://json-schema.org/draft/2020-12/schema
                   title: Supporting references
                   description: label/reference pairs for the movement. Both reference and label are required for every entry.
+                  examples:
+                    - - label: PO Number
+                        reference: PO-123456
+                      - label: Job Number
+                        reference: CARRIER-JOB-001
                   type: array
                   minItems: 1
                   items:
@@ -2032,6 +2358,8 @@ paths:
                   $schema: https://json-schema.org/draft/2020-12/schema
                   title: Special handling requirements
                   description: Free-text operational handling instructions for the movement — for example fragile, temperature-sensitive, or keep upright. Limited to 500 characters. Omit the field entirely when there are none.
+                  examples:
+                    - Handle with care and keep upright.
                   type: string
                   minLength: 1
                   maxLength: 500
@@ -2039,6 +2367,45 @@ paths:
                 - apiCode
                 - producer
               additionalProperties: false
+            examples:
+              commercial:
+                summary: Commercial producer, with broker or dealer, supporting references and special handling
+                value:
+                  apiCode: 25b14080-5e77-4f91-9957-2482a0cb8775
+                  producer:
+                    wasteSource: Commercial
+                    organisationName: ACME Waste Producers Ltd
+                    authorisationNumber: EAS/P/123456
+                    sicCode: '38110'
+                    address:
+                      fullAddress: 10 Industrial Way, Test City
+                      postcode: TE1 2PQ
+                    contactDetails:
+                      emailAddress: producer@example.com
+                      phoneNumber: '01234567890'
+                  brokerOrDealer:
+                    isPresent: true
+                    items:
+                      - organisationName: Broker Demo Ltd
+                        registrationNumber: CBDU654321
+                        contactDetails:
+                          emailAddress: broker@example.com
+                          phoneNumber: '01112223333'
+                        address:
+                          fullAddress: 2 Broker Yard, Test City
+                          postcode: TE1 1ST
+                  supportingReferences:
+                    - label: PO Number
+                      reference: PO-123456
+                    - label: Job Number
+                      reference: CARRIER-JOB-001
+                  specialHandlingRequirements: Handle with care and keep upright.
+              household:
+                summary: Household producer, minimal
+                value:
+                  apiCode: 25b14080-5e77-4f91-9957-2482a0cb8775
+                  producer:
+                    wasteSource: Household
       responses:
         '201':
           description: Movement created. Body carries the new Movement ID and any validation warnings.
@@ -2076,6 +2443,8 @@ paths:
                     $schema: https://json-schema.org/draft/2020-12/schema
                     title: Validation
                     description: Data-quality feedback returned alongside a successful response.
+                    examples:
+                      - warnings: []
                     type: object
                     required:
                       - warnings
@@ -2117,6 +2486,21 @@ paths:
                               examples:
                                 - apiCode is required.
                         description: Data-quality warnings. Empty when there are none.
+              examples:
+                commercial:
+                  summary: Commercial producer, with broker or dealer, supporting references and special handling
+                  value:
+                    data:
+                      movementId: 25HRA0B2
+                    validation:
+                      warnings: []
+                household:
+                  summary: Household producer, minimal
+                  value:
+                    data:
+                      movementId: 25HRA0B3
+                    validation:
+                      warnings: []
         '400':
           description: The request could not be stored (validation, format or state error).
           headers:
@@ -2387,6 +2771,18 @@ paths:
                   $schema: https://json-schema.org/draft/2020-12/schema
                   title: Broker or dealer involvement
                   description: 'Declares whether any broker or dealer was involved in the movement, and their details. isPresent gates the items array: when true at least one entry is required, when false or absent entries are forbidden.'
+                  examples:
+                    - isPresent: true
+                      items:
+                        - organisationName: Broker Demo Ltd
+                          registrationNumber: CBDU654321
+                          contactDetails:
+                            emailAddress: broker@example.com
+                            phoneNumber: '01112223333'
+                          address:
+                            fullAddress: 2 Broker Yard, Test City
+                            postcode: TE1 1ST
+                    - isPresent: false
                   type: object
                   oneOf:
                     - required:
@@ -2414,6 +2810,19 @@ paths:
                         $schema: https://json-schema.org/draft/2020-12/schema
                         title: Broker or dealer
                         description: A single broker or dealer who arranged the transfer. organisationName and contactDetails are required, and exactly one of registrationNumber or reasonForNoRegistrationNumber must be provided. address is optional.
+                        examples:
+                          - organisationName: Broker Demo Ltd
+                            registrationNumber: CBDU654321
+                            contactDetails:
+                              emailAddress: broker@example.com
+                              phoneNumber: '01112223333'
+                            address:
+                              fullAddress: 2 Broker Yard, Test City
+                              postcode: TE1 1ST
+                          - organisationName: Broker Demo Ltd
+                            reasonForNoRegistrationNumber: ONE_OFF
+                            contactDetails:
+                              emailAddress: broker@example.com
                         type: object
                         oneOf:
                           - required:
@@ -2447,6 +2856,10 @@ paths:
                             $schema: https://json-schema.org/draft/2020-12/schema
                             title: Contact details
                             description: Contact details for a party. At least one of emailAddress or phoneNumber must be provided.
+                            examples:
+                              - emailAddress: producer@example.com
+                                phoneNumber: '01234567890'
+                              - emailAddress: producer@example.com
                             type: object
                             properties:
                               emailAddress:
@@ -2470,6 +2883,9 @@ paths:
                             $schema: https://json-schema.org/draft/2020-12/schema
                             title: Address
                             description: A UK or Irish postal address. fullAddress is optional; postcode is required.
+                            examples:
+                              - fullAddress: 10 Industrial Way, Test City
+                                postcode: TE1 2PQ
                             type: object
                             properties:
                               fullAddress:
@@ -2492,6 +2908,11 @@ paths:
                   $schema: https://json-schema.org/draft/2020-12/schema
                   title: Supporting references
                   description: label/reference pairs for the movement. Both reference and label are required for every entry.
+                  examples:
+                    - - label: PO Number
+                        reference: PO-123456
+                      - label: Job Number
+                        reference: CARRIER-JOB-001
                   type: array
                   minItems: 1
                   items:
@@ -2520,12 +2941,40 @@ paths:
                   $schema: https://json-schema.org/draft/2020-12/schema
                   title: Special handling requirements
                   description: Free-text operational handling instructions for the movement — for example fragile, temperature-sensitive, or keep upright. Limited to 500 characters. Omit the field entirely when there are none.
+                  examples:
+                    - Handle with care and keep upright.
                   type: string
                   minLength: 1
                   maxLength: 500
               required:
                 - apiCode
               additionalProperties: false
+            examples:
+              withBrokerAndReferences:
+                summary: With broker or dealer, supporting references and special handling
+                value:
+                  apiCode: 25b14080-5e77-4f91-9957-2482a0cb8775
+                  brokerOrDealer:
+                    isPresent: true
+                    items:
+                      - organisationName: Broker Demo Ltd
+                        registrationNumber: CBDU654321
+                        contactDetails:
+                          emailAddress: broker@example.com
+                          phoneNumber: '01112223333'
+                        address:
+                          fullAddress: 2 Broker Yard, Test City
+                          postcode: TE1 1ST
+                  supportingReferences:
+                    - label: PO Number
+                      reference: PO-123456
+                    - label: Job Number
+                      reference: CARRIER-JOB-001
+                  specialHandlingRequirements: Handle with care and keep upright.
+              minimal:
+                summary: apiCode only
+                value:
+                  apiCode: 25b14080-5e77-4f91-9957-2482a0cb8775
       responses:
         '201':
           description: Collection recorded. Body carries any validation warnings.
@@ -2557,6 +3006,8 @@ paths:
                     $schema: https://json-schema.org/draft/2020-12/schema
                     title: Validation
                     description: Data-quality feedback returned alongside a successful response.
+                    examples:
+                      - warnings: []
                     type: object
                     required:
                       - warnings
@@ -2598,6 +3049,19 @@ paths:
                               examples:
                                 - apiCode is required.
                         description: Data-quality warnings. Empty when there are none.
+              examples:
+                withBrokerAndReferences:
+                  summary: With broker or dealer, supporting references and special handling
+                  value:
+                    data: null
+                    validation:
+                      warnings: []
+                minimal:
+                  summary: apiCode only
+                  value:
+                    data: null
+                    validation:
+                      warnings: []
         '400':
           description: The request could not be stored (validation, format or state error).
           headers:
@@ -2945,6 +3409,11 @@ paths:
                   $schema: https://json-schema.org/draft/2020-12/schema
                   title: Supporting references
                   description: label/reference pairs for the movement. Both reference and label are required for every entry.
+                  examples:
+                    - - label: PO Number
+                        reference: PO-123456
+                      - label: Job Number
+                        reference: CARRIER-JOB-001
                   type: array
                   minItems: 1
                   items:
@@ -2973,6 +3442,17 @@ paths:
                 - apiCode
                 - movementIds
               additionalProperties: false
+            examples:
+              twoMovements:
+                summary: Two movements delivered together
+                value:
+                  apiCode: 25b14080-5e77-4f91-9957-2482a0cb8775
+                  movementIds:
+                    - 25HRA0B2
+                    - 25HRA0B3
+                  supportingReferences:
+                    - label: Waste Ticket Number
+                      reference: WT-7781
       responses:
         '201':
           description: Delivery recorded. Body carries a list of the new Delivery(ies) — one per distinct waste type — and any validation warnings.
@@ -3005,6 +3485,12 @@ paths:
                           $schema: https://json-schema.org/draft/2020-12/schema
                           title: Delivery item
                           description: A single Delivery minted from a `POST /deliveries` request, covering the Movements sharing one waste type.
+                          examples:
+                            - deliveryId: 25KMT4Z9
+                              movementIds:
+                                - 25HRA0B2
+                                - 25HRA0B3
+                              wasteType: NON_HAZARDOUS
                           type: object
                           required:
                             - deliveryId
@@ -3044,6 +3530,8 @@ paths:
                     $schema: https://json-schema.org/draft/2020-12/schema
                     title: Validation
                     description: Data-quality feedback returned alongside a successful response.
+                    examples:
+                      - warnings: []
                     type: object
                     required:
                       - warnings
@@ -3085,6 +3573,19 @@ paths:
                               examples:
                                 - apiCode is required.
                         description: Data-quality warnings. Empty when there are none.
+              examples:
+                twoMovements:
+                  summary: Two movements delivered together
+                  value:
+                    data:
+                      deliveries:
+                        - deliveryId: 25KMT4Z9
+                          movementIds:
+                            - 25HRA0B2
+                            - 25HRA0B3
+                          wasteType: NON_HAZARDOUS
+                    validation:
+                      warnings: []
         '400':
           description: The request could not be stored (validation, format or state error).
           headers:
@@ -3349,6 +3850,18 @@ paths:
                   $schema: https://json-schema.org/draft/2020-12/schema
                   title: Broker or dealer involvement
                   description: 'Declares whether any broker or dealer was involved in the movement, and their details. isPresent gates the items array: when true at least one entry is required, when false or absent entries are forbidden.'
+                  examples:
+                    - isPresent: true
+                      items:
+                        - organisationName: Broker Demo Ltd
+                          registrationNumber: CBDU654321
+                          contactDetails:
+                            emailAddress: broker@example.com
+                            phoneNumber: '01112223333'
+                          address:
+                            fullAddress: 2 Broker Yard, Test City
+                            postcode: TE1 1ST
+                    - isPresent: false
                   type: object
                   oneOf:
                     - required:
@@ -3376,6 +3889,19 @@ paths:
                         $schema: https://json-schema.org/draft/2020-12/schema
                         title: Broker or dealer
                         description: A single broker or dealer who arranged the transfer. organisationName and contactDetails are required, and exactly one of registrationNumber or reasonForNoRegistrationNumber must be provided. address is optional.
+                        examples:
+                          - organisationName: Broker Demo Ltd
+                            registrationNumber: CBDU654321
+                            contactDetails:
+                              emailAddress: broker@example.com
+                              phoneNumber: '01112223333'
+                            address:
+                              fullAddress: 2 Broker Yard, Test City
+                              postcode: TE1 1ST
+                          - organisationName: Broker Demo Ltd
+                            reasonForNoRegistrationNumber: ONE_OFF
+                            contactDetails:
+                              emailAddress: broker@example.com
                         type: object
                         oneOf:
                           - required:
@@ -3409,6 +3935,10 @@ paths:
                             $schema: https://json-schema.org/draft/2020-12/schema
                             title: Contact details
                             description: Contact details for a party. At least one of emailAddress or phoneNumber must be provided.
+                            examples:
+                              - emailAddress: producer@example.com
+                                phoneNumber: '01234567890'
+                              - emailAddress: producer@example.com
                             type: object
                             properties:
                               emailAddress:
@@ -3432,6 +3962,9 @@ paths:
                             $schema: https://json-schema.org/draft/2020-12/schema
                             title: Address
                             description: A UK or Irish postal address. fullAddress is optional; postcode is required.
+                            examples:
+                              - fullAddress: 10 Industrial Way, Test City
+                                postcode: TE1 2PQ
                             type: object
                             properties:
                               fullAddress:
@@ -3454,6 +3987,11 @@ paths:
                   $schema: https://json-schema.org/draft/2020-12/schema
                   title: Supporting references
                   description: label/reference pairs for the movement. Both reference and label are required for every entry.
+                  examples:
+                    - - label: PO Number
+                        reference: PO-123456
+                      - label: Job Number
+                        reference: CARRIER-JOB-001
                   type: array
                   minItems: 1
                   items:
@@ -3482,6 +4020,15 @@ paths:
                 - apiCode
                 - reason
               additionalProperties: false
+            examples:
+              withReason:
+                summary: Receipt with no prior delivery, with the reason why
+                value:
+                  apiCode: 25b14080-5e77-4f91-9957-2482a0cb8775
+                  reason: No delivery was recorded prior to receipt; waste received directly from the producer.
+                  supportingReferences:
+                    - label: Weighbridge Number
+                      reference: WB-0042
       responses:
         '201':
           description: Receipt recorded against a server-created empty Delivery. Body carries the new Delivery ID and any validation warnings.
@@ -3519,6 +4066,8 @@ paths:
                     $schema: https://json-schema.org/draft/2020-12/schema
                     title: Validation
                     description: Data-quality feedback returned alongside a successful response.
+                    examples:
+                      - warnings: []
                     type: object
                     required:
                       - warnings
@@ -3560,6 +4109,14 @@ paths:
                               examples:
                                 - apiCode is required.
                         description: Data-quality warnings. Empty when there are none.
+              examples:
+                withReason:
+                  summary: Receipt with no prior delivery, with the reason why
+                  value:
+                    data:
+                      deliveryId: 25KMT4Z9
+                    validation:
+                      warnings: []
         '400':
           description: The request could not be stored (validation, format or state error).
           headers:
@@ -3830,6 +4387,18 @@ paths:
                   $schema: https://json-schema.org/draft/2020-12/schema
                   title: Broker or dealer involvement
                   description: 'Declares whether any broker or dealer was involved in the movement, and their details. isPresent gates the items array: when true at least one entry is required, when false or absent entries are forbidden.'
+                  examples:
+                    - isPresent: true
+                      items:
+                        - organisationName: Broker Demo Ltd
+                          registrationNumber: CBDU654321
+                          contactDetails:
+                            emailAddress: broker@example.com
+                            phoneNumber: '01112223333'
+                          address:
+                            fullAddress: 2 Broker Yard, Test City
+                            postcode: TE1 1ST
+                    - isPresent: false
                   type: object
                   oneOf:
                     - required:
@@ -3857,6 +4426,19 @@ paths:
                         $schema: https://json-schema.org/draft/2020-12/schema
                         title: Broker or dealer
                         description: A single broker or dealer who arranged the transfer. organisationName and contactDetails are required, and exactly one of registrationNumber or reasonForNoRegistrationNumber must be provided. address is optional.
+                        examples:
+                          - organisationName: Broker Demo Ltd
+                            registrationNumber: CBDU654321
+                            contactDetails:
+                              emailAddress: broker@example.com
+                              phoneNumber: '01112223333'
+                            address:
+                              fullAddress: 2 Broker Yard, Test City
+                              postcode: TE1 1ST
+                          - organisationName: Broker Demo Ltd
+                            reasonForNoRegistrationNumber: ONE_OFF
+                            contactDetails:
+                              emailAddress: broker@example.com
                         type: object
                         oneOf:
                           - required:
@@ -3890,6 +4472,10 @@ paths:
                             $schema: https://json-schema.org/draft/2020-12/schema
                             title: Contact details
                             description: Contact details for a party. At least one of emailAddress or phoneNumber must be provided.
+                            examples:
+                              - emailAddress: producer@example.com
+                                phoneNumber: '01234567890'
+                              - emailAddress: producer@example.com
                             type: object
                             properties:
                               emailAddress:
@@ -3913,6 +4499,9 @@ paths:
                             $schema: https://json-schema.org/draft/2020-12/schema
                             title: Address
                             description: A UK or Irish postal address. fullAddress is optional; postcode is required.
+                            examples:
+                              - fullAddress: 10 Industrial Way, Test City
+                                postcode: TE1 2PQ
                             type: object
                             properties:
                               fullAddress:
@@ -3935,6 +4524,11 @@ paths:
                   $schema: https://json-schema.org/draft/2020-12/schema
                   title: Supporting references
                   description: label/reference pairs for the movement. Both reference and label are required for every entry.
+                  examples:
+                    - - label: PO Number
+                        reference: PO-123456
+                      - label: Job Number
+                        reference: CARRIER-JOB-001
                   type: array
                   minItems: 1
                   items:
@@ -3962,6 +4556,25 @@ paths:
               required:
                 - apiCode
               additionalProperties: false
+            examples:
+              withBrokerAndReferences:
+                summary: With broker or dealer and a weighbridge reference
+                value:
+                  apiCode: 25b14080-5e77-4f91-9957-2482a0cb8775
+                  brokerOrDealer:
+                    isPresent: true
+                    items:
+                      - organisationName: Broker Demo Ltd
+                        registrationNumber: CBDU654321
+                        contactDetails:
+                          emailAddress: broker@example.com
+                          phoneNumber: '01112223333'
+                        address:
+                          fullAddress: 2 Broker Yard, Test City
+                          postcode: TE1 1ST
+                  supportingReferences:
+                    - label: Weighbridge Number
+                      reference: WB-0042
       responses:
         '201':
           description: Receipt recorded against the delivery. Body carries the Delivery ID and any validation warnings.
@@ -3999,6 +4612,8 @@ paths:
                     $schema: https://json-schema.org/draft/2020-12/schema
                     title: Validation
                     description: Data-quality feedback returned alongside a successful response.
+                    examples:
+                      - warnings: []
                     type: object
                     required:
                       - warnings
@@ -4040,6 +4655,14 @@ paths:
                               examples:
                                 - apiCode is required.
                         description: Data-quality warnings. Empty when there are none.
+              examples:
+                withBrokerAndReferences:
+                  summary: With broker or dealer and a weighbridge reference
+                  value:
+                    data:
+                      deliveryId: 25KMT4Z9
+                    validation:
+                      warnings: []
         '400':
           description: The request could not be stored (validation, format or state error).
           headers:

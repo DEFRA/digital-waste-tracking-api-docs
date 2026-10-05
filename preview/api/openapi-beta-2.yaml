@@ -159,6 +159,11 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/createMovementRequest'
+            examples:
+              commercial:
+                $ref: '../event-model/schemas/beta-2/creation/create-movement-request.examples.json#/commercial'
+              household:
+                $ref: '../event-model/schemas/beta-2/creation/create-movement-request.examples.json#/household'
       responses:
         '201':
           description: Movement created. Body carries the new Movement ID and any validation warnings.
@@ -169,6 +174,11 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/createMovementResponse'
+              examples:
+                commercial:
+                  $ref: '../event-model/schemas/beta-2/creation/create-movement-response.examples.json#/commercial'
+                household:
+                  $ref: '../event-model/schemas/beta-2/creation/create-movement-response.examples.json#/household'
         '400':
           $ref: '#/components/responses/400'
         '401':
@@ -190,6 +200,11 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/recordCollectionRequest'
+            examples:
+              withBrokerAndReferences:
+                $ref: '../event-model/schemas/beta-2/collection/create-collection-request.examples.json#/withBrokerAndReferences'
+              minimal:
+                $ref: '../event-model/schemas/beta-2/collection/create-collection-request.examples.json#/minimal'
       responses:
         '201':
           description: Collection recorded. Body carries any validation warnings.
@@ -200,6 +215,11 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/recordCollectionResponse'
+              examples:
+                withBrokerAndReferences:
+                  $ref: '../event-model/schemas/beta-2/collection/create-collection-response.examples.json#/withBrokerAndReferences'
+                minimal:
+                  $ref: '../event-model/schemas/beta-2/collection/create-collection-response.examples.json#/minimal'
         '400':
           $ref: '#/components/responses/400'
         '401':
@@ -237,6 +257,9 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/recordDeliveryRequest'
+            examples:
+              twoMovements:
+                $ref: '../event-model/schemas/beta-2/delivery/record-delivery-request.examples.json#/twoMovements'
       responses:
         '201':
           description: >-
@@ -250,6 +273,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/deliveryResponse'
+              examples:
+                twoMovements:
+                  $ref: '../event-model/schemas/beta-2/delivery/record-delivery-response.examples.json#/twoMovements'
         '400':
           $ref: '#/components/responses/400'
         '401':
@@ -272,6 +298,9 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/recordReceiptWithoutDeliveryRequest'
+            examples:
+              withReason:
+                $ref: '../event-model/schemas/beta-2/receipt/record-receipt-without-delivery-request.examples.json#/withReason'
       responses:
         '201':
           description: >-
@@ -285,6 +314,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/recordReceiptWithoutDeliveryResponse'
+              examples:
+                withReason:
+                  $ref: '../event-model/schemas/beta-2/receipt/record-receipt-without-delivery-response.examples.json#/withReason'
         '400':
           $ref: '#/components/responses/400'
         '401':
@@ -306,6 +338,9 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/recordReceiptRequest'
+            examples:
+              withBrokerAndReferences:
+                $ref: '../event-model/schemas/beta-2/receipt/record-receipt-request.examples.json#/withBrokerAndReferences'
       responses:
         '201':
           description: Receipt recorded against the delivery. Body carries the Delivery ID and any validation warnings.
@@ -316,6 +351,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/recordReceiptResponse'
+              examples:
+                withBrokerAndReferences:
+                  $ref: '../event-model/schemas/beta-2/receipt/record-receipt-response.examples.json#/withBrokerAndReferences'
         '400':
           $ref: '#/components/responses/400'
         '401':
