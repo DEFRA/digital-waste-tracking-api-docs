@@ -3,3 +3,4 @@ site/
 .DS_Store
 node_modules/
 coverage/
+docs/api/*.bundled.yaml

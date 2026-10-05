@@ -11,10 +11,13 @@
     "test:watch": "node --no-experimental-require-module ./node_modules/jest/bin/jest.js --watch",
     "format": "prettier --write \"**/*.{js,json,md,yaml,yml}\"",
     "format:check": "prettier --check \"**/*.{js,json,md,yaml,yml}\"",
-    "schemas:sync": "bash scripts/sync-schemas.sh"
+    "schemas:sync": "bash scripts/sync-schemas.sh",
+    "specs:bundle": "node scripts/bundle-specs.js"
   },
   "devDependencies": {
+    "@apidevtools/json-schema-ref-parser": "^16.0.3",
     "@babel/preset-env": "^7.29.7",
+    "@seriousme/openapi-schema-validator": "^2.11.0",
     "ajv": "^8.20.0",
     "ajv-formats": "^3.0.1",
     "babel-jest": "^29.7.0",

@@ -37,5 +37,15 @@ jobs:
 
       - run: pip install mkdocs-material mike mkdocs-swagger-ui-tag
 
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - run: npm ci
+
+      - name: Bundle OpenAPI specs
+        run: npm run specs:bundle
+
       - name: Deploy preview documentation
         run: mike deploy --push --update-aliases preview
