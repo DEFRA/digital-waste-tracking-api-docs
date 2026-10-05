@@ -12,4 +12,4 @@ robots: noindex, nofollow
 
 See [versioning.md](versioning.md) for the path-based versioning scheme this milestone follows.
 
-<swagger-ui src="openapi-beta-1.yaml"/>
+<swagger-ui src="openapi-beta-1.bundled.yaml"/>

@@ -58,6 +58,17 @@ jobs:
       - name: Checkout ref
         run: git checkout ${{ github.event.inputs.ref }}
 
+      # After `Checkout ref`, so the bundle is built from the ref being released.
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - run: npm ci
+
+      - name: Bundle OpenAPI specs
+        run: npm run specs:bundle
+
       - name: Deploy to ${{ github.event.inputs.environment }}
         run: |
           mike deploy --push --update-aliases ${{ github.event.inputs.environment }}
