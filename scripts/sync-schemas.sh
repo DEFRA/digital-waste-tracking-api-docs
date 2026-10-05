@@ -30,13 +30,13 @@ mkdir -p "$DEST"
 
 # Drop the previous snapshot first, so a schema deleted upstream disappears here
 # too rather than lingering. The hand-written README is not matched by either find.
-find "$DEST" -name '*.schema.json' -delete
+find "$DEST" \( -name '*.schema.json' -o -name '*.examples.json' \) -delete
 find "$DEST" -mindepth 1 -type d -empty -delete
 
-# Copy schema files only — the .test.js files beside them upstream are backend-side
-# and import backend paths. Restricted to beta-* so the loose .js schemas that
+# Copy schema files and the named request/response examples beside them only — the
+# .test.js files upstream are backend-side and import backend paths. Restricted to beta-* so the loose .js schemas that
 # sit directly under src/schemas/ (movement.js, headers.js, …) stay out.
-(cd "$tmp/$SUBTREE" && find . -path './beta-*' -name '*.schema.json' -print0) |
+(cd "$tmp/$SUBTREE" && find . -path './beta-*' \( -name '*.schema.json' -o -name '*.examples.json' \) -print0) |
   while IFS= read -r -d '' f; do
     mkdir -p "$DEST/$(dirname "$f")"
     cp "$tmp/$SUBTREE/$f" "$DEST/$f"
