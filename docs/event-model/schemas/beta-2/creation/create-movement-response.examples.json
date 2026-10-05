@@ -1,0 +1,24 @@
+{
+  "commercial": {
+    "summary": "Commercial producer, with broker or dealer, supporting references and special handling",
+    "value": {
+      "data": {
+        "movementId": "25HRA0B2"
+      },
+      "validation": {
+        "warnings": []
+      }
+    }
+  },
+  "household": {
+    "summary": "Household producer, minimal",
+    "value": {
+      "data": {
+        "movementId": "25HRA0B3"
+      },
+      "validation": {
+        "warnings": []
+      }
+    }
+  }
+}

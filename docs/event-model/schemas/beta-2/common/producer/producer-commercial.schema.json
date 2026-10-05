@@ -2,6 +2,22 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Producer (Commercial)",
   "description": "Producer fields specific to commercial waste. organisationName, sicCode, address and contactDetails are required. Exactly one of authorisationNumber or reasonForNoAuthorisationNumber must be provided.",
+  "examples": [
+    {
+      "wasteSource": "Commercial",
+      "organisationName": "ACME Waste Producers Ltd",
+      "authorisationNumber": "EAS/P/123456",
+      "sicCode": "38110",
+      "address": {
+        "fullAddress": "10 Industrial Way, Test City",
+        "postcode": "TE1 2PQ"
+      },
+      "contactDetails": {
+        "emailAddress": "producer@example.com",
+        "phoneNumber": "01234567890"
+      }
+    }
+  ],
   "type": "object",
   "allOf": [
     { "$ref": "producer-base.schema.json" },

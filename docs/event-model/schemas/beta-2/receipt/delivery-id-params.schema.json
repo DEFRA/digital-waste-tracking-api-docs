@@ -2,6 +2,11 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Delivery ID params",
   "description": "Path params for POST /beta-2/deliveries/{deliveryId}/receipt.",
+  "examples": [
+    {
+      "deliveryId": "25KMT4Z9"
+    }
+  ],
   "type": "object",
   "properties": {
     "deliveryId": {

@@ -2,6 +2,12 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Address",
   "description": "A UK or Irish postal address. fullAddress is optional; postcode is required.",
+  "examples": [
+    {
+      "fullAddress": "10 Industrial Way, Test City",
+      "postcode": "TE1 2PQ"
+    }
+  ],
   "type": "object",
   "properties": {
     "fullAddress": {

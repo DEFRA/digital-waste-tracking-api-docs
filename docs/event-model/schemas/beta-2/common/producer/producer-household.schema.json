@@ -2,6 +2,11 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Producer (Household)",
   "description": "Producer fields specific to household waste. organisationName, authorisationNumber, sicCode, contactDetails and address do not apply and must not be provided.",
+  "examples": [
+    {
+      "wasteSource": "Household"
+    }
+  ],
   "type": "object",
   "allOf": [
     { "$ref": "producer-base.schema.json" },

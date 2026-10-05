@@ -2,6 +2,13 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Delivery item",
   "description": "A single Delivery minted from a `POST /deliveries` request, covering the Movements sharing one waste type.",
+  "examples": [
+    {
+      "deliveryId": "25KMT4Z9",
+      "movementIds": ["25HRA0B2", "25HRA0B3"],
+      "wasteType": "NON_HAZARDOUS"
+    }
+  ],
   "type": "object",
   "required": ["deliveryId", "movementIds", "wasteType"],
   "properties": {

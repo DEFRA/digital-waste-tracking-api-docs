@@ -1,0 +1,13 @@
+{
+  "withReason": {
+    "summary": "Receipt with no prior delivery, with the reason why",
+    "value": {
+      "data": {
+        "deliveryId": "25KMT4Z9"
+      },
+      "validation": {
+        "warnings": []
+      }
+    }
+  }
+}
