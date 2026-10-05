@@ -12,13 +12,19 @@
           "required": ["authorisationNumber"],
           "properties": {
             "authorisationNumber": {},
-            "reasonForNoAuthorisationNumber": false
+            "reasonForNoAuthorisationNumber": {
+              "not": {},
+              "description": "Not allowed when authorisationNumber is provided."
+            }
           }
         },
         {
           "required": ["reasonForNoAuthorisationNumber"],
           "properties": {
-            "authorisationNumber": false,
+            "authorisationNumber": {
+              "not": {},
+              "description": "Not allowed when reasonForNoAuthorisationNumber is provided."
+            },
             "reasonForNoAuthorisationNumber": {}
           }
         }

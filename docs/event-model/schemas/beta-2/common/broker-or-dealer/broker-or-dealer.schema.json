@@ -14,7 +14,10 @@
     {
       "properties": {
         "isPresent": { "const": false },
-        "items": false
+        "items": {
+          "not": {},
+          "description": "Not allowed when isPresent is false or absent."
+        }
       }
     }
   ],

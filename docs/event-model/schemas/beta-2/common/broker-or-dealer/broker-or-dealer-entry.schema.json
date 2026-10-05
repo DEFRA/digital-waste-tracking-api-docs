@@ -8,13 +8,19 @@
       "required": ["registrationNumber"],
       "properties": {
         "registrationNumber": {},
-        "reasonForNoRegistrationNumber": false
+        "reasonForNoRegistrationNumber": {
+          "not": {},
+          "description": "Not allowed when registrationNumber is provided."
+        }
       }
     },
     {
       "required": ["reasonForNoRegistrationNumber"],
       "properties": {
-        "registrationNumber": false,
+        "registrationNumber": {
+          "not": {},
+          "description": "Not allowed when reasonForNoRegistrationNumber is provided."
+        },
         "reasonForNoRegistrationNumber": {}
       }
     }

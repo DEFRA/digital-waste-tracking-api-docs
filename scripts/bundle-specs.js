@@ -2,8 +2,15 @@
 // (`<name>.bundled.yaml`, gitignored) for the Swagger UI pages to render.
 //
 // The specs `$ref` the event-model JSON Schemas, which in turn `$ref` each
-// other, so the bundle inlines every external file and rewrites the refs to
-// internal pointers. Each bundle is then validated against the OpenAPI 3.1
+// other, so the bundle fully dereferences them: every `$ref` is replaced by
+// its target, leaving none in the output. A plain `$RefParser.bundle()` would
+// keep refs, but points repeat uses at wherever a schema was first inlined
+// (`#/components/schemas/a/properties/b`); tools built on OpenAPIKit (e.g.
+// OpenAPI Viewer for macOS) only resolve `#/components/schemas/<name>` and
+// show those schemas as empty. `circular: false` makes a self-referencing
+// schema an error rather than a silent `$ref` left in the output.
+//
+// Each bundle is then validated against the OpenAPI 3.1
 // meta-schema; an invalid one is reported and not written. Exits non-zero if
 // any spec fails, so CI and the deploy workflows stop before publishing.
 import { writeFileSync } from 'node:fs'
@@ -30,7 +37,9 @@ for (const spec of specs) {
   const target = path.join(apiDir, spec.replace(/\.yaml$/, '.bundled.yaml'))
 
   try {
-    const bundled = await $RefParser.bundle(source)
+    const bundled = await $RefParser.dereference(source, {
+      dereference: { circular: false }
+    })
 
     const result = await new Validator().validate(structuredClone(bundled))
     if (!result.valid) {
