@@ -2,6 +2,15 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Contact details",
   "description": "Contact details for a party. At least one of emailAddress or phoneNumber must be provided.",
+  "examples": [
+    {
+      "emailAddress": "producer@example.com",
+      "phoneNumber": "01234567890"
+    },
+    {
+      "emailAddress": "producer@example.com"
+    }
+  ],
   "type": "object",
   "properties": {
     "emailAddress": {

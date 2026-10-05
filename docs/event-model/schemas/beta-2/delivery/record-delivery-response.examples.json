@@ -1,0 +1,19 @@
+{
+  "twoMovements": {
+    "summary": "Two movements delivered together",
+    "value": {
+      "data": {
+        "deliveries": [
+          {
+            "deliveryId": "25KMT4Z9",
+            "movementIds": ["25HRA0B2", "25HRA0B3"],
+            "wasteType": "NON_HAZARDOUS"
+          }
+        ]
+      },
+      "validation": {
+        "warnings": []
+      }
+    }
+  }
+}

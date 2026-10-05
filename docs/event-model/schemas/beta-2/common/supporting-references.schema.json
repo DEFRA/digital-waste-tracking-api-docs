@@ -2,6 +2,18 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Supporting references",
   "description": "label/reference pairs for the movement. Both reference and label are required for every entry.",
+  "examples": [
+    [
+      {
+        "label": "PO Number",
+        "reference": "PO-123456"
+      },
+      {
+        "label": "Job Number",
+        "reference": "CARRIER-JOB-001"
+      }
+    ]
+  ],
   "type": "array",
   "minItems": 1,
   "items": {

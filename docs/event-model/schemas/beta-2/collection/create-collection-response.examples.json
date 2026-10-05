@@ -1,0 +1,20 @@
+{
+  "withBrokerAndReferences": {
+    "summary": "With broker or dealer, supporting references and special handling",
+    "value": {
+      "data": null,
+      "validation": {
+        "warnings": []
+      }
+    }
+  },
+  "minimal": {
+    "summary": "apiCode only",
+    "value": {
+      "data": null,
+      "validation": {
+        "warnings": []
+      }
+    }
+  }
+}

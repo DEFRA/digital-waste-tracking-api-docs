@@ -2,6 +2,27 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Broker or dealer",
   "description": "A single broker or dealer who arranged the transfer. organisationName and contactDetails are required, and exactly one of registrationNumber or reasonForNoRegistrationNumber must be provided. address is optional.",
+  "examples": [
+    {
+      "organisationName": "Broker Demo Ltd",
+      "registrationNumber": "CBDU654321",
+      "contactDetails": {
+        "emailAddress": "broker@example.com",
+        "phoneNumber": "01112223333"
+      },
+      "address": {
+        "fullAddress": "2 Broker Yard, Test City",
+        "postcode": "TE1 1ST"
+      }
+    },
+    {
+      "organisationName": "Broker Demo Ltd",
+      "reasonForNoRegistrationNumber": "ONE_OFF",
+      "contactDetails": {
+        "emailAddress": "broker@example.com"
+      }
+    }
+  ],
   "type": "object",
   "oneOf": [
     {

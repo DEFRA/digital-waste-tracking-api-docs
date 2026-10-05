@@ -2,6 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Special handling requirements",
   "description": "Free-text operational handling instructions for the movement — for example fragile, temperature-sensitive, or keep upright. Limited to 500 characters. Omit the field entirely when there are none.",
+  "examples": ["Handle with care and keep upright."],
   "type": "string",
   "minLength": 1,
   "maxLength": 500
