@@ -92,6 +92,13 @@ const validateConsignmentRules = (movement, helpers) => {
   return movement
 }
 
+/**
+ * @deprecated Superseded by the synced JSON Schema at
+ * `docs/event-model/schemas/beta-2/common/supporting-references.schema.json`,
+ * which `openapi.yaml` `$ref`s as `supportingReferences` for this endpoint. See
+ * the @deprecated note on sharedSchemas.js's otherReferenceSchema for how the
+ * shapes have diverged.
+ */
 const otherReferenceSchema = Joi.object({
   reference: Joi.string()
     .min(1)

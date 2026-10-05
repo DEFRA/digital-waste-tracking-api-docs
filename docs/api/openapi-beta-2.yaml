@@ -3,7 +3,7 @@ openapi: 3.1.0
 info:
   title: Digital Waste Tracking API
   version: beta-2
-  description: Milestone `beta-2` of the waste-movement journey — creation, collection, delivery and receipt, with data validation. Payload fields are being added a resource at a time; only the Producer is carried on `POST /movements` so far.
+  description: Milestone `beta-2` of the waste-movement journey — creation, collection, delivery and receipt, with data validation. Payload fields are being added a resource at a time; each request schema shows what its endpoint carries so far.
 
 servers:
   - url: https://api.example.defra.gov.uk/dwt/beta-2

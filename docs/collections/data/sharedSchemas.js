@@ -246,6 +246,28 @@ export const requiredFullAddressSchema = (fullAddressDescription) =>
     fullAddress: Joi.string().required().description(fullAddressDescription)
   })
 
+/**
+ * Additional label/reference pair.
+ *
+ * @deprecated Superseded by the JSON Schema in `waste-movement-backend`, mirrored
+ * here at `docs/event-model/schemas/beta-2/common/supporting-references.schema.json`.
+ * That is now the source of truth, it is what the running service validates
+ * against, and `openapi.yaml` `$ref`s it directly for Creation, Collection,
+ * Delivery and Receipt-without-Delivery. Its rules are tested upstream, beside
+ * the schema files.
+ *
+ * Kept only because creationJoi.js, collectionJoi.js, deliveryJoi.js and
+ * receiptJoi.js still compose it, so those fixtures stay whole and readable. Do
+ * not extend it, and do not treat a difference between it and the synced schema
+ * as a bug here — the synced one wins.
+ *
+ * Note the shapes have diverged. The synced schema renames the field from
+ * `otherReferencesForMovement` to `supportingReferences`; it constrains `label`
+ * to an enum (Weighbridge Number, PO Number, Job Number, Invoice Number, Waste
+ * Ticket Number, Other), where this one takes any non-empty string; it caps
+ * `reference` at 50 characters, where this one has no maximum; and it requires
+ * at least one entry when the array is supplied.
+ */
 export const otherReferenceSchema = Joi.object({
   reference: Joi.string()
     .min(1)
