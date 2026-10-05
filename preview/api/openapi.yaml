@@ -50,17 +50,29 @@ components:
       name: movementId
       in: path
       required: true
-      description: Movement ID minted by `POST /movements`.
+      description: |
+        Movement ID minted by `POST /movements`. Short, externally-shared,
+        year-prefixed sqids (YY + alphanumerics, see https://sqids.org/).
+        Format is opaque to callers; do not parse.
       schema:
-        $ref: '#/components/schemas/movementId'
+        $ref: '../event-model/schemas/beta-2/common/movement-id.schema.json'
 
     deliveryIdPath:
       name: deliveryId
       in: path
       required: true
-      description: Delivery ID minted by `POST /deliveries`.
+      description: |
+        Delivery ID minted by `POST /deliveries`, covering one or more
+        Movement IDs delivered together at a single receiver site. Short,
+        externally-shared, year-prefixed sqids (YY + alphanumerics, see
+        https://sqids.org/). Format is opaque to callers; do not parse.
+
+        Exception: for a hazardous delivery, the request contains exactly
+        one Movement ID (see the hazardous-waste constraint on
+        `POST /deliveries`), and `deliveryId` is set equal to that Movement
+        ID rather than minted.
       schema:
-        $ref: '#/components/schemas/deliveryId'
+        $ref: '../event-model/schemas/beta-2/common/delivery-id.schema.json'
 
   # ----------------------------------------------------------------------
   # Schemas
@@ -74,36 +86,14 @@ components:
   schemas:
     # --- 1. Identifiers and primitives ----------------------------------
 
-    movementId:
-      type: string
-      description: |
-        Unique identifier for a waste movement. Minted by the server on
-        `POST /movements` and immutable thereafter. Short,
-        externally-shared, year-prefixed sqids (YY + alphanumerics, see
-        https://sqids.org/). Format is opaque to callers; do not parse.
-      example: 25HRA0B2
-
-    deliveryId:
-      type: string
-      description: |
-        Unique identifier for a delivery, covering one or more Movement IDs
-        delivered together at a single receiver site. Minted by the server
-        on `POST /deliveries`. Short, externally-shared,
-        year-prefixed sqids (YY + alphanumerics, see https://sqids.org/).
-        Format is opaque to callers; do not parse.
-
-        Exception: for a hazardous delivery, the request contains exactly
-        one Movement ID (see the hazardous-waste constraint on
-        `POST /deliveries`), and `deliveryId` is set equal to that Movement
-        ID rather than minted.
-      example: 25KMT4Z9
-
     # Internal event identifiers (creationId, collectionId, deliveryEventId,
     # receiptId) are UUIDs minted per event and used server-side only.
     # They are NOT part of the public contract and are never returned in
     # API responses, so they are not modelled here. Public resources are
     # addressed solely by their public identifiers: movementId and
     # deliveryId (and, on the deprecated Phase 1 path, wasteTrackingId).
+    # movementId and deliveryId themselves are the synced beta-2 schemas
+    # under ../event-model/schemas/beta-2/common/.
 
     wasteTrackingId:
       type: string
@@ -749,7 +739,7 @@ components:
         carrying any warnings.
       properties:
         movementId:
-          $ref: '#/components/schemas/movementId'
+          $ref: '../event-model/schemas/beta-2/common/movement-id.schema.json'
         validation:
           description: Validation warnings returned alongside a successful response.
           type: object
@@ -908,7 +898,7 @@ components:
           required: [movementId]
           properties:
             movementId:
-              $ref: '#/components/schemas/movementId'
+              $ref: '../event-model/schemas/beta-2/common/movement-id.schema.json'
         - $ref: '#/components/schemas/createMovementRequest'
 
     deliveryResource:
@@ -920,7 +910,7 @@ components:
           required: [deliveryId]
           properties:
             deliveryId:
-              $ref: '#/components/schemas/deliveryId'
+              $ref: '../event-model/schemas/beta-2/common/delivery-id.schema.json'
         - $ref: '#/components/schemas/deliveryRequest'
 
     receiptResource:
@@ -932,7 +922,7 @@ components:
           required: [deliveryId]
           properties:
             deliveryId:
-              $ref: '#/components/schemas/deliveryId'
+              $ref: '../event-model/schemas/beta-2/common/delivery-id.schema.json'
         - $ref: '#/components/schemas/receiveMovementRequest'
 
     # Delivery event — POST /deliveries.
@@ -965,7 +955,7 @@ components:
           type: array
           minItems: 1
           items:
-            $ref: '#/components/schemas/movementId'
+            $ref: '../event-model/schemas/beta-2/common/movement-id.schema.json'
           description: |
             One or more Movement IDs delivered together at the same drop-off
             place. A single-collection run supplies an array of one; a
@@ -1036,28 +1026,6 @@ components:
             Receipt has been recorded against the Delivery (BusinessRuleViolation).
           example: true
 
-    deliveryResult:
-      type: object
-      description: One delivery entry — either the aggregated non-hazardous group or a single hazardous movement.
-      required: [deliveryId, movementIds, wasteType]
-      properties:
-        deliveryId:
-          $ref: '#/components/schemas/deliveryId'
-        movementIds:
-          type: array
-          items:
-            $ref: '#/components/schemas/movementId'
-          description: |
-            Movement IDs covered by this delivery entry. A single ID for a
-            hazardous entry; one or more for the aggregated
-            non-hazardous entry.
-        wasteType:
-          type: string
-          enum: [HAZARDOUS, NON_HAZARDOUS]
-          description: |
-            Whether this entry is the aggregated non-hazardous delivery or
-            one of the per-Movement hazardous deliveries.
-
     deliveryResponse:
       type: object
       description: |
@@ -1067,9 +1035,12 @@ components:
       properties:
         deliveries:
           type: array
-          description: One or more delivery entries created by this request.
+          description: |
+            One or more delivery entries created by this request — the
+            aggregated non-hazardous delivery and/or one per-Movement
+            delivery for each hazardous Movement.
           items:
-            $ref: '#/components/schemas/deliveryResult'
+            $ref: '../event-model/schemas/beta-2/delivery/delivery-item.schema.json'
         validation:
           description: Validation warnings returned alongside a successful response.
           type: object
@@ -1196,7 +1167,7 @@ components:
         it creates exactly one empty Delivery per call.
       properties:
         deliveryId:
-          $ref: '#/components/schemas/deliveryId'
+          $ref: '../event-model/schemas/beta-2/common/delivery-id.schema.json'
         validation:
           description: Validation warnings returned alongside a successful response.
           type: object
