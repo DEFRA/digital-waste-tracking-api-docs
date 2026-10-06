@@ -53,8 +53,7 @@
       "description": "Name of the broker or dealer organisation who arranged this transfer."
     },
     "registrationNumber": {
-      "type": "string",
-      "pattern": "^\\s*(?:[Cc][Bb][Dd][LlUu]\\d{3,}|[Ww][Cc][Rr]/[Rr]/\\d{7}|(?:[Ss][Cc][Oo]|[Ss][Ee][Aa]|[Ss][Nn][Oo]|[Ss][Ww][Ee]|[Ww][Cc][Rr])/\\d{6}|[Pp][Cc][Tt]-[A-Za-z]-\\d{3,7}|[Rr][Oo][Cc]\\W*[UuLl][Tt]\\W*\\d{1,5})\\s*$",
+      "$ref": "../registration-number.schema.json",
       "description": "Waste carrier, broker or dealer registration number, in a valid UK home-nation format (England and NRW CBDU/CBDL, SEPA WCR/SCO/SEA/SNO/SWE and PCT, NI ROC UT/LT). Mutually exclusive with reasonForNoRegistrationNumber — exactly one of the two is required."
     },
     "reasonForNoRegistrationNumber": {
