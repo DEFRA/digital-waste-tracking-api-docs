@@ -41,6 +41,9 @@ servers:
   - url: http://localhost:3001
     description: Local (Docker Compose)
 
+security:
+  - bearerAuth: []
+
 tags:
   - name: Movement
     description: Create and manage a waste movement record.
@@ -56,6 +59,14 @@ tags:
     description: Lookup endpoints for codes used elsewhere in the API.
 
 components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: >-
+        AWS Cognito access token, obtained with the OAuth 2.0 client credentials grant (`POST {authBaseUrl}/oauth2/token` with your client ID and secret). Sent as `Authorization: Bearer <token>`.
+
   # ----------------------------------------------------------------------
   # Reusable parameters
   # ----------------------------------------------------------------------
