@@ -6,8 +6,25 @@ info:
   description: Milestone `beta-1` of the waste-movement journey — creation, collection, delivery and receipt.
 
 servers:
-  - url: https://api.example.defra.gov.uk/dwt/beta-1
-    description: Placeholder server URL — replace with the real environment URL.
+  - url: https://waste-tracking.api.defra.gov.uk/beta-1
+    description: Production (public)
+  - url: https://waste-tracking.integration.api.defra.gov.uk/beta-1
+    description: Integration / ext-test (public)
+  - url: https://waste-movement-external-api.api.prod.cdp-int.defra.cloud/beta-1
+    description: Production (CDP internal)
+  - url: https://waste-movement-external-api.api.ext-test.cdp-int.defra.cloud/beta-1
+    description: Ext-test (CDP internal)
+  - url: https://waste-movement-external-api.api.perf-test.cdp-int.defra.cloud/beta-1
+    description: Perf-test (CDP internal)
+  - url: https://waste-movement-external-api.api.test.cdp-int.defra.cloud/beta-1
+    description: Test (CDP internal)
+  - url: https://waste-movement-external-api.api.dev.cdp-int.defra.cloud/beta-1
+    description: Dev (CDP internal)
+  - url: http://localhost:3001/beta-1
+    description: Local (Docker Compose)
+
+security:
+  - bearerAuth: []
 
 tags:
   - name: Movement
@@ -20,6 +37,15 @@ tags:
     description: Record receipt of waste at a receiver site.
 
 components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: >-
+        AWS Cognito access token, obtained with the OAuth 2.0 client credentials grant (`POST {authBaseUrl}/oauth2/token` with your client ID and secret). Sent as `Authorization: Bearer <token>`.
+
+
   parameters:
     movementIdPath:
       name: movementId
