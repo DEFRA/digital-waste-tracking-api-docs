@@ -6,22 +6,8 @@ info:
   description: Milestone `beta-2` of the waste-movement journey — creation, collection, delivery and receipt, with data validation. Payload fields are being added a resource at a time; each request schema shows what its endpoint carries so far.
 
 servers:
-  - url: https://waste-tracking.api.defra.gov.uk/beta-2
-    description: Production (public)
   - url: https://waste-tracking.integration.api.defra.gov.uk/beta-2
     description: Integration / ext-test (public)
-  - url: https://waste-movement-external-api.api.prod.cdp-int.defra.cloud/beta-2
-    description: Production (CDP internal)
-  - url: https://waste-movement-external-api.api.ext-test.cdp-int.defra.cloud/beta-2
-    description: Ext-test (CDP internal)
-  - url: https://waste-movement-external-api.api.perf-test.cdp-int.defra.cloud/beta-2
-    description: Perf-test (CDP internal)
-  - url: https://waste-movement-external-api.api.test.cdp-int.defra.cloud/beta-2
-    description: Test (CDP internal)
-  - url: https://waste-movement-external-api.api.dev.cdp-int.defra.cloud/beta-2
-    description: Dev (CDP internal)
-  - url: http://localhost:3001/beta-2
-    description: Local (Docker Compose)
 
 security:
   - bearerAuth: []
