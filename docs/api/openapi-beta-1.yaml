@@ -45,6 +45,7 @@ components:
       description: >-
         AWS Cognito access token, obtained with the OAuth 2.0 client credentials grant (`POST {authBaseUrl}/oauth2/token` with your client ID and secret). Sent as `Authorization: Bearer <token>`.
 
+
   parameters:
     movementIdPath:
       name: movementId
