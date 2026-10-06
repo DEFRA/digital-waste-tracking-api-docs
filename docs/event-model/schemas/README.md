@@ -10,12 +10,13 @@ robots: noindex, nofollow
 !!! warning "Internal documentation"
     This page is internal design/planning material for the delivery team, not published guidance for Software Providers integrating with the Digital Waste Tracking API. Content here may be incomplete, in-progress, or superseded.
 
-Every `*.schema.json` file in this folder is copied verbatim from [`waste-movement-backend`](https://github.com/DEFRA/waste-movement-backend)'s `src/schemas/`, preserving that folder's layout. This README is the one file here that the sync does not touch.
+Every `*.schema.json` file in this folder, the named `*.examples.json` beside them, and each version's `openapi.json` are copied verbatim from [`waste-movement-backend`](https://github.com/DEFRA/waste-movement-backend)'s `src/schemas/`, preserving that folder's layout. This README is the one file here that the sync does not touch.
 
 Both API versions are mirrored, each keeping its version prefix:
 
 ```
 beta-1/                             # the live Receipt of Waste endpoints
+  openapi.json                      # the beta-1 spec — $refs the files beside it
   common/                           # ids, wasteType, delivery-item, issue, validation
   create-movement-request.schema.json
   create-movement-response.schema.json
@@ -23,6 +24,7 @@ beta-1/                             # the live Receipt of Waste endpoints
   record-receipt-response.schema.json
   …
 beta-2/                             # the Phase 2 event model
+  openapi.json                      # the beta-2 spec — $refs the files beside it
   common/
     address.schema.json
     contact-details.schema.json
@@ -46,7 +48,7 @@ The version prefix is not decoration: each file's path from this folder matches 
 
 ## Do not edit anything in this folder
 
-Changes made here are silently overwritten by the next sync. A change to a rule — in either version — is a PR against `waste-movement-backend`; once it is on `main`, it arrives here by running:
+Changes made here are silently overwritten by the next sync. A change to a rule or a beta spec — in either version — is a PR against `waste-movement-backend`; once it is on `main`, it arrives here by running:
 
 ```bash
 npm run schemas:sync
@@ -72,7 +74,7 @@ A sync that brings a resource across for the first time is not finished when the
 
 **4. Leave the deprecated Phase 1 endpoints alone.** `POST /movements/receive` and `PUT /movements/{wasteTrackingId}/receive` keep the shapes they shipped with. The trap is that a request schema can serve both sides of the Phase 1 / Phase 2 line: `receiveMovementRequest` is shared by those two **and** by the live `POST`/`PUT /deliveries/{deliveryId}/receipt`, so swapping a `$ref` inside it changes all four at once. Where that happens, the Phase 1 constraint wins and the live endpoint keeps the old shape too — splitting the schema to separate them is a deliberate change worth its own conversation, not something to do in passing. Check what a schema actually feeds before editing it.
 
-Two things worth knowing about what will and will not catch a mistake here. `test/api/openapi-dialect.test.js` does not resolve `$ref`s — it checks the 2020-12 dialect, absent `$id`s and 3.0-isms, so it passes just as happily with a ref pointing at a file that does not exist. Nothing else in the repo resolves them either, so a new external `$ref` is worth walking by hand, including the nested hops (`broker-or-dealer.schema.json` reaches `../contact-details.schema.json` and `../address.schema.json`). And a swap is rarely only a refactor: the beta-2 shapes have genuinely moved on from the fixtures they replace — broker went from a bare object to an `isPresent`/`items[]` wrapper with `contactDetails` nesting — so the endpoints you point at them start documenting a shape the backend may only implement for some events so far. Say so in the PR.
+Two things worth knowing about what will and will not catch a mistake here. `test/api/openapi-dialect.test.js` does not resolve `$ref`s — it checks the synced schemas' 2020-12 dialect and absent `$id`s — and `openapi.yaml` is neither bundled nor tested, so nothing in the repo resolves its refs, so a new external `$ref` is worth walking by hand, including the nested hops (`broker-or-dealer.schema.json` reaches `../contact-details.schema.json` and `../address.schema.json`). And a swap is rarely only a refactor: the beta-2 shapes have genuinely moved on from the fixtures they replace — broker went from a bare object to an `isPresent`/`items[]` wrapper with `contactDetails` nesting — so the endpoints you point at them start documenting a shape the backend may only implement for some events so far. Say so in the PR.
 
 The doc-side Joi fixture is not updated to match. It is deprecated, and it drifts from here on; the synced schema is what readers are being sent to.
 

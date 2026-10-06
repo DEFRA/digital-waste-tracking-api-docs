@@ -1,0 +1,7 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Registration number",
+  "description": "Waste carrier, broker or dealer registration number, in a valid UK home-nation format (England and NRW CBDU/CBDL, SEPA WCR/SCO/SEA/SNO/SWE and PCT, NI ROC UT/LT). Mirrors ALL_CARRIER_REGISTRATION_NUMBER_REGEXES from @defra/waste-movement-utils, as one case-insensitive pattern; unlike Phase 1 it also allows surrounding whitespace.",
+  "type": "string",
+  "pattern": "^\\s*(?:[Cc][Bb][Dd][LlUu]\\d{3,}|[Ww][Cc][Rr]/[Rr]/\\d{7}|(?:[Ss][Cc][Oo]|[Ss][Ee][Aa]|[Ss][Nn][Oo]|[Ss][Ww][Ee]|[Ww][Cc][Rr])/\\d{6}|[Pp][Cc][Tt]-[A-Za-z]-\\d{3,7}|[Rr][Oo][Cc]\\W*[UuLl][Tt]\\W*\\d{1,5})\\s*$"
+}

@@ -201,9 +201,9 @@ One open question is narrowed rather than answered. [D-021](../collections/decis
 
 Nothing below has been done. Grouped by where the work lands, because a decision recorded in this repo has no effect until the sibling service repos are changed to match.
 
-### This repo — the contract
+### `waste-movement-backend` — the contract
 
-- **Remove `validation` from every success response schema.** Four schemas in `api/openapi-beta-2.yaml` — `createMovementResponse`, `recordCollectionResponse`, `deliveryResponse`, `recordReceiptResponse` — declare `required: [data, validation]` and carry a `validation` property. Drop both, and delete the now-unused `validation` schema. The same four-schema change applies to `api/openapi-beta-1.yaml`, which has the identical envelope. This is behaviour-neutral: the field is hardcoded empty in every `beta` route, so removing it changes the documented contract and no observed response.
+- **Remove `validation` from every success response schema.** Four schemas in `src/schemas/beta-2/openapi.json` — `createMovementResponse`, `recordCollectionResponse`, `deliveryResponse`, `recordReceiptResponse` — declare `required: [data, validation]` and carry a `validation` property. Drop both, and delete the now-unused `validation` schema. The same four-schema change applies to `src/schemas/beta-1/openapi.json`, which has the identical envelope. This is behaviour-neutral: the field is hardcoded empty in every `beta` route, so removing it changes the documented contract and no observed response.
 - **Add `confirmationToken`** to the `problemDetails` schema in both `beta` specs, as an optional member present only on `confirmation-required` responses.
 - **Document the `X-Confirm-Warnings` request header** on every write operation in both `beta` specs.
 - **Decide whether `beta-1` changes at all**, or whether this lands only in `beta-2` and later. [D-038](../collections/decisions.md#d-038) requires a breaking change to be copied forward into a new milestone rather than amended in place — but removing an always-empty field, and adding an optional member and an optional header, is arguably not breaking. Worth settling explicitly rather than assuming either way.

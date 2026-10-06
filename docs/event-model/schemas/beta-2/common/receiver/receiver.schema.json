@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Receiver",
+  "description": "A single intended receiver. siteName, authorisationNumber, receiptAddress and contactDetails are all required.",
+  "type": "object",
+  "properties": {
+    "siteName": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Name of the receiving site."
+    },
+    "authorisationNumber": {
+      "$ref": "../authorisation-number.schema.json",
+      "description": "Receiver environmental permit or exemption number, in a valid UK format."
+    },
+    "receiptAddress": {
+      "$ref": "../address.schema.json",
+      "description": "Address the waste will be received at. postcode is required; fullAddress is optional."
+    },
+    "contactDetails": {
+      "$ref": "../contact-details.schema.json",
+      "description": "How to contact the receiving site. At least one of emailAddress or phoneNumber is required."
+    }
+  },
+  "required": [
+    "siteName",
+    "authorisationNumber",
+    "receiptAddress",
+    "contactDetails"
+  ],
+  "additionalProperties": false
+}

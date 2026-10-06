@@ -2,7 +2,7 @@
 
 ## Running the docs locally
 
-The Swagger pages render bundled copies of the OpenAPI specs (`docs/api/*.bundled.yaml`), which are generated and gitignored, so build them first:
+The beta Swagger pages render bundled copies of the beta OpenAPI specs (`docs/api/openapi-beta-*.yaml`), which are generated and gitignored, so build them first:
 
 ```
 nvm use
@@ -21,17 +21,17 @@ mkdocs serve
 
 Open http://127.0.0.1:8000/digital-waste-tracking-api-docs/
 
-Re-run `npm run specs:bundle` after editing any `docs/api/openapi*.yaml` or `docs/event-model/schemas/` file — `mkdocs serve` won't rebuild the bundles itself. The same command runs in CI and fails if any `$ref` doesn't resolve or a spec isn't valid OpenAPI 3.1.
+Re-run `npm run specs:bundle` after syncing `docs/event-model/schemas/` — `mkdocs serve` won't rebuild the bundles itself. The same command runs in CI and fails if any `$ref` doesn't resolve or a spec isn't valid OpenAPI 3.1.
 
-## Syncing the event-model schemas
+## Syncing the event-model schemas and beta specs
 
-The JSON Schemas under `docs/event-model/schemas/` are a committed copy of `waste-movement-backend`'s `src/schemas/`, which is the source of truth. `docs/api/openapi.yaml` `$ref`s them, so the copy is what `npm run specs:bundle` inlines into the rendered spec. To pull the latest from the backend's `main`:
+The JSON Schemas, named examples and beta OpenAPI specs (`beta-*/openapi.json`) under `docs/event-model/schemas/` are a committed copy of `waste-movement-backend`'s `src/schemas/`, which is the source of truth. The beta Swagger pages are built from those synced specs, and `docs/api/openapi.yaml` `$ref`s the schemas, so the copy is what `npm run specs:bundle` renders. To pull the latest from the backend's `main`:
 
 ```
 npm run schemas:sync
 ```
 
-Commit whatever it changes. **Do not edit anything under that folder by hand** — a rule change is a PR against `waste-movement-backend`, then a sync. A CI check re-runs the sync on every PR and fails visibly when the committed copy has fallen behind. See `docs/event-model/schemas/README.md` for the details.
+Commit whatever it changes. **Do not edit anything under that folder by hand** — a rule or beta spec change is a PR against `waste-movement-backend`, then a sync. A CI check re-runs the sync on every PR and fails visibly when the committed copy has fallen behind. See `docs/event-model/schemas/README.md` for the details.
 
 ## Prettifying markdown files
 
