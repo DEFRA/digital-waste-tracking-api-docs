@@ -49,6 +49,7 @@ At-a-glance view of every decision, sorted by status, then by impact (structural
 | D-034 | [PUT operations use history/revision pattern across all events](#put-operations-use-historyrevision-pattern-across-all-events) | ✅ Decided | 🟠 Medium | **Lifecycle** |
 | D-027 | [Per-organisation vs per-actor API credentials](#per-organisation-vs-per-actor-api-credentials) | ✅ Decided | 🟠 Medium | **Onboarding** |
 | D-042 | [Waste item classification: separated from logistics at Creation, reused at the no-prior-delivery Receipt endpoint, dropped at the ordinary Receipt endpoint](#waste-item-classification-separated-from-logistics-at-creation-reused-at-the-no-prior-delivery-receipt-endpoint-dropped-at-the-ordinary-receipt-endpoint) | ✅ Decided | 🟠 Medium | **Creation** |
+| D-046 | [`apiCode` moves from the request body to an `x-api-code` header (beta-2)](#apicode-moves-from-the-request-body-to-an-x-api-code-header-beta-2) | ✅ Decided | 🟠 Medium | **API conventions** |
 | D-002 | [Single OpenAPI file, not `$ref`-split](#single-openapi-file-not-ref-split) | ✅ Decided | 🟢 Low | **Spec structure** |
 | D-011 | [Static and transit collection collapsed into a single endpoint](#static-and-transit-collection-collapsed-into-a-single-endpoint) | ✅ Decided | 🟢 Low | **Collection** |
 | D-040 | [Rename drop-off and Transfer ID to delivery and Delivery ID](#rename-drop-off-and-transfer-id-to-delivery-and-delivery-id) | ✅ Decided · Applied register-wide | 🟢 Low | **Naming** |
@@ -403,7 +404,7 @@ Correcting a recorded delivery is therefore not an in-place edit: soft-delete th
 
 ### Per-organisation vs per-actor API credentials
 
-**D-027** · ✅ Decided · Impact: 🟠 Medium · Area: **Onboarding** · Related: [D-008](#d-008), [D-036](#d-036)
+**D-027** · ✅ Decided · Impact: 🟠 Medium · Area: **Onboarding** · Related: [D-008](#d-008), [D-036](#d-036), [D-046](#d-046)
 
 **Context.** Phase 1 is receiver-first: a receiver registers its organisation via the Waste Tracking Service and receives credentials — a Cognito app client (`client_id` + `client_secret`) that is exchanged for a Bearer JWT, and an `apiCode` that identifies the submitting organisation in every API request. Phase 2 adds carrier, broker, and producer actors. The open question was whether those actors require separate per-role credentials or whether one organisation-level registration covers all roles that organisation holds.
 
@@ -671,6 +672,28 @@ While implementing this, a related pre-existing gap was found and fixed: `hazard
 **Decision.** Rename `carrier` → `intendedCarriers`, an array (`min(1)`, always required — unlike `receivers`, this array has no conditional gate) of the existing per-entry carrier shape (`intendedCarrierSchema`, unchanged: `meansOfTransport` and `organisationName` mandatory, other fields optional with their existing integrity rules, at least one of `emailAddress`/`phoneNumber` required per-entry).
 
 **Consequences.** Ripples into `creationTypes.ts` (`carrier: IntendedCarrier` → `intendedCarriers: IntendedCarrier[]`), the Creation test suite (`creation/create-movement.test.js`), the `creationEvent.js` worked examples, and `openapi.yaml`'s Creation request schema (`carrier` → an `intendedCarriers` array of `intendedCarrierDetails`, same pattern as `receivers`/`intendedReceiverDetails`). Every other event's `carrier` field (Collection, Delivery, Receipt, Receipt-without-Delivery — all the shared `carrierSchema`) is unaffected; this is Creation-only, same as D-043 left Receipt's `receiverSiteSchema` untouched.
+
+<a id="d-046"></a>
+
+### `apiCode` moves from the request body to an `x-api-code` header (beta-2)
+
+**D-046** · ✅ Decided · Impact: 🟠 Medium · Area: **API conventions** · Related: [D-027](#d-027), [D-036](#d-036), [D-038](#d-038), [D-039](#d-039)
+
+**Context.** Every write request carries two credentials: the Cognito access token in the `Authorization` header, and the organisation's `apiCode` ([D-027](#d-027)) as a required field in the JSON body — in the live Phase 1 receipt endpoints and in every beta-1 and beta-2 request schema. The `apiCode` says _who_ is submitting, not anything about the waste, so it sits oddly among the event data. It also makes the API harder to drive from tools. Swagger UI's Authorize dialog, Bruno/curl environments and Schemathesis (`--header 'x-api-code: …'`) can set a header once per run, but a body field has to be edited into every payload. Schemathesis generates bodies itself, so it can't keep a real `apiCode` in them at all. A body field also can't identify the caller on a request with no body, such as a future `GET`. The original reason for putting it in the body was not recorded. It does need to stay separate from the token, because one integrator's Cognito client can submit for more than one organisation, but that doesn't require the body.
+
+**Decision.** From `beta-2`, the `apiCode` is sent as an **`x-api-code` request header** on every endpoint, next to `Authorization`:
+
+- It is removed from all beta-2 request bodies. A body that still contains `apiCode` is rejected with `400` (`NotAllowed`, pointer `/apiCode`), because the request schemas don't allow extra properties.
+- `openapi-beta-2.yaml` declares it as an `apiKey` security scheme (`in: header`, `name: x-api-code`), required together with `bearerAuth`. Swagger UI's Authorize dialog collects both.
+- Only the transport changes. What the `apiCode` means, how it is issued, and how it is resolved to an organisation ([D-027](#d-027)), and its use for attribution and amend rights ([D-036](#d-036)), stay as they are.
+- Phase 1 and `beta-1` keep `apiCode` in the body. Under [D-038](#d-038), a breaking contract change goes into the next beta milestone rather than being retrofitted.
+
+**Consequences.**
+
+- **`waste-movement-backend`** never resolved `apiCode` on beta routes. It takes the organisation from the `x-dwt-organisation-id` header set by the external API. Its only change is that the beta-2 request schemas and examples no longer include `apiCode`. These schemas are the source the `docs/event-model/schemas/` mirror is synced from.
+- **`waste-movement-external-api`** has to read the `apiCode` from the `x-api-code` header for beta-2 routes. Today its `add-submitting-organisation-to-request` plugin reads `request.payload.apiCode`. It still forwards only the resolved organisation (`x-dwt-organisation-id`) to the backend, never the raw header. The `apiCode` must be masked in logs the same way the body field is today (`maskApiCode`).
+- **Deployment order matters.** If the backend change ships before the external API change, every beta-2 write fails: a body `apiCode` is rejected by the backend, and a header `apiCode` is ignored by the external API, so no organisation is forwarded. The external API should accept the header first (falling back to the body while the change rolls out), then the backend change can ship.
+- Example payloads, generated bodies and stored request bodies are now pure domain data. The beta-2 collection and receipt bodies have no required fields left, so `{}` is a valid request to those endpoints.
 
 ## Open
 
