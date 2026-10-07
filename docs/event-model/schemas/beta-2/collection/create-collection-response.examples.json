@@ -9,7 +9,7 @@
     }
   },
   "minimal": {
-    "summary": "apiCode only",
+    "summary": "Empty body",
     "value": {
       "data": null,
       "validation": {

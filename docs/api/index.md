@@ -14,15 +14,15 @@ Three OpenAPI 3.1 specifications describe the Digital Waste Tracking API. They a
 
 | Spec | Answers | Viewer |
 | --- | --- | --- |
-| `openapi-beta-1.yaml` | What beta-1 serves today: the five journey endpoints, no data validation. | [beta-1](openapi-beta-1.md) |
-| `openapi-beta-2.yaml` | What beta-2 serves today: the same endpoints, with fields and validation being added a resource at a time. | [beta-2](openapi-beta-2.md) |
+| `beta-1/openapi.json` | What beta-1 serves today: the five journey endpoints, no data validation. Synced from the backend. | [beta-1](openapi-beta-1.md) |
+| `beta-2/openapi.json` | What beta-2 serves today: the same endpoints, with fields and validation being added a resource at a time. Synced from the backend. | [beta-2](openapi-beta-2.md) |
 | `openapi.yaml` | The target design at general availability, without a version prefix. Subject to change. | [target](openapi.md) |
 
 The [decisions register](../collections/decisions.md) explains why the contract is shaped the way it is, and what is still open. The [versioning schedule](versioning-schedule.md) says what each beta release adds.
 
 ## Where the shapes come from
 
-Request and response shapes are JSON Schema files in `waste-movement-backend`, which the service validates against. This repo keeps a copy under `docs/event-model/schemas/`, and the specs refer to those files rather than restating them ([D-052](../collections/decisions.md#d-052)). The target spec does the same wherever beta-2 already defines a shape, and describes the rest itself until it is built.
+Request and response shapes are JSON Schema files in `waste-movement-backend`, which the service validates against. This repo keeps a copy under `docs/event-model/schemas/`, together with the beta specs that refer to them, which are defined in the backend too ([D-052](../collections/decisions.md#d-052)). The target spec does the same wherever beta-2 already defines a shape, and describes the rest itself until it is built.
 
 ## Endpoints in the target spec
 
@@ -47,4 +47,4 @@ The live Receipt of Waste endpoints are unchanged, and their request and respons
 
 ## Previewing a spec
 
-Each spec has a viewer on this site (see the table above). The YAML files `$ref` the JSON Schema files, so standalone tools need the bundled version: run `npm run specs:bundle`, then open `docs/api/<name>.bundled.yaml` in [Swagger Editor](https://editor.swagger.io) or an editor extension.
+Each spec has a viewer on this site (see the table above). The beta specs `$ref` the JSON Schema files, so standalone tools need the bundled version: run `npm run specs:bundle`, then open `docs/api/openapi-beta-N.yaml` in [Swagger Editor](https://editor.swagger.io) or an editor extension. The target spec is rendered as it is and is not bundled.

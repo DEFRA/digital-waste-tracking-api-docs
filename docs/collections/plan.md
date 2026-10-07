@@ -36,7 +36,7 @@ During beta every endpoint is served under a version prefix — `/beta-1/movemen
 | `waste-tracking-id-backend` | Movement and Delivery IDs, from the same sequence as the Phase 1 `wasteTrackingId` ([D-013](decisions.md#d-013)) | **Team C** |
 | `waste-organisation-backend` | `apiCode` issuance and lookup for every actor type ([D-027](decisions.md#d-027)) | **Team A/B** |
 | `waste-organisation-frontend` | Self-service API code management, already open to every actor type | **Team A/B** |
-| `digital-waste-tracking-api-docs` | Beta and target specs, synced schemas, decisions register | **Team C** |
+| `digital-waste-tracking-api-docs` | Target spec, synced beta specs and schemas, decisions register | **Team C** |
 
 ---
 

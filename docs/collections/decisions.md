@@ -30,7 +30,7 @@ Three documents describe the API, and they answer different questions:
 
 | Document | Answers |
 | --- | --- |
-| [`openapi-beta-1.yaml`](../api/openapi-beta-1.md), [`openapi-beta-2.yaml`](../api/openapi-beta-2.md) | What is served today. Built from the JSON Schemas synced from `waste-movement-backend`. |
+| [beta-1](../api/openapi-beta-1.md) and [beta-2](../api/openapi-beta-2.md) specs (`beta-N/openapi.json`) | What is served today. Defined in `waste-movement-backend` and synced here with the JSON Schemas they refer to. |
 | [`openapi.yaml`](../api/openapi.md) | The target design for general availability. Subject to change. |
 | This register | Why the contract is shaped the way it is, and what is still undecided. |
 
@@ -593,7 +593,7 @@ Unlike the per-event reads ([D-033](#d-033)), this is a producer-facing summary,
 - The Phase 1 receipt endpoints stay in it. They are shown as deprecated under the current proposal, but that depends on how receipts are linked to Deliveries ([D-022](#d-022)), and nothing is decided about when or how they would be retired ([D-023](#d-023)).
 - The Phase 1 reference-data lookups (`/reference-data/...`) are kept as they are.
 
-What is served today is described separately, by `openapi-beta-1.yaml` and `openapi-beta-2.yaml` ([D-052](#d-052)).
+What is served today is described separately, by the beta specs synced from the backend ([D-052](#d-052)).
 
 **Consequences.** One document shows the whole journey and the intended path away from the Phase 1 receipt. The cost is carrying some Phase 1 shapes forward, such as the `wasteTrackingId` name ([D-004](#d-004)). The live Phase 1 endpoints and their own documentation are not changed by this spec.
 
@@ -610,8 +610,8 @@ What is served today is described separately, by `openapi-beta-1.yaml` and `open
 - Every beta request and response shape is a JSON Schema file in `waste-movement-backend` under `src/schemas/beta-N/`, with its tests beside it.
 - The backend validates requests and responses against those files. A request that fails is rejected with `400`; a response that fails is logged and returned as `500`, so the service cannot silently drift from its own contract.
 - This repo keeps a verbatim copy under `docs/event-model/schemas/`, refreshed with `npm run schemas:sync`. A check on every pull request reports when the copy no longer matches the backend's `main`.
-- The beta specs refer to those files with `$ref` instead of restating them. `npm run specs:bundle` inlines every reference into a single file per spec and validates it against the OpenAPI 3.1 rules; the published pages render the bundled file.
-- The target spec `$ref`s the beta-2 files wherever beta-2 already defines a shape, and describes the rest itself until it is built.
+- The beta specs themselves (`beta-N/openapi.json`) are defined in the backend too, refer to those files with `$ref`, and are synced the same way. `npm run specs:bundle` inlines every reference into a single file per beta spec and validates it against the OpenAPI 3.1 rules; the published pages render the bundled file.
+- The target spec `$ref`s the beta-2 files wherever beta-2 already defines a shape, and describes the rest itself until it is built. It is rendered as it is, without bundling or validation in CI.
 
 **Consequences.** Changing a shape means changing the backend schema; the docs follow. The Joi drafts in `docs/collections/data/` are retired resource by resource as their shapes move into the backend schemas. Replaces the single hand-written spec file of [D-002](#d-002).
 

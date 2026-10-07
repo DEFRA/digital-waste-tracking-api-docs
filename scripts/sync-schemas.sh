@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
-# Copies the versioned JSON Schemas from waste-movement-backend (the source of
-# truth) into docs/event-model/schemas/, which is committed to this
-# repo so a plain clone renders without a network fetch.
+# Copies the versioned JSON Schemas, their named examples and each version's
+# OpenAPI spec from waste-movement-backend (the source of truth) into
+# docs/event-model/schemas/, which is committed to this repo so a plain clone
+# renders without a network fetch.
 #
 # Every `beta-*` folder under the backend's src/schemas/ comes across, keeping
 # its version prefix, so each file's path from the mirror root equals its path
@@ -30,13 +31,14 @@ mkdir -p "$DEST"
 
 # Drop the previous snapshot first, so a schema deleted upstream disappears here
 # too rather than lingering. The hand-written README is not matched by either find.
-find "$DEST" \( -name '*.schema.json' -o -name '*.examples.json' \) -delete
+find "$DEST" \( -name '*.schema.json' -o -name '*.examples.json' -o -name 'openapi.json' \) -delete
 find "$DEST" -mindepth 1 -type d -empty -delete
 
-# Copy schema files and the named request/response examples beside them only — the
+# Copy schema files, the named request/response examples beside them, and each
+# version's openapi.json (which $refs both by relative path) only — the
 # .test.js files upstream are backend-side and import backend paths. Restricted to beta-* so the loose .js schemas that
 # sit directly under src/schemas/ (movement.js, headers.js, …) stay out.
-(cd "$tmp/$SUBTREE" && find . -path './beta-*' \( -name '*.schema.json' -o -name '*.examples.json' \) -print0) |
+(cd "$tmp/$SUBTREE" && find . -path './beta-*' \( -name '*.schema.json' -o -name '*.examples.json' -o -name 'openapi.json' \) -print0) |
   while IFS= read -r -d '' f; do
     mkdir -p "$DEST/$(dirname "$f")"
     cp "$tmp/$SUBTREE/$f" "$DEST/$f"

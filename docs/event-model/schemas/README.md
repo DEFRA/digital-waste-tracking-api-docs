@@ -10,12 +10,13 @@ robots: noindex, nofollow
 !!! warning "Internal documentation"
     This page is internal design/planning material for the delivery team, not published guidance for Software Providers integrating with the Digital Waste Tracking API. Content here may be incomplete, in-progress, or superseded.
 
-Every `*.schema.json` file in this folder is copied verbatim from [`waste-movement-backend`](https://github.com/DEFRA/waste-movement-backend)'s `src/schemas/`, preserving that folder's layout. This README is the one file here that the sync does not touch.
+Every `*.schema.json` file in this folder, the named `*.examples.json` beside them, and each version's `openapi.json` are copied verbatim from [`waste-movement-backend`](https://github.com/DEFRA/waste-movement-backend)'s `src/schemas/`, preserving that folder's layout. This README is the one file here that the sync does not touch.
 
 Both API versions are mirrored, each keeping its version prefix:
 
 ```
 beta-1/                             # beta-1: the five journey endpoints, minimal fields
+  openapi.json                      # the beta-1 spec — $refs the files beside it
   common/                           # ids, wasteType, delivery-item, issue, validation
   create-movement-request.schema.json
   create-movement-response.schema.json
@@ -23,6 +24,7 @@ beta-1/                             # beta-1: the five journey endpoints, minima
   record-receipt-response.schema.json
   …
 beta-2/                             # the Phase 2 event model
+  openapi.json                      # the beta-2 spec — $refs the files beside it
   common/
     address.schema.json
     contact-details.schema.json
@@ -46,7 +48,7 @@ The version prefix is not decoration: the backend's loader registers each file u
 
 ## Do not edit anything in this folder
 
-Changes made here are silently overwritten by the next sync. A change to a rule — in either version — is a PR against `waste-movement-backend`; once it is on `main`, it arrives here by running:
+Changes made here are silently overwritten by the next sync. A change to a rule or a beta spec — in either version — is a PR against `waste-movement-backend`; once it is on `main`, it arrives here by running:
 
 ```bash
 npm run schemas:sync
@@ -64,15 +66,15 @@ The snapshot always tracks latest `main`; there is no pinned SHA. Git holds the 
 
 A sync that brings a resource across for the first time is not finished when the files land. The resource may also exist as a hand-written shape in the target spec (`docs/api/openapi.yaml`) and as a Joi draft under `docs/collections/data/`, and both now have a source of truth above them. Producer went through this in [#78](https://github.com/DEFRA/digital-waste-tracking-api-docs/pull/78), Broker or Dealer after it.
 
-**1. Point the specs at it.** In `openapi-beta-N.yaml`, `$ref` the new request or response file. In the target spec, swap the hand-written shape for a `$ref`, per endpoint rather than per field name; the path is relative to `docs/api/`, e.g. `../event-model/schemas/beta-2/common/producer/producer.schema.json`. Drop any `allOf` + `description` wrapper around the old internal `$ref`: the synced schema carries its own description. Delete a local `#/components/schemas/…` component only once nothing else refers to it.
+**1. Point the target spec at it.** The beta spec itself (`beta-N/openapi.json`) arrives with the sync, already referring to the new files. In the target spec, swap the hand-written shape for a `$ref`, per endpoint rather than per field name; the path is relative to `docs/api/`, e.g. `../event-model/schemas/beta-2/common/producer/producer.schema.json`. Drop any `allOf` + `description` wrapper around the old internal `$ref`: the synced schema carries its own description. Delete a local `#/components/schemas/…` component only once nothing else refers to it.
 
 **2. Retire the Joi draft.** Once the resource has landed, delete its draft from `docs/collections/data/` and remove it from the differences table in that folder's [README](../../collections/data/README.md). If other drafts still compose it, mark it `@deprecated` instead, naming the mirror path — `producerSchema` in `creationJoi.js` is the worked example.
 
 **3. Leave the Phase 1 endpoints alone.** `POST /movements/receive` and `PUT /movements/{wasteTrackingId}/receive` are live and unchanged, and the target spec does not repeat their bodies — it points at the live [Receipt of Waste API reference](https://defra.github.io/waste-tracking-service/production/apiSpecifications/) through `legacyReceiptRequest`. Nothing synced here should be wired into them.
 
-**4. Bundle and check.** Run `npm run specs:bundle`: it resolves every `$ref`, including the nested hops (`broker-or-dealer.schema.json` reaches `../contact-details.schema.json` and `../address.schema.json`), and validates each spec against OpenAPI 3.1, failing on a missing file. `test/api/openapi-dialect.test.js` adds the 2020-12 dialect check and confirms no `$id` has come back.
+**4. Check the references.** `npm run specs:bundle` resolves every `$ref` in the synced beta specs and validates them against OpenAPI 3.1, and `test/api/openapi-dialect.test.js` checks the synced schemas' 2020-12 dialect and that no `$id` has come back. The target spec `openapi.yaml` is neither bundled nor tested, so a new external `$ref` in it is worth walking by hand, including the nested hops (`broker-or-dealer.schema.json` reaches `../contact-details.schema.json` and `../address.schema.json`).
 
-A swap is rarely only a refactor: the beta-2 shapes have often moved on from the drafts they replace — broker went from a bare object to an `isPresent`/`items[]` wrapper with `contactDetails` nesting — so say in the PR what the endpoints now document.
+A swap is rarely only a refactor: the beta-2 shapes have often moved on from the drafts they replace — broker went from a bare object to an `isPresent`/`items[]` wrapper with `contactDetails` nesting — so say in the PR what the target spec now documents.
 
 ## Why a copy rather than a `$ref` to GitHub
 

@@ -2,7 +2,6 @@
   "commercial": {
     "summary": "Commercial producer, with broker or dealer, supporting references and special handling",
     "value": {
-      "apiCode": "25b14080-5e77-4f91-9957-2482a0cb8775",
       "producer": {
         "wasteSource": "Commercial",
         "organisationName": "ACME Waste Producers Ltd",
@@ -50,7 +49,6 @@
   "household": {
     "summary": "Household producer, minimal",
     "value": {
-      "apiCode": "25b14080-5e77-4f91-9957-2482a0cb8775",
       "producer": {
         "wasteSource": "Household"
       }

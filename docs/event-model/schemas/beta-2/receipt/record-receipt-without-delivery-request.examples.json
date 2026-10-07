@@ -2,7 +2,6 @@
   "withReason": {
     "summary": "Receipt with no prior delivery, with the reason why",
     "value": {
-      "apiCode": "25b14080-5e77-4f91-9957-2482a0cb8775",
       "reason": "No delivery was recorded prior to receipt; waste received directly from the producer.",
       "supportingReferences": [
         {

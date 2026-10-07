@@ -1,0 +1,125 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Carrier",
+  "description": "A single waste carrier. organisationName, meansOfTransport and contactDetails are required, and exactly one of registrationNumber or reasonForNoRegistrationNumber must be provided. vehicleRegistration is required for Road and otherMeansOfTransport for Other; each is forbidden otherwise. address is optional.",
+  "type": "object",
+  "oneOf": [
+    {
+      "required": ["registrationNumber"],
+      "properties": {
+        "registrationNumber": {},
+        "reasonForNoRegistrationNumber": {
+          "not": {},
+          "description": "Not allowed when registrationNumber is provided."
+        }
+      }
+    },
+    {
+      "required": ["reasonForNoRegistrationNumber"],
+      "properties": {
+        "registrationNumber": {
+          "not": {},
+          "description": "Not allowed when reasonForNoRegistrationNumber is provided."
+        },
+        "reasonForNoRegistrationNumber": {}
+      }
+    }
+  ],
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "meansOfTransport": {
+            "const": "Road"
+          }
+        },
+        "required": ["meansOfTransport"]
+      },
+      "then": {
+        "properties": {
+          "vehicleRegistration": {}
+        },
+        "required": ["vehicleRegistration"]
+      },
+      "else": {
+        "properties": {
+          "vehicleRegistration": {
+            "not": {},
+            "description": "Not allowed unless meansOfTransport is Road."
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "meansOfTransport": {
+            "const": "Other"
+          }
+        },
+        "required": ["meansOfTransport"]
+      },
+      "then": {
+        "properties": {
+          "otherMeansOfTransport": {}
+        },
+        "required": ["otherMeansOfTransport"]
+      },
+      "else": {
+        "properties": {
+          "otherMeansOfTransport": {
+            "not": {},
+            "description": "Not allowed unless meansOfTransport is Other."
+          }
+        }
+      }
+    }
+  ],
+  "properties": {
+    "organisationName": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Name of the carrier organisation."
+    },
+    "registrationNumber": {
+      "$ref": "../registration-number.schema.json",
+      "description": "Waste carrier registration number, in a valid UK home-nation format (England and NRW CBDU/CBDL, SEPA WCR/SCO/SEA/SNO/SWE and PCT, NI ROC UT/LT). Mutually exclusive with reasonForNoRegistrationNumber — exactly one of the two is required."
+    },
+    "reasonForNoRegistrationNumber": {
+      "type": "string",
+      "enum": ["ON_SITE", "HOUSEHOLD", "ONE_OFF", "MARINE"],
+      "description": "Why the carrier has no registration number. Mutually exclusive with registrationNumber — exactly one of the two is required."
+    },
+    "meansOfTransport": {
+      "type": "string",
+      "enum": [
+        "Road",
+        "Rail",
+        "Air",
+        "Sea",
+        "Inland Waterway",
+        "Piped",
+        "Other"
+      ],
+      "description": "How the carrier will transport the waste."
+    },
+    "vehicleRegistration": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Registration of the vehicle carrying the waste. Required when meansOfTransport is Road; forbidden otherwise."
+    },
+    "otherMeansOfTransport": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Description of the means of transport. Required when meansOfTransport is Other; forbidden otherwise."
+    },
+    "contactDetails": {
+      "$ref": "../contact-details.schema.json"
+    },
+    "address": {
+      "$ref": "../address.schema.json"
+    }
+  },
+  "required": ["organisationName", "meansOfTransport", "contactDetails"],
+  "additionalProperties": false
+}

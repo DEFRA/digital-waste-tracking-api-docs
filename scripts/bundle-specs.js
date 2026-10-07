@@ -1,5 +1,7 @@
-// Bundles each OpenAPI spec in docs/api/ into a single self-contained file
-// (`<name>.bundled.yaml`, gitignored) for the Swagger UI pages to render.
+// Bundles each `beta-*/openapi.json` synced from waste-movement-backend into
+// docs/event-model/schemas/ into a single self-contained file,
+// docs/api/openapi-beta-N.yaml (gitignored), for the Swagger UI pages to
+// render. docs/api/openapi.yaml is a proof of concept and isn't bundled.
 //
 // The specs `$ref` the event-model JSON Schemas, which in turn `$ref` each
 // other, so the bundle fully dereferences them: every `$ref` is replaced by
@@ -13,29 +15,37 @@
 // Each bundle is then validated against the OpenAPI 3.1
 // meta-schema; an invalid one is reported and not written. Exits non-zero if
 // any spec fails, so CI and the deploy workflows stop before publishing.
-import { writeFileSync } from 'node:fs'
+import { existsSync, readdirSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { $RefParser } from '@apidevtools/json-schema-ref-parser'
 import { Validator } from '@seriousme/openapi-schema-validator'
 import yaml from 'js-yaml'
 
-const apiDir = path.join(
+const docsDir = path.join(
   path.dirname(fileURLToPath(import.meta.url)),
   '..',
-  'docs',
-  'api'
+  'docs'
 )
+const apiDir = path.join(docsDir, 'api')
+const schemaRoot = path.join(docsDir, 'event-model', 'schemas')
 
-// Listed rather than globbed, so the `.bundled.yaml` outputs are never inputs.
-const specs = ['openapi.yaml', 'openapi-beta-1.yaml', 'openapi-beta-2.yaml']
+// Discovered the way the sync discovers versions, so a future beta-3 is
+// bundled with no change here.
+const specs = readdirSync(schemaRoot)
+  .filter((entry) => entry.startsWith('beta-'))
+  .filter((version) =>
+    existsSync(path.join(schemaRoot, version, 'openapi.json'))
+  )
+  .map((version) => ({
+    spec: `${version}/openapi.json`,
+    source: path.join(schemaRoot, version, 'openapi.json'),
+    target: path.join(apiDir, `openapi-${version}.yaml`)
+  }))
 
 let failed = false
 
-for (const spec of specs) {
-  const source = path.join(apiDir, spec)
-  const target = path.join(apiDir, spec.replace(/\.yaml$/, '.bundled.yaml'))
-
+for (const { spec, source, target } of specs) {
   try {
     const bundled = await $RefParser.dereference(source, {
       dereference: { circular: false }
