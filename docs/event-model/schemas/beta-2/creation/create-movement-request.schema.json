@@ -4,12 +4,6 @@
   "description": "Payload for POST /beta-2/movements.",
   "type": "object",
   "properties": {
-    "apiCode": {
-      "type": "string",
-      "format": "uuid",
-      "description": "Unique identifier of the submitting organisation.",
-      "examples": ["25b14080-5e77-4f91-9957-2482a0cb8775"]
-    },
     "producer": {
       "$ref": "../common/producer/producer.schema.json"
     },
@@ -23,6 +17,6 @@
       "$ref": "../common/special-handling-requirements.schema.json"
     }
   },
-  "required": ["apiCode", "producer"],
+  "required": ["producer"],
   "additionalProperties": false
 }

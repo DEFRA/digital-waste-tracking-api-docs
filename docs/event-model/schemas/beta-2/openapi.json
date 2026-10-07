@@ -13,7 +13,8 @@
   ],
   "security": [
     {
-      "bearerAuth": []
+      "bearerAuth": [],
+      "apiCode": []
     }
   ],
   "tags": [
@@ -41,6 +42,12 @@
         "scheme": "bearer",
         "bearerFormat": "JWT",
         "description": "AWS Cognito access token, obtained with the OAuth 2.0 client credentials grant (`POST {authBaseUrl}/oauth2/token` with your client ID and secret). Sent as `Authorization: Bearer <token>`."
+      },
+      "apiCode": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "x-api-code",
+        "description": "The `apiCode` issued to your organisation, identifying who the submission is made on behalf of. Sent as a header rather than in the request body."
       }
     },
     "parameters": {
