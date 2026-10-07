@@ -13,14 +13,15 @@ The request was rejected and nothing was stored. Correct the request before you 
 | Cause | Example `detail` | `errors` present |
 | --- | --- | --- |
 | The request body does not match the endpoint's schema, for example a required field is missing or a value has the wrong type or format | `2 validation errors occurred` | Yes |
-| The `apiCode` is not recognised | `the API Code supplied is invalid` | No |
+| beta-1 only: the `apiCode` in the body is not recognised. On beta-2 a missing or unrecognised API Code returns [unauthorized](unauthorized.md). | `the API Code supplied is invalid` | No |
+| beta-2 only: the body still contains `apiCode`, which moved to the `x-api-code` header | `1 validation error occurred` (pointer `/apiCode`, `NotAllowed`) | Yes |
 | A Movement ID in a `POST /deliveries` request does not exist | `No movement exists for movement ID(s): 25HRA0B2, 25HRA0B3` | No |
 | The request body is not valid JSON | `Invalid request payload JSON format` | No |
 | The `Authorization` header is malformed | `Bad HTTP authentication header format` | No |
 
 ## Validation errors
 
-If the request body fails schema validation, the response includes an `errors` array with one entry for each problem found. All problems are reported together, so you can fix them in one go.
+If the request body fails schema validation, the response includes an `errors` array with one entry for each problem found. All problems are reported together, so you can fix them in one go. A value of the wrong type — for example a string where an object is expected — is reported once, and nothing inside it is reported until its type is fixed.
 
 | Member | Description |
 | --- | --- |
@@ -66,6 +67,6 @@ If the request body fails schema validation, the response includes an `errors` a
 ## How to fix it
 
 - Check each entry in `errors` and correct the field that `pointer` refers to.
-- Check the request against the [API spec](../api/openapi.md).
-- Check that you are using the `apiCode` you were given for your organisation.
+- Check the request against the spec for the version you are calling: [beta-2](../api/openapi-beta-2.md) or [beta-1](../api/openapi-beta-1.md).
+- On beta-2, send the `apiCode` in the `x-api-code` header, not in the body. On beta-1, check that the `apiCode` in the body is the one issued to your organisation.
 - For `POST /deliveries`, check that every Movement ID was returned by an earlier `POST /movements` request.
