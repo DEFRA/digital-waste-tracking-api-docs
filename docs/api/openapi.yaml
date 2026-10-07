@@ -192,87 +192,8 @@ components:
     # deletion state, collection sequence) are enforced server-side and
     # stated in the descriptions.
 
-    intendedCarrierDetails:
-      type: object
-      description: |
-        A prospective carrier declared at creation (D-045). Same fields as
-        `carrier`, but only `meansOfTransport`, `organisationName` and
-        `contactDetails` are mandatory, because other carrier details may not
-        be known when the movement is planned. Optional
-        fields keep their integrity rules when supplied (enforced
-        server-side):
-          * `registrationNumber` and `reasonForNoRegistrationNumber` are mutually exclusive;
-          * `vehicleRegistration` is only valid when `meansOfTransport` is `Road`;
-          * `otherMeansOfTransport` is only valid when `meansOfTransport` is `Other`.
-        From collection onwards the full `carrier` rules apply
-        (registrationNumber or reason, and vehicleRegistration for Road).
-      required:
-        - contactDetails
-        - meansOfTransport
-        - organisationName
-      properties:
-        meansOfTransport:
-          type: string
-          enum: [Road, Rail, Air, Sea, Inland Waterway, Piped, Other]
-          description: How the waste is transported. The only mandatory carrier field at creation. Case-sensitive; 'Inland Waterway' includes a space.
-          example: Road
-        registrationNumber:
-          type: [string, 'null']
-          description: Carrier/Broker/Dealer registration number (e.g. CBDU123456). Optional at creation; if provided, must be a valid carrier registration format.
-          example: CBDU123456
-        reasonForNoRegistrationNumber:
-          type: string
-          enum: [ON_SITE, ONE_OFF, MARINE]
-          description: Reason a registration number is not supplied. Must not be supplied alongside a valid registrationNumber.
-          example: ONE_OFF
-        organisationName:
-          type: string
-          description: Carrier organisation name. Required at creation.
-          example: Test Carrier Ltd
-        vehicleRegistration:
-          type: string
-          maxLength: 10
-          description: Vehicle registration number. Only valid when meansOfTransport is Road.
-          example: AB12 CDE
-        otherMeansOfTransport:
-          type: string
-          description: Free-text description of the transport method when meansOfTransport is Other.
-        contactDetails:
-          $ref: '#/components/schemas/contactDetails'
-        address:
-          $ref: '#/components/schemas/address'
-
     intendedReceiverDetails:
-      type: object
-      description: |
-        Intended receiver details recorded at creation. Required only when the
-        movement contains hazardous waste (enforced server-side, D-043). Each
-        entry needs `siteName`, `authorisationNumber`, `address` (with
-        fullAddress) and `contactDetails`. These are provisional — the site
-        that actually received the waste is recorded on the receipt
-        (`receiverSite`).
-      required:
-        - siteName
-        - authorisationNumber
-        - address
-        - contactDetails
-      properties:
-        siteName:
-          type: string
-          description: Name of the intended receiving site.
-          example: Test Receiver Site
-        authorisationNumber:
-          type: string
-          description: Environmental permit/authorisation number for the receiving site, validated against UK site-authorisation formats. Required when siteName is supplied.
-          example: HP3456XX
-        contactDetails:
-          $ref: '#/components/schemas/contactDetails'
-        address:
-          allOf:
-            - $ref: '#/components/schemas/address'
-            - type: object
-              required: [fullAddress]
-          description: Receiver site address. Required (with fullAddress) when siteName is supplied.
+      $ref: '../event-model/schemas/beta-2/common/receiver/receiver.schema.json'
 
     collectionSite:
       type: object
@@ -629,8 +550,8 @@ components:
           type: array
           minItems: 1
           items:
-            $ref: '#/components/schemas/intendedCarrierDetails'
-          description: Prospective carrier(s) declared at creation (D-045). Always required, at least one — a producer may declare more than one prospective carrier. Each entry needs meansOfTransport, organisationName and contactDetails.
+            $ref: '#/components/schemas/carrier'
+          description: Prospective carrier(s) declared at creation (D-045). Always required, at least one — a producer may declare more than one prospective carrier. Each entry follows the same rules as the carrier at later events.
         brokerOrDealer:
           $ref: '../event-model/schemas/beta-2/common/broker-or-dealer/broker-or-dealer.schema.json'
         receivers:
@@ -638,7 +559,7 @@ components:
           minItems: 1
           items:
             $ref: '#/components/schemas/intendedReceiverDetails'
-          description: Intended receiving site(s) (D-043). Required, with at least one entry, only when the movement contains hazardous waste (enforced server-side) — a producer may declare waste heading to more than one receiving site.
+          description: Intended receiving site(s) (D-043). Required, with at least one entry, only when the movement contains hazardous waste (enforced server-side) — a producer may declare waste heading to more than one receiving site. Each entry needs siteName, authorisationNumber, receiptAddress and contactDetails.
         collectionAddressDifferentFromProducer:
           type: boolean
           default: false
@@ -967,90 +888,19 @@ components:
     # Parties, treatments and weights shared by the new endpoints.
     # ------------------------------------------------------------------
     carrier:
-      type: object
-      description: |
-        Carrier organisation and transport details, as recorded at
-        collection, delivery and receipt (D-008). `contactDetails` is
-        required.
-      required:
-        - contactDetails
-        - registrationNumber
-        - organisationName
-        - meansOfTransport
-      properties:
-        registrationNumber:
-          type: [string, 'null']
-          description: |
-            <p>A waste carrier registration number is a legal requirement for businesses that transport, buy, sell or dispose of waste. This license ensures that waste is handled and transported in a responsible and environmentally friendly manner.</p>
-             <p><b>Home Nations Codes:</b></p>
-             <p><b>General Format</b> where 9 is a digit 0-9</p>
-             <p><font color="blue"><b>Wales NRW:</b></font></p>
-                CBDL9, CBDL99, CBDU999 (1+ digits)
-                <p>i.e. CBD<font color="red"><b>U</b></font>999999 (Upper Tier) or CBD<font color="red"><b>L</b></font>999999 (Lower Tier), where "CBD" stands for "Carrier, Broker, Dealer"</p>              
-             <p><font color="blue"><b>England:</b></font></p>
-                CBDL9, CBDL99, CBDU999 (1+ digits)
-                 <p>i.e. CBD<font color="red"><b>U</b></font>999999 (Upper Tier) or CBD<font color="red"><b>L</b></font>999999 (Lower Tier), where "CBD" stands for "Carrier, Broker, Dealer"</p>             
-             <p><font color="blue"><b>Scotland SEPA:</b></font></p>
-                WCR/R/9999999, SCO/999999, SEA/999999, SNO/999999, SWE/999999, WCR/999999
-                <p>Typically starts with WCR followed by numbers and potentially letters according to the Scottish Environment Protection Agency (SEPA).</p>  
-               <p>Current format – WCR/R/1234567</p>
-               <p>Previous formats – SCO/123456, SEA/123456, SNO/123456, SWE/123456, WCR/123456</p>
-             <p><font color="blue"><b>Northern Ireland NI</b></font></p>
-                <p></p><p>ROC UT 9,ROC UT 99,ROC UT 999,ROC UT 9999,ROC UT 99999,  ROC LT 9, ROC LT 99, ROC LT 999, ROC LT 9999, ROC LT 99999 </p>
-                Include a prefix like ROC followed by UT (Upper Tier) or LT (Lower Tier) and then numbers. Note the spaces are not mandatory.<p></p> For example:
-                ROC UT 9999
-                ROCLT9999<p></p><p></p>
-                <p><b>General Format</b> where 9 is a digit 0-9</p>
-          example: CBDL6
-        reasonForNoRegistrationNumber:
-          type: string
-          enum: [ON_SITE, ONE_OFF, MARINE]
-          description: |
-            If you have not provided a registration number, then here you must provide an appropriate reason code from the list below:
-            <ul>
-            <li><b>ON_SITE - Movement within the same premises</b> (e.g. waste transferred between different areas or authorisations on the same site)</li>
-            <li><b>ONE_OFF - One-off or infrequent waste transport</b> (carrier does not normally and regularly transport controlled waste)</li>
-            <li><b>MARINE - Marine transport covered by a marine licence/exemption</b> (waste moved by vessel in connection with a licensed marine operation)</li>
-            </ul>
-            <p><font color="green"><b>Business Rules:</b></font></p>
-            <ul>
-            <li>If either “Null” or an empty string are entered into carrier.registrationNumber then carrier.reasonForNoRegistrationNumber is required.</li>
-            <li>If a valid string is entered into carrier.registrationNumber then carrier.reasonForNoRegistrationNumber should not be provided.</li>
-            </ul>
-          example: ON_SITE
-        organisationName:
-          type: string
-          description: The business name of the carrier.
-          example: Waste Carriers Lite Ltd
-        address:
-          $ref: '#/components/schemas/address'
-        contactDetails:
-          $ref: '#/components/schemas/contactDetails'
-        vehicleRegistration:
-          type: string
-          maxLength: 10
-          description: This is the carrier's vehicle registration number. <p><font color="green"><b>Business Rules:</b></font></p> <ul> <li>If carrier.meansOfTransport is “Road” then carrier.vehicleRegistration is required.</li> <li>If carrier.meansOfTransport is not “Road” then carrier.vehicleRegistration is not applicable.</li> </ul>
-          example: RNT 493
-        meansOfTransport:
-          type: string
-          enum: [Road, Rail, Air, Sea, Inland Waterway, Piped, Other]
-          description: |
-            This describes how the waste is transported (road, rail, air, sea, piped, inland waterway, other)
-            <b>Note:</b> The field is case-sensitive, please use the case specified in the business rule.
-            <p><font color="green"><b>Business Rule:</b></font></p> 
-            Must be either Road, Rail, Air, Sea, “Inland Waterway”, Piped or Other.
-          example: Rail
+      $ref: '../event-model/schemas/beta-2/common/carrier/carrier.schema.json'
+
     receiverSite:
       type: object
       description: |
-        Receiving organisation, contact details, and the physical address
-        where the waste was received, confirmed at receipt. `contactDetails`
+        Receiving organisation, contact details, and the address where the
+        waste was received (`receiptAddress`), confirmed at receipt. `contactDetails`
         is required.
       required:
         - contactDetails
         - siteName
         - authorisationNumber
-        - address
+        - receiptAddress
       properties:
         siteName:
           type: string
@@ -1111,7 +961,7 @@ components:
                 <li>Invalid formats will be rejected with error: "Site authorisation number must be in a valid UK format"</li>
               </ul>
           example: EPR/DD2522BF
-        address:
+        receiptAddress:
           allOf:
             - $ref: '#/components/schemas/address'
             - type: object

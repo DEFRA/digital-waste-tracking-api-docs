@@ -44,8 +44,8 @@ Three documents describe the API, and they answer different questions:
 | D-010 | [Hazardous Movements are split into their own Delivery by the server](#d-010) | A1 | ✅ Decided | 🟠 Medium | Not yet (beta-2, in progress) |
 | D-029 | [Transit collection (driver to driver) is a further collection event on the same Movement](#d-029) | A1 | ✅ Decided | 🟠 Medium | Not yet |
 | D-008 | [Who is declared at each event: a carrier always, a broker or dealer optionally](#d-008) | A2 | ✅ Decided | 🟠 Medium | Partly (beta-2) |
-| D-043 | [Creation declares intended receiving sites as an array: `receivers`](#d-043) | A2 | ✅ Decided | 🟢 Low | Not yet |
-| D-045 | [Creation declares intended carriers as an array: `intendedCarriers`](#d-045) | A2 | ✅ Decided | 🟢 Low | Not yet |
+| D-043 | [Creation declares intended receiving sites as an array: `receivers`](#d-043) | A2 | ✅ Decided | 🟢 Low | Schema only (beta-2) |
+| D-045 | [Creation declares intended carriers as an array: `intendedCarriers`](#d-045) | A2 | ✅ Decided | 🟢 Low | Schema only (beta-2) |
 | D-047 | [The producer is described by waste source: Household, Commercial or Municipal](#d-047) | A2 | ✅ Decided | 🟠 Medium | beta-2 |
 | D-048 | [Supporting references and special handling requirements](#d-048) | A2 | ✅ Decided | 🟢 Low | beta-2 |
 | D-049 | [Recording that a movement is a council movement](#d-049) | A2 | ⏳ Open | 🟢 Low | n/a |
@@ -240,43 +240,48 @@ Built today: the endpoint in beta-1 and beta-2, which creates the empty Delivery
 - `isPresent` says whether a broker or dealer was involved. When it is `true`, `items` must hold at least one entry; when it is `false` or absent, `items` is not allowed. Leaving `isPresent` out is the same as `false`.
 - Each entry in `items` needs `organisationName`, `contactDetails` (at least one of `emailAddress` or `phoneNumber`) and exactly one of `registrationNumber` or `reasonForNoRegistrationNumber`. `address` is optional. More than one broker or dealer can be declared.
 
+Every carrier — intended or actual — has the same shape: see [D-045](#d-045) for its rules, including the reasons allowed for having no registration number (`ON_SITE`, `HOUSEHOLD`, `ONE_OFF`, `MARINE`).
+
 Every party — producer, carrier, broker or dealer, receiver — must carry contact details, as a `contactDetails` object holding `emailAddress` and `phoneNumber`, at least one of which is required. The only exception is a `Household` producer, which carries no details at all ([D-047](#d-047)). Contact details are never separate top-level fields on the party.
 
 **Consequences.** Providers can state explicitly that no broker or dealer was involved, without the field being mandatory. `isPresent` is the boolean gate asked for in DWTC-152, DWTC-153, DWTC-155 and DWTC-162. `reasonForNoRegistrationNumber` is free text until the BA and policy team agree a list of reasons.
 
-Built today: `brokerOrDealer` on Creation, Collection and both receipt endpoints in beta-2, and `contactDetails` on the producer and broker or dealer. Not yet built: `carrier` and `intendedCarriers`, which exist only in the target spec.
+Built today: `brokerOrDealer` on Creation, Collection and both receipt endpoints in beta-2, and `contactDetails` on the producer and broker or dealer. The carrier schema is defined in beta-2 but not yet used by any request ([D-045](#d-045)).
 
 <a id="d-043"></a>
 
 #### Creation declares intended receiving sites as an array: `receivers`
 
-**D-043** · ✅ Decided · Impact: 🟢 Low · Group: **A2** · Built in: **Not yet** · Related: [D-045](#d-045)
+**D-043** · ✅ Decided · Impact: 🟢 Low · Group: **A2** · Built in: **Schema only (beta-2, not yet used by a request)** · Related: [D-045](#d-045)
 
 **Context.** A producer may send waste to more than one receiving site (raised in DWTC-155). Creation previously took a single, optional `receiver`.
 
 **Decision.** Creation takes `receivers`, an array of intended receiving sites.
 
 - Required, with at least one entry, when the movement contains hazardous waste; optional otherwise. Whether the movement is hazardous comes from its waste classification, so this is checked by the server.
-- Each entry needs `siteName`, `authorisationNumber`, `address` and `contactDetails` ([D-008](#d-008)).
+- Each entry needs `siteName`, `authorisationNumber` (a valid UK permit or exemption format), `receiptAddress` — the address the waste will be received at — and `contactDetails` ([D-008](#d-008)).
 
-The receivers declared at Creation are provisional. The site that actually received the waste is recorded on the receipt.
+The receivers declared at Creation are provisional. The site that actually received the waste is recorded on the receipt as `receiverSite`, whose address is also called `receiptAddress` — the address of receipt, which can differ from the receiving organisation's own address, and the equivalent of the Phase 1 `receipt.address`.
 
-**Consequences.** The Joi drafts in `data/` still call the field `intendedReceivers`; they are a planning reference and are not updated (see the [data README](data/README.md)).
+**Consequences.** Built today: the receiver schemas (`common/receiver/receiver.schema.json`, `receivers.schema.json`) are in beta-2 but not yet referenced by any request; the hazardous-only requirement will sit in the creation request schema. The Joi drafts in `data/` still call the field `intendedReceivers` and the address `address`; they are a planning reference and are not updated (see the [data README](data/README.md)).
 
 <a id="d-045"></a>
 
 #### Creation declares intended carriers as an array: `intendedCarriers`
 
-**D-045** · ✅ Decided · Impact: 🟢 Low · Group: **A2** · Built in: **Not yet** · Related: [D-008](#d-008), [D-043](#d-043)
+**D-045** · ✅ Decided · Impact: 🟢 Low · Group: **A2** · Built in: **Schema only (beta-2, not yet used by a request)** · Related: [D-008](#d-008), [D-043](#d-043)
 
-**Context.** When a movement is planned, the carrier may not be settled yet, or more than one carrier may be lined up. Creation previously took a single, required `carrier`.
+**Context.** When a movement is planned, more than one carrier may be lined up. Creation previously took a single, required `carrier`.
 
-**Decision.** Creation takes `intendedCarriers`, an array that is always required, with at least one entry.
+**Decision.** Creation takes `intendedCarriers`, an array that is always required, with at least one entry. Each entry follows the same carrier rules as every later event ([D-008](#d-008)):
 
-- Each entry needs `meansOfTransport`, `organisationName` and `contactDetails` ([D-008](#d-008)). Other carrier details are optional, because they may not be known at planning time, but keep their usual rules when supplied — for example exactly one of `registrationNumber` or `reasonForNoRegistrationNumber`.
-- Every later event takes a single `carrier`: the one that actually did the work ([D-008](#d-008)).
+- `organisationName`, `meansOfTransport` and `contactDetails` are required; `address` is optional.
+- Exactly one of `registrationNumber` (a valid UK carrier, broker or dealer registration format) or `reasonForNoRegistrationNumber` (`ON_SITE`, `HOUSEHOLD`, `ONE_OFF` or `MARINE`).
+- `vehicleRegistration` is required when `meansOfTransport` is `Road`, and not allowed otherwise; `otherMeansOfTransport` likewise for `Other`.
 
-**Consequences.** Creation records intent; collection, delivery and receipt record what happened.
+An earlier version of this decision required only `meansOfTransport`, `organisationName` and `contactDetails` at creation, on the grounds that other details may not be known when a movement is planned. The beta-2 carrier schema applies the full rules from creation onwards, and that is the decision now.
+
+**Consequences.** One carrier shape serves creation, collection, delivery and receipt. Creation records intent; the later events record which carrier actually did the work. Built today: the carrier schemas (`common/carrier/carrier.schema.json`, `carriers.schema.json`) are in beta-2 but not yet referenced by any request.
 
 <a id="d-047"></a>
 
