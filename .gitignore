@@ -4,6 +4,3 @@ site/
 node_modules/
 coverage/
 docs/api/openapi-beta-*.yaml
-
-# local data dumps (may contain API codes)
-docs/ext_test.js
