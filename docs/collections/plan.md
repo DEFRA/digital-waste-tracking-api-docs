@@ -8,24 +8,22 @@ robots: noindex, nofollow
 !!! warning "Internal documentation"
     This page is internal design/planning material for the delivery team, not published guidance for Software Providers integrating with the Digital Waste Tracking API. Content here may be incomplete, in-progress, or superseded.
 
-# Phase 2 Collections API — Cross-Team Plan
+# Phase 2 — Cross-Team Plan
 
-This document tracks the delivery plan for extending the Digital Waste Tracking external API to cover the full waste-movement journey, and for establishing a test environment where external software integrators can authenticate and submit data.
-
-For background on what is being designed, start with the [collections overview](index.md). For the API surface and the decisions behind it, see the [API workstream](../api/README.md) and the [decisions register](decisions.md).
+How the teams deliver the waste movement journey, and what is blocking what. For what is being designed, start with the [collections overview](index.md); for the contract, the [API overview](../api/index.md); for the reasoning, the [decisions register](decisions.md).
 
 ---
 
 ## The four events
 
-Phase 1 captures waste at the point it arrives at a receiver site. Phase 2 broadens this to cover the journey from creation to receipt across four business events:
-
 | Event | Actor | Endpoint |
 | --- | --- | --- |
-| **Create Movement** | Producer / Broker / Carrier | `POST /movements` |
-| **Record Collection** | Driver (real-time) or Carrier (retrospective) | `POST /movements/{movementId}/collection` |
-| **Record Delivery** | Driver | `POST /deliveries` |
-| **Record Receipt** | Receiver | `POST /deliveries/{deliveryId}/receipt` |
+| **Create a movement** | Producer, broker or carrier | `POST /movements` |
+| **Record a collection** | Carrier — driver in real time, or recorded afterwards | `POST /movements/{movementId}/collection` |
+| **Record a delivery** | Carrier | `POST /deliveries` |
+| **Record a receipt** | Receiver | `POST /deliveries/{deliveryId}/receipt`, or `POST /receipts` when there is no prior delivery |
+
+During beta every endpoint is served under a version prefix — `/beta-1/movements`, `/beta-2/movements` — and the prefix is dropped at general availability ([D-038](decisions.md#d-038)).
 
 ---
 
@@ -33,133 +31,89 @@ Phase 1 captures waste at the point it arrives at a receiver site. Phase 2 broad
 
 | Repo | Phase 2 work | Team |
 | --- | --- | --- |
-| `waste-movement-external-api` | New endpoint routes, Joi schemas, orchestration | **Team C** |
-| `waste-movement-backend` | Movement / Collection / Delivery persistence, revised receipt | **Team C** |
-| `waste-tracking-id-backend` | Delivery ID generation (same sqid format as Movement IDs, per [D-013](decisions.md#d-013)) | **Team C** |
-| `waste-organisation-backend` | Carrier / broker / producer API-code issuance for test | **Team A/B** |
-| `waste-organisation-frontend` | New actor registration UI (if self-serve onboarding added later) | **Team A/B** |
+| `waste-movement-external-api` | Public beta routes: authentication, `apiCode` → organisation lookup, forwarding to the backend. No payload validation of its own. | **Team C** |
+| `waste-movement-backend` | JSON Schemas for every request and response ([D-052](decisions.md#d-052)), validation, business rules, persistence | **Team C** |
+| `waste-tracking-id-backend` | Movement and Delivery IDs, from the same sequence as the Phase 1 `wasteTrackingId` ([D-013](decisions.md#d-013)) | **Team C** |
+| `waste-organisation-backend` | `apiCode` issuance and lookup for every actor type ([D-027](decisions.md#d-027)) | **Team A/B** |
+| `waste-organisation-frontend` | Self-service API code management, already open to every actor type | **Team A/B** |
+| `digital-waste-tracking-api-docs` | Beta and target specs, synced schemas, decisions register | **Team C** |
+
+---
+
+## Release plan
+
+Releases follow the [versioning schedule](../api/versioning-schedule.md). The decisions each one depends on:
+
+| Release | Scope | Status | Depends on |
+| --- | --- | --- | --- |
+| beta-1 | All five journey endpoints, no data validation — tests identifiers and structure | Served on integration | — |
+| beta-2 | Fields and full validation, a resource at a time, plus rejection | In progress: producer, broker or dealer, references and handling requirements built | Hazardous split ([D-010](decisions.md#d-010)); rejection model ([D-025](decisions.md#d-025)); warnings vs confirmation ([D-046](decisions.md#d-046)); cross-check rules ([D-021](decisions.md#d-021)) |
+| beta-3 | Updates and soft-delete (`PUT`) | Not started | [D-009](decisions.md#d-009), [D-017](decisions.md#d-017), [D-034](decisions.md#d-034), [D-036](decisions.md#d-036); transit collection editing ([D-035](decisions.md#d-035)); storage model ([D-037](decisions.md#d-037)); specific 404 types ([D-014](decisions.md#d-014)) |
+| beta-4 | Reads (`GET`) | Not started | [D-033](decisions.md#d-033); fate-of-waste content and access ([D-019](decisions.md#d-019)) |
+| beta-5 | Final iterations from provider feedback | Not started | — |
+
+Alongside the releases: how receipts link to Deliveries — new endpoints or an extended Phase 1 receipt ([D-022](decisions.md#d-022)) — and when and how the Phase 1 receipt endpoints are retired ([D-023](decisions.md#d-023)). The live Receipt of Waste endpoints are not changed until that migration is documented.
 
 ---
 
 ## Decisions status
 
-### Resolved
+### Settled and built
 
 | Decision | Summary |
 | --- | --- |
-| [D-027](decisions.md#d-027) | **Per-organisation credentials.** All actor types onboard the same way as receivers — Cognito app client plus `apiCode`. Every record is attributed to the submitting organisation. No new credential shape or registration path needed for Phase 2. |
-| [D-036](decisions.md#d-036) | **Write authorisation.** Append (`POST`) is open to any authenticated organisation. Amend (`PUT`) is restricted to the authoring organisation. |
-| [D-013](decisions.md#d-013) | **Identifier format.** Movement IDs and Delivery IDs both use 8-character year-prefixed sqids (`YY[A-Z0-9]{6}`). |
-| [D-016](decisions.md#d-016) | **Resource model.** Richardson Maturity Level 2 — URLs name resources, HTTP methods carry the verbs. |
-| [D-009](decisions.md#d-009) | **Soft-delete.** No `DELETE` endpoints. `isDeleted` flag on `PUT` only, for Movement, Collection, and Delivery. Receipt cannot be deleted. |
-| [D-034](decisions.md#d-034) | **History/revision pattern** on all `PUT` operations — same as the Phase 1 receipt `PUT`. |
-| [D-038](decisions.md#d-038) | **API conventions** (new endpoints only). Status codes; one `2xx` `{ data, meta?, validation }` and one `4xx`/`5xx` `{ error, requestId }` envelope; `x-request-id` tracing; pagination deferred. Source of truth: [standards.md](../api/standards.md). |
+| [D-027](decisions.md#d-027) | One set of credentials per organisation — a Cognito app client plus an `apiCode` — whatever role it plays. |
+| [D-036](decisions.md#d-036) | Anyone may record an event; only its author may change it. Every write is attributed to its organisation. |
+| [D-013](decisions.md#d-013) | IDs are a two-digit year plus a sqids code, with no fixed length, from one shared sequence. |
+| [D-016](decisions.md#d-016) | Resource-shaped URLs with HTTP methods as the verbs. |
+| [D-038](decisions.md#d-038) | Versioned in the path during beta, unversioned at general availability. |
+| [D-039](decisions.md#d-039) | API standards: `{ data, validation }` success envelope, RFC 9457 Problem Details for errors, `x-request-id` on every response. Source: [standards.md](../api/standards.md). |
+| [D-052](decisions.md#d-052) | JSON Schemas in `waste-movement-backend` are the source of truth for every shape. |
 
-### Still open — resolve before building the affected endpoints
+### Settled, not yet built
+
+| Decision | Summary | Release |
+| --- | --- | --- |
+| [D-010](decisions.md#d-010) | Hazardous Movements split into their own Delivery by the server. | beta-2 |
+| [D-009](decisions.md#d-009) | Soft-delete with `isDeleted`, set only through `PUT`; a Receipt cannot be deleted. | beta-3 |
+| [D-017](decisions.md#d-017) | A recorded delivery can only be soft-deleted, not edited. | beta-3 |
+| [D-034](decisions.md#d-034) | Every update keeps the previous version and guards against concurrent changes. | beta-3 |
+
+### Open — resolve before building what they block
 
 | Decision | Blocks | Owner |
 | --- | --- | --- |
-| [D-022](decisions.md#d-022) | Whether to implement `POST /deliveries/{deliveryId}/receipt` or extend `POST /movements/receive`. Spec leans toward the new endpoint (Option 1). | Tech lead + BA |
-| [D-025](decisions.md#d-025) | Receipt acceptance / rejection outcome schema. No rejection model exists in Phase 1. | BA + policy |
-| [D-028](decisions.md#d-028) | Pre-generated Delivery IDs for offline drivers — affects whether `waste-tracking-id-backend` needs a reservation mechanism. See [proposed design](phase2/option-a-pre-reserved-delivery-IDs.md). | Team C |
-| [D-019](decisions.md#d-019) | `GET /movements/{movementId}/fate-of-waste` response schema. URL and key are agreed; what it returns is not. | BA |
+| [D-025](decisions.md#d-025) | Rejection, which the schedule puts in beta-2. | BA + policy |
+| [D-022](decisions.md#d-022) | Phase 1 migration: measure the impact of new endpoints vs extending the live receipt, from a provider's point of view. | Tech lead + BA |
+| [D-046](decisions.md#d-046) | The first soft data-quality check on a beta endpoint. Free to decide now, breaking later. | Tech lead + BA |
+| [D-037](decisions.md#d-037) | Persistence beyond the current minimal collections — needed before beta-3. | Team C + architects |
+| [D-035](decisions.md#d-035) | Storing, editing and soft-deleting transit collection events. | Team C + BA |
+| [D-028](decisions.md#d-028) | Pre-reserved Delivery IDs for drivers without signal. See [proposed design](phase2/option-a-pre-reserved-delivery-IDs.md). | Team C |
+| [D-019](decisions.md#d-019) | Fate-of-waste response and who may read it. | BA + policy |
 
----
-
-## Phase 0 — Alignment (before build starts)
-
-**All teams**
-
-- Close [D-022](decisions.md#d-022): confirm the new Delivery-scoped receipt endpoint (`POST /deliveries/{deliveryId}/receipt`) is the path forward. This determines which receipt handler Team C builds and whether the Phase 1 endpoint is deprecated or extended.
-- Confirm the test Cognito user pool can have new app clients provisioned by the platform / infra team. The test pool is already running at `waste-movement-external-api-8ec5c.auth.eu-west-2.amazoncognito.com` — the question is access permissions for whoever provisions new clients.
-
-**Team C**
-
-- Decide the Phase 2 document model: extend the existing `WasteInput` document in `waste-movement-backend` (which already has `creation` and `collection` slots but does not populate them) or introduce a separate `movements` collection. This is the highest-consequence local architectural decision before any Phase 2 code is written. See the [Phase 1 implemented data model](phase1/receipt-api-implemented-data-model.md) for the current shape.
-- Confirm whether Movement IDs and Delivery IDs are minted from a **shared** sequence in `waste-tracking-id-backend` (so the two can never collide) or from separate counters. Implement accordingly before the Delivery endpoint is built.
-
-**Team A/B**
-
-- The existing `apiCode` issuance flow in `waste-organisation-backend` is confirmed role-agnostic (see [registration.md](registration.md)): the JWT auth plugin does not inspect `isWasteReceiver`, and `ensureAtLeastOneApiCodeExists` fires for any organisation on first write regardless of actor type. No code change is needed.
-- Confirm that the test environment allows calling `PUT /user/{userId}/organisation/{organisationId}` on `waste-organisation-backend` without a deployment — this is the zero-change path to provision a carrier org and `apiCode` in Phase 1 (Option A in [registration.md](registration.md)).
-
----
-
-## Phase 1 — Minimum viable test environment
-
-**Goal:** an external software integrator can obtain a Bearer token, call `GET /auth/test` successfully, and submit a `POST /movements` request.
-
-### Team C — `waste-movement-external-api` + `waste-movement-backend`
-
-1. Implement `POST /movements` — validates payload per the [API spec](../api/README.md) (carrier required per [D-008](decisions.md#d-008); broker optional; waste items with EWC codes; disposal codes optional per [D-031](decisions.md#d-031)); mints a Movement ID via `waste-tracking-id-backend`; persists via `waste-movement-backend`.
-2. Implement `POST /movements/{movementId}/collection` — static collection only at this stage (transit extension follows in Phase 3 per [D-029](decisions.md#d-029)).
-3. The existing JWT auth in `jwt-auth.js` validates Bearer tokens from the Cognito JWKS endpoint and makes `client_id` available to handlers — no auth changes needed. The `apiCode` in the request body identifies the submitting organisation via the existing `waste-organisation-backend` lookup, unchanged from Phase 1.
-
-### Team A/B — `waste-organisation-backend`
-
-Provision a carrier org and `apiCode` for the first software integrator. No code change is required — use **Option A** from [registration.md](registration.md):
-
-1. Call `PUT /user/{userId}/organisation/{organisationId}` with a body like `{ "name": "Carrier Ltd (test)", "isWasteReceiver": false }`. Use a new UUID for `organisationId`; any valid Defra ID user UUID for `userId`.
-2. `ensureAtLeastOneApiCodeExists` fires automatically on first write, creating a UUID `apiCode` and persisting it.
-3. Retrieve the generated code via `GET /organisation/{organisationId}/apiCodes`.
-4. Hand the `apiCode` to the software integrator alongside the Cognito credentials from the Platform step below.
-
-### Platform / infra
-
-- Provision a Cognito app client in the test user pool for the carrier software integrator. Use the [existing onboarding process](https://github.com/DEFRA/waste-tracking-service/blob/alpha_collections/docs/api-software-developer-onboarding-process.md): create the client via the AWS CLI or console, assign the `waste-movement-external-api-resource-srv/access` scope, and distribute the `client_id` and `client_secret` via encrypted email.
-
----
-
-## Phase 2 — Full journey
-
-**Goal:** a software integrator can record all four events end-to-end in the test environment.
-
-### Team C
-
-| Endpoint | Key rules |
-| --- | --- |
-| `PUT /movements/{movementId}` | Full update; history/revision pattern ([D-034](decisions.md#d-034)); amend restricted to authoring org ([D-036](decisions.md#d-036)) |
-| `PUT /movements/{movementId}/collection` | Tail-only update / soft-delete of latest active event ([D-029](decisions.md#d-029), [D-009](decisions.md#d-009)) |
-| `POST /deliveries` | Delivery; mandatory `delivery.address` ([D-018](decisions.md#d-018)); `movementIds[]` array — many-to-one ([D-007](decisions.md#d-007)); hazardous constraint: exactly 1 movement ([D-010](decisions.md#d-010)); mints Delivery ID, except a hazardous delivery reuses the Movement ID ([D-010](decisions.md#d-010)) |
-| `PUT /deliveries/{deliveryId}` | Soft-delete only via `isDeleted` — no field edits ([D-017](decisions.md#d-017)) |
-| `POST /deliveries/{deliveryId}/receipt` | New Phase 2 receipt (contingent on [D-022](decisions.md#d-022) Option 1); cross-checks waste vs Creation and carrier vs Movement chain ([D-006](decisions.md#d-006)); mismatches are warnings, not hard errors |
-| `PUT /deliveries/{deliveryId}/receipt` | Receipt update; history/revision pattern ([D-034](decisions.md#d-034)) |
-| `POST /receipts` | Receipt with no prior delivery ([D-041](decisions.md#d-041), proposal); mandatory `reasonForNoDeliveryId`; server creates an empty Delivery (`movementIds: []`) and returns `deliveryId`; request/response shape not yet finalised — open questions in the register |
-
-The Phase 1 receipt endpoints (`POST /movements/receive`, `PUT /movements/{wasteTrackingId}/receive`) remain in the spec marked `deprecated: true`. No removal date is set — see [D-023](decisions.md#d-023).
-
-Every end-to-end journey across the four events should produce a valid sequence of API calls without a 4xx response; use the key journey shapes (carrier baseline, broker-initiated, rejection-retry, deferred recording) as integration acceptance tests.
-
----
-
-## Phase 3 — Transit collection and fate-of-waste
-
-**Goal:** cover driver-to-driver handovers and producer read-only access.
-
-### Team C
-
-- **Transit collection** — extend `POST /movements/{movementId}/collection` with append semantics. Adds `collectionType` (enum `STATIC` / `TRANSIT`) and `receivedFromCarrier` (required when `TRANSIT`). Server enforces that the first active event is always `STATIC` and subsequent events are always `TRANSIT`. Tail-only soft-delete applies across the sequence. Full spec in [D-029](decisions.md#d-029).
-- **`GET /movements/{movementId}/fate-of-waste`** — producer read-only projection. URL is stable; response schema depends on [D-019](decisions.md#d-019) being resolved with the BA first.
+The full list, including smaller open questions, is in the [decisions register index](decisions.md#index).
 
 ---
 
 ## Key cross-team interface: `apiCode` and organisation identity
 
-The current flow in `waste-movement-external-api` resolves `apiCode` → submitting organisation via `waste-organisation-backend` before forwarding to `waste-movement-backend`. This is the integration boundary between Team C and Teams A/B.
+Every request carries an `apiCode`. On beta routes the gateway (`waste-movement-external-api`) looks it up in `waste-organisation-backend` and forwards the organisation to `waste-movement-backend`, which attributes the record to it. An unknown code is rejected with `400`; an organisation whose service charge has lapsed gets `402` ([D-027](decisions.md#d-027)).
 
-With [D-027](decisions.md#d-027) decided, the mechanism is unchanged — carriers and brokers receive `apiCode` values through the same issuance process as receivers. Code analysis of `waste-organisation-backend` confirms that `apiCode` issuance is not tied to the receiver role: the JWT auth plugin does not check `isWasteReceiver`, and `ensureAtLeastOneApiCodeExists` fires for any organisation type. Full details and the test provisioning options are in [registration.md](registration.md).
+`apiCode` issuance is not tied to the receiver role: the authentication plugin does not check `isWasteReceiver`, and `ensureAtLeastOneApiCodeExists` runs for any organisation. Carriers, brokers and producers get codes the same way receivers do. Details and test provisioning options are in [registration.md](registration.md). Cognito app clients are still provisioned manually per integrating system, using the [onboarding process](https://github.com/DEFRA/waste-tracking-service/blob/alpha_collections/docs/api-software-developer-onboarding-process.md).
 
 ---
 
-## Immediate actions
+## Next actions
 
 | # | Action | Team |
 | --- | --- | --- |
-| 1 | Close [D-022](decisions.md#d-022) — confirm new Delivery-scoped receipt endpoint | Team C + BA |
-| 2 | Confirm test Cognito pool can accept new app clients for carrier integrators | Platform + Team A/B |
-| 3 | ~~Confirm `apiCode` issuance is not tied to receiver role~~ — **confirmed, no code change needed** (see [registration.md](registration.md)) | Team A/B ✅ |
-| 4 | Decide Phase 2 document model — three options under evaluation: aggregate, per-event-type, CQRS/event-sourcing (see [D-037](decisions.md#d-037)) | Team C |
-| 5 | Decide Movement ID / Delivery ID shared vs separate counter in `waste-tracking-id-backend` | Team C |
-| 6 | Implement `POST /movements` (external API + backend) | Team C |
-| 7 | Provision first carrier `apiCode` in test environment | Team A/B |
-| 8 | Provision first carrier Cognito app client and send credentials to integrator | Platform |
+| 1 | Decide the rejection model ([D-025](decisions.md#d-025)) before beta-2 is complete | BA + policy |
+| 2 | Implement the hazardous split in beta-2 ([D-010](decisions.md#d-010)) | Team C |
+| 3 | Rename `reason` to `reasonForNoDeliveryId` on `POST /receipts`, and store it ([D-041](decisions.md#d-041)) | Team C |
+| 4 | Decide warnings vs confirmation ([D-046](decisions.md#d-046)) before any soft check is built | Tech lead + BA |
+| 5 | Compare the live receipt with the beta receipt from a provider's point of view, to measure the impact of each option in [D-022](decisions.md#d-022) | Team C + BA |
+| 6 | Decide the storage model ([D-037](decisions.md#d-037)) before beta-3 | Team C + architects |
+| 7 | Return the specific 404 problem types ([D-014](decisions.md#d-014)) when `PUT` is built | Team C |
+| 8 | Build the `Deprecation` header ([D-038](decisions.md#d-038)) before the first beta version is retired | Team C |
+
+Done: `apiCode` issuance confirmed role-agnostic ([registration.md](registration.md)); Movement and Delivery IDs confirmed to share one sequence ([D-013](decisions.md#d-013)); `POST /movements` and the other four journey endpoints built in beta-1 and beta-2.

@@ -260,7 +260,7 @@ Built today: `brokerOrDealer` on Creation, Collection and both receipt endpoints
 
 The receivers declared at Creation are provisional. The site that actually received the waste is recorded on the receipt.
 
-**Consequences.** The Joi drafts in `data/` still call the field `intendedReceivers`; they are to be renamed to `receivers` to match this decision.
+**Consequences.** The Joi drafts in `data/` still call the field `intendedReceivers`; they are a planning reference and are not updated (see the [data README](data/README.md)).
 
 <a id="d-045"></a>
 

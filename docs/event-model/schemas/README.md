@@ -15,7 +15,7 @@ Every `*.schema.json` file in this folder is copied verbatim from [`waste-moveme
 Both API versions are mirrored, each keeping its version prefix:
 
 ```
-beta-1/                             # the live Receipt of Waste endpoints
+beta-1/                             # beta-1: the five journey endpoints, minimal fields
   common/                           # ids, wasteType, delivery-item, issue, validation
   create-movement-request.schema.json
   create-movement-response.schema.json
@@ -42,7 +42,7 @@ beta-2/                             # the Phase 2 event model
 
 Every whole request or response body is named after the backend route it belongs to, with a `-request` or `-response` suffix; the resources they are built from keep resource names.
 
-The version prefix is not decoration: each file's path from this folder matches its own `$id` (`"beta-2/common/producer/producer.schema.json"`), which is the relationship the backend's loader asserts. Every `$ref` between these files is relative and stays within its version, so the tree resolves standalone. A future `beta-3` is picked up by the sync with no change to the script.
+The version prefix is not decoration: the backend's loader registers each file under its path from this folder (`beta-2/common/producer/producer.schema.json`), and that path is the schema's identity — the files declare no `$id` (see below). Every `$ref` between these files is relative and stays within its version, so the tree resolves standalone. A future `beta-3` is picked up by the sync with no change to the script.
 
 ## Do not edit anything in this folder
 
@@ -62,19 +62,17 @@ The snapshot always tracks latest `main`; there is no pinned SHA. Git holds the 
 
 ## When a schema arrives here
 
-A sync that brings a resource across for the first time is not finished when the files land — that resource already exists twice more in this repo, as a Joi fixture under `docs/collections/data/` and as its spec shape in `docs/api/openapi.yaml`, and both now have a source of truth above them. Producer went through this in [#78](https://github.com/DEFRA/digital-waste-tracking-api-docs/pull/78), Broker or Dealer after it; the steps below are what those two settled on.
+A sync that brings a resource across for the first time is not finished when the files land. The resource may also exist as a hand-written shape in the target spec (`docs/api/openapi.yaml`) and as a Joi draft under `docs/collections/data/`, and both now have a source of truth above them. Producer went through this in [#78](https://github.com/DEFRA/digital-waste-tracking-api-docs/pull/78), Broker or Dealer after it.
 
-**1. Deprecate the Joi fixture — do not delete it.** Add an `@deprecated` JSDoc block to the export naming the mirror path, saying the synced schema wins, and listing the divergences you can actually see. The fixture stays because the rest of its event file still composes it and would stop being readable without it. `producerSchema` in `creationJoi.js` and `brokerSchema` in `sharedSchemas.js` are the two worked examples. If the file's header comment describes the resource's rules, add a closing paragraph marking it as the exception — the bullets above it now describe the fixture, not what the service enforces.
+**1. Point the specs at it.** In `openapi-beta-N.yaml`, `$ref` the new request or response file. In the target spec, swap the hand-written shape for a `$ref`, per endpoint rather than per field name; the path is relative to `docs/api/`, e.g. `../event-model/schemas/beta-2/common/producer/producer.schema.json`. Drop any `allOf` + `description` wrapper around the old internal `$ref`: the synced schema carries its own description. Delete a local `#/components/schemas/…` component only once nothing else refers to it.
 
-**2. Delete the fixture's test under `test/event-model/schema/`.** These schemas are tested upstream beside the schema files, so a doc-side test of the same rules is a second, staler copy. Then grep for the deleted file: sibling tests cite each other in their header comments (`create-movement.test.js` lists which sub-schemas are "covered elsewhere"), and those lists go stale silently.
+**2. Retire the Joi draft.** Once the resource has landed, delete its draft from `docs/collections/data/` and remove it from the differences table in that folder's [README](../../collections/data/README.md). If other drafts still compose it, mark it `@deprecated` instead, naming the mirror path — `producerSchema` in `creationJoi.js` is the worked example.
 
-**3. Swap the `$ref` in `docs/api/openapi.yaml`, per endpoint rather than per field name.** The path is relative to `docs/api/`, e.g. `../event-model/schemas/beta-2/common/producer/producer.schema.json`. Drop any `allOf` + `description` wrapper around the old internal `$ref`: the synced schema carries its own description, and the inline one is usually about to become wrong — both broker descriptions still claimed the Phase 1 shape. Delete the local `#/components/schemas/…` component only once nothing else refers to it. `producerDetails` had exactly one consumer and went; `brokerOrDealer` had four and stayed.
+**3. Leave the Phase 1 endpoints alone.** `POST /movements/receive` and `PUT /movements/{wasteTrackingId}/receive` are live and unchanged, and the target spec does not repeat their bodies — it points at the live [Receipt of Waste API reference](https://defra.github.io/waste-tracking-service/production/apiSpecifications/) through `legacyReceiptRequest`. Nothing synced here should be wired into them.
 
-**4. Leave the deprecated Phase 1 endpoints alone.** `POST /movements/receive` and `PUT /movements/{wasteTrackingId}/receive` keep the shapes they shipped with. The trap is that a request schema can serve both sides of the Phase 1 / Phase 2 line: `receiveMovementRequest` is shared by those two **and** by the live `POST`/`PUT /deliveries/{deliveryId}/receipt`, so swapping a `$ref` inside it changes all four at once. Where that happens, the Phase 1 constraint wins and the live endpoint keeps the old shape too — splitting the schema to separate them is a deliberate change worth its own conversation, not something to do in passing. Check what a schema actually feeds before editing it.
+**4. Bundle and check.** Run `npm run specs:bundle`: it resolves every `$ref`, including the nested hops (`broker-or-dealer.schema.json` reaches `../contact-details.schema.json` and `../address.schema.json`), and validates each spec against OpenAPI 3.1, failing on a missing file. `test/api/openapi-dialect.test.js` adds the 2020-12 dialect check and confirms no `$id` has come back.
 
-Two things worth knowing about what will and will not catch a mistake here. `test/api/openapi-dialect.test.js` does not resolve `$ref`s — it checks the 2020-12 dialect, absent `$id`s and 3.0-isms, so it passes just as happily with a ref pointing at a file that does not exist. Nothing else in the repo resolves them either, so a new external `$ref` is worth walking by hand, including the nested hops (`broker-or-dealer.schema.json` reaches `../contact-details.schema.json` and `../address.schema.json`). And a swap is rarely only a refactor: the beta-2 shapes have genuinely moved on from the fixtures they replace — broker went from a bare object to an `isPresent`/`items[]` wrapper with `contactDetails` nesting — so the endpoints you point at them start documenting a shape the backend may only implement for some events so far. Say so in the PR.
-
-The doc-side Joi fixture is not updated to match. It is deprecated, and it drifts from here on; the synced schema is what readers are being sent to.
+A swap is rarely only a refactor: the beta-2 shapes have often moved on from the drafts they replace — broker went from a bare object to an `isPresent`/`items[]` wrapper with `contactDetails` nesting — so say in the PR what the endpoints now document.
 
 ## Why a copy rather than a `$ref` to GitHub
 
