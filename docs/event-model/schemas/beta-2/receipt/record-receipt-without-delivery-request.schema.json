@@ -4,12 +4,6 @@
   "description": "Payload for POST /beta-2/receipts.",
   "type": "object",
   "properties": {
-    "apiCode": {
-      "type": "string",
-      "format": "uuid",
-      "description": "Unique identifier of the submitting organisation.",
-      "examples": ["25b14080-5e77-4f91-9957-2482a0cb8775"]
-    },
     "reason": {
       "type": "string",
       "minLength": 1,
@@ -25,6 +19,6 @@
       "$ref": "../common/supporting-references.schema.json"
     }
   },
-  "required": ["apiCode", "reason"],
+  "required": ["reason"],
   "additionalProperties": false
 }

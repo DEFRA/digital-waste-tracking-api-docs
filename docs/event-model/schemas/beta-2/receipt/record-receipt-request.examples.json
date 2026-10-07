@@ -2,7 +2,6 @@
   "withBrokerAndReferences": {
     "summary": "With broker or dealer and a weighbridge reference",
     "value": {
-      "apiCode": "25b14080-5e77-4f91-9957-2482a0cb8775",
       "brokerOrDealer": {
         "isPresent": true,
         "items": [
