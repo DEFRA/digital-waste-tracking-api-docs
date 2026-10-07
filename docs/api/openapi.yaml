@@ -9,10 +9,11 @@ info:
     collection, delivery, receipt and producer fate-of-waste. It extends the
     Phase 1 Receipt of Waste API and carries no version prefix (D-038).
 
-    What is served today is described by the beta specs, `openapi-beta-1.yaml`
-    and `openapi-beta-2.yaml`. Where beta-2 already defines a shape, this spec
-    refers to the same JSON Schema files, synced from `waste-movement-backend`
-    (D-052); the rest is described here until it is built.
+    What is served today is described by the beta specs (`beta-1/openapi.json`,
+    `beta-2/openapi.json`), synced from `waste-movement-backend` with the JSON
+    Schema files they refer to. Where beta-2 already defines a shape,
+    this spec refers to the same files; the rest is described here until it
+    is built.
 
     The live Phase 1 receipt endpoints are unchanged. They are shown here as
     deprecated under the current proposal, which depends on how receipts are
