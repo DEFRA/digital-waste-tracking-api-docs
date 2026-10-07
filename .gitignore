@@ -4,3 +4,6 @@ site/
 node_modules/
 coverage/
 docs/api/*.bundled.yaml
+
+# local data dumps (may contain API codes)
+docs/ext_test.js
