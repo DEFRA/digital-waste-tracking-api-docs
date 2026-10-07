@@ -246,9 +246,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/problemDetails'
               example:
-                type: https://waste-tracking.service.gov.uk/problems/movement-not-found
-                title: Waste movement not found
-                detail: No waste movement exists with this Movement ID.
+                type: https://defra.github.io/digital-waste-tracking-api-docs/preview/problems/not-found
+                title: Not Found
+                detail: movementId not found
                 instance: /movements/25HRA0B2/collection
                 requestId: 4c6f9e1a-8f2b-4e3d-9a1c-2b7d5e6f0a3c
         '500':
@@ -380,9 +380,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/problemDetails'
               example:
-                type: https://waste-tracking.service.gov.uk/problems/delivery-not-found
-                title: Delivery not found
-                detail: No delivery exists with this Delivery ID.
+                type: https://defra.github.io/digital-waste-tracking-api-docs/preview/problems/not-found
+                title: Not Found
+                detail: 'No delivery exists with delivery ID: 25KMT4Z9'
                 instance: /deliveries/25KMT4Z9/receipt
                 requestId: 4c6f9e1a-8f2b-4e3d-9a1c-2b7d5e6f0a3c
         '500':

@@ -243,7 +243,7 @@ Every party — producer, carrier, broker or dealer, receiver — must carry con
 
 **Consequences.** Providers can state explicitly that no broker or dealer was involved, without the field being mandatory. `isPresent` is the boolean gate asked for in DWTC-152, DWTC-153, DWTC-155 and DWTC-162. `reasonForNoRegistrationNumber` is free text until the BA and policy team agree a list of reasons.
 
-Built today: `brokerOrDealer` on Creation, Collection and both receipt endpoints in beta-2, and `contactDetails` on the producer and broker or dealer. Not yet built: `carrier` and `intendedCarriers`, which exist only in the target spec. There, the carrier and receiver shapes still carry flat `emailAddress`/`phoneNumber` fields, to be moved into `contactDetails`.
+Built today: `brokerOrDealer` on Creation, Collection and both receipt endpoints in beta-2, and `contactDetails` on the producer and broker or dealer. Not yet built: `carrier` and `intendedCarriers`, which exist only in the target spec.
 
 <a id="d-043"></a>
 
@@ -260,7 +260,7 @@ Built today: `brokerOrDealer` on Creation, Collection and both receipt endpoints
 
 The receivers declared at Creation are provisional. The site that actually received the waste is recorded on the receipt.
 
-**Consequences.** The target spec and the Joi drafts in `data/` currently call the field `intendedReceivers`; they are to be renamed to `receivers` to match this decision.
+**Consequences.** The Joi drafts in `data/` still call the field `intendedReceivers`; they are to be renamed to `receivers` to match this decision.
 
 <a id="d-045"></a>
 
@@ -373,7 +373,7 @@ Each endpoint uses it like this:
 
 **Consequences.** A change to classification is made in one place and applies to both Creation and `POST /receipts`. The ordinary receipt payload stays small. A receiver who finds that the waste is not what was declared cannot restate the classification on the ordinary receipt; how that is reported belongs to the receipt outcome model ([D-025](#d-025)).
 
-**Target spec gap.** The ordinary receipt shares one request body with the Phase 1 receipt endpoints, so the target spec currently shows the Phase 1 body with the light waste item too. The two are to be separated, with the Phase 1 body left exactly as it is live.
+In the target spec the ordinary receipt has its own request body, separate from the Phase 1 receipt, whose body is defined by the live [Receipt of Waste API reference](https://defra.github.io/waste-tracking-service/production/apiSpecifications/) and is unchanged.
 
 <a id="d-031"></a>
 
@@ -725,7 +725,7 @@ What each beta endpoint returns in `data`:
 - **One shared sequence.** Movement IDs, Delivery IDs and the Phase 1 `wasteTrackingId` all come from the same counter, so two different IDs are never the same string — except a hazardous Delivery, whose ID is its Movement ID by design ([D-010](#d-010)).
 - **Opaque.** IDs carry no meaning a provider should rely on, beyond being unique.
 
-**Consequences.** The year prefix gives each year a fresh range, so capacity is effectively unlimited. The beta schemas describe IDs as plain strings with no pattern. The target spec still gives `wasteTrackingId` a fixed eight-character pattern with a two-letter prefix (`^[A-Z]{2}[A-Z0-9]{6}$`), which matches neither the year prefix nor the variable length; it is to be corrected.
+**Consequences.** The year prefix gives each year a fresh range, so capacity is effectively unlimited. The beta schemas describe IDs as plain strings with no pattern. The target spec describes `wasteTrackingId` the same way.
 
 <a id="d-004"></a>
 
@@ -775,7 +775,7 @@ Open: can providers reserve a pool of Delivery IDs in advance, which a driver's 
 
 **Consequences.** All new endpoints share one set of status codes, one success shape and one error shape, and every response can be traced.
 
-`type` URIs point at the published [Problem types](../problems/index.md) pages on this docs site (`https://defra.github.io/digital-waste-tracking-api-docs/…/problems/`), as the service returns them today. The `waste-tracking.service.gov.uk` base shown in standards.md is to be updated to match.
+`type` URIs point at the published [Problem types](../problems/index.md) pages on this docs site (`https://defra.github.io/digital-waste-tracking-api-docs/…/problems/`), as the service returns them today.
 
 Built today: all of the above on beta-1 and beta-2.
 
@@ -798,7 +798,7 @@ Built today: all of the above on beta-1 and beta-2.
 
 **Consequences.** A caller can act on the `type` alone, without parsing the message.
 
-Built today: only `POST` exists, so only "parent missing" can occur, and the service returns the generic `not-found` type with the cause in `detail`. The specific types are not built yet; the beta specs already show `movement-not-found` and `delivery-not-found` in their examples, which does not match what is returned.
+Built today: only `POST` exists, so only "parent missing" can occur, and the service returns the generic `not-found` type with the cause in `detail`. The specific types are not built yet; the target spec shows them, and the beta specs show what is returned today.
 
 <a id="d-034"></a>
 
