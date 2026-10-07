@@ -97,7 +97,7 @@ The full list, including smaller open questions, is in the [decisions register i
 
 ## Key cross-team interface: `apiCode` and organisation identity
 
-Every request carries an `apiCode`. On beta routes the gateway (`waste-movement-external-api`) looks it up in `waste-organisation-backend` and forwards the organisation to `waste-movement-backend`, which attributes the record to it. An unknown code is rejected with `400`; an organisation whose service charge has lapsed gets `402` ([D-027](decisions.md#d-027)).
+Every request carries an `apiCode`: in the `x-api-code` header from beta-2, in the body on beta-1 and the Phase 1 receipt ([D-053](decisions.md#d-053)). On beta routes the gateway (`waste-movement-external-api`) looks it up in `waste-organisation-backend` and forwards only the organisation to `waste-movement-backend`, which attributes the record to it. A missing or unknown code is rejected — `401` on beta-2, `400` on beta-1; an organisation whose service charge has lapsed gets `402` ([D-027](decisions.md#d-027)).
 
 `apiCode` issuance is not tied to the receiver role: the authentication plugin does not check `isWasteReceiver`, and `ensureAtLeastOneApiCodeExists` runs for any organisation. Carriers, brokers and producers get codes the same way receivers do. Details and test provisioning options are in [registration.md](registration.md). Cognito app clients are still provisioned manually per integrating system, using the [onboarding process](https://github.com/DEFRA/waste-tracking-service/blob/alpha_collections/docs/api-software-developer-onboarding-process.md).
 
@@ -115,5 +115,6 @@ Every request carries an `apiCode`. On beta routes the gateway (`waste-movement-
 | 6 | Decide the storage model ([D-037](decisions.md#d-037)) before beta-3 | Team C + architects |
 | 7 | Return the specific 404 problem types ([D-014](decisions.md#d-014)) when `PUT` is built | Team C |
 | 8 | Build the `Deprecation` header ([D-038](decisions.md#d-038)) before the first beta version is retired | Team C |
+| 9 | Remove the gateway's beta-2 fallback to a body `apiCode`, which can no longer succeed ([D-053](decisions.md#d-053)) | Team C |
 
 Done: `apiCode` issuance confirmed role-agnostic ([registration.md](registration.md)); Movement and Delivery IDs confirmed to share one sequence ([D-013](decisions.md#d-013)); `POST /movements` and the other four journey endpoints built in beta-1 and beta-2.

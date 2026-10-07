@@ -39,7 +39,7 @@ Request and response shapes are JSON Schema files in `waste-movement-backend`, w
 
 URLs name resources and HTTP methods carry the verbs ([D-016](../collections/decisions.md#d-016)). Providers handle two identifiers: the Movement ID and the Delivery ID ([D-012](../collections/decisions.md#d-012)). Reads of individual events are deferred to beta-4 ([D-033](../collections/decisions.md#d-033)); updates (`PUT`) are planned for beta-3.
 
-New endpoints follow the [API standards](standards.md): a `{ data, validation }` success envelope, [RFC 9457 Problem Details](../problems/index.md) for errors, and an `x-request-id` header on every response.
+New endpoints follow the [API standards](standards.md): a `{ data, validation }` success envelope, [RFC 9457 Problem Details](../problems/index.md) for errors, and an `x-request-id` header on every response. From beta-2, every request carries the organisation's `apiCode` in an `x-api-code` header next to the bearer token ([D-053](../collections/decisions.md#d-053)).
 
 ## Phase 1 receipt endpoints
 

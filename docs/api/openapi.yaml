@@ -22,7 +22,9 @@ info:
 
     New endpoints follow the API standards (D-039): a `{ data, validation }`
     success envelope, RFC 9457 Problem Details for errors, and an
-    `x-request-id` header on every response. Decision IDs (D-nnn) refer to the
+    `x-request-id` header on every response. Every request to them carries
+    the Cognito token in `Authorization` and the organisation's `apiCode` in
+    an `x-api-code` header (D-053). Decision IDs (D-nnn) refer to the
     decisions register.
 
 servers:
@@ -33,6 +35,7 @@ servers:
 
 security:
   - bearerAuth: []
+    apiCode: []
 
 tags:
   - name: Movement
@@ -56,6 +59,13 @@ components:
       bearerFormat: JWT
       description: >-
         AWS Cognito access token, obtained with the OAuth 2.0 client credentials grant (`POST {authBaseUrl}/oauth2/token` with your client ID and secret). Sent as `Authorization: Bearer <token>`.
+
+    apiCode:
+      type: apiKey
+      in: header
+      name: x-api-code
+      description: >-
+        The `apiCode` issued to your organisation, identifying who the submission is made for (D-027). Sent as a header, not in the request body (D-053). A missing or unrecognised code is rejected with `401`.
 
 
   # ----------------------------------------------------------------------
@@ -570,27 +580,18 @@ components:
 
     # POST /movements. Creation declares intended carriers (D-045) and, for
     # hazardous waste, intended receivers (D-043); `brokerOrDealer` is optional
-    # (D-008). `apiCode` identifies the submitting organisation (D-027).
+    # (D-008). The submitting organisation is identified by the `x-api-code`
+    # header (D-027, D-053), not by the body.
 
     createMovementRequest:
       type: object
       description: Request body for POST /movements.
       required:
-        - apiCode
         - plannedCollectionTime
         - producer
         - intendedCarriers
         - wasteItems
       properties:
-        apiCode:
-          type: string
-          format: uuid
-          description: |
-            Unique identifier of the submitting organisation, produced by the
-            Waste Tracking Service registration process. At creation the
-            submitter is the movement initiator (carrier or broker). The backend
-            may resolve this to an internal submittingOrganisation.
-          example: 25b14080-5e77-4f91-9957-2482a0cb8775
         plannedCollectionTime:
           type: string
           format: date-time
@@ -707,20 +708,11 @@ components:
       type: object
       description: Request body for POST /movements/{movementId}/collection.
       required:
-        - apiCode
         - actualDateTimeCollected
         - carrier
         - dutyOfCareConfirmed
         - collectionSite
       properties:
-        apiCode:
-          type: string
-          format: uuid
-          description: |
-            Unique identifier of the submitting organisation (the carrier
-            recording the collection), produced by Waste Tracking Service
-            registration.
-          example: 25b14080-5e77-4f91-9957-2482a0cb8775
         actualDateTimeCollected:
           type: string
           format: date-time
@@ -807,20 +799,11 @@ components:
       type: object
       description: Request body for POST /deliveries.
       required:
-        - apiCode
         - movementIds
         - actualDateTimeDelivered
         - carrier
         - deliverySite
       properties:
-        apiCode:
-          type: string
-          format: uuid
-          description: |
-            Unique identifier of the submitting organisation (the carrier
-            recording the delivery), produced by Waste Tracking Service
-            registration.
-          example: 25b14080-5e77-4f91-9957-2482a0cb8775
         movementIds:
           type: array
           minItems: 1
@@ -866,7 +849,8 @@ components:
     #
     # A recorded delivery is immutable under policy; the only property that may
     # change is the soft-delete flag isDeleted (D-009). The delivery PUT
-    # therefore accepts ONLY isDeleted (plus apiCode for caller identity). Every
+    # therefore accepts ONLY isDeleted (the caller is identified by the
+    # x-api-code header, D-053). Every
     # other deliveryRequest field is rejected with a NotAllowed validation error
     # (additionalProperties: false). To correct a recorded delivery, soft-delete
     # it (isDeleted: true) and record a fresh delivery via POST /deliveries.
@@ -875,18 +859,8 @@ components:
       description: Request body for PUT /deliveries/{deliveryId} — restricted to the soft-delete flag.
       additionalProperties: false
       required:
-        - apiCode
         - isDeleted
       properties:
-        apiCode:
-          type: string
-          format: uuid
-          description: |
-            Unique identifier of the submitting organisation (the carrier),
-            produced by Waste Tracking Service registration. Caller
-            identity only — not a mutable property of the delivery record, so
-            its presence does not breach delivery immutability.
-          example: 25b14080-5e77-4f91-9957-2482a0cb8775
         isDeleted:
           type: boolean
           description: |
@@ -930,18 +904,12 @@ components:
       type: object
       description: Request body for POST /receipts.
       required:
-        - apiCode
         - dateTimeReceived
         - carrier
         - wasteItems
         - receiverSite
         - reasonForNoDeliveryId
       properties:
-        apiCode:
-          type: string
-          format: uuid
-          description: This is the unique sixteen byte identifier of the receiving organisation produced by the registration process found within the Waste Tracking Service.
-          example: ba6eb330-4f7f-11eb-a2fb-67c34e9ac07cg
         dateTimeReceived:
           type: string
           format: date-time
@@ -1317,17 +1285,11 @@ components:
       type: object
       description: Request body for POST and PUT /deliveries/{deliveryId}/receipt.
       required:
-        - apiCode
         - dateTimeReceived
         - carrier
         - wasteItems
         - receiverSite
       properties:
-        apiCode:
-          type: string
-          format: uuid
-          description: This is the unique sixteen byte identifier of the receiving organisation produced by the registration process found within the Waste Tracking Service.
-          example: ba6eb330-4f7f-11eb-a2fb-67c34e9ac07cg
         dateTimeReceived:
           type: string
           format: date-time
@@ -1382,7 +1344,7 @@ components:
             $ref: '#/components/schemas/problemDetails'
 
     '401':
-      description: Missing or invalid authentication.
+      description: Missing or invalid authentication — the bearer token or the `x-api-code` header.
       headers:
         x-request-id:
           $ref: '#/components/headers/RequestId'
@@ -1703,8 +1665,7 @@ paths:
       summary: Soft-delete or restore a delivery
       description: |
         A recorded delivery cannot be edited (D-017). This operation accepts
-        only `isDeleted` (plus `apiCode`); any other field is rejected as
-        `NotAllowed`.
+        only `isDeleted`; any other field is rejected as `NotAllowed`.
 
         `isDeleted: true` soft-deletes the delivery, but only while no receipt
         has been recorded against it; afterwards the attempt is rejected as a
@@ -1891,6 +1852,8 @@ paths:
         bodies are those of the live Receipt of Waste API reference. A
         successful call returns the Phase 1 `wasteTrackingId`.
       operationId: createReceiptMovementLegacy
+      security:
+        - bearerAuth: []
       externalDocs:
         description: Receipt of Waste API reference (live)
         url: https://defra.github.io/waste-tracking-service/production/apiSpecifications/
@@ -1940,6 +1903,8 @@ paths:
         `PUT /deliveries/{deliveryId}/receipt` (D-022). Request and response
         bodies are those of the live Receipt of Waste API reference.
       operationId: updateReceiptMovementLegacy
+      security:
+        - bearerAuth: []
       externalDocs:
         description: Receipt of Waste API reference (live)
         url: https://defra.github.io/waste-tracking-service/production/apiSpecifications/
@@ -2008,6 +1973,8 @@ paths:
     get:
       tags: [Reference data]
       operationId: listEwcCodes
+      security:
+        - bearerAuth: []
       description: |
         Endpoint used to get a list of EWC codes. On success <b>200</b>, it returns a code list including a boolean value for the waste type, i.e. Hazardous equals true/false. It returns a <b>401</b> on failure.<br><br>        
         Example Request
@@ -2093,6 +2060,8 @@ paths:
     get:
       tags: [Reference data]
       operationId: listHazardousPropertyCodes
+      security:
+        - bearerAuth: []
       description: |
         Endpoint used to get a list of hazardous property codes. It returns a code list on <b>200</b> success or a <b>401</b> on failure.<br><br>
         Example Request
@@ -2153,6 +2122,8 @@ paths:
     get:
       tags: [Reference data]
       operationId: listDisposalOrRecoveryCodes
+      security:
+        - bearerAuth: []
       description: |
         Endpoint used to get a list of disposal or recovery codes.<br>
         Note: The field in the specification is case-sensitive, please use the case specified for the code.<br><br>
@@ -2206,6 +2177,8 @@ paths:
     get:
       tags: [Reference data]
       operationId: listContainerTypes
+      security:
+        - bearerAuth: []
       description: |
         Endpoint used to get a list of container types. It returns a code list on <b>200</b> success, or a <b>401</b> on failure.<br>        
           Note: The field returned by the method is case-sensitive, please use the case specified for the code.<br><br>
@@ -2254,6 +2227,8 @@ paths:
     get:
       tags: [Reference data]
       operationId: listPopNames
+      security:
+        - bearerAuth: []
       description: |
         Endpoint used to get a list of POP (Persistent Organic Pollutant) name codes. It returns a code list on <b>200</b> success or a <b>401</b> on failure.<br><br>
         Example Request

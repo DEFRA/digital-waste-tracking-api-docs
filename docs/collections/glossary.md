@@ -90,7 +90,7 @@ The party operating the site where waste is received. Holds an environmental per
 
 ### Submitting organisation
 
-The organisation a request is made for, identified by the `apiCode` in the request. Every record is attributed to it, whatever role it is playing ([D-027](decisions.md#d-027)); only the organisation that recorded an event may change it ([D-036](decisions.md#d-036)).
+The organisation a request is made for, identified by its `apiCode` — sent in the `x-api-code` header from beta-2, in the body on beta-1 and the Phase 1 receipt ([D-053](decisions.md#d-053)). Every record is attributed to it, whatever role it is playing ([D-027](decisions.md#d-027)); only the organisation that recorded an event may change it ([D-036](decisions.md#d-036)).
 
 ## Journey terms
 

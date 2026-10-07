@@ -82,6 +82,7 @@ Three documents describe the API, and they answer different questions:
 | D-024 | [How a Phase 1 `wasteTrackingId` relates to a Phase 2 Movement ID](#d-024) | B5 | ⏳ Open | 🟠 Medium | n/a |
 | D-036 | [Anyone may record an event; only its author may change it](#d-036) | B6 | ✅ Decided | 🔴 High | Partly (beta-1) |
 | D-027 | [One set of credentials per organisation, whatever role it plays](#d-027) | B6 | ✅ Decided | 🟠 Medium | beta-1 |
+| D-053 | [`apiCode` is sent in an `x-api-code` header from beta-2](#d-053) | B6 | ✅ Decided | 🟠 Medium | beta-2 |
 | D-037 | [How Phase 2 events are stored in MongoDB](#d-037) | B7 | ⏳ Open | 🔴 High | n/a |
 | D-005 | [Receipt is linked to a delivery via the Delivery ID](#d-005) | B2 | 🗄️ Retired | — | — |
 | D-011 | [Static and transit collection collapsed into a single endpoint](#d-011) | B2 | 🗄️ Retired | — | — |
@@ -514,11 +515,11 @@ Spun out of [D-009](#d-009), to confirm with the BA. D-009 takes the stricter re
 
 #### A recorded delivery cannot be edited, only soft-deleted
 
-**D-017** · ✅ Decided · Impact: 🟠 Medium · Group: **A5** · Built in: **Not yet (beta-3)** · Related: [D-007](#d-007), [D-009](#d-009), [D-018](#d-018), [D-027](#d-027), [D-034](#d-034), [D-051](#d-051)
+**D-017** · ✅ Decided · Impact: 🟠 Medium · Group: **A5** · Built in: **Not yet (beta-3)** · Related: [D-007](#d-007), [D-009](#d-009), [D-018](#d-018), [D-034](#d-034), [D-051](#d-051), [D-053](#d-053)
 
 **Context.** A delivery records a physical handover: which Movements, by which carrier, where and when. Policy requires that record to be unchangeable once made.
 
-**Decision.** `PUT /deliveries/{deliveryId}` accepts only `isDeleted`, plus `apiCode`, which every request carries to identify the organisation ([D-027](#d-027)). Any other field is rejected (`NotAllowed`).
+**Decision.** `PUT /deliveries/{deliveryId}` accepts only `isDeleted` in its body; the organisation is identified by the `x-api-code` header, as on every request ([D-053](#d-053)). Any other field is rejected (`NotAllowed`).
 
 To correct a delivery, soft-delete it and record a new one with `POST /deliveries`. This is only possible until a receipt has been recorded against it ([D-009](#d-009)).
 
@@ -865,7 +866,7 @@ Phase 1 mints `wasteTrackingId` when waste is received; Phase 2 mints the Moveme
 
 #### One set of credentials per organisation, whatever role it plays
 
-**D-027** · ✅ Decided · Impact: 🟠 Medium · Group: **B6** · Built in: **beta-1** · Related: [D-036](#d-036)
+**D-027** · ✅ Decided · Impact: 🟠 Medium · Group: **B6** · Built in: **beta-1** · Related: [D-036](#d-036), [D-053](#d-053)
 
 **Context.** Phase 1 is used by receivers only. Each integrating system gets a Cognito app client (`client_id` and `client_secret`), exchanged for a bearer token, and each request carries an `apiCode` that identifies the organisation it is made for. Phase 2 adds producers, carriers and brokers or dealers. The question was whether each role needs its own credentials.
 
@@ -874,11 +875,11 @@ Phase 1 mints `wasteTrackingId` when waste is received; Phase 2 mints the Moveme
 - **Cognito app client** — issued manually, per integrating system and per environment, and shared over a secure channel. Unchanged from Phase 1.
 - **`apiCode`** — self-service: once an organisation is registered and its users sign in with Defra ID, they create, name and disable their own API codes in the organisation service (`waste-organisation-frontend`). Already in place for Phase 1; nothing new is needed for Phase 2.
 
-Every record is attributed to the organisation identified by the `apiCode`, whatever role it is acting in.
+Every record is attributed to the organisation identified by the `apiCode`, whatever role it is acting in. From beta-2 the `apiCode` is sent in an `x-api-code` header rather than the body ([D-053](#d-053)).
 
 **Consequences.** API codes scale through self-service; app clients remain a manual step per integrating system, which grows as carriers, brokers and producers join. Restricting which roles may record which events is a separate policy question ([D-036](#d-036)).
 
-Built today: on every beta request the gateway looks the `apiCode` up in the organisation service and passes the organisation on to the backend. An unknown code is rejected with `400`; an organisation whose service charge has lapsed gets `402`.
+Built today: on every beta request the gateway looks the `apiCode` up in the organisation service and passes the organisation on to the backend. A missing or unknown code is rejected — with `401` on beta-2 (header), `400` on beta-1 (body); an organisation whose service charge has lapsed gets `402`.
 
 <a id="d-036"></a>
 
@@ -899,6 +900,26 @@ Built today: on every beta request the gateway looks the `apiCode` up in the org
 **Consequences.** The model fits the reality of reassignment, subcontracting and handovers. It depends on every write's author being stored, unchangeable and available to regulators.
 
 Built today: beta stores the organisation on every Movement and Delivery it records, and does not restrict which organisation may refer to an existing one. Not yet built: `PUT`, so the author-only rule is not exercised yet.
+
+<a id="d-053"></a>
+
+#### `apiCode` is sent in an `x-api-code` header from beta-2
+
+**D-053** · ✅ Decided · Impact: 🟠 Medium · Group: **B6** · Built in: **beta-2** · Related: [D-027](#d-027), [D-036](#d-036), [D-038](#d-038), [D-039](#d-039)
+
+**Context.** Every write carries two credentials: the Cognito access token in the `Authorization` header, and the organisation's `apiCode` ([D-027](#d-027)), which was a required field in every JSON body — in the Phase 1 receipt and in beta-1. The `apiCode` says _who_ is submitting, not anything about the waste, so it sat oddly among the event data. It also made the API harder to drive from tools: Swagger UI's Authorize dialog, Bruno or curl environments and Schemathesis can set a header once per run, but a body field has to be edited into every payload, and generated bodies cannot carry a real one at all. A body field also cannot identify the caller on a request with no body, such as a future `GET`. It does need to stay separate from the token, because one integrator's Cognito client can submit for more than one organisation — but that does not require the body.
+
+**Decision.** From beta-2, the `apiCode` is sent in an **`x-api-code` request header** on every endpoint, next to `Authorization`:
+
+- It is removed from every beta-2 request body. A body that still contains `apiCode` is rejected with `400` (`NotAllowed`, pointer `/apiCode`), because the request schemas allow no extra properties.
+- A missing or unrecognised `x-api-code` is rejected with `401`, like a missing or invalid token.
+- The beta-2 spec declares it as an `apiKey` security scheme (`in: header`, `name: x-api-code`), required together with `bearerAuth`; Swagger UI's Authorize dialog collects both.
+- Only the transport changes. What the `apiCode` means, how it is issued and resolved to an organisation ([D-027](#d-027)), and its use for attribution and change rights ([D-036](#d-036)) stay as they are.
+- The Phase 1 receipt and beta-1 keep `apiCode` in the body: a breaking change goes into the next beta version rather than being retrofitted ([D-038](#d-038)).
+
+**Consequences.** Request bodies are pure domain data — examples, generated bodies and stored requests no longer carry a credential. The beta-2 collection and receipt bodies have no required fields left, so `{}` is a valid request to them. The gateway resolves the header and forwards only the organisation to the backend, never the raw code; the code is masked in its logs and redacted from request logs, like `authorization`.
+
+Built today: beta-2, in the gateway and the backend (DWTC-246). **Gap:** the gateway still falls back to a body `apiCode` on beta-2, from the rollout; the backend now rejects a body `apiCode`, so the fallback can never succeed and can be removed.
 
 ### B7 Storage
 
