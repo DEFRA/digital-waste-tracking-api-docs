@@ -2,7 +2,6 @@
   "withBrokerAndReferences": {
     "summary": "With broker or dealer, supporting references and special handling",
     "value": {
-      "apiCode": "25b14080-5e77-4f91-9957-2482a0cb8775",
       "brokerOrDealer": {
         "isPresent": true,
         "items": [
@@ -34,9 +33,7 @@
     }
   },
   "minimal": {
-    "summary": "apiCode only",
-    "value": {
-      "apiCode": "25b14080-5e77-4f91-9957-2482a0cb8775"
-    }
+    "summary": "Empty body",
+    "value": {}
   }
 }

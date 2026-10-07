@@ -9,6 +9,7 @@ servers:
     description: Integration / ext-test (public)
 security:
   - bearerAuth: []
+    apiCode: []
 tags:
   - name: Movement
     description: Create and manage a waste movement record.
@@ -25,6 +26,11 @@ components:
       scheme: bearer
       bearerFormat: JWT
       description: 'AWS Cognito access token, obtained with the OAuth 2.0 client credentials grant (`POST {authBaseUrl}/oauth2/token` with your client ID and secret). Sent as `Authorization: Bearer <token>`.'
+    apiCode:
+      type: apiKey
+      in: header
+      name: x-api-code
+      description: The `apiCode` issued to your organisation, identifying who the submission is made on behalf of. Sent as a header rather than in the request body.
   parameters:
     movementIdPath:
       name: movementId
@@ -77,12 +83,6 @@ components:
       description: Payload for POST /beta-2/movements.
       type: object
       properties:
-        apiCode:
-          type: string
-          format: uuid
-          description: Unique identifier of the submitting organisation.
-          examples:
-            - 25b14080-5e77-4f91-9957-2482a0cb8775
         producer:
           $schema: https://json-schema.org/draft/2020-12/schema
           title: Producer
@@ -547,7 +547,6 @@ components:
           minLength: 1
           maxLength: 500
       required:
-        - apiCode
         - producer
       additionalProperties: false
     recordCollectionRequest:
@@ -556,12 +555,6 @@ components:
       description: Payload for POST /beta-2/movements/{movementId}/collection.
       type: object
       properties:
-        apiCode:
-          type: string
-          format: uuid
-          description: Unique identifier of the submitting organisation.
-          examples:
-            - 25b14080-5e77-4f91-9957-2482a0cb8775
         brokerOrDealer:
           $schema: https://json-schema.org/draft/2020-12/schema
           title: Broker or dealer involvement
@@ -743,8 +736,6 @@ components:
           type: string
           minLength: 1
           maxLength: 500
-      required:
-        - apiCode
       additionalProperties: false
     recordDeliveryRequest:
       $schema: https://json-schema.org/draft/2020-12/schema
@@ -752,12 +743,6 @@ components:
       description: Payload for POST /beta-2/deliveries.
       type: object
       properties:
-        apiCode:
-          type: string
-          format: uuid
-          description: Unique identifier of the submitting organisation.
-          examples:
-            - 25b14080-5e77-4f91-9957-2482a0cb8775
         movementIds:
           type: array
           items:
@@ -798,7 +783,6 @@ components:
               - label
             additionalProperties: false
       required:
-        - apiCode
         - movementIds
       additionalProperties: false
     recordReceiptRequest:
@@ -807,12 +791,6 @@ components:
       description: Payload for POST /beta-2/deliveries/{deliveryId}/receipt.
       type: object
       properties:
-        apiCode:
-          type: string
-          format: uuid
-          description: Unique identifier of the submitting organisation.
-          examples:
-            - 25b14080-5e77-4f91-9957-2482a0cb8775
         brokerOrDealer:
           $schema: https://json-schema.org/draft/2020-12/schema
           title: Broker or dealer involvement
@@ -985,8 +963,6 @@ components:
               - reference
               - label
             additionalProperties: false
-      required:
-        - apiCode
       additionalProperties: false
     recordReceiptWithoutDeliveryRequest:
       $schema: https://json-schema.org/draft/2020-12/schema
@@ -994,12 +970,6 @@ components:
       description: Payload for POST /beta-2/receipts.
       type: object
       properties:
-        apiCode:
-          type: string
-          format: uuid
-          description: Unique identifier of the submitting organisation.
-          examples:
-            - 25b14080-5e77-4f91-9957-2482a0cb8775
         reason:
           type: string
           minLength: 1
@@ -1179,7 +1149,6 @@ components:
               - label
             additionalProperties: false
       required:
-        - apiCode
         - reason
       additionalProperties: false
     issue:
@@ -1196,7 +1165,7 @@ components:
           type: string
           description: RFC 6901 JSON Pointer to the field this issue relates to.
           examples:
-            - /apiCode
+            - /producer
         errorType:
           type: string
           enum:
@@ -1215,7 +1184,7 @@ components:
           type: string
           description: Human-readable description of the issue.
           examples:
-            - apiCode is required.
+            - producer is required.
     problemDetails:
       type: object
       description: RFC 9457 Problem Details (`application/problem+json`).
@@ -1262,7 +1231,7 @@ components:
                 type: string
                 description: RFC 6901 JSON Pointer to the field this issue relates to.
                 examples:
-                  - /apiCode
+                  - /producer
               errorType:
                 type: string
                 enum:
@@ -1281,7 +1250,7 @@ components:
                 type: string
                 description: Human-readable description of the issue.
                 examples:
-                  - apiCode is required.
+                  - producer is required.
           description: Field-level problems. Present on 400 responses; omitted otherwise.
     createMovementResponse:
       $schema: https://json-schema.org/draft/2020-12/schema
@@ -1331,7 +1300,7 @@ components:
                     type: string
                     description: RFC 6901 JSON Pointer to the field this issue relates to.
                     examples:
-                      - /apiCode
+                      - /producer
                   errorType:
                     type: string
                     enum:
@@ -1350,7 +1319,7 @@ components:
                     type: string
                     description: Human-readable description of the issue.
                     examples:
-                      - apiCode is required.
+                      - producer is required.
               description: Data-quality warnings. Empty when there are none.
     recordCollectionResponse:
       $schema: https://json-schema.org/draft/2020-12/schema
@@ -1394,7 +1363,7 @@ components:
                     type: string
                     description: RFC 6901 JSON Pointer to the field this issue relates to.
                     examples:
-                      - /apiCode
+                      - /producer
                   errorType:
                     type: string
                     enum:
@@ -1413,7 +1382,7 @@ components:
                     type: string
                     description: Human-readable description of the issue.
                     examples:
-                      - apiCode is required.
+                      - producer is required.
               description: Data-quality warnings. Empty when there are none.
     deliveryResponse:
       $schema: https://json-schema.org/draft/2020-12/schema
@@ -1503,7 +1472,7 @@ components:
                     type: string
                     description: RFC 6901 JSON Pointer to the field this issue relates to.
                     examples:
-                      - /apiCode
+                      - /producer
                   errorType:
                     type: string
                     enum:
@@ -1522,7 +1491,7 @@ components:
                     type: string
                     description: Human-readable description of the issue.
                     examples:
-                      - apiCode is required.
+                      - producer is required.
               description: Data-quality warnings. Empty when there are none.
     recordReceiptResponse:
       $schema: https://json-schema.org/draft/2020-12/schema
@@ -1572,7 +1541,7 @@ components:
                     type: string
                     description: RFC 6901 JSON Pointer to the field this issue relates to.
                     examples:
-                      - /apiCode
+                      - /producer
                   errorType:
                     type: string
                     enum:
@@ -1591,7 +1560,7 @@ components:
                     type: string
                     description: Human-readable description of the issue.
                     examples:
-                      - apiCode is required.
+                      - producer is required.
               description: Data-quality warnings. Empty when there are none.
     recordReceiptWithoutDeliveryResponse:
       $schema: https://json-schema.org/draft/2020-12/schema
@@ -1641,7 +1610,7 @@ components:
                     type: string
                     description: RFC 6901 JSON Pointer to the field this issue relates to.
                     examples:
-                      - /apiCode
+                      - /producer
                   errorType:
                     type: string
                     enum:
@@ -1660,7 +1629,7 @@ components:
                     type: string
                     description: Human-readable description of the issue.
                     examples:
-                      - apiCode is required.
+                      - producer is required.
               description: Data-quality warnings. Empty when there are none.
   responses:
     '400':
@@ -1719,7 +1688,7 @@ components:
                       type: string
                       description: RFC 6901 JSON Pointer to the field this issue relates to.
                       examples:
-                        - /apiCode
+                        - /producer
                     errorType:
                       type: string
                       enum:
@@ -1738,7 +1707,7 @@ components:
                       type: string
                       description: Human-readable description of the issue.
                       examples:
-                        - apiCode is required.
+                        - producer is required.
                 description: Field-level problems. Present on 400 responses; omitted otherwise.
     '401':
       description: Missing or invalid authentication.
@@ -1796,7 +1765,7 @@ components:
                       type: string
                       description: RFC 6901 JSON Pointer to the field this issue relates to.
                       examples:
-                        - /apiCode
+                        - /producer
                     errorType:
                       type: string
                       enum:
@@ -1815,7 +1784,7 @@ components:
                       type: string
                       description: Human-readable description of the issue.
                       examples:
-                        - apiCode is required.
+                        - producer is required.
                 description: Field-level problems. Present on 400 responses; omitted otherwise.
     '500':
       description: Unexpected server error.
@@ -1873,7 +1842,7 @@ components:
                       type: string
                       description: RFC 6901 JSON Pointer to the field this issue relates to.
                       examples:
-                        - /apiCode
+                        - /producer
                     errorType:
                       type: string
                       enum:
@@ -1892,7 +1861,7 @@ components:
                       type: string
                       description: Human-readable description of the issue.
                       examples:
-                        - apiCode is required.
+                        - producer is required.
                 description: Field-level problems. Present on 400 responses; omitted otherwise.
 paths:
   /movements:
@@ -1912,12 +1881,6 @@ paths:
               description: Payload for POST /beta-2/movements.
               type: object
               properties:
-                apiCode:
-                  type: string
-                  format: uuid
-                  description: Unique identifier of the submitting organisation.
-                  examples:
-                    - 25b14080-5e77-4f91-9957-2482a0cb8775
                 producer:
                   $schema: https://json-schema.org/draft/2020-12/schema
                   title: Producer
@@ -2382,14 +2345,12 @@ paths:
                   minLength: 1
                   maxLength: 500
               required:
-                - apiCode
                 - producer
               additionalProperties: false
             examples:
               commercial:
                 summary: Commercial producer, with broker or dealer, supporting references and special handling
                 value:
-                  apiCode: 25b14080-5e77-4f91-9957-2482a0cb8775
                   producer:
                     wasteSource: Commercial
                     organisationName: ACME Waste Producers Ltd
@@ -2421,7 +2382,6 @@ paths:
               household:
                 summary: Household producer, minimal
                 value:
-                  apiCode: 25b14080-5e77-4f91-9957-2482a0cb8775
                   producer:
                     wasteSource: Household
       responses:
@@ -2483,7 +2443,7 @@ paths:
                               type: string
                               description: RFC 6901 JSON Pointer to the field this issue relates to.
                               examples:
-                                - /apiCode
+                                - /producer
                             errorType:
                               type: string
                               enum:
@@ -2502,7 +2462,7 @@ paths:
                               type: string
                               description: Human-readable description of the issue.
                               examples:
-                                - apiCode is required.
+                                - producer is required.
                         description: Data-quality warnings. Empty when there are none.
               examples:
                 commercial:
@@ -2575,7 +2535,7 @@ paths:
                           type: string
                           description: RFC 6901 JSON Pointer to the field this issue relates to.
                           examples:
-                            - /apiCode
+                            - /producer
                         errorType:
                           type: string
                           enum:
@@ -2594,7 +2554,7 @@ paths:
                           type: string
                           description: Human-readable description of the issue.
                           examples:
-                            - apiCode is required.
+                            - producer is required.
                     description: Field-level problems. Present on 400 responses; omitted otherwise.
         '401':
           description: Missing or invalid authentication.
@@ -2652,7 +2612,7 @@ paths:
                           type: string
                           description: RFC 6901 JSON Pointer to the field this issue relates to.
                           examples:
-                            - /apiCode
+                            - /producer
                         errorType:
                           type: string
                           enum:
@@ -2671,7 +2631,7 @@ paths:
                           type: string
                           description: Human-readable description of the issue.
                           examples:
-                            - apiCode is required.
+                            - producer is required.
                     description: Field-level problems. Present on 400 responses; omitted otherwise.
         '500':
           description: Unexpected server error.
@@ -2729,7 +2689,7 @@ paths:
                           type: string
                           description: RFC 6901 JSON Pointer to the field this issue relates to.
                           examples:
-                            - /apiCode
+                            - /producer
                         errorType:
                           type: string
                           enum:
@@ -2748,7 +2708,7 @@ paths:
                           type: string
                           description: Human-readable description of the issue.
                           examples:
-                            - apiCode is required.
+                            - producer is required.
                     description: Field-level problems. Present on 400 responses; omitted otherwise.
   /movements/{movementId}/collection:
     parameters:
@@ -2779,12 +2739,6 @@ paths:
               description: Payload for POST /beta-2/movements/{movementId}/collection.
               type: object
               properties:
-                apiCode:
-                  type: string
-                  format: uuid
-                  description: Unique identifier of the submitting organisation.
-                  examples:
-                    - 25b14080-5e77-4f91-9957-2482a0cb8775
                 brokerOrDealer:
                   $schema: https://json-schema.org/draft/2020-12/schema
                   title: Broker or dealer involvement
@@ -2966,14 +2920,11 @@ paths:
                   type: string
                   minLength: 1
                   maxLength: 500
-              required:
-                - apiCode
               additionalProperties: false
             examples:
               withBrokerAndReferences:
                 summary: With broker or dealer, supporting references and special handling
                 value:
-                  apiCode: 25b14080-5e77-4f91-9957-2482a0cb8775
                   brokerOrDealer:
                     isPresent: true
                     items:
@@ -2992,9 +2943,8 @@ paths:
                       reference: CARRIER-JOB-001
                   specialHandlingRequirements: Handle with care and keep upright.
               minimal:
-                summary: apiCode only
-                value:
-                  apiCode: 25b14080-5e77-4f91-9957-2482a0cb8775
+                summary: Empty body
+                value: {}
       responses:
         '201':
           description: Collection recorded. Body carries any validation warnings.
@@ -3048,7 +2998,7 @@ paths:
                               type: string
                               description: RFC 6901 JSON Pointer to the field this issue relates to.
                               examples:
-                                - /apiCode
+                                - /producer
                             errorType:
                               type: string
                               enum:
@@ -3067,7 +3017,7 @@ paths:
                               type: string
                               description: Human-readable description of the issue.
                               examples:
-                                - apiCode is required.
+                                - producer is required.
                         description: Data-quality warnings. Empty when there are none.
               examples:
                 withBrokerAndReferences:
@@ -3077,7 +3027,7 @@ paths:
                     validation:
                       warnings: []
                 minimal:
-                  summary: apiCode only
+                  summary: Empty body
                   value:
                     data: null
                     validation:
@@ -3138,7 +3088,7 @@ paths:
                           type: string
                           description: RFC 6901 JSON Pointer to the field this issue relates to.
                           examples:
-                            - /apiCode
+                            - /producer
                         errorType:
                           type: string
                           enum:
@@ -3157,7 +3107,7 @@ paths:
                           type: string
                           description: Human-readable description of the issue.
                           examples:
-                            - apiCode is required.
+                            - producer is required.
                     description: Field-level problems. Present on 400 responses; omitted otherwise.
         '401':
           description: Missing or invalid authentication.
@@ -3215,7 +3165,7 @@ paths:
                           type: string
                           description: RFC 6901 JSON Pointer to the field this issue relates to.
                           examples:
-                            - /apiCode
+                            - /producer
                         errorType:
                           type: string
                           enum:
@@ -3234,7 +3184,7 @@ paths:
                           type: string
                           description: Human-readable description of the issue.
                           examples:
-                            - apiCode is required.
+                            - producer is required.
                     description: Field-level problems. Present on 400 responses; omitted otherwise.
         '404':
           description: Movement not found.
@@ -3292,7 +3242,7 @@ paths:
                           type: string
                           description: RFC 6901 JSON Pointer to the field this issue relates to.
                           examples:
-                            - /apiCode
+                            - /producer
                         errorType:
                           type: string
                           enum:
@@ -3311,7 +3261,7 @@ paths:
                           type: string
                           description: Human-readable description of the issue.
                           examples:
-                            - apiCode is required.
+                            - producer is required.
                     description: Field-level problems. Present on 400 responses; omitted otherwise.
               example:
                 type: https://waste-tracking.service.gov.uk/problems/movement-not-found
@@ -3375,7 +3325,7 @@ paths:
                           type: string
                           description: RFC 6901 JSON Pointer to the field this issue relates to.
                           examples:
-                            - /apiCode
+                            - /producer
                         errorType:
                           type: string
                           enum:
@@ -3394,7 +3344,7 @@ paths:
                           type: string
                           description: Human-readable description of the issue.
                           examples:
-                            - apiCode is required.
+                            - producer is required.
                     description: Field-level problems. Present on 400 responses; omitted otherwise.
   /deliveries:
     post:
@@ -3413,12 +3363,6 @@ paths:
               description: Payload for POST /beta-2/deliveries.
               type: object
               properties:
-                apiCode:
-                  type: string
-                  format: uuid
-                  description: Unique identifier of the submitting organisation.
-                  examples:
-                    - 25b14080-5e77-4f91-9957-2482a0cb8775
                 movementIds:
                   type: array
                   items:
@@ -3459,14 +3403,12 @@ paths:
                       - label
                     additionalProperties: false
               required:
-                - apiCode
                 - movementIds
               additionalProperties: false
             examples:
               twoMovements:
                 summary: Two movements delivered together
                 value:
-                  apiCode: 25b14080-5e77-4f91-9957-2482a0cb8775
                   movementIds:
                     - 25HRA0B2
                     - 25HRA0B3
@@ -3572,7 +3514,7 @@ paths:
                               type: string
                               description: RFC 6901 JSON Pointer to the field this issue relates to.
                               examples:
-                                - /apiCode
+                                - /producer
                             errorType:
                               type: string
                               enum:
@@ -3591,7 +3533,7 @@ paths:
                               type: string
                               description: Human-readable description of the issue.
                               examples:
-                                - apiCode is required.
+                                - producer is required.
                         description: Data-quality warnings. Empty when there are none.
               examples:
                 twoMovements:
@@ -3662,7 +3604,7 @@ paths:
                           type: string
                           description: RFC 6901 JSON Pointer to the field this issue relates to.
                           examples:
-                            - /apiCode
+                            - /producer
                         errorType:
                           type: string
                           enum:
@@ -3681,7 +3623,7 @@ paths:
                           type: string
                           description: Human-readable description of the issue.
                           examples:
-                            - apiCode is required.
+                            - producer is required.
                     description: Field-level problems. Present on 400 responses; omitted otherwise.
         '401':
           description: Missing or invalid authentication.
@@ -3739,7 +3681,7 @@ paths:
                           type: string
                           description: RFC 6901 JSON Pointer to the field this issue relates to.
                           examples:
-                            - /apiCode
+                            - /producer
                         errorType:
                           type: string
                           enum:
@@ -3758,7 +3700,7 @@ paths:
                           type: string
                           description: Human-readable description of the issue.
                           examples:
-                            - apiCode is required.
+                            - producer is required.
                     description: Field-level problems. Present on 400 responses; omitted otherwise.
         '500':
           description: Unexpected server error.
@@ -3816,7 +3758,7 @@ paths:
                           type: string
                           description: RFC 6901 JSON Pointer to the field this issue relates to.
                           examples:
-                            - /apiCode
+                            - /producer
                         errorType:
                           type: string
                           enum:
@@ -3835,7 +3777,7 @@ paths:
                           type: string
                           description: Human-readable description of the issue.
                           examples:
-                            - apiCode is required.
+                            - producer is required.
                     description: Field-level problems. Present on 400 responses; omitted otherwise.
   /receipts:
     post:
@@ -3854,12 +3796,6 @@ paths:
               description: Payload for POST /beta-2/receipts.
               type: object
               properties:
-                apiCode:
-                  type: string
-                  format: uuid
-                  description: Unique identifier of the submitting organisation.
-                  examples:
-                    - 25b14080-5e77-4f91-9957-2482a0cb8775
                 reason:
                   type: string
                   minLength: 1
@@ -4039,14 +3975,12 @@ paths:
                       - label
                     additionalProperties: false
               required:
-                - apiCode
                 - reason
               additionalProperties: false
             examples:
               withReason:
                 summary: Receipt with no prior delivery, with the reason why
                 value:
-                  apiCode: 25b14080-5e77-4f91-9957-2482a0cb8775
                   reason: No delivery was recorded prior to receipt; waste received directly from the producer.
                   supportingReferences:
                     - label: Weighbridge Number
@@ -4110,7 +4044,7 @@ paths:
                               type: string
                               description: RFC 6901 JSON Pointer to the field this issue relates to.
                               examples:
-                                - /apiCode
+                                - /producer
                             errorType:
                               type: string
                               enum:
@@ -4129,7 +4063,7 @@ paths:
                               type: string
                               description: Human-readable description of the issue.
                               examples:
-                                - apiCode is required.
+                                - producer is required.
                         description: Data-quality warnings. Empty when there are none.
               examples:
                 withReason:
@@ -4195,7 +4129,7 @@ paths:
                           type: string
                           description: RFC 6901 JSON Pointer to the field this issue relates to.
                           examples:
-                            - /apiCode
+                            - /producer
                         errorType:
                           type: string
                           enum:
@@ -4214,7 +4148,7 @@ paths:
                           type: string
                           description: Human-readable description of the issue.
                           examples:
-                            - apiCode is required.
+                            - producer is required.
                     description: Field-level problems. Present on 400 responses; omitted otherwise.
         '401':
           description: Missing or invalid authentication.
@@ -4272,7 +4206,7 @@ paths:
                           type: string
                           description: RFC 6901 JSON Pointer to the field this issue relates to.
                           examples:
-                            - /apiCode
+                            - /producer
                         errorType:
                           type: string
                           enum:
@@ -4291,7 +4225,7 @@ paths:
                           type: string
                           description: Human-readable description of the issue.
                           examples:
-                            - apiCode is required.
+                            - producer is required.
                     description: Field-level problems. Present on 400 responses; omitted otherwise.
         '500':
           description: Unexpected server error.
@@ -4349,7 +4283,7 @@ paths:
                           type: string
                           description: RFC 6901 JSON Pointer to the field this issue relates to.
                           examples:
-                            - /apiCode
+                            - /producer
                         errorType:
                           type: string
                           enum:
@@ -4368,7 +4302,7 @@ paths:
                           type: string
                           description: Human-readable description of the issue.
                           examples:
-                            - apiCode is required.
+                            - producer is required.
                     description: Field-level problems. Present on 400 responses; omitted otherwise.
   /deliveries/{deliveryId}/receipt:
     parameters:
@@ -4399,12 +4333,6 @@ paths:
               description: Payload for POST /beta-2/deliveries/{deliveryId}/receipt.
               type: object
               properties:
-                apiCode:
-                  type: string
-                  format: uuid
-                  description: Unique identifier of the submitting organisation.
-                  examples:
-                    - 25b14080-5e77-4f91-9957-2482a0cb8775
                 brokerOrDealer:
                   $schema: https://json-schema.org/draft/2020-12/schema
                   title: Broker or dealer involvement
@@ -4577,14 +4505,11 @@ paths:
                       - reference
                       - label
                     additionalProperties: false
-              required:
-                - apiCode
               additionalProperties: false
             examples:
               withBrokerAndReferences:
                 summary: With broker or dealer and a weighbridge reference
                 value:
-                  apiCode: 25b14080-5e77-4f91-9957-2482a0cb8775
                   brokerOrDealer:
                     isPresent: true
                     items:
@@ -4658,7 +4583,7 @@ paths:
                               type: string
                               description: RFC 6901 JSON Pointer to the field this issue relates to.
                               examples:
-                                - /apiCode
+                                - /producer
                             errorType:
                               type: string
                               enum:
@@ -4677,7 +4602,7 @@ paths:
                               type: string
                               description: Human-readable description of the issue.
                               examples:
-                                - apiCode is required.
+                                - producer is required.
                         description: Data-quality warnings. Empty when there are none.
               examples:
                 withBrokerAndReferences:
@@ -4743,7 +4668,7 @@ paths:
                           type: string
                           description: RFC 6901 JSON Pointer to the field this issue relates to.
                           examples:
-                            - /apiCode
+                            - /producer
                         errorType:
                           type: string
                           enum:
@@ -4762,7 +4687,7 @@ paths:
                           type: string
                           description: Human-readable description of the issue.
                           examples:
-                            - apiCode is required.
+                            - producer is required.
                     description: Field-level problems. Present on 400 responses; omitted otherwise.
         '401':
           description: Missing or invalid authentication.
@@ -4820,7 +4745,7 @@ paths:
                           type: string
                           description: RFC 6901 JSON Pointer to the field this issue relates to.
                           examples:
-                            - /apiCode
+                            - /producer
                         errorType:
                           type: string
                           enum:
@@ -4839,7 +4764,7 @@ paths:
                           type: string
                           description: Human-readable description of the issue.
                           examples:
-                            - apiCode is required.
+                            - producer is required.
                     description: Field-level problems. Present on 400 responses; omitted otherwise.
         '404':
           description: Delivery not found.
@@ -4897,7 +4822,7 @@ paths:
                           type: string
                           description: RFC 6901 JSON Pointer to the field this issue relates to.
                           examples:
-                            - /apiCode
+                            - /producer
                         errorType:
                           type: string
                           enum:
@@ -4916,7 +4841,7 @@ paths:
                           type: string
                           description: Human-readable description of the issue.
                           examples:
-                            - apiCode is required.
+                            - producer is required.
                     description: Field-level problems. Present on 400 responses; omitted otherwise.
               example:
                 type: https://waste-tracking.service.gov.uk/problems/delivery-not-found
@@ -4980,7 +4905,7 @@ paths:
                           type: string
                           description: RFC 6901 JSON Pointer to the field this issue relates to.
                           examples:
-                            - /apiCode
+                            - /producer
                         errorType:
                           type: string
                           enum:
@@ -4999,5 +4924,5 @@ paths:
                           type: string
                           description: Human-readable description of the issue.
                           examples:
-                            - apiCode is required.
+                            - producer is required.
                     description: Field-level problems. Present on 400 responses; omitted otherwise.

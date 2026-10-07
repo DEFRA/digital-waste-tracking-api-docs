@@ -8,7 +8,7 @@
     "pointer": {
       "type": "string",
       "description": "RFC 6901 JSON Pointer to the field this issue relates to.",
-      "examples": ["/apiCode"]
+      "examples": ["/producer"]
     },
     "errorType": {
       "type": "string",
@@ -28,7 +28,7 @@
     "message": {
       "type": "string",
       "description": "Human-readable description of the issue.",
-      "examples": ["apiCode is required."]
+      "examples": ["producer is required."]
     }
   }
 }

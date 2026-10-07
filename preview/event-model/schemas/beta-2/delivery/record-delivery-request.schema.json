@@ -4,12 +4,6 @@
   "description": "Payload for POST /beta-2/deliveries.",
   "type": "object",
   "properties": {
-    "apiCode": {
-      "type": "string",
-      "format": "uuid",
-      "description": "Unique identifier of the submitting organisation.",
-      "examples": ["25b14080-5e77-4f91-9957-2482a0cb8775"]
-    },
     "movementIds": {
       "type": "array",
       "items": { "type": "string" },
@@ -20,6 +14,6 @@
       "$ref": "../common/supporting-references.schema.json"
     }
   },
-  "required": ["apiCode", "movementIds"],
+  "required": ["movementIds"],
   "additionalProperties": false
 }

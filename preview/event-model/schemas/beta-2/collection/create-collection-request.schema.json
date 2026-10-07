@@ -4,12 +4,6 @@
   "description": "Payload for POST /beta-2/movements/{movementId}/collection.",
   "type": "object",
   "properties": {
-    "apiCode": {
-      "type": "string",
-      "format": "uuid",
-      "description": "Unique identifier of the submitting organisation.",
-      "examples": ["25b14080-5e77-4f91-9957-2482a0cb8775"]
-    },
     "brokerOrDealer": {
       "$ref": "../common/broker-or-dealer/broker-or-dealer.schema.json"
     },
@@ -20,6 +14,5 @@
       "$ref": "../common/special-handling-requirements.schema.json"
     }
   },
-  "required": ["apiCode"],
   "additionalProperties": false
 }
