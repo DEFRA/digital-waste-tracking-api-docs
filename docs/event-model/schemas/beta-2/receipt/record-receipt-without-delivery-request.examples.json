@@ -3,6 +3,20 @@
     "summary": "Receipt with no prior delivery, with the reason why",
     "value": {
       "reason": "No delivery was recorded prior to receipt; waste received directly from the producer.",
+      "carrier": {
+        "organisationName": "Carrier Demo Ltd",
+        "registrationNumber": "CBDU123456",
+        "meansOfTransport": "Road",
+        "vehicleRegistration": "AB12 CDE",
+        "contactDetails": {
+          "emailAddress": "carrier@example.com",
+          "phoneNumber": "01234567890"
+        },
+        "address": {
+          "fullAddress": "4 Carrier Lane, Test City",
+          "postcode": "TE1 4CR"
+        }
+      },
       "supportingReferences": [
         {
           "label": "Weighbridge Number",

@@ -82,7 +82,7 @@
       "description": "Name of the carrier organisation."
     },
     "registrationNumber": {
-      "$ref": "../registration-number.schema.json",
+      "$ref": "registration-number.schema.json",
       "description": "Waste carrier registration number, in a valid UK home-nation format (England and NRW CBDU/CBDL, SEPA WCR/SCO/SEA/SNO/SWE and PCT, NI ROC UT/LT). Mutually exclusive with reasonForNoRegistrationNumber — exactly one of the two is required."
     },
     "reasonForNoRegistrationNumber": {
@@ -114,10 +114,10 @@
       "description": "Description of the means of transport. Required when meansOfTransport is Other; forbidden otherwise."
     },
     "contactDetails": {
-      "$ref": "../contact-details.schema.json"
+      "$ref": "contact-details.schema.json"
     },
     "address": {
-      "$ref": "../address.schema.json"
+      "$ref": "address.schema.json"
     }
   },
   "required": ["organisationName", "meansOfTransport", "contactDetails"],

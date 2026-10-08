@@ -2,6 +2,20 @@
   "withBrokerAndReferences": {
     "summary": "With broker or dealer, supporting references and special handling",
     "value": {
+      "carrier": {
+        "organisationName": "Carrier Demo Ltd",
+        "registrationNumber": "CBDU123456",
+        "meansOfTransport": "Road",
+        "vehicleRegistration": "AB12 CDE",
+        "contactDetails": {
+          "emailAddress": "carrier@example.com",
+          "phoneNumber": "01234567890"
+        },
+        "address": {
+          "fullAddress": "4 Carrier Lane, Test City",
+          "postcode": "TE1 4CR"
+        }
+      },
       "brokerOrDealer": {
         "isPresent": true,
         "items": [
@@ -33,7 +47,22 @@
     }
   },
   "minimal": {
-    "summary": "Empty body",
-    "value": {}
+    "summary": "carrier only",
+    "value": {
+      "carrier": {
+        "organisationName": "Carrier Demo Ltd",
+        "registrationNumber": "CBDU123456",
+        "meansOfTransport": "Road",
+        "vehicleRegistration": "AB12 CDE",
+        "contactDetails": {
+          "emailAddress": "carrier@example.com",
+          "phoneNumber": "01234567890"
+        },
+        "address": {
+          "fullAddress": "4 Carrier Lane, Test City",
+          "postcode": "TE1 4CR"
+        }
+      }
+    }
   }
 }
