@@ -454,65 +454,77 @@
 <p>This page is internal design/planning material for the delivery team, not published guidance for Software Providers integrating with the Digital Waste Tracking API. Content here may be incomplete, in-progress, or superseded.</p>
 </div>
 <h1 id="glossary">Glossary</h1>
-<p>A reference for terms used across this section. Identifier vocabulary in particular is worth establishing up front, because several IDs look similar and refer to different things.</p>
+<p>A reference for terms used across this section. Identifier vocabulary in particular is worth establishing up front, because several IDs look similar and refer to different things. Decision IDs (D-nnn) link to the <a href="../decisions/">decisions register</a>.</p>
 <h2 id="identifiers">Identifiers</h2>
+<p>All public identifiers share one format and one sequence (<a href="../decisions/#d-013">D-013</a>): a two-digit year followed by a sqids code (sqids.org), for example <code>25HRA0B2</code>. The length is not fixed — it grows as the yearly counter grows — so treat every ID as opaque: never parse it or validate a pattern. Because they come from one sequence, two different IDs are never the same string, except where a hazardous Delivery reuses its Movement ID by design.</p>
 <h3 id="movement-id">Movement ID</h3>
-<p>The identifier of a waste movement, minted when a movement is created via <code>POST /movements</code>. It is immutable once issued and lives across the whole journey of that movement, from creation through collection, delivery, and receipt. Software vendors and integrators store and pass this value through their systems.</p>
-<p>Phase 1 had no creation event, so a movement was known only at receipt time and was identified by a <code>wasteTrackingId</code>. The Movement ID is <strong>distinct</strong> from the <code>wasteTrackingId</code> — they are minted by different events at different points in the lifecycle (creation vs receipt), and are not the same value. Both use sqids (sqids.org). How a Phase 1 <code>wasteTrackingId</code> reconciles to a Phase 2 Movement ID is a migration-strategy question, not settled here.</p>
-<h3 id="wastetrackingid"><code>wasteTrackingId</code></h3>
-<p>Phase 1's identifier for a received waste movement, minted at receipt by <code>POST /movements/receive</code>. Phase 1 had no creation event, so this was the only handle on a movement. Retained on the deprecated receipt endpoints for backward compatibility. Distinct from the Phase 2 Movement ID (see above); reconciliation between the two is deferred to the migration strategy. Format: 8-character sqid, two-letter prefix.</p>
+<p>The identifier of a waste movement, minted by <code>POST /movements</code>. It is the handle for the whole journey — creation, every collection event, delivery, receipt and fate-of-waste — so software providers store it and pass it between organisations (<a href="../decisions/#d-012">D-012</a>).</p>
 <h3 id="delivery-id">Delivery ID</h3>
-<p>The identifier of a delivery event, minted when the carrier records a delivery via <code>POST /deliveries</code>. A single Delivery ID covers one or more Movement IDs delivered together at the same receiver site, which is what makes multi-collection runs possible.</p>
-<p>The driver passes the Delivery ID on to the receiver — typically on paper, sometimes digitally — and the receiver records the receipt against it via <code>POST /deliveries/{deliveryId}/receipt</code>.</p>
-<p>For the exceptional case where waste is received with no prior Movement/Collection/Delivery trail at all, <code>POST /receipts</code> records the receipt and has the server mint an empty Delivery (<code>movementIds: []</code>) behind the scenes, returning its Delivery ID in the same response — so even a receipt with no prior journey gets a real, addressable Delivery ID. See <a href="../decisions/#d-041">D-041</a>.</p>
-<h3 id="creation-id-collection-id-delivery-event-id-receive-id">Creation ID, Collection ID, Delivery Event ID, Receive ID</h3>
-<p>Per-event identifiers, distinct from the Movement ID and Delivery ID. Each event of a given type has its own ID. They are useful for audit purposes and for referring to specific events without conflating the event with the entity it acts on.</p>
-<p>Note the naming clash the <a href="../decisions/#d-040">D-040</a> rename introduced: the delivery event's own internal per-event id and the delivery's public identifier are now both "Delivery"-something. This glossary calls the former the <strong>Delivery Event ID</strong> to keep the two apart — the API itself never exposes it (see <a href="../decisions/#d-012">D-012</a>).</p>
-<p>For example, a movement with two collections has one Movement ID, two Collection IDs (one per collection event), one Delivery Event ID and one Delivery ID at delivery, and a single Receive ID at the receiver site.</p>
+<p>The identifier of one handover of waste at a site, minted by <code>POST /deliveries</code>. One Delivery ID covers one or more Movements delivered together (<a href="../decisions/#d-007">D-007</a>). The driver passes it to the receiver — on paper or digitally — and the receiver records the receipt against it with <code>POST /deliveries/{deliveryId}/receipt</code>.</p>
+<p><code>POST /receipts</code> also mints a Delivery ID: for waste received with no earlier movement, collection or delivery recorded, the server creates an empty Delivery and returns its ID, so the receipt still has a handle (<a href="../decisions/#d-041">D-041</a>).</p>
+<h3 id="wastetrackingid"><code>wasteTrackingId</code></h3>
+<p>The Phase 1 identifier, minted when waste is received through <code>POST /movements/receive</code>. Phase 1 had no creation event, so this was the only handle on a received load. It is not a Movement ID (<a href="../decisions/#d-004">D-004</a>). Whether and how a Phase 1 record maps to a Phase 2 Movement is part of the migration (<a href="../decisions/#d-024">D-024</a>).</p>
 <h3 id="wt-id">WT-ID</h3>
-<p>A legacy term from early Phase 1 documentation for the <code>wasteTrackingId</code> (see its entry above). Mentioned here so readers of older documents recognise it. It is <strong>not</strong> another name for the Phase 2 Movement ID.</p>
+<p>A term from early Phase 1 documentation for the <code>wasteTrackingId</code>. Mentioned so readers of older documents recognise it. It is <strong>not</strong> another name for the Movement ID.</p>
+<h3 id="event-ids-internal">Event IDs (internal)</h3>
+<p>Each event — creation, every collection event, delivery, receipt — also has an internal ID used for storage and audit. These are never returned by the API (<a href="../decisions/#d-012">D-012</a>). Whether collection events need a public ID of their own is open (<a href="../decisions/#d-035">D-035</a>). To avoid a clash with the public Delivery ID, the delivery event's internal ID is called the <strong>Delivery Event ID</strong> here.</p>
 <h2 id="resource-hierarchy">Resource hierarchy</h2>
-<p>The API is organised around two top-level resources — Movements and Deliveries — each with a sub-resource that captures the event happening to it. The sub-resources are 1:1: each Movement has exactly one Collection, each Delivery has exactly one Receipt. A Movement is on exactly one Delivery; a Delivery can aggregate multiple Movements.</p>
-<div class="highlight"><pre><span></span><code>/movements/{movementId}/collection      ← 1:1 (the pickup)
-/deliveries/{deliveryId}/receipt        ← 1:1 (the acceptance)
-/deliveries/{deliveryId}                ← contains a list of Movement IDs
+<p>The API has two top-level resources, Movements and Deliveries, each with an event recorded under it (<a href="../decisions/#d-016">D-016</a>):</p>
+<div class="highlight"><pre><span></span><code>/movements/{movementId}               ← the movement, created once
+/movements/{movementId}/collection    ← one or more collection events, in order
+/deliveries/{deliveryId}              ← one handover, listing its Movement IDs
+/deliveries/{deliveryId}/receipt      ← exactly one receipt per Delivery
 </code></pre></div>
-<p>This shape has two practical consequences worth knowing:</p>
+<p>How they relate (<a href="../decisions/#d-015">D-015</a>):</p>
 <ul>
-<li><strong>Multi-collection runs are multi-Movement.</strong> A driver picking up from three producers in a single run creates three Movements, each with its own Movement ID and its own Collection event. The Movements are then aggregated under a single Delivery ID at the delivery.</li>
-<li><strong>Multi-delivery runs are multi-Delivery.</strong> A driver dropping at two receivers in a single run mints two Delivery IDs — one per delivery event. The Movements being delivered are split across the two Deliveries.</li>
-<li><strong>Hazardous deliveries reuse the Movement ID.</strong> Hazardous waste cannot be aggregated under a shared Delivery (<a href="../decisions/#d-010">D-010</a>), so a hazardous delivery always covers exactly one Movement — and instead of minting a new Delivery ID, the server sets it equal to that Movement ID.</li>
-<li><strong>A Delivery can exist with zero Movement IDs.</strong> The one exception to "a Movement is on exactly one Delivery" above: <code>POST /receipts</code> (<a href="../decisions/#d-041">D-041</a>) creates an empty Delivery (<code>movementIds: []</code>) server-side for a receipt with no prior Movement at all.</li>
+<li><strong>Several pickups are several Movements.</strong> A driver collecting from three producers in one run creates three Movements, each with its own collection event.</li>
+<li><strong>A handover adds a collection event.</strong> A driver-to-driver handover is a further <code>TRANSIT</code> collection event on the same Movement, not a new Movement (<a href="../decisions/#d-029">D-029</a>).</li>
+<li><strong>A Delivery can cover several Movements, and a Movement can be on several Deliveries</strong> — for example one collection with several waste streams going to different receivers (<a href="../decisions/#d-007">D-007</a>).</li>
+<li><strong>Hazardous Movements are delivered on their own.</strong> The server splits a mixed request: each hazardous Movement becomes its own Delivery, whose Delivery ID is the Movement ID (<a href="../decisions/#d-010">D-010</a>).</li>
+<li><strong>A Delivery can have no Movements</strong> — the empty Delivery created by <code>POST /receipts</code> (<a href="../decisions/#d-041">D-041</a>).</li>
+<li><strong>One receipt per Delivery.</strong> Whether the load is accepted, rejected or partly accepted, the outcome is recorded on that one receipt; the Movement is not split. How the outcome is recorded is open (<a href="../decisions/#d-025">D-025</a>).</li>
 </ul>
-<p>If a load is partially rejected at the receiver, that is recorded on the single Receipt, not by creating new Movements — the Movement is unchanged. How the partial outcome is represented on the receipt is a data-model question still being worked through and is not yet in the API spec.</p>
-<p>A recorded delivery is <strong>immutable</strong>: once a Delivery has been registered via <code>POST /deliveries</code>, the only property that can change is its soft-delete flag <code>isDeleted</code>. <code>PUT /deliveries/{deliveryId}</code> accepts that flag alone — the place, carrier, timestamp and Movement IDs cannot be re-edited. To correct a delivery, soft-delete it and record a fresh one (see D-017 in the <a href="../decisions/">decisions register</a>).</p>
+<p>A recorded delivery cannot be edited, only soft-deleted; to correct one, soft-delete it and record a new one (<a href="../decisions/#d-017">D-017</a>).</p>
 <h2 id="actors-and-roles">Actors and roles</h2>
 <h3 id="producer">Producer</h3>
-<p>The party producing the waste. The producer's site is where collection takes place. In broker-initiated movements the producer can also query the fate of their waste through the producer-tracking flow.</p>
+<p>The party the waste comes from, recorded on the movement at creation. What is recorded depends on the <strong>waste source</strong> (<a href="../decisions/#d-047">D-047</a>):</p>
+<ul>
+<li><strong>Household</strong> — no producer details at all.</li>
+<li><strong>Commercial</strong> — organisation name, SIC code, address, contact details, and an authorisation number or a reason for not having one.</li>
+<li><strong>Municipal</strong> — as commercial, with the SIC code optional.</li>
+</ul>
+<p>Whether a movement made by or for a local council needs flagging is open (<a href="../decisions/#d-049">D-049</a>).</p>
 <h3 id="carrier">Carrier</h3>
-<p>The party physically moving the waste. The carrier is always required on a movement — even when the movement is initiated by someone else, there has to be a carrier on the record. Carriers hold a CB:DU (Carrier, Broker, Dealer Upper-tier) registration in England and Wales.</p>
-<h3 id="broker">Broker</h3>
-<p>A party arranging a movement on behalf of a producer. In the API, broker details are required only when the movement is broker-initiated.</p>
-<p>In the API, the term <code>broker</code> is used as an umbrella for any non-carrier-initiated movement — so a movement initiated by a producer or a receiver, not just by a registered broker, is treated as broker-initiated. This is a deliberate simplification: all three start their journeys at the same point and produce the same downstream paths.</p>
+<p>The party physically moving the waste. At creation the movement declares one or more <strong>intended carriers</strong> (<a href="../decisions/#d-045">D-045</a>); every later event — collection, delivery, receipt — records the actual <code>carrier</code> (<a href="../decisions/#d-008">D-008</a>). Carriers hold a waste carrier registration, such as a CBDU number in England and Wales, or give a reason for not having one.</p>
+<h3 id="broker-or-dealer">Broker or dealer</h3>
+<p>A party who arranges a movement without handling the waste. Optional at creation, collection and receipt, and not captured at delivery (<a href="../decisions/#d-008">D-008</a>). Recorded as <code>brokerOrDealer</code>: <code>isPresent</code> says whether one was involved, and <code>items</code> lists them — more than one can be declared.</p>
 <h3 id="driver">Driver</h3>
-<p>The individual physically operating the vehicle for a carrier. Currently identified at event level (collection, delivery) but treated as a sub-actor of the carrier rather than an independent party. The data model around drivers will firm up as we work through it.</p>
+<p>The person operating the vehicle for a carrier. Treated as part of the carrier, not as a separate party; the API records no driver details.</p>
 <h3 id="receiver">Receiver</h3>
-<p>The party operating the site where waste is delivered. Holds an environmental permit (or equivalent authorisation) that determines which waste types they may accept. Records the receipt of waste and its initial treatment outcome.</p>
+<p>The party operating the site where waste is received. Holds an environmental permit or equivalent authorisation that determines which waste it may accept. Records the receipt and the actual treatment. At creation, a movement carrying hazardous waste declares its intended <strong>receivers</strong> (<a href="../decisions/#d-043">D-043</a>); the site that actually received the waste is recorded on the receipt.</p>
+<h3 id="submitting-organisation">Submitting organisation</h3>
+<p>The organisation a request is made for, identified by its <code>apiCode</code> — sent in the <code>x-api-code</code> header from beta-2, in the body on beta-1 and the Phase 1 receipt (<a href="../decisions/#d-053">D-053</a>). Every record is attributed to it, whatever role it is playing (<a href="../decisions/#d-027">D-027</a>); only the organisation that recorded an event may change it (<a href="../decisions/#d-036">D-036</a>).</p>
 <h2 id="journey-terms">Journey terms</h2>
-<h3 id="initiator">Initiator</h3>
-<p>The party who creates the movement and, in doing so, mints the Movement ID. The initiator is either <code>carrier</code> or <code>broker</code> (see "Broker" above for what <code>broker</code> covers).</p>
-<h3 id="collection">Collection</h3>
-<p>A collection event is the act of waste passing from a producer into a driver's care, recorded against a specific Movement. Each Movement has exactly one Collection event — a driver picking up multiple loads on a run is recording one Collection per Movement, not multiple Collections on a single Movement.</p>
-<p>Earlier drafts of the API distinguished "static collection" (producer to driver) from "transit collection" (driver-to-driver handover). The final model collapses this distinction: every collection is just the collection event for its Movement. A driver-to-driver handover is modelled by ending one Movement at a delivery and creating a new Movement at the next pickup, rather than as a separate event type.</p>
-<p>Endpoint: <code>POST /movements/{movementId}/collection</code>.</p>
-<h3 id="producer-tracking">Producer-tracking</h3>
-<p>A read-only flow in which the producer queries the fate of their waste via <code>GET /movements/{id}/fate-of-waste</code>. The endpoint exposes a deliberately limited subset of information, focused on classification across stages, collection and receipt timestamps, and the treatment codes applied at the receiver. The producer does not see operational detail like the identity of the driver.</p>
+<h3 id="collection-event">Collection event</h3>
+<p>The record of waste passing into a carrier's care, under <code>POST /movements/{movementId}/collection</code>. The first event on a Movement is a <code>STATIC</code> pickup from the producer; each later event is a <code>TRANSIT</code> handover from one carrier to another, naming the carrier it came from in <code>receivedFromCarrier</code> (<a href="../decisions/#d-029">D-029</a>). Collection events carry no waste details (<a href="../decisions/#d-032">D-032</a>).</p>
+<h3 id="delivery">Delivery</h3>
+<p>The record of waste handed over at a site, under <code>POST /deliveries</code>. It names the Movements delivered, the carrier, when, and the site with its address (<a href="../decisions/#d-018">D-018</a>).</p>
+<h3 id="receipt">Receipt</h3>
+<p>The record of waste arriving at a receiving site, under <code>POST /deliveries/{deliveryId}/receipt</code> — or <code>POST /receipts</code> when there is no prior delivery, in which case a <code>reasonForNoDeliveryId</code> is required (<a href="../decisions/#d-041">D-041</a>). The receipt records actual weights and treatments. Whether the live Phase 1 receipt is extended instead of these endpoints is open (<a href="../decisions/#d-022">D-022</a>).</p>
 <h3 id="cross-check">Cross-check</h3>
-<p>The validation of a receipt's carrier and waste details against the linked delivery. Mismatches return validation warnings rather than hard errors, so the receipt is still recorded when the paperwork chain has minor inconsistencies. The granularity of the check is undefined and tracked in the <a href="../decisions/">decisions register</a>. How the receipt links to the delivery — and therefore whether the cross-check is unconditional or conditional on a supplied Delivery ID — depends on the open receipt-migration decision; see the register.</p>
+<p>The comparison of a receipt with what was declared earlier: its waste against the movements' creation records, and its carrier against the carrier recorded earlier in the journey (<a href="../decisions/#d-006">D-006</a>). A mismatch does not stop the receipt being recorded. What counts as a mismatch (<a href="../decisions/#d-021">D-021</a>), and whether mismatches are returned as warnings or must be confirmed (<a href="../decisions/#d-046">D-046</a>), is open.</p>
+<h3 id="fate-of-waste">Fate of waste</h3>
+<p>A read-only view for the producer of what happened to their waste, through <code>GET /movements/{movementId}/fate-of-waste</code>. What it shows, and who may read it, is open (<a href="../decisions/#d-019">D-019</a>).</p>
 <h3 id="intended-treatment">Intended Treatment</h3>
-<p>The disposal or recovery treatment planned for a waste item, captured in <code>wasteItems[].disposalOrRecoveryCodes</code> at Creation. Mandatory — a planning figure, not a guarantee of the eventual outcome. See <a href="../decisions/#d-031">D-031</a>.</p>
+<p>The disposal or recovery treatment planned for a waste item at creation, in <code>wasteItems[].intendedTreatments</code> — a code and the weight treated under it. Required (<a href="../decisions/#d-031">D-031</a>).</p>
 <h3 id="actual-treatment">Actual Treatment</h3>
-<p>The confirmed disposal or recovery treatment applied to a waste item, captured in the same <code>disposalOrRecoveryCodes</code> field at Receipt. Optional, and authoritative — the receiver's Actual Treatment is the source of truth, and may differ from what was intended at Creation. See <a href="../decisions/#d-031">D-031</a>.</p>
+<p>The disposal or recovery treatment confirmed at receipt, in <code>wasteItems[].actualTreatments</code>. Optional — a site may need to inspect the waste before confirming — and authoritative: it may differ from the intended treatment (<a href="../decisions/#d-031">D-031</a>).</p>
+<h3 id="supporting-references">Supporting references</h3>
+<p>The provider's own references for a movement — purchase order, weighbridge ticket, invoice and so on — as <code>{ label, reference }</code> pairs, accepted on every write endpoint (<a href="../decisions/#d-048">D-048</a>).</p>
+<h3 id="contact-details">Contact details</h3>
+<p>Every party except a household producer carries a <code>contactDetails</code> object with an email address, a phone number, or both (<a href="../decisions/#d-008">D-008</a>).</p>
+<h3 id="soft-delete">Soft-delete</h3>
+<p>Withdrawing an event recorded in error by setting <code>isDeleted: true</code> through its <code>PUT</code>. Nothing is ever hard-deleted, and a receipt cannot be deleted (<a href="../decisions/#d-009">D-009</a>).</p>
 
 
 

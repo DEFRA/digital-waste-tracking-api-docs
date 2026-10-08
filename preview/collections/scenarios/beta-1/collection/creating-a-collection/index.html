@@ -476,12 +476,14 @@
 <span class="nf">    </span><span class="k">Then </span><span class="nf">the Collection isn't created</span>
 <span class="nf">    </span><span class="k">And </span><span class="nf">they should be informed that the Movement ID is unrecognised</span>
 
+<span class="c">  # The Movement ID is part of the path, so a request without one matches no</span>
+<span class="c">  # endpoint and is answered with the generic not-found problem.</span>
 <span class="nf">  </span><span class="k">Scenario:</span><span class="nf"> A Collection isn't created when a Movement ID is not provided</span>
 <span class="k">    Given </span><span class="nf">they have valid Collection data</span>
 <span class="nf">    </span><span class="k">And </span><span class="nf">they have no Movement ID</span>
 <span class="nf">    </span><span class="k">When </span><span class="nf">they submit the Collection</span>
 <span class="nf">    </span><span class="k">Then </span><span class="nf">the Collection isn't created</span>
-<span class="nf">    </span><span class="k">And </span><span class="nf">they should be informed that a Movement ID is required</span>
+<span class="nf">    </span><span class="k">And </span><span class="nf">they should be informed that the endpoint was not found</span>
 
 <span class="nf">  </span><span class="k">Scenario:</span><span class="nf"> A Collection isn't created when malformed data is provided</span>
 <span class="k">    Given </span><span class="nf">they have malformed Collection data</span>

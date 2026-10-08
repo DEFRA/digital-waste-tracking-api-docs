@@ -352,6 +352,10 @@
       
         
       
+        
+      
+        
+      
     
     
     
@@ -411,6 +415,62 @@
   
   
     <li class="md-nav__item">
+      <a href="../../api/openapi-beta-2/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API spec (beta-2)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/openapi-beta-1/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API spec (beta-1)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../api/openapi/" class="md-nav__link">
         
   
@@ -418,7 +478,7 @@
   <span class="md-ellipsis">
     
   
-    API spec
+    Target API spec
   
 
     
@@ -504,7 +564,7 @@
 </div>
 <p>Every <code>*.schema.json</code> file in this folder, the named <code>*.examples.json</code> beside them, and each version's <code>openapi.json</code> are copied verbatim from <a href="https://github.com/DEFRA/waste-movement-backend"><code>waste-movement-backend</code></a>'s <code>src/schemas/</code>, preserving that folder's layout. This README is the one file here that the sync does not touch.</p>
 <p>Both API versions are mirrored, each keeping its version prefix:</p>
-<div class="highlight"><pre><span></span><code>beta-1/                             # the live Receipt of Waste endpoints
+<div class="highlight"><pre><span></span><code>beta-1/                             # beta-1: the five journey endpoints, minimal fields
   openapi.json                      # the beta-1 spec — $refs the files beside it
   common/                           # ids, wasteType, delivery-item, issue, validation
   create-movement-request.schema.json
@@ -531,7 +591,7 @@ beta-2/                             # the Phase 2 event model
   …
 </code></pre></div>
 <p>Every whole request or response body is named after the backend route it belongs to, with a <code>-request</code> or <code>-response</code> suffix; the resources they are built from keep resource names.</p>
-<p>The version prefix is not decoration: each file's path from this folder matches its own <code>$id</code> (<code>"beta-2/common/producer/producer.schema.json"</code>), which is the relationship the backend's loader asserts. Every <code>$ref</code> between these files is relative and stays within its version, so the tree resolves standalone. A future <code>beta-3</code> is picked up by the sync with no change to the script.</p>
+<p>The version prefix is not decoration: the backend's loader registers each file under its path from this folder (<code>beta-2/common/producer/producer.schema.json</code>), and that path is the schema's identity — the files declare no <code>$id</code> (see below). Every <code>$ref</code> between these files is relative and stays within its version, so the tree resolves standalone. A future <code>beta-3</code> is picked up by the sync with no change to the script.</p>
 <h2 id="do-not-edit-anything-in-this-folder">Do not edit anything in this folder</h2>
 <p>Changes made here are silently overwritten by the next sync. A change to a rule or a beta spec — in either version — is a PR against <code>waste-movement-backend</code>; once it is on <code>main</code>, it arrives here by running:</p>
 <div class="highlight"><pre><span></span><code>npm<span class="w"> </span>run<span class="w"> </span>schemas:sync
@@ -541,18 +601,17 @@ beta-2/                             # the Phase 2 event model
 <p>These files are what the running service validates against. The beta-2 files may look different from the hand-maintained copies this folder replaced (the former <code>docs/event-model/schema/</code>, singular, now deleted) — a field renamed, a rule tightened, a structure reshaped. <strong>That is expected, and is not drift to reconcile here.</strong> If a difference looks wrong, the conversation belongs in <code>waste-movement-backend</code>.</p>
 <p>The snapshot always tracks latest <code>main</code>; there is no pinned SHA. Git holds the provenance — the committed diffs of this folder are its history. The <code>Schemas / schemas:sync</code> workflow re-runs the sync on every PR (and on demand), and fails visibly — but non-blocking — when this snapshot no longer matches upstream. There is no scheduled run, so a backend-side change lands here when the next PR opens rather than the moment it is merged.</p>
 <h2 id="when-a-schema-arrives-here">When a schema arrives here</h2>
-<p>A sync that brings a resource across for the first time is not finished when the files land — that resource already exists twice more in this repo, as a Joi fixture under <code>docs/collections/data/</code> and as its spec shape in <code>docs/api/openapi.yaml</code>, and both now have a source of truth above them. Producer went through this in <a href="https://github.com/DEFRA/digital-waste-tracking-api-docs/pull/78">#78</a>, Broker or Dealer after it; the steps below are what those two settled on.</p>
-<p><strong>1. Deprecate the Joi fixture — do not delete it.</strong> Add an <code>@deprecated</code> JSDoc block to the export naming the mirror path, saying the synced schema wins, and listing the divergences you can actually see. The fixture stays because the rest of its event file still composes it and would stop being readable without it. <code>producerSchema</code> in <code>creationJoi.js</code> and <code>brokerSchema</code> in <code>sharedSchemas.js</code> are the two worked examples. If the file's header comment describes the resource's rules, add a closing paragraph marking it as the exception — the bullets above it now describe the fixture, not what the service enforces.</p>
-<p><strong>2. Delete the fixture's test under <code>test/event-model/schema/</code>.</strong> These schemas are tested upstream beside the schema files, so a doc-side test of the same rules is a second, staler copy. Then grep for the deleted file: sibling tests cite each other in their header comments (<code>create-movement.test.js</code> lists which sub-schemas are "covered elsewhere"), and those lists go stale silently.</p>
-<p><strong>3. Swap the <code>$ref</code> in <code>docs/api/openapi.yaml</code>, per endpoint rather than per field name.</strong> The path is relative to <code>docs/api/</code>, e.g. <code>../event-model/schemas/beta-2/common/producer/producer.schema.json</code>. Drop any <code>allOf</code> + <code>description</code> wrapper around the old internal <code>$ref</code>: the synced schema carries its own description, and the inline one is usually about to become wrong — both broker descriptions still claimed the Phase 1 shape. Delete the local <code>#/components/schemas/…</code> component only once nothing else refers to it. <code>producerDetails</code> had exactly one consumer and went; <code>brokerOrDealer</code> had four and stayed.</p>
-<p><strong>4. Leave the deprecated Phase 1 endpoints alone.</strong> <code>POST /movements/receive</code> and <code>PUT /movements/{wasteTrackingId}/receive</code> keep the shapes they shipped with. The trap is that a request schema can serve both sides of the Phase 1 / Phase 2 line: <code>receiveMovementRequest</code> is shared by those two <strong>and</strong> by the live <code>POST</code>/<code>PUT /deliveries/{deliveryId}/receipt</code>, so swapping a <code>$ref</code> inside it changes all four at once. Where that happens, the Phase 1 constraint wins and the live endpoint keeps the old shape too — splitting the schema to separate them is a deliberate change worth its own conversation, not something to do in passing. Check what a schema actually feeds before editing it.</p>
-<p>Two things worth knowing about what will and will not catch a mistake here. <code>test/api/openapi-dialect.test.js</code> does not resolve <code>$ref</code>s — it checks the synced schemas' 2020-12 dialect and absent <code>$id</code>s — and <code>openapi.yaml</code> is neither bundled nor tested, so nothing in the repo resolves its refs, so a new external <code>$ref</code> is worth walking by hand, including the nested hops (<code>broker-or-dealer.schema.json</code> reaches <code>../contact-details.schema.json</code> and <code>../address.schema.json</code>). And a swap is rarely only a refactor: the beta-2 shapes have genuinely moved on from the fixtures they replace — broker went from a bare object to an <code>isPresent</code>/<code>items[]</code> wrapper with <code>contactDetails</code> nesting — so the endpoints you point at them start documenting a shape the backend may only implement for some events so far. Say so in the PR.</p>
-<p>The doc-side Joi fixture is not updated to match. It is deprecated, and it drifts from here on; the synced schema is what readers are being sent to.</p>
+<p>A sync that brings a resource across for the first time is not finished when the files land. The resource may also exist as a hand-written shape in the target spec (<code>docs/api/openapi.yaml</code>) and as a Joi draft under <code>docs/collections/data/</code>, and both now have a source of truth above them. Producer went through this in <a href="https://github.com/DEFRA/digital-waste-tracking-api-docs/pull/78">#78</a>, Broker or Dealer after it.</p>
+<p><strong>1. Point the target spec at it.</strong> The beta spec itself (<code>beta-N/openapi.json</code>) arrives with the sync, already referring to the new files. In the target spec, swap the hand-written shape for a <code>$ref</code>, per endpoint rather than per field name; the path is relative to <code>docs/api/</code>, e.g. <code>../event-model/schemas/beta-2/common/producer/producer.schema.json</code>. Drop any <code>allOf</code> + <code>description</code> wrapper around the old internal <code>$ref</code>: the synced schema carries its own description. Delete a local <code>#/components/schemas/…</code> component only once nothing else refers to it.</p>
+<p><strong>2. Retire the Joi draft.</strong> Once the resource has landed, delete its draft from <code>docs/collections/data/</code> and remove it from the differences table in that folder's <a href="../../collections/data/">README</a>. If other drafts still compose it, mark it <code>@deprecated</code> instead, naming the mirror path — <code>producerSchema</code> in <code>creationJoi.js</code> is the worked example.</p>
+<p><strong>3. Leave the Phase 1 endpoints alone.</strong> <code>POST /movements/receive</code> and <code>PUT /movements/{wasteTrackingId}/receive</code> are live and unchanged, and the target spec does not repeat their bodies — it points at the live <a href="https://defra.github.io/waste-tracking-service/production/apiSpecifications/">Receipt of Waste API reference</a> through <code>legacyReceiptRequest</code>. Nothing synced here should be wired into them.</p>
+<p><strong>4. Check the references.</strong> <code>npm run specs:bundle</code> resolves every <code>$ref</code> in the synced beta specs and validates them against OpenAPI 3.1; it runs in CI on every pull request. The schemas themselves are not tested here: they are tested beside the schema files in <code>waste-movement-backend</code>, whose validator only accepts the 2020-12 dialect. A check that no <code>$id</code> comes back (see below) belongs there too. The target spec <code>openapi.yaml</code> is neither bundled nor tested, so a new external <code>$ref</code> in it is worth walking by hand, including the nested hops (<code>broker-or-dealer.schema.json</code> reaches <code>../contact-details.schema.json</code> and <code>../address.schema.json</code>).</p>
+<p>A swap is rarely only a refactor: the beta-2 shapes have often moved on from the drafts they replace — broker went from a bare object to an <code>isPresent</code>/<code>items[]</code> wrapper with <code>contactDetails</code> nesting — so say in the PR what the target spec now documents.</p>
 <h2 id="why-a-copy-rather-than-a-ref-to-github">Why a copy rather than a <code>$ref</code> to GitHub</h2>
 <p><code>raw.githubusercontent.com</code> would work on paper: both repos are public and raw sends <code>access-control-allow-origin: *</code>. Committing the files instead keeps <code>mkdocs serve</code>, a fresh clone, and the published site all rendering with no build-time or view-time network dependency, and no reliance on another host staying up.</p>
 <h2 id="why-these-files-declare-no-id">Why these files declare no <code>$id</code></h2>
 <p>A schema file here carries no <code>$id</code>, and that is deliberate upstream rather than an omission. The backend's loader registers each schema under its path relative to <code>src/schemas/</code> and ajv treats that key as the base URI, so the path is the identity instead of being restated inside the file. Keeping <code>$id</code> out is also what makes these files correct when served from anywhere else, this site included: a resolver falls back to the retrieval URL for the base URI, and every relative <code>$ref</code> beneath a schema — <code>producer-household.schema.json</code> and the rest — resolves against the folder the file was actually fetched from.</p>
-<p>This was not always so. The first version of this mirror carried path-relative <code>$id</code>s (<code>"beta-2/common/producer/producer.schema.json"</code>), which a spec-compliant resolver appends to the retrieval URL, deriving a base URI with the path in it twice and 404ing every nested <code>$ref</code>. Swagger UI ignores <code>$id</code> and so rendered the spec page correctly throughout, which is why it was not visible here. Upstream removed them; a sync brought that across, and <code>test/api/openapi-dialect.test.js</code> now asserts none come back.</p>
+<p>This was not always so. The first version of this mirror carried path-relative <code>$id</code>s (<code>"beta-2/common/producer/producer.schema.json"</code>), which a spec-compliant resolver appends to the retrieval URL, deriving a base URI with the path in it twice and 404ing every nested <code>$ref</code>. Swagger UI ignores <code>$id</code> and so rendered the spec page correctly throughout, which is why it was not visible here. Upstream removed them and a sync brought that across. A check that none come back belongs beside the schemas in <code>waste-movement-backend</code>, where they are written; this repo no longer tests for it.</p>
 <h2 id="conventions">Conventions</h2>
 <p>The schema conventions — file layout, path-as-identity, variant composition, the tests that sit beside each file — are documented upstream in <a href="https://github.com/DEFRA/waste-movement-backend/blob/main/src/schemas/README.md"><code>waste-movement-backend</code>'s <code>src/schemas/README.md</code></a>. The schemas are tested there, beside the schema files; they are not re-tested in this repo.</p>
 

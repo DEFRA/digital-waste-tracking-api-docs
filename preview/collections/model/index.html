@@ -456,24 +456,24 @@
 <h1 id="data-model">Data model</h1>
 <p>The entities, identifiers, and state transitions underlying the extended API.</p>
 <h2 id="status">Status</h2>
-<p>Started at proposal level. This workstream now contains draft notes on the current Phase 1 storage model and a proposed MongoDB shape for Phase 2. It is still exploratory rather than settled design: the <a href="../../api/README.md">API spec</a> and decisions register remain the primary drivers, and the model will continue to evolve as those stabilise.</p>
+<p>Three storage models for Phase 2 are under evaluation, and none is decided yet (<a href="../decisions/#d-037">D-037</a>). Beta-1 and beta-2 currently keep two minimal collections, <code>movements</code> and <code>deliveries</code>, holding IDs, the organisation and timestamps. The <a href="../../api/">API overview</a> and the decisions register remain the primary drivers; the model follows them.</p>
 <h2 id="what-will-be-here">What will be here</h2>
 <p>This folder is expected to grow into:</p>
 <ul>
 <li>An entity-relationship view of the main aggregates — Movement, Collection, Delivery, Receipt — and the reference data they depend on.</li>
-<li>A journey state diagram showing how events transition a Movement between states (planned → in-collection → in-transit → delivered → accepted / rejected / returned), reconciled against the four terminal states named in the <a href="../glossary/">glossary</a>.</li>
+<li>A journey state diagram showing how events move a Movement between states (planned → collected → in transit → delivered → accepted, rejected or partly accepted). The receipt outcomes depend on <a href="../decisions/#d-025">D-025</a>.</li>
 <li>A reconciliation view of how Phase 1 receipt entities (<code>wasteItem</code>, <code>wasteReceiver</code>, etc.) map to the entities introduced by the new endpoints.</li>
 </ul>
 <p>The OpenAPI spec defines the wire shapes; this workstream describes the storage and lifecycle shape that may back them.</p>
 <h2 id="current-proposals">Current proposals</h2>
 <ul>
 <li><a href="phase1-waste-inputs/">Phase 1 movement store</a> - what the current <code>waste-inputs</code> / <code>waste-inputs-history</code> collections store, how revisioning works, and how they may be retained during migration.</li>
-<li><a href="mongo-schema-proposal/">Mongo schema proposal</a> - proposed current-state collections, history collections, document shapes, and index list for Movements and Deliveries, including event-level organisation provenance.</li>
+<li><a href="mongo-schema-proposal/">Mongo schema proposal</a> - Option A: proposed current-state collections, history collections, document shapes, and index list for Movements and Deliveries, including event-level organisation provenance.</li>
 <li><a href="mongo-schema-proposal-per-event/">Mongo schema proposal — Per-event-type collections</a> - Option B: one collection per business event type (movement-creations, collection-events, deliveries, receipt-events); under evaluation alongside the aggregate model above.</li>
-<li><a href="mongo-schema-proposal-CQRS/">Mongo schema proposal — CQRS / Event Sourcing</a> - Option C: append-only event store with derived projections; evaluated and not adopted — retained as a record of what was considered.</li>
+<li><a href="mongo-schema-proposal-CQRS/">Mongo schema proposal — CQRS / Event Sourcing</a> - Option C: append-only event store with derived projections; under evaluation, pending a spike (<a href="../decisions/#d-037">D-037</a>).</li>
 </ul>
 <h2 id="working-assumption">Working assumption</h2>
-<p>The relationship between Movement IDs and the per-event identifiers — Movement ID is durable and immutable; Creation, Collection, Delivery Event and Receive IDs are event-level and can multiply per Movement; Delivery ID links one or more Movements at a single delivery — is treated as established. The data model elaborates on it but is not expected to change it.</p>
+<p>The relationship between the public and internal identifiers is treated as established: the Movement ID is durable and immutable; the internal event IDs (creation, collection, delivery event, receipt) are per event and can multiply per Movement; a Delivery ID covers one or more Movements at a single handover, and a Movement can be on more than one Delivery (<a href="../decisions/#d-007">D-007</a>, <a href="../decisions/#d-012">D-012</a>). How transit collection events are stored is open (<a href="../decisions/#d-035">D-035</a>).</p>
 
 
 

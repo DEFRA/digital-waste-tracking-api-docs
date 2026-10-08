@@ -525,8 +525,8 @@
 </ul>
 <div class="highlight"><pre><span></span><code><span class="c1">// 400 — validation   (Content-Type: application/problem+json)</span>
 <span class="p">{</span>
-<span class="w">  </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://waste-tracking.service.gov.uk/problems/validation-error"</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">"title"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Request validation failed"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://defra.github.io/digital-waste-tracking-api-docs/preview/problems/bad-request"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"title"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Bad Request"</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">"detail"</span><span class="p">:</span><span class="w"> </span><span class="s2">"The receipt could not be stored because 2 fields are invalid."</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">"instance"</span><span class="p">:</span><span class="w"> </span><span class="s2">"/movements/25HRA0B2/receive"</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">"requestId"</span><span class="p">:</span><span class="w"> </span><span class="s2">"…"</span><span class="p">,</span>
@@ -537,7 +537,7 @@
 <span class="p">}</span>
 <span class="c1">// 404 / 401 / 500   (no field errors)</span>
 <span class="p">{</span>
-<span class="w">  </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://waste-tracking.service.gov.uk/problems/movement-not-found"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://defra.github.io/digital-waste-tracking-api-docs/preview/problems/movement-not-found"</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">"title"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Waste movement not found"</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">"detail"</span><span class="p">:</span><span class="w"> </span><span class="s2">"No waste movement exists with tracking ID 25HRA0B2."</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">"instance"</span><span class="p">:</span><span class="w"> </span><span class="s2">"/movements/25HRA0B2"</span><span class="p">,</span>
@@ -555,7 +555,7 @@
 <p><strong><code>5xx</code></strong> uses the same Problem Details shape, with <code>detail</code> never leaking internals (stack traces, downstream errors). All error responses set <code>Content-Type: application/problem+json</code>.</p>
 </li>
 <li>
-<p><strong><code>type</code> URIs are minted under a stable base</strong> — <code>https://waste-tracking.service.gov.uk/problems/…</code> — ideally resolving to a short docs page per problem type.</p>
+<p><strong><code>type</code> URIs resolve to the published <a href="../../problems/">Problem types</a> pages</strong> on this docs site — <code>https://defra.github.io/digital-waste-tracking-api-docs/…/problems/&lt;type&gt;</code> — so each <code>type</code> a developer receives opens a page explaining it. This is the base the service uses today.</p>
 </li>
 </ul>
 <h3 id="4-pagination">4. Pagination</h3>

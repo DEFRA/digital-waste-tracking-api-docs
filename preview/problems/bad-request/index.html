@@ -350,6 +350,10 @@
       
         
       
+        
+      
+        
+      
     
     
     
@@ -409,6 +413,62 @@
   
   
     <li class="md-nav__item">
+      <a href="../../api/openapi-beta-2/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API spec (beta-2)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/openapi-beta-1/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API spec (beta-1)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../api/openapi/" class="md-nav__link">
         
   
@@ -416,7 +476,7 @@
   <span class="md-ellipsis">
     
   
-    API spec
+    Target API spec
   
 
     
@@ -534,9 +594,14 @@
 <td>Yes</td>
 </tr>
 <tr>
-<td>The <code>apiCode</code> is not recognised</td>
+<td>beta-1 only: the <code>apiCode</code> in the body is not recognised. On beta-2 a missing or unrecognised API Code returns <a href="../unauthorized/">unauthorized</a>.</td>
 <td><code>the API Code supplied is invalid</code></td>
 <td>No</td>
+</tr>
+<tr>
+<td>beta-2 only: the body still contains <code>apiCode</code>, which moved to the <code>x-api-code</code> header</td>
+<td><code>1 validation error occurred</code> (pointer <code>/apiCode</code>, <code>NotAllowed</code>)</td>
+<td>Yes</td>
 </tr>
 <tr>
 <td>A Movement ID in a <code>POST /deliveries</code> request does not exist</td>
@@ -556,7 +621,7 @@
 </tbody>
 </table>
 <h2 id="validation-errors">Validation errors</h2>
-<p>If the request body fails schema validation, the response includes an <code>errors</code> array with one entry for each problem found. All problems are reported together, so you can fix them in one go.</p>
+<p>If the request body fails schema validation, the response includes an <code>errors</code> array with one entry for each problem found. All problems are reported together, so you can fix them in one go. A value of the wrong type — for example a string where an object is expected — is reported once, and nothing inside it is reported until its type is fixed.</p>
 <table>
 <thead>
 <tr>
@@ -645,8 +710,8 @@
 <h2 id="how-to-fix-it">How to fix it</h2>
 <ul>
 <li>Check each entry in <code>errors</code> and correct the field that <code>pointer</code> refers to.</li>
-<li>Check the request against the <a href="../../api/openapi/">API spec</a>.</li>
-<li>Check that you are using the <code>apiCode</code> you were given for your organisation.</li>
+<li>Check the request against the spec for the version you are calling: <a href="../../api/openapi-beta-2/">beta-2</a> or <a href="../../api/openapi-beta-1/">beta-1</a>.</li>
+<li>On beta-2, send the <code>apiCode</code> in the <code>x-api-code</code> header, not in the body. On beta-1, check that the <code>apiCode</code> in the body is the one issued to your organisation.</li>
 <li>For <code>POST /deliveries</code>, check that every Movement ID was returned by an earlier <code>POST /movements</code> request.</li>
 </ul>
 

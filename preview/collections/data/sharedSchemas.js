@@ -711,8 +711,8 @@ export const brokerSchema = Joi.object({
  * moved here after the two event files' copies were confirmed byte-identical.
  * Distinct from Creation's own intendedReceiverSchema (creationJoi.js), which
  * has different requiredness rules (siteName/authorisationNumber/address are
- * conditional there, unconditional here) — reconciling the two remains a
- * separate, open question (see test/event-model/schema/common/receiver.test.js).
+ * conditional there, unconditional here). D-043 has since made all three
+ * required on every Creation entry; the target spec is the reference.
  */
 export const receiverSiteSchema = Joi.object({
   siteName: Joi.string()

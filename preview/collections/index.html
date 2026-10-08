@@ -454,46 +454,54 @@
 <p>This page is internal design/planning material for the delivery team, not published guidance for Software Providers integrating with the Digital Waste Tracking API. Content here may be incomplete, in-progress, or superseded.</p>
 </div>
 <h1 id="collections">Collections</h1>
-<p>This section documents the design work to extend the Digital Waste Tracking service from its current receiver-first capability toward a fuller waste-movement journey. It exists to support User Research with carriers, receivers, drivers, brokers and producers, and to give software vendors building on the API a single place to track the design as it evolves.</p>
-<p>The work is in alpha. Pages here describe a design in progress, not a shipped product. Where something is unsettled, it is flagged as such.</p>
+<p>This section documents Phase 2 of Digital Waste Tracking: extending the service from receipt only to the whole waste movement journey. It supports user research with carriers, receivers, drivers, brokers and producers, and gives the software providers building on the API one place to follow the design as it evolves.</p>
+<p>Phase 2 is being built and tested in beta releases (<code>/beta-1</code>, <code>/beta-2</code>, …) alongside the live service. Pages here describe work in progress; where something is unsettled, it is flagged as such.</p>
 <h2 id="what-we-are-designing">What we are designing</h2>
-<p>The current production capability — covered by the <a href="https://defra.github.io/waste-tracking-service/production/api-landing-page/">Receipt of Waste API</a> — captures waste at the point it arrives at a receiver site. The extension broadens this to cover the journey from creation to receipt, around four business events:</p>
+<p>The live service — the <a href="https://defra.github.io/waste-tracking-service/production/api-landing-page/">Receipt of Waste API</a> — records waste when it arrives at a receiving site. Phase 2 covers the journey from creation to receipt, around four business events:</p>
 <ul>
-<li><strong>Create Movement</strong> — a producer, broker, or carrier registers an intended waste movement and is given a Movement ID.</li>
-<li><strong>Record Collection</strong> — the driver records that waste has been picked up.</li>
-<li><strong>Record Delivery</strong> — the driver records that waste has been delivered, and is given a Delivery ID covering one or more Movements delivered together.</li>
-<li><strong>Record Receipt</strong> — the receiver records what they have accepted, linked to the upstream delivery via the Delivery ID (<code>POST /deliveries/{deliveryId}/receipt</code>). This is the existing Phase 1 capability, now part of a longer chain. For the exceptional case where no delivery was recorded at all, a dedicated <code>POST /receipts</code> endpoint records the receipt and creates an empty Delivery server-side to give it a reference (<a href="decisions/#d-041">D-041</a>).</li>
+<li><strong>Create a movement</strong> — a producer, broker or carrier records a planned waste movement and gets a Movement ID.</li>
+<li><strong>Record a collection</strong> — the carrier records that the waste has been picked up. A driver-to-driver handover is recorded as a further collection event on the same movement (<a href="decisions/#d-029">D-029</a>).</li>
+<li><strong>Record a delivery</strong> — the carrier records that the waste has been handed over at a site, and gets a Delivery ID covering one or more movements delivered together (<a href="decisions/#d-007">D-007</a>).</li>
+<li><strong>Record a receipt</strong> — the receiver records what arrived, against the Delivery ID (<code>POST /deliveries/{deliveryId}/receipt</code>). Where no delivery was recorded at all, <code>POST /receipts</code> records the receipt and creates an empty Delivery to give it a reference (<a href="decisions/#d-041">D-041</a>). Whether the live Phase 1 receipt is extended instead is still open (<a href="decisions/#d-022">D-022</a>).</li>
 </ul>
-<p>A separate read-only flow lets the producer query the fate of their waste once a movement has reached a terminal state.</p>
+<p>A separate read-only query will let a producer see what happened to their waste (<a href="decisions/#d-019">D-019</a>).</p>
 <h2 id="how-this-section-is-organised">How this section is organised</h2>
-<p>The work is split into two workstreams, plus cross-cutting reference material.</p>
-<p><a href="model/"><strong>Data model.</strong></a> The entities, identifiers, and state transitions that underlie the API. Currently a placeholder; the model will be developed once the API spec stabilises.</p>
-<p><a href="../api/README.md"><strong>API.</strong></a> The OpenAPI specification for the extended service. Covers sixteen paths across creation, collection, delivery, receipt, fate-of-waste, and reference data. Includes Phase 1 receipt endpoints preserved verbatim.</p>
-<p><a href="decisions/"><strong>Decisions.</strong></a> A running register of design decisions, open questions, and parked items.</p>
-<p><a href="glossary/"><strong>Glossary.</strong></a> Disambiguation of identifier and actor vocabulary — Movement ID vs. Delivery ID vs. WT-ID, what counts as a broker, and so on.</p>
-<p><a href="phase2/assessment-feedback/"><strong>Assessment feedback.</strong></a> External assessment advice from the GDS Alpha review — vendor delegation and API versioning so far — and how each point maps to current-state findings and existing decisions.</p>
+<p><a href="decisions/"><strong>Decisions.</strong></a> The register of design decisions, open questions and parked items, grouped into waste business rules and technical design. The fastest way in for anyone joining.</p>
+<p><a href="../api/"><strong>API.</strong></a> The API built in steps: the beta-1 and beta-2 specs as served today, and the target design they lead towards.</p>
+<p><a href="glossary/"><strong>Glossary.</strong></a> The vocabulary for identifiers and actors: Movement ID, Delivery ID, <code>wasteTrackingId</code>, what counts as a broker, and so on.</p>
+<p><a href="model/"><strong>Data model.</strong></a> The storage proposals for Phase 2 events, still being evaluated (<a href="decisions/#d-037">D-037</a>).</p>
+<p><a href="scenarios/beta-1/"><strong>Scenarios.</strong></a> The behaviour each beta-1 endpoint is expected to show, written as Gherkin features.</p>
+<p><a href="phase2/assessment-feedback/"><strong>Assessment feedback.</strong></a> Advice from the GDS alpha assessment and how each point maps to current findings and decisions.</p>
 <h2 id="where-to-start">Where to start</h2>
-<p>If you are a software vendor or developer integrating with the API, start at the <a href="../api/README.md">API workstream</a>. If you are joining the project and want to know what has been decided so far, the <a href="decisions/">decisions register</a> is the fastest way in.</p>
+<p>If you are a software provider or developer integrating with the API, start with the <a href="../api/">API overview</a>. If you are joining the project, start with the <a href="decisions/">decisions register</a>.</p>
 <h2 id="status">Status</h2>
 <table>
 <thead>
 <tr>
-<th>Workstream</th>
+<th>Area</th>
 <th>Status</th>
 </tr>
 </thead>
 <tbody>
 <tr>
+<td>beta-1</td>
+<td>Served on integration: all five journey endpoints, no data validation.</td>
+</tr>
+<tr>
+<td>beta-2</td>
+<td>Served on integration and being extended: fields and validation added a resource at a time.</td>
+</tr>
+<tr>
+<td>Target design</td>
+<td><code>openapi.yaml</code>, subject to change. Updates (<code>PUT</code>) are planned for beta-3 and reads for beta-4 (<a href="../api/versioning-schedule/">versioning schedule</a>).</td>
+</tr>
+<tr>
+<td>Phase 1 receipt</td>
+<td>Live and unchanged until a migration to Phase 2 is documented (<a href="decisions/#d-023">D-023</a>).</td>
+</tr>
+<tr>
 <td>Data model</td>
-<td>Not yet started. Follows once the API stabilises.</td>
-</tr>
-<tr>
-<td>API — extended endpoints</td>
-<td>Drafted. Subject to review and BA confirmation on several open points (see decisions register).</td>
-</tr>
-<tr>
-<td>API — Phase 1 receipt</td>
-<td>Preserved unchanged.</td>
+<td>Three storage options under evaluation (<a href="decisions/#d-037">D-037</a>).</td>
 </tr>
 </tbody>
 </table>

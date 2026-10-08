@@ -454,67 +454,104 @@
 <p>This page is internal design/planning material for the delivery team, not published guidance for Software Providers integrating with the Digital Waste Tracking API. Content here may be incomplete, in-progress, or superseded.</p>
 </div>
 <h1 id="api">API</h1>
-<p>The OpenAPI specification for the extended Digital Waste Tracking API. It will eventually feed the <a href="../collections/model/">data model</a>.</p>
-<h2 id="what-is-here">What is here</h2>
-<ul>
-<li><code>openapi.yaml</code> — the specification. A single OpenAPI 3.0.3 file covering the new endpoints alongside the Phase 1 receipt and reference data endpoints, preserved verbatim.</li>
-</ul>
-<h2 id="surface-area">Surface area</h2>
-<p>The current draft covers sixteen paths:</p>
+<p>The Digital Waste Tracking API is being built in steps. Each beta release is a stage on the way to the target design, and each has its own OpenAPI 3.1 specification:</p>
+<table>
+<thead>
+<tr>
+<th>Step</th>
+<th>Spec</th>
+<th>What it covers</th>
+<th>Viewer</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>beta-1</td>
+<td><code>beta-1/openapi.json</code></td>
+<td>The first step: the five journey endpoints, with no data validation, so integrators can test identifiers and structure. Synced from the backend.</td>
+<td><a href="openapi-beta-1/">beta-1</a></td>
+</tr>
+<tr>
+<td>beta-2</td>
+<td><code>beta-2/openapi.json</code></td>
+<td>The current step: the same endpoints, with fields and validation added a resource at a time. Synced from the backend.</td>
+<td><a href="openapi-beta-2/">beta-2</a></td>
+</tr>
+<tr>
+<td>beta-3 onwards</td>
+<td>—</td>
+<td>Updates, then reads, then final iterations, as set out in the <a href="versioning-schedule/">versioning schedule</a>.</td>
+<td>—</td>
+</tr>
+<tr>
+<td>Target</td>
+<td><code>openapi.yaml</code></td>
+<td>Where the steps lead: the design at general availability, without a version prefix. Subject to change as the betas teach us more.</td>
+<td><a href="openapi/">target</a></td>
+</tr>
+</tbody>
+</table>
+<p>The beta specs describe what is served today; the target spec describes where it is going. The <a href="../collections/decisions/">decisions register</a> explains why the contract is shaped the way it is, and what is still open.</p>
+<h2 id="where-the-shapes-come-from">Where the shapes come from</h2>
+<p>Request and response shapes are JSON Schema files in <code>waste-movement-backend</code>, which the service validates against. This repo keeps a copy under <code>docs/event-model/schemas/</code>, together with the beta specs that refer to them, which are defined in the backend too (<a href="../collections/decisions/#d-052">D-052</a>). The target spec does the same wherever beta-2 already defines a shape, and describes the rest itself until it is built.</p>
+<h2 id="endpoints-in-the-target-spec">Endpoints in the target spec</h2>
 <table>
 <thead>
 <tr>
 <th>Area</th>
 <th>Paths</th>
+<th>Served today</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td>Movement</td>
-<td><code>POST /movements</code>, <code>GET /movements/{movementId}</code>, <code>PUT /movements/{movementId}</code></td>
+<td><code>POST /movements</code>, <code>PUT /movements/{movementId}</code></td>
+<td><code>POST</code>, under <code>/beta-1</code> and <code>/beta-2</code></td>
 </tr>
 <tr>
 <td>Collection</td>
-<td><code>POST /movements/{movementId}/collection</code>, <code>GET /movements/{movementId}/collection</code>, <code>PUT /movements/{movementId}/collection</code></td>
+<td><code>POST /movements/{movementId}/collection</code>, <code>PUT /movements/{movementId}/collection</code></td>
+<td><code>POST</code>, under <code>/beta-1</code> and <code>/beta-2</code></td>
 </tr>
 <tr>
 <td>Delivery</td>
-<td><code>POST /deliveries</code>, <code>GET /deliveries/{deliveryId}</code>, <code>PUT /deliveries/{deliveryId}</code></td>
+<td><code>POST /deliveries</code>, <code>PUT /deliveries/{deliveryId}</code></td>
+<td><code>POST</code>, under <code>/beta-1</code> and <code>/beta-2</code></td>
 </tr>
 <tr>
 <td>Receipt</td>
-<td><code>POST /deliveries/{deliveryId}/receipt</code>, <code>GET /deliveries/{deliveryId}/receipt</code>, <code>PUT /deliveries/{deliveryId}/receipt</code></td>
+<td><code>POST /deliveries/{deliveryId}/receipt</code>, <code>PUT /deliveries/{deliveryId}/receipt</code></td>
+<td><code>POST</code>, under <code>/beta-1</code> and <code>/beta-2</code></td>
 </tr>
 <tr>
 <td>Receipt without a prior delivery</td>
 <td><code>POST /receipts</code></td>
+<td>yes, under <code>/beta-1</code> and <code>/beta-2</code></td>
 </tr>
 <tr>
-<td>Receipt (Phase 1, deprecated)</td>
-<td><code>POST /movements/receive</code>, <code>PUT /movements/{id}/receive</code></td>
+<td>Receipt (Phase 1)</td>
+<td><code>POST /movements/receive</code>, <code>PUT /movements/{wasteTrackingId}/receive</code></td>
+<td>yes, live and unchanged</td>
 </tr>
 <tr>
 <td>Producer query</td>
-<td><code>GET /movements/{movementId}/fate-of-waste</code></td>
+<td><code>GET /movements/{movementId}/fate-of-waste</code> (proposal)</td>
+<td>no</td>
 </tr>
 <tr>
 <td>Reference data (Phase 1)</td>
-<td><code>GET /reference-data/ewc-codes</code>, <code>GET /reference-data/hazardous-property-codes</code>, <code>GET /reference-data/disposal-or-recovery-codes</code>, <code>GET /reference-data/container-types</code>, <code>GET /reference-data/pop-names</code></td>
+<td><code>GET /reference-data/ewc-codes</code>, <code>…/hazardous-property-codes</code>, <code>…/disposal-or-recovery-codes</code>, <code>…/container-types</code>, <code>…/pop-names</code></td>
+<td>yes, live</td>
 </tr>
 </tbody>
 </table>
-<p>The spec follows the Richardson Maturity Model Level 2 — URLs name resources, HTTP methods carry the verbs. Two public identifiers exist in the API contract: Movement ID and Delivery ID. The Movement is the unit of waste being moved (1:1 with its Collection event); the Delivery is the delivery event at a receiver site (1:1 with its Receipt, but can aggregate multiple Movements). See the <a href="../collections/glossary/#resource-hierarchy">resource hierarchy section in the glossary</a> for more.</p>
-<p>Phase 1 endpoints are kept exactly as published. The single change in their behaviour is an optional <code>deliveryId</code> field on the receipt request body, which links a receipt to an upstream delivery when the carrier has recorded one. The Phase 1 receipt endpoints (<code>POST /movements/receive</code>, <code>PUT /movements/{id}/receive</code>) are marked <code>deprecated: true</code> in the spec — new integrations should use the Delivery-scoped endpoints above. A removal timeline is yet to be agreed (see the <a href="../collections/decisions/">decisions register</a>).</p>
-<h2 id="status">Status</h2>
-<p>The spec is in alpha and being iterated alongside data-model work. Several schemas (waste classification, hazardous codes, POPs codes, party details) are deliberately permissive placeholders pending domain detail from the BA. A number of design points are still open and tracked in the <a href="../collections/decisions/">decisions register</a>.</p>
-<p>The vocabulary used across the spec — Movement ID, Delivery ID, the per-event IDs, what counts as a broker — is documented in the <a href="../collections/glossary/">glossary</a>.</p>
-<h2 id="previewing-the-spec">Previewing the spec</h2>
-<p>The YAML can be previewed in any standard OpenAPI tool. Two options:</p>
-<ul>
-<li><strong><a href="https://editor.swagger.io">Swagger Editor</a></strong> — paste the contents of <code>openapi.yaml</code> to get a rendered Swagger UI on the right.</li>
-<li><strong>VS Code</strong> — the OpenAPI (Swagger) Editor extension by 42Crunch adds a preview pane that updates live as the YAML is edited.</li>
-</ul>
-<p>An inline viewer is also available on this site: <a href="openapi/">open the OpenAPI viewer</a>.</p>
+<p>URLs name resources and HTTP methods carry the verbs (<a href="../collections/decisions/#d-016">D-016</a>). Providers handle two identifiers: the Movement ID and the Delivery ID (<a href="../collections/decisions/#d-012">D-012</a>). Reads of individual events are deferred to beta-4 (<a href="../collections/decisions/#d-033">D-033</a>); updates (<code>PUT</code>) are planned for beta-3.</p>
+<p>New endpoints follow the <a href="standards/">API standards</a>: a <code>{ data, validation }</code> success envelope, <a href="../problems/">RFC 9457 Problem Details</a> for errors, and an <code>x-request-id</code> header on every response. From beta-2, every request carries the organisation's <code>apiCode</code> in an <code>x-api-code</code> header next to the bearer token (<a href="../collections/decisions/#d-053">D-053</a>).</p>
+<h2 id="phase-1-receipt-endpoints">Phase 1 receipt endpoints</h2>
+<p>The live Receipt of Waste endpoints are unchanged, and their request and response bodies are defined by the live <a href="https://defra.github.io/waste-tracking-service/production/apiSpecifications/">Receipt of Waste API reference</a>. The target spec shows them as deprecated under the current proposal, but that depends on how receipts are linked to Deliveries (<a href="../collections/decisions/#d-022">D-022</a>), and nothing is decided about when or how they would be retired (<a href="../collections/decisions/#d-023">D-023</a>).</p>
+<h2 id="previewing-a-spec">Previewing a spec</h2>
+<p>Each spec has a viewer on this site (see the table above). The beta specs <code>$ref</code> the JSON Schema files, so standalone tools need the bundled version: run <code>npm run specs:bundle</code>, then open <code>docs/api/openapi-beta-N.yaml</code> in <a href="https://editor.swagger.io">Swagger Editor</a> or an editor extension. The target spec is rendered as it is and is not bundled.</p>
 
 
 

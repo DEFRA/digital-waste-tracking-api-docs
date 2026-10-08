@@ -474,7 +474,7 @@
 <h3 id="invalid-submissions"><code>invalid-submissions</code></h3>
 <p>Operational holding collection for update attempts that could not be applied, for example because the target <code>wasteTrackingId</code> was not found.</p>
 <h2 id="current-persisted-shape">Current persisted shape</h2>
-<p>The current domain object in <code>waste-movement-backend</code> exposes these top-level fields (<a href="C:/Applications/EqualExperts/Defra/WasteTracking/Repos/waste-movement-backend/src/domain/wasteInput.js:1">wasteInput.js</a>):</p>
+<p>The current domain object in <code>waste-movement-backend</code> exposes these top-level fields (<a href="https://github.com/DEFRA/waste-movement-backend/blob/main/src/domain/wasteInput.js#L1">wasteInput.js</a>):</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
 <span class="w">  </span><span class="p">;(</span><span class="nx">wasteTrackingId</span><span class="p">,</span>
 <span class="w">    </span><span class="nx">creation</span><span class="p">,</span>
@@ -495,7 +495,7 @@
 <li>either <code>orgId</code> or <code>submittingOrganisation</code></li>
 <li><code>receipt.movement</code></li>
 </ul>
-<p>See <a href="C:/Applications/EqualExperts/Defra/WasteTracking/Repos/waste-movement-backend/src/routes/create-receipt-movement.js:47">create-receipt-movement.js</a>.</p>
+<p>See <a href="https://github.com/DEFRA/waste-movement-backend/blob/main/src/routes/create-receipt-movement.js#L47">create-receipt-movement.js</a>.</p>
 <p>The create service then adds:</p>
 <ul>
 <li><code>_id = wasteTrackingId</code></li>
@@ -503,7 +503,7 @@
 <li><code>createdAt</code></li>
 <li><code>lastUpdatedAt</code></li>
 </ul>
-<p>See <a href="C:/Applications/EqualExperts/Defra/WasteTracking/Repos/waste-movement-backend/src/services/movement-create.js:8">movement-create.js</a>.</p>
+<p>See <a href="https://github.com/DEFRA/waste-movement-backend/blob/main/src/services/movement-create.js#L8">movement-create.js</a>.</p>
 <h2 id="example-waste-inputs-document">Example <code>waste-inputs</code> document</h2>
 <p>Illustrative shape based on the current Phase 1 receipt write path:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
@@ -544,7 +544,7 @@
 <span class="w">  </span><span class="p">}</span>
 <span class="p">}</span>
 </code></pre></div>
-<p>The exact nested payload shape is driven by the receipt request schema and can be seen in the Phase 1 receipt examples under <a href="C:/Applications/EqualExperts/Defra/WasteTracking/Repos/waste-tracking-service/docs/collections/data/receiptEvent.js:1">receiptEvent.js</a>.</p>
+<p>The exact nested payload shape is driven by the receipt request schema and can be seen in the Phase 1 receipt examples under <a href="../../data/receiptEvent.js">receiptEvent.js</a>.</p>
 <h2 id="revision-model">Revision model</h2>
 <p>The current backend uses document revisioning rather than event sourcing.</p>
 <ul>
@@ -552,7 +552,7 @@
 <li>each successful update increments <code>revision</code></li>
 <li>the prior full document is copied into <code>waste-inputs-history</code></li>
 </ul>
-<p>The history entry is created by shallow-copying the previous live document, adding <code>timestamp</code>, and removing <code>_id</code> (<a href="C:/Applications/EqualExperts/Defra/WasteTracking/Repos/waste-movement-backend/src/common/helpers/create-history-entry.js:1">create-history-entry.js</a>).</p>
+<p>The history entry is created by shallow-copying the previous live document, adding <code>timestamp</code>, and removing <code>_id</code> (<a href="https://github.com/DEFRA/waste-movement-backend/blob/main/src/common/helpers/create-history-entry.js#L1">create-history-entry.js</a>).</p>
 <h2 id="example-waste-inputs-history-document">Example <code>waste-inputs-history</code> document</h2>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
 <span class="w">  </span><span class="nx">wasteTrackingId</span><span class="o">:</span><span class="w"> </span><span class="s2">"2578ZCY8"</span><span class="p">,</span>
@@ -570,7 +570,7 @@
 <span class="p">}</span>
 </code></pre></div>
 <h2 id="current-indexes">Current indexes</h2>
-<p>The backend currently creates these indexes (<a href="C:/Applications/EqualExperts/Defra/WasteTracking/Repos/waste-movement-backend/src/common/helpers/mongodb.js:72">mongodb.js</a>):</p>
+<p>The backend currently creates these indexes (<a href="https://github.com/DEFRA/waste-movement-backend/blob/main/src/common/helpers/mongodb.js#L72">mongodb.js</a>):</p>
 <h3 id="waste-inputs_1"><code>waste-inputs</code></h3>
 <ul>
 <li><code>{ id: 1 }</code></li>
@@ -586,7 +586,7 @@
 </ul>
 <h2 id="current-update-behaviour">Current update behaviour</h2>
 <p>The live update route updates <code>receipt.movement</code> in place rather than appending a new business event object.</p>
-<p>See <a href="C:/Applications/EqualExperts/Defra/WasteTracking/Repos/waste-movement-backend/src/routes/update-receipt-movement.js:13">update-receipt-movement.js</a> and <a href="C:/Applications/EqualExperts/Defra/WasteTracking/Repos/waste-movement-backend/src/services/movement-update.js:55">movement-update.js</a>.</p>
+<p>See <a href="https://github.com/DEFRA/waste-movement-backend/blob/main/src/routes/update-receipt-movement.js#L13">update-receipt-movement.js</a> and <a href="https://github.com/DEFRA/waste-movement-backend/blob/main/src/services/movement-update.js#L55">movement-update.js</a>.</p>
 <p>This is a key distinction from the proposed Phase 2 model:</p>
 <ul>
 <li>Phase 1 history is snapshot-based</li>

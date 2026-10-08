@@ -141,7 +141,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#phase-2-collections-api-cross-team-plan" class="md-skip">
+        <a href="#phase-2-cross-team-plan" class="md-skip">
           Skip to content
         </a>
       
@@ -453,12 +453,10 @@
 <p class="admonition-title">Internal documentation</p>
 <p>This page is internal design/planning material for the delivery team, not published guidance for Software Providers integrating with the Digital Waste Tracking API. Content here may be incomplete, in-progress, or superseded.</p>
 </div>
-<h1 id="phase-2-collections-api-cross-team-plan">Phase 2 Collections API — Cross-Team Plan</h1>
-<p>This document tracks the delivery plan for extending the Digital Waste Tracking external API to cover the full waste-movement journey, and for establishing a test environment where external software integrators can authenticate and submit data.</p>
-<p>For background on what is being designed, start with the <a href="../">collections overview</a>. For the API surface and the decisions behind it, see the <a href="../api/README.md">API workstream</a> and the <a href="../decisions/">decisions register</a>.</p>
+<h1 id="phase-2-cross-team-plan">Phase 2 — Cross-Team Plan</h1>
+<p>How the teams deliver the waste movement journey, and what is blocking what. For what is being designed, start with the <a href="../">collections overview</a>; for the contract, the <a href="../../api/">API overview</a>; for the reasoning, the <a href="../decisions/">decisions register</a>.</p>
 <hr />
 <h2 id="the-four-events">The four events</h2>
-<p>Phase 1 captures waste at the point it arrives at a receiver site. Phase 2 broadens this to cover the journey from creation to receipt across four business events:</p>
 <table>
 <thead>
 <tr>
@@ -469,27 +467,28 @@
 </thead>
 <tbody>
 <tr>
-<td><strong>Create Movement</strong></td>
-<td>Producer / Broker / Carrier</td>
+<td><strong>Create a movement</strong></td>
+<td>Producer, broker or carrier</td>
 <td><code>POST /movements</code></td>
 </tr>
 <tr>
-<td><strong>Record Collection</strong></td>
-<td>Driver (real-time) or Carrier (retrospective)</td>
+<td><strong>Record a collection</strong></td>
+<td>Carrier — driver in real time, or recorded afterwards</td>
 <td><code>POST /movements/{movementId}/collection</code></td>
 </tr>
 <tr>
-<td><strong>Record Delivery</strong></td>
-<td>Driver</td>
+<td><strong>Record a delivery</strong></td>
+<td>Carrier</td>
 <td><code>POST /deliveries</code></td>
 </tr>
 <tr>
-<td><strong>Record Receipt</strong></td>
+<td><strong>Record a receipt</strong></td>
 <td>Receiver</td>
-<td><code>POST /deliveries/{deliveryId}/receipt</code></td>
+<td><code>POST /deliveries/{deliveryId}/receipt</code>, or <code>POST /receipts</code> when there is no prior delivery</td>
 </tr>
 </tbody>
 </table>
+<p>During beta every endpoint is served under a version prefix — <code>/beta-1/movements</code>, <code>/beta-2/movements</code> — and the prefix is dropped at general availability (<a href="../decisions/#d-038">D-038</a>).</p>
 <hr />
 <h2 id="team-ownership">Team ownership</h2>
 <table>
@@ -503,34 +502,85 @@
 <tbody>
 <tr>
 <td><code>waste-movement-external-api</code></td>
-<td>New endpoint routes, Joi schemas, orchestration</td>
+<td>Public beta routes: authentication, <code>apiCode</code> → organisation lookup, forwarding to the backend. No payload validation of its own.</td>
 <td><strong>Team C</strong></td>
 </tr>
 <tr>
 <td><code>waste-movement-backend</code></td>
-<td>Movement / Collection / Delivery persistence, revised receipt</td>
+<td>JSON Schemas for every request and response (<a href="../decisions/#d-052">D-052</a>), validation, business rules, persistence</td>
 <td><strong>Team C</strong></td>
 </tr>
 <tr>
 <td><code>waste-tracking-id-backend</code></td>
-<td>Delivery ID generation (same sqid format as Movement IDs, per <a href="../decisions/#d-013">D-013</a>)</td>
+<td>Movement and Delivery IDs, from the same sequence as the Phase 1 <code>wasteTrackingId</code> (<a href="../decisions/#d-013">D-013</a>)</td>
 <td><strong>Team C</strong></td>
 </tr>
 <tr>
 <td><code>waste-organisation-backend</code></td>
-<td>Carrier / broker / producer API-code issuance for test</td>
+<td><code>apiCode</code> issuance and lookup for every actor type (<a href="../decisions/#d-027">D-027</a>)</td>
 <td><strong>Team A/B</strong></td>
 </tr>
 <tr>
 <td><code>waste-organisation-frontend</code></td>
-<td>New actor registration UI (if self-serve onboarding added later)</td>
+<td>Self-service API code management, already open to every actor type</td>
 <td><strong>Team A/B</strong></td>
+</tr>
+<tr>
+<td><code>digital-waste-tracking-api-docs</code></td>
+<td>Target spec, synced beta specs and schemas, decisions register</td>
+<td><strong>Team C</strong></td>
 </tr>
 </tbody>
 </table>
 <hr />
+<h2 id="release-plan">Release plan</h2>
+<p>Releases follow the <a href="../../api/versioning-schedule/">versioning schedule</a>. The decisions each one depends on:</p>
+<table>
+<thead>
+<tr>
+<th>Release</th>
+<th>Scope</th>
+<th>Status</th>
+<th>Depends on</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>beta-1</td>
+<td>All five journey endpoints, no data validation — tests identifiers and structure</td>
+<td>Served on integration</td>
+<td>—</td>
+</tr>
+<tr>
+<td>beta-2</td>
+<td>Fields and full validation, a resource at a time, plus rejection</td>
+<td>In progress: producer, broker or dealer, references and handling requirements built</td>
+<td>Hazardous split (<a href="../decisions/#d-010">D-010</a>); rejection model (<a href="../decisions/#d-025">D-025</a>); warnings vs confirmation (<a href="../decisions/#d-046">D-046</a>); cross-check rules (<a href="../decisions/#d-021">D-021</a>)</td>
+</tr>
+<tr>
+<td>beta-3</td>
+<td>Updates and soft-delete (<code>PUT</code>)</td>
+<td>Not started</td>
+<td><a href="../decisions/#d-009">D-009</a>, <a href="../decisions/#d-017">D-017</a>, <a href="../decisions/#d-034">D-034</a>, <a href="../decisions/#d-036">D-036</a>; transit collection editing (<a href="../decisions/#d-035">D-035</a>); storage model (<a href="../decisions/#d-037">D-037</a>); specific 404 types (<a href="../decisions/#d-014">D-014</a>)</td>
+</tr>
+<tr>
+<td>beta-4</td>
+<td>Reads (<code>GET</code>)</td>
+<td>Not started</td>
+<td><a href="../decisions/#d-033">D-033</a>; fate-of-waste content and access (<a href="../decisions/#d-019">D-019</a>)</td>
+</tr>
+<tr>
+<td>beta-5</td>
+<td>Final iterations from provider feedback</td>
+<td>Not started</td>
+<td>—</td>
+</tr>
+</tbody>
+</table>
+<p>Alongside the releases: how receipts link to Deliveries — new endpoints or an extended Phase 1 receipt (<a href="../decisions/#d-022">D-022</a>) — and when and how the Phase 1 receipt endpoints are retired (<a href="../decisions/#d-023">D-023</a>). The live Receipt of Waste endpoints are not changed until that migration is documented.</p>
+<hr />
 <h2 id="decisions-status">Decisions status</h2>
-<h3 id="resolved">Resolved</h3>
+<h3 id="settled-and-built">Settled and built</h3>
 <table>
 <thead>
 <tr>
@@ -541,35 +591,67 @@
 <tbody>
 <tr>
 <td><a href="../decisions/#d-027">D-027</a></td>
-<td><strong>Per-organisation credentials.</strong> All actor types onboard the same way as receivers — Cognito app client plus <code>apiCode</code>. Every record is attributed to the submitting organisation. No new credential shape or registration path needed for Phase 2.</td>
+<td>One set of credentials per organisation — a Cognito app client plus an <code>apiCode</code> — whatever role it plays.</td>
 </tr>
 <tr>
 <td><a href="../decisions/#d-036">D-036</a></td>
-<td><strong>Write authorisation.</strong> Append (<code>POST</code>) is open to any authenticated organisation. Amend (<code>PUT</code>) is restricted to the authoring organisation.</td>
+<td>Anyone may record an event; only its author may change it. Every write is attributed to its organisation.</td>
 </tr>
 <tr>
 <td><a href="../decisions/#d-013">D-013</a></td>
-<td><strong>Identifier format.</strong> Movement IDs and Delivery IDs both use 8-character year-prefixed sqids (<code>YY[A-Z0-9]{6}</code>).</td>
+<td>IDs are a two-digit year plus a sqids code, with no fixed length, from one shared sequence.</td>
 </tr>
 <tr>
 <td><a href="../decisions/#d-016">D-016</a></td>
-<td><strong>Resource model.</strong> Richardson Maturity Level 2 — URLs name resources, HTTP methods carry the verbs.</td>
-</tr>
-<tr>
-<td><a href="../decisions/#d-009">D-009</a></td>
-<td><strong>Soft-delete.</strong> No <code>DELETE</code> endpoints. <code>isDeleted</code> flag on <code>PUT</code> only, for Movement, Collection, and Delivery. Receipt cannot be deleted.</td>
-</tr>
-<tr>
-<td><a href="../decisions/#d-034">D-034</a></td>
-<td><strong>History/revision pattern</strong> on all <code>PUT</code> operations — same as the Phase 1 receipt <code>PUT</code>.</td>
+<td>Resource-shaped URLs with HTTP methods as the verbs.</td>
 </tr>
 <tr>
 <td><a href="../decisions/#d-038">D-038</a></td>
-<td><strong>API conventions</strong> (new endpoints only). Status codes; one <code>2xx</code> <code>{ data, meta?, validation }</code> and one <code>4xx</code>/<code>5xx</code> <code>{ error, requestId }</code> envelope; <code>x-request-id</code> tracing; pagination deferred. Source of truth: <a href="../../api/standards/">standards.md</a>.</td>
+<td>Versioned in the path during beta, unversioned at general availability.</td>
+</tr>
+<tr>
+<td><a href="../decisions/#d-039">D-039</a></td>
+<td>API standards: <code>{ data, validation }</code> success envelope, RFC 9457 Problem Details for errors, <code>x-request-id</code> on every response. Source: <a href="../../api/standards/">standards.md</a>.</td>
+</tr>
+<tr>
+<td><a href="../decisions/#d-052">D-052</a></td>
+<td>JSON Schemas in <code>waste-movement-backend</code> are the source of truth for every shape.</td>
 </tr>
 </tbody>
 </table>
-<h3 id="still-open-resolve-before-building-the-affected-endpoints">Still open — resolve before building the affected endpoints</h3>
+<h3 id="settled-not-yet-built">Settled, not yet built</h3>
+<table>
+<thead>
+<tr>
+<th>Decision</th>
+<th>Summary</th>
+<th>Release</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="../decisions/#d-010">D-010</a></td>
+<td>Hazardous Movements split into their own Delivery by the server.</td>
+<td>beta-2</td>
+</tr>
+<tr>
+<td><a href="../decisions/#d-009">D-009</a></td>
+<td>Soft-delete with <code>isDeleted</code>, set only through <code>PUT</code>; a Receipt cannot be deleted.</td>
+<td>beta-3</td>
+</tr>
+<tr>
+<td><a href="../decisions/#d-017">D-017</a></td>
+<td>A recorded delivery can only be soft-deleted, not edited.</td>
+<td>beta-3</td>
+</tr>
+<tr>
+<td><a href="../decisions/#d-034">D-034</a></td>
+<td>Every update keeps the previous version and guards against concurrent changes.</td>
+<td>beta-3</td>
+</tr>
+</tbody>
+</table>
+<h3 id="open-resolve-before-building-what-they-block">Open — resolve before building what they block</h3>
 <table>
 <thead>
 <tr>
@@ -580,123 +662,49 @@
 </thead>
 <tbody>
 <tr>
-<td><a href="../decisions/#d-022">D-022</a></td>
-<td>Whether to implement <code>POST /deliveries/{deliveryId}/receipt</code> or extend <code>POST /movements/receive</code>. Spec leans toward the new endpoint (Option 1).</td>
-<td>Tech lead + BA</td>
-</tr>
-<tr>
 <td><a href="../decisions/#d-025">D-025</a></td>
-<td>Receipt acceptance / rejection outcome schema. No rejection model exists in Phase 1.</td>
+<td>Rejection, which the schedule puts in beta-2.</td>
 <td>BA + policy</td>
 </tr>
 <tr>
+<td><a href="../decisions/#d-022">D-022</a></td>
+<td>Phase 1 migration: measure the impact of new endpoints vs extending the live receipt, from a provider's point of view.</td>
+<td>Tech lead + BA</td>
+</tr>
+<tr>
+<td><a href="../decisions/#d-046">D-046</a></td>
+<td>The first soft data-quality check on a beta endpoint. Free to decide now, breaking later.</td>
+<td>Tech lead + BA</td>
+</tr>
+<tr>
+<td><a href="../decisions/#d-037">D-037</a></td>
+<td>Persistence beyond the current minimal collections — needed before beta-3.</td>
+<td>Team C + architects</td>
+</tr>
+<tr>
+<td><a href="../decisions/#d-035">D-035</a></td>
+<td>Storing, editing and soft-deleting transit collection events.</td>
+<td>Team C + BA</td>
+</tr>
+<tr>
 <td><a href="../decisions/#d-028">D-028</a></td>
-<td>Pre-generated Delivery IDs for offline drivers — affects whether <code>waste-tracking-id-backend</code> needs a reservation mechanism. See <a href="../phase2/option-a-pre-reserved-delivery-IDs/">proposed design</a>.</td>
+<td>Pre-reserved Delivery IDs for drivers without signal. See <a href="../phase2/option-a-pre-reserved-delivery-IDs/">proposed design</a>.</td>
 <td>Team C</td>
 </tr>
 <tr>
 <td><a href="../decisions/#d-019">D-019</a></td>
-<td><code>GET /movements/{movementId}/fate-of-waste</code> response schema. URL and key are agreed; what it returns is not.</td>
-<td>BA</td>
+<td>Fate-of-waste response and who may read it.</td>
+<td>BA + policy</td>
 </tr>
 </tbody>
 </table>
-<hr />
-<h2 id="phase-0-alignment-before-build-starts">Phase 0 — Alignment (before build starts)</h2>
-<p><strong>All teams</strong></p>
-<ul>
-<li>Close <a href="../decisions/#d-022">D-022</a>: confirm the new Delivery-scoped receipt endpoint (<code>POST /deliveries/{deliveryId}/receipt</code>) is the path forward. This determines which receipt handler Team C builds and whether the Phase 1 endpoint is deprecated or extended.</li>
-<li>Confirm the test Cognito user pool can have new app clients provisioned by the platform / infra team. The test pool is already running at <code>waste-movement-external-api-8ec5c.auth.eu-west-2.amazoncognito.com</code> — the question is access permissions for whoever provisions new clients.</li>
-</ul>
-<p><strong>Team C</strong></p>
-<ul>
-<li>Decide the Phase 2 document model: extend the existing <code>WasteInput</code> document in <code>waste-movement-backend</code> (which already has <code>creation</code> and <code>collection</code> slots but does not populate them) or introduce a separate <code>movements</code> collection. This is the highest-consequence local architectural decision before any Phase 2 code is written. See the <a href="../phase1/receipt-api-implemented-data-model/">Phase 1 implemented data model</a> for the current shape.</li>
-<li>Confirm whether Movement IDs and Delivery IDs are minted from a <strong>shared</strong> sequence in <code>waste-tracking-id-backend</code> (so the two can never collide) or from separate counters. Implement accordingly before the Delivery endpoint is built.</li>
-</ul>
-<p><strong>Team A/B</strong></p>
-<ul>
-<li>The existing <code>apiCode</code> issuance flow in <code>waste-organisation-backend</code> is confirmed role-agnostic (see <a href="../registration/">registration.md</a>): the JWT auth plugin does not inspect <code>isWasteReceiver</code>, and <code>ensureAtLeastOneApiCodeExists</code> fires for any organisation on first write regardless of actor type. No code change is needed.</li>
-<li>Confirm that the test environment allows calling <code>PUT /user/{userId}/organisation/{organisationId}</code> on <code>waste-organisation-backend</code> without a deployment — this is the zero-change path to provision a carrier org and <code>apiCode</code> in Phase 1 (Option A in <a href="../registration/">registration.md</a>).</li>
-</ul>
-<hr />
-<h2 id="phase-1-minimum-viable-test-environment">Phase 1 — Minimum viable test environment</h2>
-<p><strong>Goal:</strong> an external software integrator can obtain a Bearer token, call <code>GET /auth/test</code> successfully, and submit a <code>POST /movements</code> request.</p>
-<h3 id="team-c-waste-movement-external-api-waste-movement-backend">Team C — <code>waste-movement-external-api</code> + <code>waste-movement-backend</code></h3>
-<ol>
-<li>Implement <code>POST /movements</code> — validates payload per the <a href="../api/README.md">API spec</a> (carrier required per <a href="../decisions/#d-008">D-008</a>; broker optional; waste items with EWC codes; disposal codes optional per <a href="../decisions/#d-031">D-031</a>); mints a Movement ID via <code>waste-tracking-id-backend</code>; persists via <code>waste-movement-backend</code>.</li>
-<li>Implement <code>POST /movements/{movementId}/collection</code> — static collection only at this stage (transit extension follows in Phase 3 per <a href="../decisions/#d-029">D-029</a>).</li>
-<li>The existing JWT auth in <code>jwt-auth.js</code> validates Bearer tokens from the Cognito JWKS endpoint and makes <code>client_id</code> available to handlers — no auth changes needed. The <code>apiCode</code> in the request body identifies the submitting organisation via the existing <code>waste-organisation-backend</code> lookup, unchanged from Phase 1.</li>
-</ol>
-<h3 id="team-ab-waste-organisation-backend">Team A/B — <code>waste-organisation-backend</code></h3>
-<p>Provision a carrier org and <code>apiCode</code> for the first software integrator. No code change is required — use <strong>Option A</strong> from <a href="../registration/">registration.md</a>:</p>
-<ol>
-<li>Call <code>PUT /user/{userId}/organisation/{organisationId}</code> with a body like <code>{ "name": "Carrier Ltd (test)", "isWasteReceiver": false }</code>. Use a new UUID for <code>organisationId</code>; any valid Defra ID user UUID for <code>userId</code>.</li>
-<li><code>ensureAtLeastOneApiCodeExists</code> fires automatically on first write, creating a UUID <code>apiCode</code> and persisting it.</li>
-<li>Retrieve the generated code via <code>GET /organisation/{organisationId}/apiCodes</code>.</li>
-<li>Hand the <code>apiCode</code> to the software integrator alongside the Cognito credentials from the Platform step below.</li>
-</ol>
-<h3 id="platform-infra">Platform / infra</h3>
-<ul>
-<li>Provision a Cognito app client in the test user pool for the carrier software integrator. Use the <a href="https://github.com/DEFRA/waste-tracking-service/blob/alpha_collections/docs/api-software-developer-onboarding-process.md">existing onboarding process</a>: create the client via the AWS CLI or console, assign the <code>waste-movement-external-api-resource-srv/access</code> scope, and distribute the <code>client_id</code> and <code>client_secret</code> via encrypted email.</li>
-</ul>
-<hr />
-<h2 id="phase-2-full-journey">Phase 2 — Full journey</h2>
-<p><strong>Goal:</strong> a software integrator can record all four events end-to-end in the test environment.</p>
-<h3 id="team-c">Team C</h3>
-<table>
-<thead>
-<tr>
-<th>Endpoint</th>
-<th>Key rules</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>PUT /movements/{movementId}</code></td>
-<td>Full update; history/revision pattern (<a href="../decisions/#d-034">D-034</a>); amend restricted to authoring org (<a href="../decisions/#d-036">D-036</a>)</td>
-</tr>
-<tr>
-<td><code>PUT /movements/{movementId}/collection</code></td>
-<td>Tail-only update / soft-delete of latest active event (<a href="../decisions/#d-029">D-029</a>, <a href="../decisions/#d-009">D-009</a>)</td>
-</tr>
-<tr>
-<td><code>POST /deliveries</code></td>
-<td>Delivery; mandatory <code>delivery.address</code> (<a href="../decisions/#d-018">D-018</a>); <code>movementIds[]</code> array — many-to-one (<a href="../decisions/#d-007">D-007</a>); hazardous constraint: exactly 1 movement (<a href="../decisions/#d-010">D-010</a>); mints Delivery ID, except a hazardous delivery reuses the Movement ID (<a href="../decisions/#d-010">D-010</a>)</td>
-</tr>
-<tr>
-<td><code>PUT /deliveries/{deliveryId}</code></td>
-<td>Soft-delete only via <code>isDeleted</code> — no field edits (<a href="../decisions/#d-017">D-017</a>)</td>
-</tr>
-<tr>
-<td><code>POST /deliveries/{deliveryId}/receipt</code></td>
-<td>New Phase 2 receipt (contingent on <a href="../decisions/#d-022">D-022</a> Option 1); cross-checks waste vs Creation and carrier vs Movement chain (<a href="../decisions/#d-006">D-006</a>); mismatches are warnings, not hard errors</td>
-</tr>
-<tr>
-<td><code>PUT /deliveries/{deliveryId}/receipt</code></td>
-<td>Receipt update; history/revision pattern (<a href="../decisions/#d-034">D-034</a>)</td>
-</tr>
-<tr>
-<td><code>POST /receipts</code></td>
-<td>Receipt with no prior delivery (<a href="../decisions/#d-041">D-041</a>, proposal); mandatory <code>reasonForNoDeliveryId</code>; server creates an empty Delivery (<code>movementIds: []</code>) and returns <code>deliveryId</code>; request/response shape not yet finalised — open questions in the register</td>
-</tr>
-</tbody>
-</table>
-<p>The Phase 1 receipt endpoints (<code>POST /movements/receive</code>, <code>PUT /movements/{wasteTrackingId}/receive</code>) remain in the spec marked <code>deprecated: true</code>. No removal date is set — see <a href="../decisions/#d-023">D-023</a>.</p>
-<p>Every end-to-end journey across the four events should produce a valid sequence of API calls without a 4xx response; use the key journey shapes (carrier baseline, broker-initiated, rejection-retry, deferred recording) as integration acceptance tests.</p>
-<hr />
-<h2 id="phase-3-transit-collection-and-fate-of-waste">Phase 3 — Transit collection and fate-of-waste</h2>
-<p><strong>Goal:</strong> cover driver-to-driver handovers and producer read-only access.</p>
-<h3 id="team-c_1">Team C</h3>
-<ul>
-<li><strong>Transit collection</strong> — extend <code>POST /movements/{movementId}/collection</code> with append semantics. Adds <code>collectionType</code> (enum <code>STATIC</code> / <code>TRANSIT</code>) and <code>receivedFromCarrier</code> (required when <code>TRANSIT</code>). Server enforces that the first active event is always <code>STATIC</code> and subsequent events are always <code>TRANSIT</code>. Tail-only soft-delete applies across the sequence. Full spec in <a href="../decisions/#d-029">D-029</a>.</li>
-<li><strong><code>GET /movements/{movementId}/fate-of-waste</code></strong> — producer read-only projection. URL is stable; response schema depends on <a href="../decisions/#d-019">D-019</a> being resolved with the BA first.</li>
-</ul>
+<p>The full list, including smaller open questions, is in the <a href="../decisions/#index">decisions register index</a>.</p>
 <hr />
 <h2 id="key-cross-team-interface-apicode-and-organisation-identity">Key cross-team interface: <code>apiCode</code> and organisation identity</h2>
-<p>The current flow in <code>waste-movement-external-api</code> resolves <code>apiCode</code> → submitting organisation via <code>waste-organisation-backend</code> before forwarding to <code>waste-movement-backend</code>. This is the integration boundary between Team C and Teams A/B.</p>
-<p>With <a href="../decisions/#d-027">D-027</a> decided, the mechanism is unchanged — carriers and brokers receive <code>apiCode</code> values through the same issuance process as receivers. Code analysis of <code>waste-organisation-backend</code> confirms that <code>apiCode</code> issuance is not tied to the receiver role: the JWT auth plugin does not check <code>isWasteReceiver</code>, and <code>ensureAtLeastOneApiCodeExists</code> fires for any organisation type. Full details and the test provisioning options are in <a href="../registration/">registration.md</a>.</p>
+<p>Every request carries an <code>apiCode</code>: in the <code>x-api-code</code> header from beta-2, in the body on beta-1 and the Phase 1 receipt (<a href="../decisions/#d-053">D-053</a>). On beta routes the gateway (<code>waste-movement-external-api</code>) looks it up in <code>waste-organisation-backend</code> and forwards only the organisation to <code>waste-movement-backend</code>, which attributes the record to it. A missing or unknown code is rejected — <code>401</code> on beta-2, <code>400</code> on beta-1; an organisation whose service charge has lapsed gets <code>402</code> (<a href="../decisions/#d-027">D-027</a>).</p>
+<p><code>apiCode</code> issuance is not tied to the receiver role: the authentication plugin does not check <code>isWasteReceiver</code>, and <code>ensureAtLeastOneApiCodeExists</code> runs for any organisation. Carriers, brokers and producers get codes the same way receivers do. Details and test provisioning options are in <a href="../registration/">registration.md</a>. Cognito app clients are still provisioned manually per integrating system, using the <a href="https://github.com/DEFRA/waste-tracking-service/blob/alpha_collections/docs/api-software-developer-onboarding-process.md">onboarding process</a>.</p>
 <hr />
-<h2 id="immediate-actions">Immediate actions</h2>
+<h2 id="next-actions">Next actions</h2>
 <table>
 <thead>
 <tr>
@@ -708,46 +716,52 @@
 <tbody>
 <tr>
 <td>1</td>
-<td>Close <a href="../decisions/#d-022">D-022</a> — confirm new Delivery-scoped receipt endpoint</td>
-<td>Team C + BA</td>
+<td>Decide the rejection model (<a href="../decisions/#d-025">D-025</a>) before beta-2 is complete</td>
+<td>BA + policy</td>
 </tr>
 <tr>
 <td>2</td>
-<td>Confirm test Cognito pool can accept new app clients for carrier integrators</td>
-<td>Platform + Team A/B</td>
+<td>Implement the hazardous split in beta-2 (<a href="../decisions/#d-010">D-010</a>)</td>
+<td>Team C</td>
 </tr>
 <tr>
 <td>3</td>
-<td>~~Confirm <code>apiCode</code> issuance is not tied to receiver role~~ — <strong>confirmed, no code change needed</strong> (see <a href="../registration/">registration.md</a>)</td>
-<td>Team A/B ✅</td>
+<td>Rename <code>reason</code> to <code>reasonForNoDeliveryId</code> on <code>POST /receipts</code>, and store it (<a href="../decisions/#d-041">D-041</a>)</td>
+<td>Team C</td>
 </tr>
 <tr>
 <td>4</td>
-<td>Decide Phase 2 document model — three options under evaluation: aggregate, per-event-type, CQRS/event-sourcing (see <a href="../decisions/#d-037">D-037</a>)</td>
-<td>Team C</td>
+<td>Decide warnings vs confirmation (<a href="../decisions/#d-046">D-046</a>) before any soft check is built</td>
+<td>Tech lead + BA</td>
 </tr>
 <tr>
 <td>5</td>
-<td>Decide Movement ID / Delivery ID shared vs separate counter in <code>waste-tracking-id-backend</code></td>
-<td>Team C</td>
+<td>Compare the live receipt with the beta receipt from a provider's point of view, to measure the impact of each option in <a href="../decisions/#d-022">D-022</a></td>
+<td>Team C + BA</td>
 </tr>
 <tr>
 <td>6</td>
-<td>Implement <code>POST /movements</code> (external API + backend)</td>
-<td>Team C</td>
+<td>Decide the storage model (<a href="../decisions/#d-037">D-037</a>) before beta-3</td>
+<td>Team C + architects</td>
 </tr>
 <tr>
 <td>7</td>
-<td>Provision first carrier <code>apiCode</code> in test environment</td>
-<td>Team A/B</td>
+<td>Return the specific 404 problem types (<a href="../decisions/#d-014">D-014</a>) when <code>PUT</code> is built</td>
+<td>Team C</td>
 </tr>
 <tr>
 <td>8</td>
-<td>Provision first carrier Cognito app client and send credentials to integrator</td>
-<td>Platform</td>
+<td>Build the <code>Deprecation</code> header (<a href="../decisions/#d-038">D-038</a>) before the first beta version is retired</td>
+<td>Team C</td>
+</tr>
+<tr>
+<td>9</td>
+<td>Remove the gateway's beta-2 fallback to a body <code>apiCode</code>, which can no longer succeed (<a href="../decisions/#d-053">D-053</a>)</td>
+<td>Team C</td>
 </tr>
 </tbody>
 </table>
+<p>Done: <code>apiCode</code> issuance confirmed role-agnostic (<a href="../registration/">registration.md</a>); Movement and Delivery IDs confirmed to share one sequence (<a href="../decisions/#d-013">D-013</a>); <code>POST /movements</code> and the other four journey endpoints built in beta-1 and beta-2.</p>
 
 
 
