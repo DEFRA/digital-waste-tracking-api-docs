@@ -47,7 +47,7 @@ Releases follow the [versioning schedule](../api/versioning-schedule.md). The de
 | Release | Scope | Status | Depends on |
 | --- | --- | --- | --- |
 | beta-1 | All five journey endpoints, no data validation — tests identifiers and structure | Served on integration | — |
-| beta-2 | Fields and full validation on every endpoint, a resource at a time: waste items, receivers, collection and delivery sites, treatments, plus rejection and reclassification | In progress: producer, carriers on every event, broker or dealer, references, handling requirements and the `x-api-code` header built | Waste items at creation, which the hazardous split needs ([D-010](decisions.md#d-010)); rejection and reclassification model ([D-025](decisions.md#d-025)); warnings vs confirmation ([D-046](decisions.md#d-046)); cross-check rules ([D-021](decisions.md#d-021)) |
+| beta-2 | Fields and full validation on every endpoint, a resource at a time: waste items, receivers, collection and delivery sites, treatments, plus rejection and reclassification | In progress: producer, carriers on every event, intended receivers and the receipt's receiver, duty of care at collection, broker or dealer, references, handling requirements and the `x-api-code` header built | Waste items at creation, which the hazardous split needs ([D-010](decisions.md#d-010)); rejection and reclassification model ([D-025](decisions.md#d-025)); warnings vs confirmation ([D-046](decisions.md#d-046)); cross-check rules ([D-021](decisions.md#d-021)) |
 | beta-3 | Updates and soft-delete (`PUT`) | Not started | [D-009](decisions.md#d-009), [D-017](decisions.md#d-017), [D-034](decisions.md#d-034), [D-036](decisions.md#d-036); transit collection editing ([D-035](decisions.md#d-035)); storage model ([D-037](decisions.md#d-037)); specific 404 types ([D-014](decisions.md#d-014)) |
 | beta-4 | Reads (`GET`) | Not started | [D-033](decisions.md#d-033); fate-of-waste content and access ([D-019](decisions.md#d-019)) |
 | beta-5 | Final iterations from provider feedback | Not started | — |
@@ -72,6 +72,7 @@ Alongside the releases: how receipts link to Deliveries — new endpoints or an 
 | [D-053](decisions.md#d-053) | From beta-2, the `apiCode` is sent in an `x-api-code` header, not the body. |
 | [D-008](decisions.md#d-008), [D-045](decisions.md#d-045) | A carrier on every event — `intendedCarriers` at creation — and an optional broker or dealer. |
 | [D-047](decisions.md#d-047), [D-048](decisions.md#d-048) | Producer by waste source; supporting references and special handling requirements. |
+| [D-043](decisions.md#d-043) | `intendedReceivers` on every movement; the receipt records the actual `receiver`. |
 
 ### Settled, not yet built
 
@@ -79,7 +80,7 @@ Alongside the releases: how receipts link to Deliveries — new endpoints or an 
 | --- | --- | --- |
 | [D-010](decisions.md#d-010) | Hazardous Movements split into their own Delivery by the server, with Delivery ID = Movement ID. Needs waste items at creation first. | beta-2 |
 | [D-042](decisions.md#d-042), [D-031](decisions.md#d-031), [D-044](decisions.md#d-044) | Waste items: classification, logistics, treatments, POP and hazardous components. | beta-2 |
-| [D-043](decisions.md#d-043), [D-018](decisions.md#d-018) | Intended receivers at creation; the delivery site and address. | beta-2 |
+| [D-018](decisions.md#d-018) | The delivery site and address. | beta-2 |
 | [D-009](decisions.md#d-009) | Soft-delete with `isDeleted`, set only through `PUT`, for movements, collections, deliveries and receipts. | beta-3 |
 | [D-017](decisions.md#d-017) | A recorded delivery can only be soft-deleted, not edited. | beta-3 |
 | [D-034](decisions.md#d-034) | Every update keeps the previous version and guards against concurrent changes. | beta-3 |

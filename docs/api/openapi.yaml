@@ -193,7 +193,7 @@ components:
     # deletion state, collection sequence) are enforced server-side and
     # stated in the descriptions.
 
-    intendedReceiverDetails:
+    receiver:
       $ref: '../event-model/schemas/beta-2/common/receiver/receiver.schema.json'
 
     collectionSite:
@@ -501,8 +501,8 @@ components:
 
     # --- 4. Request and response bodies per endpoint --------------------
 
-    # POST /movements. Creation declares intended carriers (D-045) and, for
-    # hazardous waste, intended receivers (D-043); `brokerOrDealer` is optional
+    # POST /movements. Creation declares intended carriers (D-045) and
+    # intended receivers (D-043); `brokerOrDealer` is optional
     # (D-008). The submitting organisation is identified by the `x-api-code`
     # header (D-027, D-053), not by the body.
 
@@ -513,6 +513,7 @@ components:
         - plannedCollectionTime
         - producer
         - intendedCarriers
+        - intendedReceivers
         - wasteItems
       properties:
         plannedCollectionTime:
@@ -555,12 +556,12 @@ components:
           description: Prospective carrier(s) declared at creation (D-045). Always required, at least one — a producer may declare more than one prospective carrier. Each entry follows the same rules as the carrier at later events.
         brokerOrDealer:
           $ref: '../event-model/schemas/beta-2/common/broker-or-dealer/broker-or-dealer.schema.json'
-        receivers:
+        intendedReceivers:
           type: array
           minItems: 1
           items:
-            $ref: '#/components/schemas/intendedReceiverDetails'
-          description: Intended receiving site(s) (D-043). Required, with at least one entry, only when the movement contains hazardous waste (enforced server-side) — a producer may declare waste heading to more than one receiving site. Each entry needs siteName, authorisationNumber, receiptAddress and contactDetails.
+            $ref: '#/components/schemas/receiver'
+          description: Intended receiving site(s) (D-043). Always required, with at least one entry — a producer may declare waste heading to more than one receiving site. Each entry needs siteName, authorisationNumber, receiptAddress and contactDetails.
         collectionAddressDifferentFromProducer:
           type: boolean
           default: false
@@ -830,7 +831,7 @@ components:
         - dateTimeReceived
         - carrier
         - wasteItems
-        - receiverSite
+        - receiver
         - reasonForNoDeliveryId
       properties:
         dateTimeReceived:
@@ -868,8 +869,8 @@ components:
           $ref: '#/components/schemas/carrier'
         brokerOrDealer:
           $ref: '../event-model/schemas/beta-2/common/broker-or-dealer/broker-or-dealer.schema.json'
-        receiverSite:
-          $ref: '#/components/schemas/receiverSite'
+        receiver:
+          $ref: '#/components/schemas/receiver'
         reasonForNoDeliveryId:
           type: string
           description: |
@@ -891,85 +892,6 @@ components:
     carrier:
       $ref: '../event-model/schemas/beta-2/common/carrier/carrier.schema.json'
 
-    receiverSite:
-      type: object
-      description: |
-        Receiving organisation, contact details, and the address where the
-        waste was received (`receiptAddress`), confirmed at receipt. `contactDetails`
-        is required.
-      required:
-        - contactDetails
-        - siteName
-        - authorisationNumber
-        - receiptAddress
-      properties:
-        siteName:
-          type: string
-          description: The name of the site receiving the waste.
-        contactDetails:
-          $ref: '#/components/schemas/contactDetails'
-        authorisationNumber:
-          type: string
-          description: |
-            This is the site's authorisation (permit) number that allows it to accept waste for intended recovery and disposal operation. Only one authorisation number is required per site.
-              <p>Home Nations Codes:</p>(<i>where 9 is a digit 0-9, X is a letter A-Z)</i>
-              <p><font color="blue"><b>England:</b></font></p>
-              <ul>
-                <li>EAWML999999, WML999999, EXX9999XX, XX9999XX/D9999, EPR/XX9999XX, PR/XX9999XX/D9999 (the last one with a D rep permit number with deployment)</li>
-              </ul>
-              <p><font color="blue"><b>Scotland (SEPA):</b></font></p>
-              <ul>
-                <li>PPC/A/9999999, WML/L/9999999, PPC/A/SEPA9999-9999, PPC/W/9999999, PPC/N/9999999, PPC/E/9999999, WML/L/SEPA9999-9999, WML/W/9999999, WML/E/9999999, WML/N/9999999, EAS/P/999999</li>
-              </ul>
-              <p><font color="blue"><b>Wales (NRW):</b></font></p>
-              <ul>
-                <li>XX9999XX, EPR/XX9999XX</li>
-              </ul>
-              <p><font color="blue"><b>Northern Ireland (NRI):</b></font></p>
-              <ul>
-                <li>P9999/99X, P9999/99X/V#, WPPC 99/99, WPPC 99/99/V#<p></p>
-                <font color="red">WML 99/# PAC/9999/WCL999
-                WML 99/# LN/99/#</font>
-                </li><p></p>
-                Please note the following explanation:<p></p>
-                WML 99/# (where # could mean any positive integer)
-                  <p>LN/99/# (where # could mean any positive integer and can also have 01,02,---09, 10-99,100-999, etc))</p>
-                  WML 99/# (Could have  /T appended) which means a transfer
-                  <p>LN/99/# (Could have any of the following (/M-modification, /V#-variation, /T-transfer, /C-closure) appended in any combination.</p>
-                 In V#, # means any positive integer.</li>
-                 <p></p>
-                 Rationale:
-                <p></p>
-                 Licences have file reference beginning WML and a licence number beginning LN.  Additional characters may be appended (/M-modification, /V#-variation, /T-transfer, /C-closure) eg WML 07/61 LN/13/02/M/V2, WML 19/36/T LN/10/35/T/M.  Format of licence number when granted following appeal to PAC can vary, eg WML 04/38 PAC/2014/WCL001
-                 <p>Further explanation below:</p>
-                <li>P9999/99X - Permit with division (e.g., P1234/56A)</li>
-                <li>P9999/99X/V# - Permit with version number (e.g., P1234/56A/V1)</li>
-                <li>WPPC 99/99 - Waste Prevention and Control (e.g., WPPC 12/34)</li>
-                <li>WPPC 99/99/V# - WPPC with version number (e.g., WPPC 12/34/V2)</li>
-                <li>WML 99/# - File reference (e.g., C)</li>
-                <li>WML 99/#/T - File reference with transfer (e.g., WML 19/36/T)</li>
-                <li>LN/99/# - Licence number (e.g., LN/13/02)</li>
-                <li>LN/99/# with suffixes - Licence with M, V#, T, C, or N in any combination (e.g., LN/13/02/M/V2)</li>
-                <li>PAC/9999/WCL999 - Planning Appeals Commission format (e.g., PAC/2014/WCL001)</li>
-                <li>WML 99/# LN/99/# - Combined file reference and licence (e.g., WML 07/61 LN/13/02/M/V2)</li>
-                <li>WML 99/# PAC/9999/WCL999 - Combined file reference and PAC (e.g., WML 04/38 PAC/2014/WCL001)</li>
-              </ul>
-              <p><font color="green"><b>Business Rules:</b></font></p>
-              <ul>
-                <li>Only one authorisation number is required per site</li>
-                <li>Must match a valid UK format pattern (case-insensitive)</li>
-                <li>All UK nation formats are accepted (no nation-specific validation)</li>
-                <li>Invalid formats will be rejected with error: "Site authorisation number must be in a valid UK format"</li>
-              </ul>
-          example: EPR/DD2522BF
-        receiptAddress:
-          allOf:
-            - $ref: '#/components/schemas/address'
-            - type: object
-              required: [fullAddress]
-          description: |
-            Address where the waste is physically received. Both fullAddress
-            and postcode are required.
     # Intended Treatment (D-031) — createWasteItem.intendedTreatments at
     # Creation. Both the code and the weight are required.
     intendedTreatment:
@@ -1140,7 +1062,7 @@ components:
         - dateTimeReceived
         - carrier
         - wasteItems
-        - receiverSite
+        - receiver
       properties:
         dateTimeReceived:
           type: string
@@ -1178,8 +1100,8 @@ components:
           $ref: '#/components/schemas/carrier'
         brokerOrDealer:
           $ref: '../event-model/schemas/beta-2/common/broker-or-dealer/broker-or-dealer.schema.json'
-        receiverSite:
-          $ref: '#/components/schemas/receiverSite'
+        receiver:
+          $ref: '#/components/schemas/receiver'
         isDeleted:
           type: boolean
           default: false
@@ -1318,9 +1240,8 @@ paths:
         Movement ID: it is the handle for the whole journey — collection,
         delivery and fate-of-waste (D-012).
 
-        `intendedCarriers` is always required (D-045); `receivers` is required
-        when the movement contains hazardous waste (D-043); `brokerOrDealer` is
-        optional (D-008). `isDeleted` must not be sent as `true` here — it can
+        `intendedCarriers` (D-045) and `intendedReceivers` (D-043) are always
+        required; `brokerOrDealer` is optional (D-008). `isDeleted` must not be sent as `true` here — it can
         only be set with `PUT /movements/{movementId}` (D-009).
       operationId: createMovement
       requestBody:

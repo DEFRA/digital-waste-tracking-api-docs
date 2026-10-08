@@ -44,7 +44,7 @@ The API is built in steps — beta-1, then beta-2, and on through the later beta
 | D-010 | [Hazardous Movements are split into their own Delivery by the server](#d-010) | A1 | ✅ Decided | 🟠 Medium | Not yet (beta-2, in progress) |
 | D-029 | [Transit collection (driver to driver) is a further collection event on the same Movement](#d-029) | A1 | ✅ Decided | 🟠 Medium | Not yet |
 | D-008 | [Who is declared at each event: a carrier always, a broker or dealer optionally](#d-008) | A2 | ✅ Decided | 🟠 Medium | beta-2 |
-| D-043 | [Creation declares intended receiving sites as an array: `receivers`](#d-043) | A2 | ✅ Decided | 🟢 Low | Schema only (wiring in beta-2) |
+| D-043 | [Creation declares intended receiving sites as an array: `intendedReceivers`](#d-043) | A2 | ✅ Decided | 🟢 Low | beta-2 |
 | D-045 | [Creation declares intended carriers as an array: `intendedCarriers`](#d-045) | A2 | ✅ Decided | 🟢 Low | beta-2 |
 | D-047 | [The producer is described by waste source: Household, Commercial or Municipal](#d-047) | A2 | ✅ Decided | 🟠 Medium | beta-2 |
 | D-048 | [Supporting references and special handling requirements](#d-048) | A2 | ✅ Decided | 🟢 Low | beta-2 |
@@ -250,20 +250,20 @@ Built today: `brokerOrDealer` on Creation, Collection and both receipt endpoints
 
 <a id="d-043"></a>
 
-#### Creation declares intended receiving sites as an array: `receivers`
+#### Creation declares intended receiving sites as an array: `intendedReceivers`
 
-**D-043** · ✅ Decided · Impact: 🟢 Low · Group: **A2** · Built in: **Schema only (beta-2, not yet used by a request)** · Related: [D-045](#d-045)
+**D-043** · ✅ Decided · Impact: 🟢 Low · Group: **A2** · Built in: **beta-2** · Related: [D-045](#d-045)
 
 **Context.** A producer may send waste to more than one receiving site (raised in DWTC-155). Creation previously took a single, optional `receiver`.
 
-**Decision.** Creation takes `receivers`, an array of intended receiving sites.
+**Decision.** Creation takes `intendedReceivers`, an array of intended receiving sites, named to pair with `intendedCarriers` ([D-045](#d-045)).
 
-- Required, with at least one entry, when the movement contains hazardous waste; optional otherwise. Whether the movement is hazardous comes from its waste classification, so this is checked by the server.
+- Always required, with at least one entry, for every movement.
 - Each entry needs `siteName`, `authorisationNumber` (a valid UK permit or exemption format), `receiptAddress` — the address the waste will be received at — and `contactDetails` ([D-008](#d-008)).
 
-The receivers declared at Creation are provisional. The site that actually received the waste is recorded on the receipt as `receiverSite`, whose address is also called `receiptAddress` — the address of receipt, which can differ from the receiving organisation's own address, and the equivalent of the Phase 1 `receipt.address`.
+The receivers declared at Creation are provisional. The site that actually received the waste is recorded on the receipt as `receiver`, with the same shape — the same name the live Phase 1 receipt uses. Its `receiptAddress` is the address of receipt, which can differ from the receiving organisation's own address, and is the equivalent of the Phase 1 `receipt.address`.
 
-**Consequences.** Built today: the receiver schemas (`common/receiver/receiver.schema.json`, `receivers.schema.json`) are in beta-2 but not yet referenced by any request; the hazardous-only requirement will sit in the creation request schema. The Joi drafts in `data/` still call the field `intendedReceivers` and the address `address`; they are a planning reference and are not updated (see the [data README](data/README.md)).
+**Consequences.** An earlier version of this decision named the field `receivers` and required it only when the movement contained hazardous waste. As built, it is `intendedReceivers` and required for every movement. Built today: beta-2 — `intendedReceivers` on creation, and `receiver` on both receipt endpoints.
 
 <a id="d-045"></a>
 

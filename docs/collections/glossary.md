@@ -86,7 +86,7 @@ The person operating the vehicle for a carrier. Treated as part of the carrier, 
 
 ### Receiver
 
-The party operating the site where waste is received. Holds an environmental permit or equivalent authorisation that determines which waste it may accept. Records the receipt and the actual treatment. At creation, a movement carrying hazardous waste declares its intended **receivers** ([D-043](decisions.md#d-043)); the site that actually received the waste is recorded on the receipt.
+The party operating the site where waste is received. Holds an environmental permit or equivalent authorisation that determines which waste it may accept. Records the receipt and the actual treatment. At creation, every movement declares its **intended receivers** ([D-043](decisions.md#d-043)); the site that actually received the waste is recorded on the receipt as `receiver`.
 
 ### Submitting organisation
 
