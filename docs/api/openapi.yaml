@@ -346,7 +346,7 @@ components:
                   concentrationThresholdOperator:
                     type: string
                     enum: [LESS_THAN, EQUAL_TO, GREATER_THAN_OR_EQUAL]
-                    description: States that concentration is above/below/at the WM3-defined threshold for this component, without an exact figure — the threshold value itself is not sent; it is resolved from WM3 guidance against code. <p><font color="green"><b>Business Rule:</b></font></p> Optional field, mutually exclusive with concentration — a component may state one or neither, never both.
+                    description: States that concentration is above/below/at the WM3-defined threshold for this component, without an exact figure — the threshold value itself is not sent, and the service does not look it up (D-044). <p><font color="green"><b>Business Rule:</b></font></p> Optional field, mutually exclusive with concentration — a component may state one or neither, never both.
                     example: LESS_THAN
               description: |
                 The list of POP components.
@@ -429,7 +429,7 @@ components:
                   concentrationThresholdOperator:
                     type: string
                     enum: [EQUAL_TO, GREATER_THAN_OR_EQUAL]
-                    description: States that concentration is above/at the WM3-defined threshold for this component, without an exact figure — the threshold value itself is not sent; it is resolved from WM3 guidance against name. <p><font color="green"><b>Business Rule:</b></font></p> Exactly one of concentration or concentrationThresholdOperator is required. Mutually exclusive with concentration.
+                    description: States that concentration is above/at the WM3-defined threshold for this component, without an exact figure — the threshold value itself is not sent, and the service does not look it up (D-044). <p><font color="green"><b>Business Rule:</b></font></p> Exactly one of concentration or concentrationThresholdOperator is required. Mutually exclusive with concentration.
                     example: GREATER_THAN_OR_EQUAL
 
     # Shared waste item base (D-042) — classification plus logistics fields.
@@ -532,11 +532,11 @@ components:
           example: CJ123E/A0001
         reasonForNoConsignmentCode:
           type: string
-          enum: [NON_HAZ_WASTE_TRANSFER, NO_DOC_WITH_WASTE, HWRC_RECEIPT]
+          minLength: 1
           description: |
             Required when the movement contains hazardous waste and no
             hazardousWasteConsignmentCode is provided. Mutually exclusive with
-            hazardousWasteConsignmentCode. Case-sensitive.
+            hazardousWasteConsignmentCode. Free text, with no fixed list for the MVP.
         yourUniqueReference:
           type: string
           description: Caller's own reference. No format rules enforced.
@@ -847,9 +847,9 @@ components:
           example: CJ32LE/A0001
         reasonForNoConsignmentCode:
           type: string
-          enum: [NON_HAZ_WASTE_TRANSFER, NO_DOC_WITH_WASTE, HWRC_RECEIPT]
-          description: Required if waste is hazardous and no hazardousWasteConsignmentCode is provided. Must not be provided alongside hazardousWasteConsignmentCode. Case-sensitive.
-          example: NO_DOC_WITH_WASTE
+          minLength: 1
+          description: Required if waste is hazardous and no hazardousWasteConsignmentCode is provided. Must not be provided alongside hazardousWasteConsignmentCode. Free text, with no fixed list for the MVP.
+          example: No documentation provided with the waste
         yourUniqueReference:
           type: string
           description: This could be a unique weighbridge ticket number, waste transfer note number etc.
@@ -1156,9 +1156,9 @@ components:
           example: CJ32LE/A0001
         reasonForNoConsignmentCode:
           type: string
-          enum: [NON_HAZ_WASTE_TRANSFER, NO_DOC_WITH_WASTE, HWRC_RECEIPT]
-          description: If you have not provided a hazardous waste consignment code, then there are three reason codes you can choose to provide. See the table below. <table border="1"> <thead> <tr> <th>Reason</th> <th>Reason Code</th> </tr> </thead> <tbody> <tr> <td>Non-Haz Waste Transfer</td> <td>NON_HAZ_WASTE_TRANSFER</td> </tr> <tr> <td>No documentation provided with Waste</td> <td>NO_DOC_WITH_WASTE</td> </tr> <tr> <td>Household Waste Recycling Centre Receipt</td> <td>HWRC_RECEIPT</td> </tr> </tbody> </table> <b>Note:</b> The field is case-sensitive, please use the case for the code specified in the table. <p><font color="green"><b>Business Rules:</b></font></p> <ul> <li>If any waste.ewcCodes provided are considered hazardous and recordReceiptRequest.hazardousWasteConsignmentCode is not provided a recordReceiptRequest.reasonForNoConsignmentCode is required.</li> <li>If recordReceiptRequest.reasonForNoConsignmentCode is provided it must be either “NON_HAZ_WASTE_TRANSFER”, “NO_DOC_WITH_WASTE” or “HWRC_RECEIPT”. </li> </ul>
-          example: NO_DOC_WITH_WASTE
+          minLength: 1
+          description: Required if any waste item is hazardous and no hazardousWasteConsignmentCode is provided. Must not be provided alongside hazardousWasteConsignmentCode. Free text, with no fixed list for the MVP.
+          example: No documentation provided with the waste
         yourUniqueReference:
           type: string
           description: This could be a unique weighbridge ticket number, waste transfer note number etc.
@@ -1180,6 +1180,15 @@ components:
           $ref: '../event-model/schemas/beta-2/common/broker-or-dealer/broker-or-dealer.schema.json'
         receiverSite:
           $ref: '#/components/schemas/receiverSite'
+        isDeleted:
+          type: boolean
+          default: false
+          description: |
+            Soft-delete flag (D-009). Defaults to `false`. Must not be supplied
+            as `true` on create — only `PUT /deliveries/{deliveryId}/receipt` may
+            set it to `true`. A further `PUT` with `false` restores the receipt.
+            Supplying `true` on create is rejected as a `NotAllowed` validation
+            error.
 
   # ----------------------------------------------------------------------
   # Reusable responses
@@ -1578,7 +1587,8 @@ paths:
         mismatches are reported (D-046), is still open.
 
         Rejected as a `BusinessRuleViolation` while the Delivery is
-        soft-deleted. A receipt cannot itself be soft-deleted (D-009).
+        soft-deleted. `isDeleted` must not be sent as `true` here — it can
+        only be set with `PUT /deliveries/{deliveryId}/receipt` (D-009).
       operationId: recordReceipt
       requestBody:
         required: true
@@ -1613,6 +1623,12 @@ paths:
         Updates the receipt recorded against the given Delivery. Only the
         organisation that recorded it may update it (D-036), and the previous
         version is kept (D-034).
+
+        Setting `isDeleted: true` soft-deletes the receipt, for example one
+        recorded against the wrong Delivery; a further `PUT` with
+        `isDeleted: false` restores it (D-009). The Delivery stays
+        undeletable once a receipt has been recorded, even a soft-deleted
+        one (D-050).
       operationId: updateReceipt
       requestBody:
         required: true

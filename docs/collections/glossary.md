@@ -132,4 +132,4 @@ Every party except a household producer carries a `contactDetails` object with a
 
 ### Soft-delete
 
-Withdrawing an event recorded in error by setting `isDeleted: true` through its `PUT`. Nothing is ever hard-deleted, and a receipt cannot be deleted ([D-009](decisions.md#d-009)).
+Withdrawing an event recorded in error by setting `isDeleted: true` through its `PUT`. Nothing is ever hard-deleted; movements, collections, deliveries and receipts can all be soft-deleted ([D-009](decisions.md#d-009)).

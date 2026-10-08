@@ -312,7 +312,7 @@ One document per `deliveryId`. Created by `POST /deliveries/{deliveryId}/receipt
 Notes:
 
 - `_id` is the `deliveryId` — a Delivery has at most one receipt ([D-015](../decisions.md#d-015)), so the `deliveryId` is a valid unique key. A second `POST` to the same `deliveryId` gets a duplicate-key error (natural idempotency guard).
-- Receipt has no `isDeleted`. Once recorded, a receipt cannot be deleted ([D-009](../decisions.md#d-009)). The receipt `PUT` amends in place and snapshots to history; there is no soft-delete toggle.
+- Receipt has no `isDeleted`. Once recorded, a receipt cannot be deleted. _(Since superseded: a receipt can now be soft-deleted — [D-009](../decisions.md#d-009).)_ The receipt `PUT` amends in place and snapshots to history; there is no soft-delete toggle.
 - `revision` guards `PUT /deliveries/{deliveryId}/receipt` amendments — same pattern as Phase 1 `waste-inputs` revision guard ([D-034](../decisions.md#d-034)).
 
 ### `receipt-events-history`

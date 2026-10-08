@@ -75,7 +75,7 @@ Alongside the releases: how receipts link to Deliveries — new endpoints or an 
 | Decision | Summary | Release |
 | --- | --- | --- |
 | [D-010](decisions.md#d-010) | Hazardous Movements split into their own Delivery by the server. | beta-2 |
-| [D-009](decisions.md#d-009) | Soft-delete with `isDeleted`, set only through `PUT`; a Receipt cannot be deleted. | beta-3 |
+| [D-009](decisions.md#d-009) | Soft-delete with `isDeleted`, set only through `PUT`, for movements, collections, deliveries and receipts. | beta-3 |
 | [D-017](decisions.md#d-017) | A recorded delivery can only be soft-deleted, not edited. | beta-3 |
 | [D-034](decisions.md#d-034) | Every update keeps the previous version and guards against concurrent changes. | beta-3 |
 
