@@ -14,7 +14,7 @@ A reference for terms used across this section. Identifier vocabulary in particu
 
 ## Identifiers
 
-All public identifiers share one format and one sequence ([D-013](decisions.md#d-013)): a two-digit year followed by a sqids code (sqids.org), for example `25HRA0B2`. The length is not fixed — it grows as the yearly counter grows — so treat every ID as opaque: never parse it or validate a pattern. Because they come from one sequence, two different IDs are never the same string, except where a hazardous Delivery reuses its Movement ID by design.
+All public identifiers share one format and one pool ([D-013](decisions.md#d-013)): a two-digit year followed by a sqids code (sqids.org), for example `25HRA0B2`. IDs are eight characters today; the format allows nine if the yearly counter needs it, so accept both. Treat every ID as opaque: never parse it for meaning. Because they come from one sequence, two different IDs are never the same string, except where a hazardous Delivery reuses its Movement ID by design.
 
 ### Movement ID
 
@@ -86,7 +86,7 @@ The person operating the vehicle for a carrier. Treated as part of the carrier, 
 
 ### Receiver
 
-The party operating the site where waste is received. Holds an environmental permit or equivalent authorisation that determines which waste it may accept. Records the receipt and the actual treatment. At creation, a movement carrying hazardous waste declares its intended **receivers** ([D-043](decisions.md#d-043)); the site that actually received the waste is recorded on the receipt.
+The party operating the site where waste is received. Holds an environmental permit or equivalent authorisation that determines which waste it may accept. Records the receipt and the actual treatment. At creation, every movement declares its **intended receivers** ([D-043](decisions.md#d-043)); the site that actually received the waste is recorded on the receipt as `receiver`.
 
 ### Submitting organisation
 
@@ -132,4 +132,4 @@ Every party except a household producer carries a `contactDetails` object with a
 
 ### Soft-delete
 
-Withdrawing an event recorded in error by setting `isDeleted: true` through its `PUT`. Nothing is ever hard-deleted, and a receipt cannot be deleted ([D-009](decisions.md#d-009)).
+Withdrawing an event recorded in error by setting `isDeleted: true` through its `PUT`. Nothing is ever hard-deleted; movements, collections, deliveries and receipts can all be soft-deleted ([D-009](decisions.md#d-009)).

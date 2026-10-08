@@ -10,6 +10,10 @@
     "brokerOrDealer": {
       "$ref": "../common/broker-or-dealer/broker-or-dealer.schema.json"
     },
+    "dutyOfCareConfirmed": {
+      "type": "boolean",
+      "description": "Carrier confirms they have inspected the waste, that it is as described, and that they are content to transport it."
+    },
     "supportingReferences": {
       "$ref": "../common/supporting-references.schema.json"
     },
@@ -17,6 +21,6 @@
       "$ref": "../common/special-handling-requirements.schema.json"
     }
   },
-  "required": ["carrier"],
+  "required": ["carrier", "dutyOfCareConfirmed"],
   "additionalProperties": false
 }

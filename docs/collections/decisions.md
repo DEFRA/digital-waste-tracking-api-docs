@@ -43,26 +43,26 @@ The API is built in steps — beta-1, then beta-2, and on through the later beta
 | D-041 | [Receipt with no prior Delivery: `POST /receipts`, the server creates an empty Delivery](#d-041) | A1 | ✅ Decided | 🔴 High | beta-1 (gap: field name) |
 | D-010 | [Hazardous Movements are split into their own Delivery by the server](#d-010) | A1 | ✅ Decided | 🟠 Medium | Not yet (beta-2, in progress) |
 | D-029 | [Transit collection (driver to driver) is a further collection event on the same Movement](#d-029) | A1 | ✅ Decided | 🟠 Medium | Not yet |
-| D-008 | [Who is declared at each event: a carrier always, a broker or dealer optionally](#d-008) | A2 | ✅ Decided | 🟠 Medium | Partly (beta-2) |
-| D-043 | [Creation declares intended receiving sites as an array: `receivers`](#d-043) | A2 | ✅ Decided | 🟢 Low | Schema only (beta-2) |
-| D-045 | [Creation declares intended carriers as an array: `intendedCarriers`](#d-045) | A2 | ✅ Decided | 🟢 Low | Schema only (beta-2) |
+| D-008 | [Who is declared at each event: a carrier always, a broker or dealer optionally](#d-008) | A2 | ✅ Decided | 🟠 Medium | beta-2 |
+| D-043 | [Creation declares intended receiving sites as an array: `intendedReceivers`](#d-043) | A2 | ✅ Decided | 🟢 Low | beta-2 |
+| D-045 | [Creation declares intended carriers as an array: `intendedCarriers`](#d-045) | A2 | ✅ Decided | 🟢 Low | beta-2 |
 | D-047 | [The producer is described by waste source: Household, Commercial or Municipal](#d-047) | A2 | ✅ Decided | 🟠 Medium | beta-2 |
 | D-048 | [Supporting references and special handling requirements](#d-048) | A2 | ✅ Decided | 🟢 Low | beta-2 |
 | D-049 | [Recording that a movement is a council movement](#d-049) | A2 | ⏳ Open | 🟢 Low | n/a |
-| D-031 | [Treatment codes: intended at Creation, actual at Receipt](#d-031) | A3 | ✅ Decided | 🟠 Medium | Not yet |
+| D-031 | [Treatment codes: intended at Creation, actual at Receipt](#d-031) | A3 | ✅ Decided | 🟠 Medium | Not yet (beta-2) |
 | D-032 | [Waste is described at Creation and weighed at Receipt; Collection and Delivery carry no waste details](#d-032) | A3 | ✅ Decided | 🟠 Medium | beta-1 |
-| D-042 | [A waste item is its classification plus logistics; the ordinary receipt carries logistics only](#d-042) | A3 | ✅ Decided | 🟠 Medium | Not yet |
-| D-044 | [POP and hazardous components: a measured concentration, or how it compares with the WM3 threshold](#d-044) | A3 | ✅ Decided | 🟢 Low | Not yet |
-| D-006 | [The receipt is cross-checked against what was declared earlier; mismatches do not block it](#d-006) | A4 | ✅ Decided | 🟠 Medium | Not yet |
-| D-018 | [The delivery address is required when recording a delivery](#d-018) | A4 | ✅ Decided | 🟠 Medium | Not yet |
-| D-025 | [How a receipt records acceptance, rejection or partial acceptance](#d-025) | A4 | ⏳ Open | 🔴 High | Not yet |
+| D-042 | [A waste item is its classification plus logistics; the ordinary receipt carries logistics only](#d-042) | A3 | ✅ Decided | 🟠 Medium | Not yet (beta-2) |
+| D-044 | [POP and hazardous components: a measured concentration, or how it compares with the WM3 threshold](#d-044) | A3 | ✅ Decided | 🟢 Low | Not yet (beta-2) |
+| D-006 | [The receipt is cross-checked against what was declared earlier; mismatches do not block it](#d-006) | A4 | ✅ Decided | 🟠 Medium | Not yet (beta-2) |
+| D-018 | [The delivery address is required when recording a delivery](#d-018) | A4 | ✅ Decided | 🟠 Medium | Not yet (beta-2) |
+| D-025 | [How a receipt records acceptance, rejection or partial acceptance](#d-025) | A4 | ⏳ Open | 🔴 High | Not yet (beta-2) |
 | D-046 | [Soft data-quality issues: accept with warnings, or reject and confirm](#d-046) | A4 | ⏳ Open | 🔴 High | n/a |
 | D-021 | [What counts as a mismatch in the receipt cross-check](#d-021) | A4 | ⏳ Open | 🟠 Medium | n/a |
 | D-009 | [Soft-delete with `isDeleted`; no hard delete and no `DELETE` endpoint](#d-009) | A5 | ✅ Decided | 🟠 Medium | Not yet (beta-3) |
 | D-017 | [A recorded delivery cannot be edited, only soft-deleted](#d-017) | A5 | ✅ Decided | 🟠 Medium | Not yet (beta-3) |
+| D-050 | [A later event that was ever recorded keeps the earlier one from being deleted](#d-050) | A5 | ✅ Decided | 🟢 Low | Not yet (beta-3) |
 | D-035 | [How transit collection events are stored, edited and soft-deleted](#d-035) | A5 | ⏳ Open | 🟠 Medium | n/a |
-| D-051 | [Delivery immutability: why only delivery, and what after a receipt?](#d-051) | A5 | ⏳ Open | 🟠 Medium | n/a |
-| D-050 | [Does deleting a later event free an earlier one to be deleted?](#d-050) | A5 | ⏳ Open | 🟢 Low | n/a |
+| D-051 | [Delivery and receipt immutability: what can be put right, and how?](#d-051) | A5 | ⏳ Open | 🟠 Medium | n/a |
 | D-019 | [What a producer can see about the fate of their waste](#d-019) | A6 | ⏳ Open | 🟠 Medium | Not yet (beta-4) |
 | D-001 | [One target spec for the whole journey, extending the Phase 1 Receipt API](#d-001) | B1 | ✅ Decided | 🔴 High | n/a |
 | D-052 | [JSON Schemas in `waste-movement-backend` are the source of truth for request and response shapes](#d-052) | B1 | ✅ Decided | 🔴 High | beta-1 |
@@ -71,7 +71,7 @@ The API is built in steps — beta-1, then beta-2, and on through the later beta
 | D-022 | [How a receipt is linked to its Delivery: new endpoints, or an extended Phase 1 receipt](#d-022) | B2 | ⏳ Open | 🔴 High | beta-1 (Option 1) |
 | D-033 | [Per-event reads are deferred](#d-033) | B2 | ⏸️ Parked | 🟢 Low | Not yet (beta-4) |
 | D-012 | [Only the Movement ID and the Delivery ID are public](#d-012) | B3 | ✅ Decided | 🔴 High | beta-1 |
-| D-013 | [Identifiers are a two-digit year plus a sqids code, and their length is not fixed](#d-013) | B3 | ✅ Decided | 🔴 High | beta-1 |
+| D-013 | [Identifiers are a two-digit year plus a sqids code: eight characters, extendable to nine](#d-013) | B3 | ✅ Decided | 🔴 High | beta-1 |
 | D-004 | [The Phase 1 receipt path keeps `{wasteTrackingId}`](#d-004) | B3 | ✅ Decided | 🟢 Low | n/a |
 | D-028 | [Pre-reserved Delivery IDs for drivers without signal](#d-028) | B3 | ⏳ Open | 🟠 Medium | Not yet |
 | D-039 | [API standards for the new endpoints: status codes, envelopes and tracing](#d-039) | B4 | ✅ Decided | 🔴 High | beta-1 |
@@ -203,7 +203,7 @@ Built today: nothing. Collection is a stub in beta-1 and beta-2; `collectionType
 
 **Decision.** A dedicated endpoint, `POST /receipts`:
 
-- The request is a receipt plus a mandatory `reasonForNoDeliveryId` saying why there is no Delivery ID. Its waste items carry the full classification, because there is no Creation to take it from ([D-042](#d-042)).
+- The request is a receipt plus a mandatory `reasonForNoDeliveryId` — free text (at least one character), with no fixed list for the MVP — saying why there is no Delivery ID. Its waste items carry the full classification, because there is no Creation to take it from ([D-042](#d-042)).
 - The server creates an empty Delivery (no Movement IDs) and records the receipt against it, in the same request.
 - The response returns the new Delivery ID in `data.deliveryId`. From then on the receipt is addressed like any other, under `/deliveries/{deliveryId}/receipt`.
 - No delivery address is asked for. The empty Delivery has none; the receiving site on the receipt records where the waste arrived ([D-018](#d-018) applies to `POST /deliveries` only).
@@ -222,7 +222,7 @@ Built today: the endpoint in beta-1 and beta-2, which creates the empty Delivery
 
 #### Who is declared at each event: a carrier always, a broker or dealer optionally
 
-**D-008** · ✅ Decided · Impact: 🟠 Medium · Group: **A2** · Built in: **Partly (beta-2: broker or dealer)** · Related: [D-030](#d-030), [D-045](#d-045)
+**D-008** · ✅ Decided · Impact: 🟠 Medium · Group: **A2** · Built in: **beta-2** · Related: [D-030](#d-030), [D-045](#d-045)
 
 **Context.** A carrier is physically involved in every movement. A broker or dealer — someone who arranges the movement without handling the waste — is involved only sometimes, and their details may need confirming at more than one stage.
 
@@ -240,48 +240,48 @@ Built today: the endpoint in beta-1 and beta-2, which creates the empty Delivery
 - `isPresent` says whether a broker or dealer was involved. When it is `true`, `items` must hold at least one entry; when it is `false` or absent, `items` is not allowed. Leaving `isPresent` out is the same as `false`.
 - Each entry in `items` needs `organisationName`, `contactDetails` (at least one of `emailAddress` or `phoneNumber`) and exactly one of `registrationNumber` or `reasonForNoRegistrationNumber`. `address` is optional. More than one broker or dealer can be declared.
 
-Every carrier — intended or actual — has the same shape: see [D-045](#d-045) for its rules, including the reasons allowed for having no registration number (`ON_SITE`, `HOUSEHOLD`, `ONE_OFF`, `MARINE`).
+Every carrier — intended or actual — has the same shape: see [D-045](#d-045) for its rules.
 
 Every party — producer, carrier, broker or dealer, receiver — must carry contact details, as a `contactDetails` object holding `emailAddress` and `phoneNumber`, at least one of which is required. The only exception is a `Household` producer, which carries no details at all ([D-047](#d-047)). Contact details are never separate top-level fields on the party.
 
-**Consequences.** Providers can state explicitly that no broker or dealer was involved, without the field being mandatory. `isPresent` is the boolean gate asked for in DWTC-152, DWTC-153, DWTC-155 and DWTC-162. `reasonForNoRegistrationNumber` is free text until the BA and policy team agree a list of reasons.
+**Consequences.** Providers can state explicitly that no broker or dealer was involved, without the field being mandatory. `isPresent` is the boolean gate asked for in DWTC-152, DWTC-153, DWTC-155 and DWTC-162. `reasonForNoRegistrationNumber` is free text (at least one character), with no fixed list for the MVP — as built in beta-2.
 
-Built today: `brokerOrDealer` on Creation, Collection and both receipt endpoints in beta-2, and `contactDetails` on the producer and broker or dealer. The carrier schema is defined in beta-2 but not yet used by any request ([D-045](#d-045)).
+Built today: `brokerOrDealer` on Creation, Collection and both receipt endpoints in beta-2, and `contactDetails` on the producer and broker or dealer. The carrier is built in beta-2 on every event ([D-045](#d-045)).
 
 <a id="d-043"></a>
 
-#### Creation declares intended receiving sites as an array: `receivers`
+#### Creation declares intended receiving sites as an array: `intendedReceivers`
 
-**D-043** · ✅ Decided · Impact: 🟢 Low · Group: **A2** · Built in: **Schema only (beta-2, not yet used by a request)** · Related: [D-045](#d-045)
+**D-043** · ✅ Decided · Impact: 🟢 Low · Group: **A2** · Built in: **beta-2** · Related: [D-045](#d-045)
 
 **Context.** A producer may send waste to more than one receiving site (raised in DWTC-155). Creation previously took a single, optional `receiver`.
 
-**Decision.** Creation takes `receivers`, an array of intended receiving sites.
+**Decision.** Creation takes `intendedReceivers`, an array of intended receiving sites, named to pair with `intendedCarriers` ([D-045](#d-045)).
 
-- Required, with at least one entry, when the movement contains hazardous waste; optional otherwise. Whether the movement is hazardous comes from its waste classification, so this is checked by the server.
+- Always required, with at least one entry, for every movement.
 - Each entry needs `siteName`, `authorisationNumber` (a valid UK permit or exemption format), `receiptAddress` — the address the waste will be received at — and `contactDetails` ([D-008](#d-008)).
 
-The receivers declared at Creation are provisional. The site that actually received the waste is recorded on the receipt as `receiverSite`, whose address is also called `receiptAddress` — the address of receipt, which can differ from the receiving organisation's own address, and the equivalent of the Phase 1 `receipt.address`.
+The receivers declared at Creation are provisional. The site that actually received the waste is recorded on the receipt as `receiver`, with the same shape — the same name the live Phase 1 receipt uses. Its `receiptAddress` is the address of receipt, which can differ from the receiving organisation's own address, and is the equivalent of the Phase 1 `receipt.address`.
 
-**Consequences.** Built today: the receiver schemas (`common/receiver/receiver.schema.json`, `receivers.schema.json`) are in beta-2 but not yet referenced by any request; the hazardous-only requirement will sit in the creation request schema. The Joi drafts in `data/` still call the field `intendedReceivers` and the address `address`; they are a planning reference and are not updated (see the [data README](data/README.md)).
+**Consequences.** An earlier version of this decision named the field `receivers` and required it only when the movement contained hazardous waste. As built, it is `intendedReceivers` and required for every movement. Built today: beta-2 — `intendedReceivers` on creation, and `receiver` on both receipt endpoints.
 
 <a id="d-045"></a>
 
 #### Creation declares intended carriers as an array: `intendedCarriers`
 
-**D-045** · ✅ Decided · Impact: 🟢 Low · Group: **A2** · Built in: **Schema only (beta-2, not yet used by a request)** · Related: [D-008](#d-008), [D-043](#d-043)
+**D-045** · ✅ Decided · Impact: 🟢 Low · Group: **A2** · Built in: **beta-2** · Related: [D-008](#d-008), [D-043](#d-043)
 
 **Context.** When a movement is planned, more than one carrier may be lined up. Creation previously took a single, required `carrier`.
 
 **Decision.** Creation takes `intendedCarriers`, an array that is always required, with at least one entry. Each entry follows the same carrier rules as every later event ([D-008](#d-008)):
 
 - `organisationName`, `meansOfTransport` and `contactDetails` are required; `address` is optional.
-- Exactly one of `registrationNumber` (a valid UK carrier, broker or dealer registration format) or `reasonForNoRegistrationNumber` (`ON_SITE`, `HOUSEHOLD`, `ONE_OFF` or `MARINE`).
+- Exactly one of `registrationNumber` (a valid UK carrier, broker or dealer registration format) or `reasonForNoRegistrationNumber`, one of `ON_SITE`, `HOUSEHOLD`, `ONE_OFF` or `MARINE`.
 - `vehicleRegistration` is required when `meansOfTransport` is `Road`, and not allowed otherwise; `otherMeansOfTransport` likewise for `Other`.
 
 An earlier version of this decision required only `meansOfTransport`, `organisationName` and `contactDetails` at creation, on the grounds that other details may not be known when a movement is planned. The beta-2 carrier schema applies the full rules from creation onwards, and that is the decision now.
 
-**Consequences.** One carrier shape serves creation, collection, delivery and receipt. Creation records intent; the later events record which carrier actually did the work. Built today: the carrier schemas (`common/carrier/carrier.schema.json`, `carriers.schema.json`) are in beta-2 but not yet referenced by any request.
+**Consequences.** One carrier shape serves creation, collection, delivery and receipt. Creation records intent; the later events record which carrier actually did the work. Built today: beta-2 — `intendedCarriers` is required on creation, and `carrier` on collection, delivery and both receipt endpoints.
 
 <a id="d-047"></a>
 
@@ -299,7 +299,7 @@ An earlier version of this decision required only `meansOfTransport`, `organisat
 | `Commercial` | `organisationName`, `sicCode` (five digits), `address`, `contactDetails`, and exactly one of `authorisationNumber` or `reasonForNoAuthorisationNumber` | — |
 | `Municipal` | as `Commercial`, except `sicCode` | `sicCode` |
 
-`contactDetails` needs at least one of `emailAddress` or `phoneNumber`. `authorisationNumber` must be a valid UK permit or exemption number format. `reasonForNoAuthorisationNumber` is free text until the BA and policy team agree a list of reasons.
+`contactDetails` needs at least one of `emailAddress` or `phoneNumber`. `authorisationNumber` must be a valid UK permit or exemption number format. `reasonForNoAuthorisationNumber` is free text (at least one character), with no fixed list for the MVP — as built in beta-2.
 
 **Consequences.** No details of a householder are collected. The producer is captured at Creation only. A `councilMovement` flag was briefly required on every producer in beta-2. It has been taken out of the producer and parked as an open question ([D-049](#d-049)).
 
@@ -317,7 +317,7 @@ An earlier version of this decision required only `meansOfTransport`, `organisat
 - a field on the Movement itself, since it describes the movement rather than the producer;
 - derived from data already held — for example a `Municipal` waste source, or the submitting organisation's local-authority flag, which the Phase 1 receipt already records.
 
-Until this is decided, beta-2 rejects `councilMovement` as an unknown field.
+Awaiting a decision from the regulators. Until then, beta-2 rejects `councilMovement` as an unknown field.
 
 <a id="d-048"></a>
 
@@ -360,7 +360,7 @@ Built today: neither beta collection nor delivery accepts waste items. Waste ite
 
 #### A waste item is its classification plus logistics; the ordinary receipt carries logistics only
 
-**D-042** · ✅ Decided · Impact: 🟠 Medium · Group: **A3** · Built in: **Not yet** · Related: [D-025](#d-025), [D-031](#d-031), [D-032](#d-032), [D-041](#d-041)
+**D-042** · ✅ Decided · Impact: 🟠 Medium · Group: **A3** · Built in: **Not yet (beta-2)** · Related: [D-025](#d-025), [D-031](#d-031), [D-032](#d-032), [D-041](#d-041)
 
 **Context.** A waste item has two kinds of information: its classification — what the waste is — and logistics — how much there is and how it is contained. Policy feedback was that the ordinary receipt should not make the receiver re-send a classification already declared at Creation.
 
@@ -385,7 +385,7 @@ In the target spec the ordinary receipt has its own request body, separate from 
 
 #### Treatment codes: intended at Creation, actual at Receipt
 
-**D-031** · ✅ Decided · Impact: 🟠 Medium · Group: **A3** · Built in: **Not yet** · Related: [D-006](#d-006), [D-019](#d-019), [D-042](#d-042)
+**D-031** · ✅ Decided · Impact: 🟠 Medium · Group: **A3** · Built in: **Not yet (beta-2)** · Related: [D-006](#d-006), [D-019](#d-019), [D-042](#d-042)
 
 **Context.** A disposal or recovery code (an R-code or D-code) says what is done with the waste. At Creation it is the plan; at Receipt it is what the receiving site confirms. One field, `disposalOrRecoveryCodes`, used to serve both.
 
@@ -400,16 +400,16 @@ In the target spec the ordinary receipt has its own request body, separate from 
 
 #### POP and hazardous components: a measured concentration, or how it compares with the WM3 threshold
 
-**D-044** · ✅ Decided · Impact: 🟢 Low · Group: **A3** · Built in: **Not yet** · Related: [D-042](#d-042)
+**D-044** · ✅ Decided · Impact: 🟢 Low · Group: **A3** · Built in: **Not yet (beta-2)** · Related: [D-042](#d-042)
 
 **Context.** For each POP or hazardous component in the waste, the caller may know the exact concentration, or only how it compares with the threshold. An earlier shape asked for a threshold `{ operator, value }`. The BA pointed out that WM3 guidance publishes one fixed threshold per substance, so the value is a constant, not something the caller measures or chooses.
 
-**Decision.** The caller sends `concentrationThresholdOperator` with no value. The threshold itself is looked up from WM3 guidance using the component's identity.
+**Decision.** The caller sends `concentrationThresholdOperator` with no value, and the service records it as stated. The service does **not** look up thresholds, for POP or hazardous components.
 
 - **POP component:** `concentration` or `concentrationThresholdOperator` (`LESS_THAN`, `EQUAL_TO` or `GREATER_THAN_OR_EQUAL`) — one or neither, never both.
 - **Hazardous component:** exactly one of `concentration` or `concentrationThresholdOperator` (`EQUAL_TO` or `GREATER_THAN_OR_EQUAL`).
 
-**Consequences.** POP components are identified by `code`, taken from `/reference-data/pop-names`, so their threshold can be looked up. Hazardous components are identified by a free-text `name` with no reference list, so the service cannot look up their threshold until such a list exists. This is flagged for BA follow-up.
+**Consequences.** Thresholds change over time and can differ between the UK nations, so holding and resolving them would be a large, ongoing upkeep for the service. The operator records the declaration as the caller makes it, against whichever threshold applies to them; regulators interpret it. No reference list of hazardous components is needed for this.
 
 ### A4 Receipt and checks
 
@@ -417,7 +417,7 @@ In the target spec the ordinary receipt has its own request body, separate from 
 
 #### The receipt is cross-checked against what was declared earlier; mismatches do not block it
 
-**D-006** · ✅ Decided · Impact: 🟠 Medium · Group: **A4** · Built in: **Not yet** · Related: [D-021](#d-021), [D-022](#d-022), [D-032](#d-032), [D-041](#d-041), [D-046](#d-046)
+**D-006** · ✅ Decided · Impact: 🟠 Medium · Group: **A4** · Built in: **Not yet (beta-2)** · Related: [D-021](#d-021), [D-022](#d-022), [D-032](#d-032), [D-041](#d-041), [D-046](#d-046)
 
 **Context.** By the time waste is received, the journey has already recorded what the waste is and who carried it. The receipt is the first point where the actual load is recorded, so it is the natural place to compare declared with actual. Paperwork often has small inconsistencies, and a receiver must still be able to record what arrived.
 
@@ -434,7 +434,7 @@ A receipt recorded with `POST /receipts` has nothing earlier to compare with, so
 
 #### The delivery address is required when recording a delivery
 
-**D-018** · ✅ Decided · Impact: 🟠 Medium · Group: **A4** · Built in: **Not yet** · Related: [D-007](#d-007), [D-017](#d-017), [D-041](#d-041), [D-043](#d-043)
+**D-018** · ✅ Decided · Impact: 🟠 Medium · Group: **A4** · Built in: **Not yet (beta-2)** · Related: [D-007](#d-007), [D-017](#d-017), [D-041](#d-041), [D-043](#d-043)
 
 **Context.** The receiving site declared at Creation is an estimate ([D-043](#d-043)), and waste can end up somewhere else — for example a rejected load taken on to a second receiver ([D-007](#d-007)). So the place a delivery happened cannot be worked out from earlier events.
 
@@ -460,7 +460,7 @@ If [D-046](#d-046) is adopted, every mismatch is handled the same way, so this n
 
 #### How a receipt records acceptance, rejection or partial acceptance
 
-**D-025** · ⏳ Open · Impact: 🔴 High · Group: **A4** · Built in: **Not yet** · Related: [D-007](#d-007), [D-015](#d-015), [D-041](#d-041), [D-042](#d-042)
+**D-025** · ⏳ Open · Impact: 🔴 High · Group: **A4** · Built in: **Not yet (beta-2)** · Related: [D-007](#d-007), [D-015](#d-015), [D-041](#d-041), [D-042](#d-042)
 
 In Phase 1, recording a receipt means the waste was accepted; there is no way to record a rejection. Phase 2 must support three outcomes: the whole load accepted, the whole load rejected, or part accepted and part rejected.
 
@@ -468,11 +468,11 @@ Open, for the policy team:
 
 1. How the outcome is recorded on the receipt — an outcome field, accepted and rejected quantities per waste item, a reason for rejection.
 2. What happens to the rejected portion: returned to the producer, or taken on to another receiver on a further Delivery of the same Movement ([D-007](#d-007)).
-3. How a receiver reports that the waste is not what was declared, since the ordinary receipt does not restate the classification ([D-042](#d-042)).
+3. How a receiver reports that the waste is not what was declared — reclassification at receipt — since the ordinary receipt does not restate the classification ([D-042](#d-042)).
 
 Whatever is chosen is recorded on the single Receipt; the Movement is not split ([D-015](#d-015)).
 
-**Timing.** The [versioning schedule](../api/versioning-schedule.md) includes rejection in beta-2, so this needs deciding before beta-2 is complete.
+**Timing.** Rejection and reclassification are both planned for beta-2, so this needs deciding before beta-2 is complete.
 
 <a id="d-046"></a>
 
@@ -498,23 +498,36 @@ Whatever is chosen is recorded on the single Receipt; the Movement is not split 
 
 **Decision.** Nothing is ever hard-deleted, and there is no `DELETE` endpoint.
 
-- **What can be deleted.** Movement, Collection and Delivery each carry `isDeleted` (default `false`). A Receipt cannot be deleted: it is the last event in the journey. How a single collection event in a sequence is soft-deleted is still open ([D-035](#d-035)).
+- **What can be deleted.** Movement, Collection, Delivery and Receipt each carry `isDeleted` (default `false`). A receipt was first made undeletable as the record of acceptance; the BA has since confirmed it can be soft-deleted like the other events, so a receipt recorded against the wrong Delivery, or a duplicate, can be withdrawn. How a single collection event in a sequence is soft-deleted is still open ([D-035](#d-035)).
 - **How.** `isDeleted` is set to `true` only through the event's `PUT`. A `POST` that sends `isDeleted: true` is rejected (`NotAllowed`).
-- **Only while nothing later exists.** A Movement can be deleted until a collection is recorded against it; a collection until the Movement is on a Delivery; a Delivery until a Receipt is recorded against it. A later event that has itself been deleted still counts ([D-050](#d-050)).
+- **Only while nothing later exists.** A Movement can be deleted until a collection is recorded against it; a collection until the Movement is on a Delivery; a Delivery until a Receipt is recorded against it. A Receipt is the last event, so nothing later can block it. A later event that has itself been deleted still counts ([D-050](#d-050)).
 - **A deleted event blocks what follows.** No collection can be recorded or updated against a deleted Movement. A deleted Movement, or one with no active collection event, cannot be named on a Delivery. No receipt can be recorded or updated against a deleted Delivery.
 - **Undo.** A `PUT` with `isDeleted: false` restores the event. This is always allowed, because nothing later could have been recorded while it was deleted.
 
 Breaking a rule is rejected with `400` (`BusinessRuleViolation`), not reported as a warning.
 
-**Consequences.** One mechanism covers all three deletable events. Only the organisation that recorded an event can delete it ([D-036](#d-036)), and every change is kept in the event's history ([D-034](#d-034)). Every write must check the deletion state of the events it refers to, as well as that they exist.
+**Consequences.** One mechanism covers all four events. Only the organisation that recorded an event can delete it ([D-036](#d-036)), and every change is kept in the event's history ([D-034](#d-034)). Every write must check the deletion state of the events it refers to, as well as that they exist.
 
 <a id="d-050"></a>
 
-#### Does deleting a later event free an earlier one to be deleted?
+#### A later event that was ever recorded keeps the earlier one from being deleted
 
-**D-050** · ⏳ Open · Impact: 🟢 Low · Group: **A5** · Built in: **n/a** · Related: [D-009](#d-009)
+**D-050** · ✅ Decided · Impact: 🟢 Low · Group: **A5** · Built in: **Not yet (beta-3)** · Related: [D-009](#d-009), [D-015](#d-015), [D-034](#d-034)
 
-Spun out of [D-009](#d-009), to confirm with the BA. D-009 takes the stricter reading: once a collection has been recorded against a Movement, the Movement can never be deleted, even if that collection is later deleted. The looser reading — deleting the collection frees the Movement — was rejected, because two deletes in a row could hide the fact that a collection ever happened. Confirm the stricter reading holds up in real provider scenarios.
+**Context.** Spun out of [D-009](#d-009). Each event can be soft-deleted only while nothing later has been recorded against it. The question was whether a later event that has itself been soft-deleted still counts.
+
+**Decision.** It still counts. An event can be soft-deleted only while **no later event has ever been recorded** in connection with it, whether or not that later event has since been soft-deleted:
+
+| Event      | Can no longer be deleted once                     |
+| ---------- | ------------------------------------------------- |
+| Movement   | any collection event has been recorded against it |
+| Collection | the Movement has been named on any Delivery       |
+| Delivery   | a receipt has been recorded against it            |
+| Receipt    | — (nothing comes after it)                        |
+
+The looser reading — soft-deleting the later event frees the earlier one — was rejected: two deletes in a row could hide the fact that a collection, delivery or receipt ever happened.
+
+**Consequences.** Deletion works backwards from the end of the journey only one step at a time, and only for the latest event. A soft-deleted receipt is put right by restoring and correcting it (`PUT`), not by recording a second receipt: a Delivery has exactly one receipt ([D-015](#d-015)).
 
 <a id="d-017"></a>
 
@@ -532,14 +545,17 @@ To correct a delivery, soft-delete it and record a new one with `POST /deliverie
 
 <a id="d-051"></a>
 
-#### Delivery immutability: why only delivery, and what after a receipt?
+#### Delivery and receipt immutability: what can be put right, and how?
 
-**D-051** · ⏳ Open · Impact: 🟠 Medium · Group: **A5** · Built in: **n/a** · Related: [D-009](#d-009), [D-017](#d-017)
+**D-051** · ⏳ Open · Impact: 🟠 Medium · Group: **A5** · Built in: **n/a** · Related: [D-009](#d-009), [D-017](#d-017), [D-034](#d-034), [D-036](#d-036)
 
-Spun out of [D-017](#d-017), for the BA and policy team:
+Spun out of [D-017](#d-017) and [D-009](#d-009), for the BA and policy team:
 
 1. **Consistency.** Movement and collection `PUT`s accept full updates; delivery accepts only soft-delete. Is delivery deliberately the only event that cannot be edited?
 2. **Correction after a receipt.** Once a receipt is recorded, a delivery can be neither edited nor deleted, so a mistake in it can never be put right. Is that acceptable, or is an exception needed?
+3. ~~**Withdrawing a receipt.**~~ **Resolved:** the BA has confirmed a receipt can be soft-deleted, like the other events ([D-009](#d-009)), by the organisation that recorded it ([D-036](#d-036)), with every version kept ([D-034](#d-034)). Its Delivery still cannot be deleted afterwards ([D-050](#d-050)).
+
+**When.** To be settled when updates and soft-delete are planned for beta-3.
 
 <a id="d-035"></a>
 
@@ -719,7 +735,7 @@ What each beta endpoint returns in `data`:
 
 <a id="d-013"></a>
 
-#### Identifiers are a two-digit year plus a sqids code, and their length is not fixed
+#### Identifiers are a two-digit year plus a sqids code: eight characters, extendable to nine
 
 **D-013** · ✅ Decided · Impact: 🔴 High · Group: **B3** · Built in: **beta-1** · Related: [D-010](#d-010), [D-012](#d-012), [D-024](#d-024), [D-028](#d-028)
 
@@ -727,11 +743,11 @@ What each beta endpoint returns in `data`:
 
 **Decision.** IDs are minted by `waste-tracking-id-backend` from a counter that restarts every year. Each ID is the last two digits of the year followed by the counter encoded with sqids ([sqids.org](https://sqids.org/)) using the characters `A–Z` and `0–9`, at least six characters long — for example `25HRA0B2`.
 
-- **Length is not fixed.** It is at least eight characters and grows as the yearly counter grows; nine-character IDs are already issued. Providers must not assume a fixed length or validate a pattern.
-- **One shared sequence.** Movement IDs, Delivery IDs and the Phase 1 `wasteTrackingId` all come from the same counter, so two different IDs are never the same string — except a hazardous Delivery, whose ID is its Movement ID by design ([D-010](#d-010)).
+- **Eight characters, extendable to nine.** IDs are eight characters today: the year plus six sqids characters. The format allows a seventh sqids character, making nine, if the yearly counter needs it. The beta-2 schemas validate IDs against `^[0-9]{2}[A-Z0-9]{6,7}$`, so providers should accept both lengths.
+- **One shared pool.** Movement IDs, Delivery IDs and the Phase 1 `wasteTrackingId` are generated the same way, from the same counter, so two different IDs are never the same string — except a hazardous Delivery, whose ID is its Movement ID by design ([D-010](#d-010)).
 - **Opaque.** IDs carry no meaning a provider should rely on, beyond being unique.
 
-**Consequences.** The year prefix gives each year a fresh range, so capacity is effectively unlimited. The beta schemas describe IDs as plain strings with no pattern. The target spec describes `wasteTrackingId` the same way.
+**Consequences.** The year prefix gives each year a fresh range, and the seventh character multiplies it by 36 if ever needed, so capacity is ample. Built today: the pattern above on Movement and Delivery IDs in beta-2; beta-1 accepts any string. The target spec describes Movement, Delivery and Phase 1 IDs the same way.
 
 <a id="d-004"></a>
 
@@ -924,7 +940,7 @@ Built today: beta stores the organisation on every Movement and Delivery it reco
 
 **Consequences.** Request bodies are pure domain data — examples, generated bodies and stored requests no longer carry a credential. The beta-2 collection and receipt bodies have no required fields left, so `{}` is a valid request to them. The gateway resolves the header and forwards only the organisation to the backend, never the raw code; the code is masked in its logs and redacted from request logs, like `authorization`.
 
-Built today: beta-2, in the gateway and the backend (DWTC-246). **Gap:** the gateway still falls back to a body `apiCode` on beta-2, from the rollout; the backend now rejects a body `apiCode`, so the fallback can never succeed and can be removed.
+Built today: beta-2, in the gateway and the backend (DWTC-246). The gateway reads the `apiCode` only from the header on beta-2 routes: a request that still sends it in the body gets the `401` for a missing header (gateway #251).
 
 ### B7 Storage
 

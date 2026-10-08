@@ -16,6 +16,7 @@
           "postcode": "TE1 4CR"
         }
       },
+      "dutyOfCareConfirmed": true,
       "brokerOrDealer": {
         "isPresent": true,
         "items": [
@@ -62,7 +63,8 @@
           "fullAddress": "4 Carrier Lane, Test City",
           "postcode": "TE1 4CR"
         }
-      }
+      },
+      "dutyOfCareConfirmed": true
     }
   }
 }

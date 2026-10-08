@@ -16,6 +16,20 @@
           "phoneNumber": "01234567890"
         }
       },
+      "intendedReceivers": [
+        {
+          "siteName": "Receiver Site Ltd",
+          "authorisationNumber": "EAS/P/123456",
+          "receiptAddress": {
+            "fullAddress": "3 Receiver Road, Test City",
+            "postcode": "TE1 3RC"
+          },
+          "contactDetails": {
+            "emailAddress": "receiver@example.com",
+            "phoneNumber": "01234567890"
+          }
+        }
+      ],
       "brokerOrDealer": {
         "isPresent": true,
         "items": [
@@ -81,6 +95,20 @@
           "address": {
             "fullAddress": "4 Carrier Lane, Test City",
             "postcode": "TE1 4CR"
+          }
+        }
+      ],
+      "intendedReceivers": [
+        {
+          "siteName": "Receiver Site Ltd",
+          "authorisationNumber": "EAS/P/123456",
+          "receiptAddress": {
+            "fullAddress": "3 Receiver Road, Test City",
+            "postcode": "TE1 3RC"
+          },
+          "contactDetails": {
+            "emailAddress": "receiver@example.com",
+            "phoneNumber": "01234567890"
           }
         }
       ]
