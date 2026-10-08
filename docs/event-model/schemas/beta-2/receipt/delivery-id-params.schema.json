@@ -10,9 +10,8 @@
   "type": "object",
   "properties": {
     "deliveryId": {
-      "type": "string",
-      "description": "Delivery ID minted by `POST /deliveries`.",
-      "examples": ["25KMT4Z9"]
+      "$ref": "../common/delivery-id.schema.json",
+      "description": "Delivery ID minted by `POST /deliveries`."
     }
   },
   "required": ["deliveryId"],

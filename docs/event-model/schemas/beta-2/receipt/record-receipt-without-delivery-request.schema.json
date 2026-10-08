@@ -12,6 +12,9 @@
         "No delivery was recorded prior to receipt; waste received directly from the producer."
       ]
     },
+    "carrier": {
+      "$ref": "../common/carrier.schema.json"
+    },
     "brokerOrDealer": {
       "$ref": "../common/broker-or-dealer/broker-or-dealer.schema.json"
     },
@@ -19,6 +22,6 @@
       "$ref": "../common/supporting-references.schema.json"
     }
   },
-  "required": ["reason"],
+  "required": ["reason", "carrier"],
   "additionalProperties": false
 }

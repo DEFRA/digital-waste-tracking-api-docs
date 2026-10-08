@@ -6,14 +6,19 @@
   "properties": {
     "movementIds": {
       "type": "array",
-      "items": { "type": "string" },
+      "items": {
+        "$ref": "../common/movement-id.schema.json"
+      },
       "minItems": 1,
       "description": "One or more Movement IDs delivered together at this delivery."
+    },
+    "carrier": {
+      "$ref": "../common/carrier.schema.json"
     },
     "supportingReferences": {
       "$ref": "../common/supporting-references.schema.json"
     }
   },
-  "required": ["movementIds"],
+  "required": ["movementIds", "carrier"],
   "additionalProperties": false
 }
