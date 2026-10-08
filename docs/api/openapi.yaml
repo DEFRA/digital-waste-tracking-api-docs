@@ -890,7 +890,7 @@ components:
     # Parties, treatments and weights shared by the new endpoints.
     # ------------------------------------------------------------------
     carrier:
-      $ref: '../event-model/schemas/beta-2/common/carrier/carrier.schema.json'
+      $ref: '../event-model/schemas/beta-2/common/carrier.schema.json'
 
     # Intended Treatment (D-031) — createWasteItem.intendedTreatments at
     # Creation. Both the code and the weight are required.

@@ -15,6 +15,9 @@
     "carrier": {
       "$ref": "../common/carrier.schema.json"
     },
+    "receiver": {
+      "$ref": "../common/receiver/receiver.schema.json"
+    },
     "brokerOrDealer": {
       "$ref": "../common/broker-or-dealer/broker-or-dealer.schema.json"
     },
@@ -22,6 +25,6 @@
       "$ref": "../common/supporting-references.schema.json"
     }
   },
-  "required": ["reason", "carrier"],
+  "required": ["reason", "carrier", "receiver"],
   "additionalProperties": false
 }
