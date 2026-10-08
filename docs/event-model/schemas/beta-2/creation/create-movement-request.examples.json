@@ -43,7 +43,23 @@
           "reference": "CARRIER-JOB-001"
         }
       ],
-      "specialHandlingRequirements": "Handle with care and keep upright."
+      "specialHandlingRequirements": "Handle with care and keep upright.",
+      "intendedCarriers": [
+        {
+          "organisationName": "Carrier Demo Ltd",
+          "registrationNumber": "CBDU123456",
+          "meansOfTransport": "Road",
+          "vehicleRegistration": "AB12 CDE",
+          "contactDetails": {
+            "emailAddress": "carrier@example.com",
+            "phoneNumber": "01234567890"
+          },
+          "address": {
+            "fullAddress": "4 Carrier Lane, Test City",
+            "postcode": "TE1 4CR"
+          }
+        }
+      ]
     }
   },
   "household": {
@@ -51,7 +67,23 @@
     "value": {
       "producer": {
         "wasteSource": "Household"
-      }
+      },
+      "intendedCarriers": [
+        {
+          "organisationName": "Carrier Demo Ltd",
+          "registrationNumber": "CBDU123456",
+          "meansOfTransport": "Road",
+          "vehicleRegistration": "AB12 CDE",
+          "contactDetails": {
+            "emailAddress": "carrier@example.com",
+            "phoneNumber": "01234567890"
+          },
+          "address": {
+            "fullAddress": "4 Carrier Lane, Test City",
+            "postcode": "TE1 4CR"
+          }
+        }
+      ]
     }
   }
 }

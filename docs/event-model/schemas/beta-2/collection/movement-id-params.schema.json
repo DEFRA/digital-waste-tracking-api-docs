@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Movement ID params",
+  "description": "Path params for POST /beta-2/movements/{movementId}/collection.",
+  "examples": [
+    {
+      "movementId": "25HRA0B2"
+    }
+  ],
+  "type": "object",
+  "properties": {
+    "movementId": {
+      "$ref": "../common/movement-id.schema.json",
+      "description": "Movement ID minted by `POST /movements`."
+    }
+  },
+  "required": ["movementId"],
+  "additionalProperties": false
+}

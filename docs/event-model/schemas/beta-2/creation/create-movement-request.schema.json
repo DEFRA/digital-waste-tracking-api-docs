@@ -7,6 +7,14 @@
     "producer": {
       "$ref": "../common/producer/producer.schema.json"
     },
+    "intendedCarriers": {
+      "type": "array",
+      "items": {
+        "$ref": "../common/carrier.schema.json"
+      },
+      "minItems": 1,
+      "description": "The carriers intended to transport the waste. At least one is required."
+    },
     "brokerOrDealer": {
       "$ref": "../common/broker-or-dealer/broker-or-dealer.schema.json"
     },
@@ -17,6 +25,6 @@
       "$ref": "../common/special-handling-requirements.schema.json"
     }
   },
-  "required": ["producer"],
+  "required": ["producer", "intendedCarriers"],
   "additionalProperties": false
 }
