@@ -34,12 +34,14 @@ Feature: Creating a Collection
     Then the Collection isn't created
     And they should be informed that the Movement ID is unrecognised
 
+  # The Movement ID is part of the path, so a request without one matches no
+  # endpoint and is answered with the generic not-found problem.
   Scenario: A Collection isn't created when a Movement ID is not provided
     Given they have valid Collection data
     And they have no Movement ID
     When they submit the Collection
     Then the Collection isn't created
-    And they should be informed that a Movement ID is required
+    And they should be informed that the endpoint was not found
 
   Scenario: A Collection isn't created when malformed data is provided
     Given they have malformed Collection data

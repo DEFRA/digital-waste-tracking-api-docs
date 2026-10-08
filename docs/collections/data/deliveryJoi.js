@@ -21,7 +21,8 @@
  * in this request schema — it is performed server-side. Every non-hazardous
  * Movement is aggregated under one newly-minted deliveryId; every hazardous
  * Movement becomes its own delivery entry. This schema validates the request
- * only — see deliveryTypes.ts for the response shape (deliveries[]).
+ * only — the response shape (data.deliveries[]) is defined by the synced
+ * beta-2 response schema.
  */
 
 import Joi from 'joi'
@@ -36,7 +37,7 @@ import {
 // Delivery site
 // ---------------------------------------------------------------------------
 
-// Exported for testing (see test/event-model/schema/delivery/). Built from
+// Exported so other draft files can compose it. Built from
 // the shared addressSchema (sharedSchemas.js) via requiredFullAddressSchema —
 // kept under this name since existing tests/consumers import it as
 // deliverySiteAddressSchema.

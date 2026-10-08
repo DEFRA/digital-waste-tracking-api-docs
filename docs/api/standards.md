@@ -100,8 +100,8 @@ Agree one convention per concern and apply it uniformly to the endpoints we buil
   ```json
   // 400 — validation   (Content-Type: application/problem+json)
   {
-    "type": "https://waste-tracking.service.gov.uk/problems/validation-error",
-    "title": "Request validation failed",
+    "type": "https://defra.github.io/digital-waste-tracking-api-docs/preview/problems/bad-request",
+    "title": "Bad Request",
     "detail": "The receipt could not be stored because 2 fields are invalid.",
     "instance": "/movements/25HRA0B2/receive",
     "requestId": "…",
@@ -112,7 +112,7 @@ Agree one convention per concern and apply it uniformly to the endpoints we buil
   }
   // 404 / 401 / 500   (no field errors)
   {
-    "type": "https://waste-tracking.service.gov.uk/problems/movement-not-found",
+    "type": "https://defra.github.io/digital-waste-tracking-api-docs/preview/problems/movement-not-found",
     "title": "Waste movement not found",
     "detail": "No waste movement exists with tracking ID 25HRA0B2.",
     "instance": "/movements/25HRA0B2",
@@ -126,7 +126,7 @@ Agree one convention per concern and apply it uniformly to the endpoints we buil
 
 - **`5xx`** uses the same Problem Details shape, with `detail` never leaking internals (stack traces, downstream errors). All error responses set `Content-Type: application/problem+json`.
 
-- **`type` URIs are minted under a stable base** — `https://waste-tracking.service.gov.uk/problems/…` — ideally resolving to a short docs page per problem type.
+- **`type` URIs resolve to the published [Problem types](../problems/index.md) pages** on this docs site — `https://defra.github.io/digital-waste-tracking-api-docs/…/problems/<type>` — so each `type` a developer receives opens a page explaining it. This is the base the service uses today.
 
 ### 4. Pagination
 

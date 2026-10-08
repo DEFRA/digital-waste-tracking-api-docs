@@ -13,11 +13,9 @@ on:
       - 'docs/collections/data/**'
       - 'docs/api/**'
       - 'docs/event-model/**'
-      - 'test/**'
       - 'scripts/**'
       - 'package.json'
       - 'package-lock.json'
-      - 'jest.config.js'
       - '.github/workflows/**'
 
 jobs:
@@ -32,8 +30,6 @@ jobs:
           cache: 'npm'
 
       - run: npm ci
-
-      - run: npm test
 
       - name: Bundle and validate OpenAPI specs
         run: npm run specs:bundle

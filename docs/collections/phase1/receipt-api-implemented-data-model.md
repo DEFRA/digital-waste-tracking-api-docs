@@ -8,6 +8,10 @@ robots: noindex, nofollow
 !!! warning "Internal documentation"
     This page is internal design/planning material for the delivery team, not published guidance for Software Providers integrating with the Digital Waste Tracking API. Content here may be incomplete, in-progress, or superseded.
 
+<!-- prettier-ignore -->
+!!! info "Phase 1 — live and unchanged"
+    This page describes the live Phase 1 Receipt of Waste API, which is not changed until a migration to Phase 2 is documented ([D-023](../decisions.md#d-023)). The authoritative definition is the live [Receipt of Waste API reference](https://defra.github.io/waste-tracking-service/production/apiSpecifications/).
+
 # Current Receipt API Waste Movement Data Model
 
 ## Scope

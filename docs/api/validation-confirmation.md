@@ -10,7 +10,7 @@ robots: noindex, nofollow
 
 <!-- prettier-ignore -->
 !!! info "Draft proposal — not decided"
-    This is a **draft proposal for team discussion**, not an agreed position. Nothing here is decided, and no entry exists for it in the [decisions register](../collections/decisions.md) — the register still records the accept-with-warnings behaviour this pitch proposes to replace ([D-031](../collections/decisions.md#d-031), [D-039](../collections/decisions.md#d-039)). The current behaviour stands until this is agreed and recorded. The [follow-up](#follow-up-if-adopted) section lists what would need to change if it is.
+    This is a **draft proposal for team discussion**, not an agreed position. Nothing here is decided: it is tracked as the open question [D-046](../collections/decisions.md#d-046) in the decisions register, which still records the accept-with-warnings behaviour this pitch proposes to replace ([D-031](../collections/decisions.md#d-031), [D-039](../collections/decisions.md#d-039)). The current behaviour stands until this is agreed and recorded. The [follow-up](#follow-up-if-adopted) section lists what would need to change if it is.
 
 # Validation Confirmation
 
@@ -28,7 +28,7 @@ Replace **accept-with-warnings** on new endpoints with **reject-and-confirm**. A
 
 ## Baseline
 
-The service accepts a request that has soft, data-quality problems, stores the record, and returns those problems as `validation.warnings` on a `201`/`200`. This was inherited from the Phase 1 Receipt of Waste API when the [API Standards](standards.md) pitch was written, and carried forward into the `beta` contract: `api/openapi-beta-2.yaml` marks `validation` as `required` on every success response schema, so a warnings array is part of the promised shape whether or not there are warnings.
+The service accepts a request that has soft, data-quality problems, stores the record, and returns those problems as `validation.warnings` on a `201`/`200`. This was inherited from the Phase 1 Receipt of Waste API when the [API Standards](standards.md) pitch was written, and carried forward into the `beta` contract: the beta-2 spec (`beta-2/openapi.json`) marks `validation` as `required` on every success response schema, so a warnings array is part of the promised shape whether or not there are warnings.
 
 Four things about that baseline are worth stating precisely, because the argument turns on them.
 
@@ -218,7 +218,7 @@ Nothing below has been done. Grouped by where the work lands, because a decision
 ### This repo — standards and register
 
 - **Rework [API Standards](standards.md)**: the accept-with-warnings bullet in TL;DR, the "Accept-with-warnings" paragraph in Solution, the reject-vs-warn bullet in Topic 1, and the whole of Topic 2 including its `validation` examples and the shared warning/error item shape.
-- **Add a new decision entry.** Next free ID is **D-046** (D-045 is the current highest). Per the register's conventions this needs both the body entry in ID order and a row in the ranked Index table near the top.
+- **Close [D-046](../collections/decisions.md#d-046)** in the decisions register, the open question this proposal answers, and update its row in the Index.
 - **Amend [D-031](../collections/decisions.md#d-031)**, whose last sentence reads "Omitting the code produces a warning, not a rejection".
 - **Update [D-039](../collections/decisions.md#d-039)**'s summary bullets, which describe the reject-vs-warn model and the `2xx` envelope.
 - **Update [D-006](../collections/decisions.md#d-006)** and the glossary entry it drives (`collections/glossary.md`, cross-check definition: "Mismatches return validation warnings rather than hard errors"), plus the matching claim in `collections/plan.md` for `POST /deliveries/{deliveryId}/receipt`.

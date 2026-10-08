@@ -34,7 +34,7 @@ import {
 // Collection site
 // ---------------------------------------------------------------------------
 
-// Exported for testing (see test/event-model/schema/collection/). Built from
+// Exported so other draft files can compose it. Built from
 // the shared addressSchema (sharedSchemas.js) via requiredFullAddressSchema —
 // kept under this name since existing tests/consumers import it as
 // collectionAddressSchema.

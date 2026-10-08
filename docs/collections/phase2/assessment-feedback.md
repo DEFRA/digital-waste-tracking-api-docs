@@ -8,6 +8,10 @@ robots: noindex, nofollow
 !!! warning "Internal documentation"
     This page is internal design/planning material for the delivery team, not published guidance for Software Providers integrating with the Digital Waste Tracking API. Content here may be incomplete, in-progress, or superseded.
 
+<!-- prettier-ignore -->
+!!! info "Since this was written"
+    This page records the assessment advice and the findings as they stood in July 2026. Since then: API versioning has been decided — a path prefix during beta, unversioned at general availability ([D-038](../decisions.md#d-038)); every spec is OpenAPI 3.1 ([D-003](../decisions.md#d-003)); and the Phase 1 receipt endpoints are live and unchanged, with their retirement still open ([D-022](../decisions.md#d-022), [D-023](../decisions.md#d-023)).
+
 # Assessment Feedback
 
 Records advice from the GDS Alpha service assessment (23 July 2026) relevant to the Phase 2 collections work, alongside the current-state findings gathered in response for each point. This is a context/findings record, not a decision — see [Decisions](../decisions.md) for the formal register.

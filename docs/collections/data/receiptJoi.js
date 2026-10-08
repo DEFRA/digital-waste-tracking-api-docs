@@ -10,8 +10,8 @@ import Joi from 'joi'
  * This file keeps the Receipt schema, nested schemas, allowed values and field descriptions together.
  * Shared sub-schemas (weight, other-reference, carrier, broker/dealer, treatments, receiverSite, etc.)
  * are imported from sharedSchemas.js, like the other three event files. Only genuinely Receipt-specific
- * shapes — receiptWasteItem — are defined locally here, and exported for testing
- * (see test/event-model/schema/receipt/).
+ * shapes — receiptWasteItem — are defined locally here, and exported so other
+ * draft files can compose them.
  *
  * carrier and brokerOrDealer use the shared carrierSchema/brokerSchema (sharedSchemas.js) rather than
  * local duplicates, so this endpoint picks up the same registrationNumber/reasonForNoRegistrationNumber
@@ -73,7 +73,7 @@ const validateReceiptConsignmentRules = (movement, helpers) => {
  * Creation record already carries ewcCodes, wasteDescription, pops and
  * hazardous detail. Only the logistics fields plus actualTreatments remain.
  */
-// Exported for testing (see test/event-model/schema/receipt/).
+// Exported so other draft files can compose it.
 export const receiptWasteItemSchema = Joi.object({
   weight: weightSchema
     .required()

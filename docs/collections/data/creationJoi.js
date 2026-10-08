@@ -122,7 +122,7 @@ const validateCreationRules = (movement, helpers) => {
 // ordinary Receipt endpoint's wasteItem, which drops classification entirely).
 // ---------------------------------------------------------------------------
 
-// Exported for testing (see test/event-model/schema/creation/).
+// Exported so other draft files can compose it.
 export const createWasteItemSchema = wasteItemBaseSchema
   .keys({
     intendedTreatments: Joi.array()
@@ -165,7 +165,7 @@ const plannedCollectionAddressSchema = addressSchema
     'Address where the waste is planned to be collected, when different from producer.address. Both fullAddress and postcode are required.'
   )
 
-// Exported for testing (see test/event-model/schema/common/receiver.test.js).
+// Exported so other draft files can compose it.
 export const intendedReceiverSchema = Joi.object({
   siteName: Joi.string()
     .required()

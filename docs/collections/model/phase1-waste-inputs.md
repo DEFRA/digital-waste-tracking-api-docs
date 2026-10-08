@@ -44,7 +44,7 @@ Operational holding collection for update attempts that could not be applied, fo
 
 ## Current persisted shape
 
-The current domain object in `waste-movement-backend` exposes these top-level fields ([wasteInput.js](C:/Applications/EqualExperts/Defra/WasteTracking/Repos/waste-movement-backend/src/domain/wasteInput.js:1)):
+The current domain object in `waste-movement-backend` exposes these top-level fields ([wasteInput.js](https://github.com/DEFRA/waste-movement-backend/blob/main/src/domain/wasteInput.js#L1)):
 
 ```javascript
 {
@@ -68,7 +68,7 @@ In the live Phase 1 receipt flow, the create route currently writes:
 - either `orgId` or `submittingOrganisation`
 - `receipt.movement`
 
-See [create-receipt-movement.js](C:/Applications/EqualExperts/Defra/WasteTracking/Repos/waste-movement-backend/src/routes/create-receipt-movement.js:47).
+See [create-receipt-movement.js](https://github.com/DEFRA/waste-movement-backend/blob/main/src/routes/create-receipt-movement.js#L47).
 
 The create service then adds:
 
@@ -77,7 +77,7 @@ The create service then adds:
 - `createdAt`
 - `lastUpdatedAt`
 
-See [movement-create.js](C:/Applications/EqualExperts/Defra/WasteTracking/Repos/waste-movement-backend/src/services/movement-create.js:8).
+See [movement-create.js](https://github.com/DEFRA/waste-movement-backend/blob/main/src/services/movement-create.js#L8).
 
 ## Example `waste-inputs` document
 
@@ -123,7 +123,7 @@ Illustrative shape based on the current Phase 1 receipt write path:
 }
 ```
 
-The exact nested payload shape is driven by the receipt request schema and can be seen in the Phase 1 receipt examples under [receiptEvent.js](C:/Applications/EqualExperts/Defra/WasteTracking/Repos/waste-tracking-service/docs/collections/data/receiptEvent.js:1).
+The exact nested payload shape is driven by the receipt request schema and can be seen in the Phase 1 receipt examples under [receiptEvent.js](../data/receiptEvent.js).
 
 ## Revision model
 
@@ -133,7 +133,7 @@ The current backend uses document revisioning rather than event sourcing.
 - each successful update increments `revision`
 - the prior full document is copied into `waste-inputs-history`
 
-The history entry is created by shallow-copying the previous live document, adding `timestamp`, and removing `_id` ([create-history-entry.js](C:/Applications/EqualExperts/Defra/WasteTracking/Repos/waste-movement-backend/src/common/helpers/create-history-entry.js:1)).
+The history entry is created by shallow-copying the previous live document, adding `timestamp`, and removing `_id` ([create-history-entry.js](https://github.com/DEFRA/waste-movement-backend/blob/main/src/common/helpers/create-history-entry.js#L1)).
 
 ## Example `waste-inputs-history` document
 
@@ -156,7 +156,7 @@ The history entry is created by shallow-copying the previous live document, addi
 
 ## Current indexes
 
-The backend currently creates these indexes ([mongodb.js](C:/Applications/EqualExperts/Defra/WasteTracking/Repos/waste-movement-backend/src/common/helpers/mongodb.js:72)):
+The backend currently creates these indexes ([mongodb.js](https://github.com/DEFRA/waste-movement-backend/blob/main/src/common/helpers/mongodb.js#L72)):
 
 ### `waste-inputs`
 
@@ -175,7 +175,7 @@ The backend currently creates these indexes ([mongodb.js](C:/Applications/EqualE
 
 The live update route updates `receipt.movement` in place rather than appending a new business event object.
 
-See [update-receipt-movement.js](C:/Applications/EqualExperts/Defra/WasteTracking/Repos/waste-movement-backend/src/routes/update-receipt-movement.js:13) and [movement-update.js](C:/Applications/EqualExperts/Defra/WasteTracking/Repos/waste-movement-backend/src/services/movement-update.js:55).
+See [update-receipt-movement.js](https://github.com/DEFRA/waste-movement-backend/blob/main/src/routes/update-receipt-movement.js#L13) and [movement-update.js](https://github.com/DEFRA/waste-movement-backend/blob/main/src/services/movement-update.js#L55).
 
 This is a key distinction from the proposed Phase 2 model:
 
