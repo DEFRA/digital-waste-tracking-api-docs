@@ -31,11 +31,11 @@ During beta every endpoint is served under a version prefix — `/beta-1/movemen
 
 | Repo | Phase 2 work | Team |
 | --- | --- | --- |
-| `waste-movement-external-api` | Public beta routes: authentication, `apiCode` → organisation lookup, forwarding to the backend. No payload validation of its own. | **Team C** |
-| `waste-movement-backend` | JSON Schemas for every request and response ([D-052](decisions.md#d-052)), validation, business rules, persistence | **Team C** |
-| `waste-tracking-id-backend` | Movement and Delivery IDs, from the same sequence as the Phase 1 `wasteTrackingId` ([D-013](decisions.md#d-013)) | **Team C** |
-| `waste-organisation-backend` | `apiCode` issuance and lookup for every actor type ([D-027](decisions.md#d-027)) | **Team A/B** |
-| `waste-organisation-frontend` | Self-service API code management, already open to every actor type | **Team A/B** |
+| `waste-movement-external-api` | Public beta routes: authentication, `apiCode` → organisation lookup, forwarding to the backend. No payload validation of its own. | **Team A/C** |
+| `waste-movement-backend` | JSON Schemas for every request and response ([D-052](decisions.md#d-052)), validation, business rules, persistence | **Team A/C** |
+| `waste-tracking-id-backend` | Movement and Delivery IDs, from the same sequence as the Phase 1 `wasteTrackingId` ([D-013](decisions.md#d-013)) | **Team A/C** |
+| `waste-organisation-backend` | `apiCode` issuance and lookup for every actor type ([D-027](decisions.md#d-027)) | **Team B** |
+| `waste-organisation-frontend` | Self-service API code management, already open to every actor type | **Team B** |
 | `digital-waste-tracking-api-docs` | Target spec, synced beta specs and schemas, decisions register | **Team C** |
 
 ---
@@ -115,6 +115,3 @@ Every request carries an `apiCode`: in the `x-api-code` header from beta-2, in t
 | 6 | Decide the storage model ([D-037](decisions.md#d-037)) before beta-3 | Team C + architects |
 | 7 | Return the specific 404 problem types ([D-014](decisions.md#d-014)) when `PUT` is built | Team C |
 | 8 | Build the `Deprecation` header ([D-038](decisions.md#d-038)) before the first beta version is retired | Team C |
-| 9 | Remove the gateway's beta-2 fallback to a body `apiCode`, which can no longer succeed ([D-053](decisions.md#d-053)) | Team C |
-
-Done: `apiCode` issuance confirmed role-agnostic ([registration.md](registration.md)); Movement and Delivery IDs confirmed to share one sequence ([D-013](decisions.md#d-013)); `POST /movements` and the other four journey endpoints built in beta-1 and beta-2.

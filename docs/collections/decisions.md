@@ -940,7 +940,7 @@ Built today: beta stores the organisation on every Movement and Delivery it reco
 
 **Consequences.** Request bodies are pure domain data — examples, generated bodies and stored requests no longer carry a credential. The beta-2 collection and receipt bodies have no required fields left, so `{}` is a valid request to them. The gateway resolves the header and forwards only the organisation to the backend, never the raw code; the code is masked in its logs and redacted from request logs, like `authorization`.
 
-Built today: beta-2, in the gateway and the backend (DWTC-246). **Gap:** the gateway still falls back to a body `apiCode` on beta-2, from the rollout; the backend now rejects a body `apiCode`, so the fallback can never succeed and can be removed.
+Built today: beta-2, in the gateway and the backend (DWTC-246). The gateway reads the `apiCode` only from the header on beta-2 routes: a request that still sends it in the body gets the `401` for a missing header (gateway #251).
 
 ### B7 Storage
 
