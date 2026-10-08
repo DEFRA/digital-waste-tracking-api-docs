@@ -35,7 +35,6 @@ The drafts stopped being updated when the backend schemas became the source of t
 | `producer.councilMovement` | Not on the producer; parked as an open question ([D-049](../decisions.md#d-049)) |
 | Producer with flat fields (already marked `@deprecated`) | The beta-2 producer schema, by waste source ([D-047](../decisions.md#d-047)) |
 | Transit collection editing and soft-delete rules (tail only) | Still open ([D-035](../decisions.md#d-035)) |
-| "8-character" identifiers | No fixed length ([D-013](../decisions.md#d-013)) |
 
 Where the drafts and the target disagree, the target wins. The precise rules for a field live in the target spec's descriptions, the decisions register, and — for formats — `waste-movement-utils` (`src/constants/regexes.js`), which the live service uses.
 

@@ -80,8 +80,8 @@ components:
       required: true
       description: |
         Movement ID minted by `POST /movements`. A two-digit year followed by
-        a sqids code (https://sqids.org/); the length is not fixed (D-013).
-        Treat it as opaque: do not parse it or validate a pattern.
+        a sqids code (https://sqids.org/): eight characters today, nine if
+        the yearly counter needs it (D-013). Treat it as opaque.
       schema:
         $ref: '../event-model/schemas/beta-2/common/movement-id.schema.json'
 
@@ -93,7 +93,7 @@ components:
         Delivery ID minted by `POST /deliveries`, covering one or more
         Movement IDs delivered together at a single receiver site. Same
         format as the Movement ID: a two-digit year followed by a sqids code,
-        of no fixed length (D-013). Treat it as opaque.
+        eight characters today, nine if needed (D-013). Treat it as opaque.
 
         Exception: each hazardous Movement becomes its own Delivery, and its
         Delivery ID is the Movement ID itself rather than a newly minted one
@@ -136,7 +136,7 @@ components:
         `POST /movements/receive` and used to address
         `PUT /movements/{wasteTrackingId}/receive`. Same format as the
         Movement and Delivery IDs, and drawn from the same sequence: a
-        two-digit year followed by a sqids code, of no fixed length (D-013).
+        two-digit year followed by a sqids code, eight characters today and nine if needed (D-013).
         Treat it as opaque. It is not a Movement ID (D-004).
       example: 25HRA0B2
 
