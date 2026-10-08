@@ -4,6 +4,9 @@
   "description": "Payload for POST /beta-2/deliveries/{deliveryId}/receipt.",
   "type": "object",
   "properties": {
+    "carrier": {
+      "$ref": "../common/carrier.schema.json"
+    },
     "brokerOrDealer": {
       "$ref": "../common/broker-or-dealer/broker-or-dealer.schema.json"
     },
@@ -11,5 +14,6 @@
       "$ref": "../common/supporting-references.schema.json"
     }
   },
+  "required": ["carrier"],
   "additionalProperties": false
 }

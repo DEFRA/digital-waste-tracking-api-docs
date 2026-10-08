@@ -58,7 +58,8 @@
         "description": "Movement ID minted by `POST /movements`.",
         "schema": {
           "$ref": "#/components/schemas/movementId"
-        }
+        },
+        "example": "25HRA0B2"
       },
       "deliveryIdPath": {
         "name": "deliveryId",
@@ -67,12 +68,14 @@
         "description": "Delivery ID minted by `POST /deliveries`.",
         "schema": {
           "$ref": "#/components/schemas/deliveryId"
-        }
+        },
+        "example": "25KMT4Z9"
       }
     },
     "headers": {
       "RequestId": {
         "description": "Trace id for this request. Quote it to support if something goes wrong.",
+        "required": true,
         "schema": {
           "type": "string",
           "example": "4c6f9e1a-8f2b-4e3d-9a1c-2b7d5e6f0a3c"
@@ -254,6 +257,22 @@
                   }
                 }
               }
+            },
+            "links": {
+              "RecordCollection": {
+                "operationId": "recordCollection",
+                "description": "The returned `movementId` identifies the movement whose collection is recorded.",
+                "parameters": {
+                  "movementId": "$response.body#/data/movementId"
+                }
+              },
+              "RecordDelivery": {
+                "operationId": "recordDelivery",
+                "description": "The returned `movementId` can be included in the `movementIds` of a delivery.",
+                "requestBody": {
+                  "movementIds": ["$response.body#/data/movementId"]
+                }
+              }
             }
           },
           "400": {
@@ -393,6 +412,15 @@
                   "twoMovements": {
                     "$ref": "./delivery/record-delivery-response.examples.json#/twoMovements"
                   }
+                }
+              }
+            },
+            "links": {
+              "RecordReceipt": {
+                "operationId": "recordReceipt",
+                "description": "Each returned `deliveryId` identifies a delivery whose receipt is recorded.",
+                "parameters": {
+                  "deliveryId": "$response.body#/data/deliveries/0/deliveryId"
                 }
               }
             }

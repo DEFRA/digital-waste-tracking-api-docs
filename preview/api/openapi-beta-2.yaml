@@ -40,10 +40,12 @@ components:
       schema:
         $schema: https://json-schema.org/draft/2020-12/schema
         title: Movement ID
-        description: Unique identifier for a waste movement, minted by the server on `POST /movements`.
+        description: 'Unique identifier for a waste movement, minted by the server on `POST /movements`. Format: a two-digit year prefix followed by six or seven characters from A–Z and 0–9, 8 or 9 characters in all. Movement IDs and Delivery IDs share this format. Treat it as opaque: don''t parse it.'
         type: string
+        pattern: ^[0-9]{2}[A-Z0-9]{6,7}$
         examples:
           - 25HRA0B2
+      example: 25HRA0B2
     deliveryIdPath:
       name: deliveryId
       in: path
@@ -52,13 +54,16 @@ components:
       schema:
         $schema: https://json-schema.org/draft/2020-12/schema
         title: Delivery ID
-        description: Unique identifier for a delivery, minted by the server on `POST /deliveries`.
+        description: 'Unique identifier for a delivery, minted by the server on `POST /deliveries`. Format: a two-digit year prefix followed by six or seven characters from A–Z and 0–9, 8 or 9 characters in all. Movement IDs and Delivery IDs share this format. Treat it as opaque: don''t parse it.'
         type: string
+        pattern: ^[0-9]{2}[A-Z0-9]{6,7}$
         examples:
           - 25KMT4Z9
+      example: 25KMT4Z9
   headers:
     RequestId:
       description: Trace id for this request. Quote it to support if something goes wrong.
+      required: true
       schema:
         type: string
         example: 4c6f9e1a-8f2b-4e3d-9a1c-2b7d5e6f0a3c
@@ -66,15 +71,17 @@ components:
     movementId:
       $schema: https://json-schema.org/draft/2020-12/schema
       title: Movement ID
-      description: Unique identifier for a waste movement, minted by the server on `POST /movements`.
+      description: 'Unique identifier for a waste movement, minted by the server on `POST /movements`. Format: a two-digit year prefix followed by six or seven characters from A–Z and 0–9, 8 or 9 characters in all. Movement IDs and Delivery IDs share this format. Treat it as opaque: don''t parse it.'
       type: string
+      pattern: ^[0-9]{2}[A-Z0-9]{6,7}$
       examples:
         - 25HRA0B2
     deliveryId:
       $schema: https://json-schema.org/draft/2020-12/schema
       title: Delivery ID
-      description: Unique identifier for a delivery, minted by the server on `POST /deliveries`.
+      description: 'Unique identifier for a delivery, minted by the server on `POST /deliveries`. Format: a two-digit year prefix followed by six or seven characters from A–Z and 0–9, 8 or 9 characters in all. Movement IDs and Delivery IDs share this format. Treat it as opaque: don''t parse it.'
       type: string
+      pattern: ^[0-9]{2}[A-Z0-9]{6,7}$
       examples:
         - 25KMT4Z9
     createMovementRequest:
@@ -365,6 +372,152 @@ components:
                   - sicCode
                   - contactDetails
                   - address
+        intendedCarriers:
+          type: array
+          items:
+            $schema: https://json-schema.org/draft/2020-12/schema
+            title: Carrier
+            description: A single waste carrier. organisationName, meansOfTransport and contactDetails are required, and exactly one of registrationNumber or reasonForNoRegistrationNumber must be provided. vehicleRegistration is required for Road and otherMeansOfTransport for Other; each is forbidden otherwise. address is optional.
+            type: object
+            oneOf:
+              - required:
+                  - registrationNumber
+                properties:
+                  registrationNumber: {}
+                  reasonForNoRegistrationNumber:
+                    not: {}
+                    description: Not allowed when registrationNumber is provided.
+              - required:
+                  - reasonForNoRegistrationNumber
+                properties:
+                  registrationNumber:
+                    not: {}
+                    description: Not allowed when reasonForNoRegistrationNumber is provided.
+                  reasonForNoRegistrationNumber: {}
+            allOf:
+              - if:
+                  properties:
+                    meansOfTransport:
+                      const: Road
+                  required:
+                    - meansOfTransport
+                then:
+                  properties:
+                    vehicleRegistration: {}
+                  required:
+                    - vehicleRegistration
+                else:
+                  properties:
+                    vehicleRegistration:
+                      not: {}
+                      description: Not allowed unless meansOfTransport is Road.
+              - if:
+                  properties:
+                    meansOfTransport:
+                      const: Other
+                  required:
+                    - meansOfTransport
+                then:
+                  properties:
+                    otherMeansOfTransport: {}
+                  required:
+                    - otherMeansOfTransport
+                else:
+                  properties:
+                    otherMeansOfTransport:
+                      not: {}
+                      description: Not allowed unless meansOfTransport is Other.
+            properties:
+              organisationName:
+                type: string
+                minLength: 1
+                description: Name of the carrier organisation.
+              registrationNumber:
+                description: Waste carrier registration number, in a valid UK home-nation format (England and NRW CBDU/CBDL, SEPA WCR/SCO/SEA/SNO/SWE and PCT, NI ROC UT/LT). Mutually exclusive with reasonForNoRegistrationNumber — exactly one of the two is required.
+                $schema: https://json-schema.org/draft/2020-12/schema
+                title: Registration number
+                type: string
+                pattern: ^\s*(?:[Cc][Bb][Dd][LlUu]\d{3,}|[Ww][Cc][Rr]/[Rr]/\d{7}|(?:[Ss][Cc][Oo]|[Ss][Ee][Aa]|[Ss][Nn][Oo]|[Ss][Ww][Ee]|[Ww][Cc][Rr])/\d{6}|[Pp][Cc][Tt]-[A-Za-z]-\d{3,7}|[Rr][Oo][Cc]\W*[UuLl][Tt]\W*\d{1,5})\s*$
+              reasonForNoRegistrationNumber:
+                type: string
+                enum:
+                  - ON_SITE
+                  - HOUSEHOLD
+                  - ONE_OFF
+                  - MARINE
+                description: Why the carrier has no registration number. Mutually exclusive with registrationNumber — exactly one of the two is required.
+              meansOfTransport:
+                type: string
+                enum:
+                  - Road
+                  - Rail
+                  - Air
+                  - Sea
+                  - Inland Waterway
+                  - Piped
+                  - Other
+                description: How the carrier will transport the waste.
+              vehicleRegistration:
+                type: string
+                minLength: 1
+                description: Registration of the vehicle carrying the waste. Required when meansOfTransport is Road; forbidden otherwise.
+              otherMeansOfTransport:
+                type: string
+                minLength: 1
+                description: Description of the means of transport. Required when meansOfTransport is Other; forbidden otherwise.
+              contactDetails:
+                $schema: https://json-schema.org/draft/2020-12/schema
+                title: Contact details
+                description: Contact details for a party. At least one of emailAddress or phoneNumber must be provided.
+                examples:
+                  - emailAddress: producer@example.com
+                    phoneNumber: '01234567890'
+                  - emailAddress: producer@example.com
+                type: object
+                properties:
+                  emailAddress:
+                    type: string
+                    format: email
+                    description: Contact email address.
+                  phoneNumber:
+                    type: string
+                    pattern: ^\s*(?=(?:\D*\d){7,15}\D*$)\+?[0-9()\-\s]+$
+                    description: Contact phone number, in a valid format.
+                anyOf:
+                  - properties:
+                      emailAddress: {}
+                    required:
+                      - emailAddress
+                  - properties:
+                      phoneNumber: {}
+                    required:
+                      - phoneNumber
+              address:
+                $schema: https://json-schema.org/draft/2020-12/schema
+                title: Address
+                description: A UK or Irish postal address. fullAddress is optional; postcode is required.
+                examples:
+                  - fullAddress: 10 Industrial Way, Test City
+                    postcode: TE1 2PQ
+                type: object
+                properties:
+                  fullAddress:
+                    type: string
+                    minLength: 1
+                    description: Full address line.
+                  postcode:
+                    type: string
+                    pattern: ^\s*(?:(?:(([Gg][Ii][Rr] 0[Aa]{2})|((([A-Za-z]\d{1,2})|(([A-Za-z][A-Ha-hJ-Yj-y]\d{1,2})|(([A-Za-z]\d[A-Za-z])|([A-Za-z][A-Ha-hJ-Yj-y]\d?[A-Za-z])))) \d[A-Za-z]{2})))|(?:(?:[Dd]6[Ww]|[AaC-Fc-fHhKkNnPpRrTtV-Yv-y]\d{2}) ?[0-9AaC-Fc-fHhKkNnPpRrTtV-Yv-y]{4}))\s*$
+                    description: Accepts UK postcodes and Irish Eircodes.
+                required:
+                  - postcode
+            required:
+              - organisationName
+              - meansOfTransport
+              - contactDetails
+            additionalProperties: false
+          minItems: 1
+          description: The carriers intended to transport the waste. At least one is required.
         brokerOrDealer:
           $schema: https://json-schema.org/draft/2020-12/schema
           title: Broker or dealer involvement
@@ -548,6 +701,7 @@ components:
           maxLength: 500
       required:
         - producer
+        - intendedCarriers
       additionalProperties: false
     recordCollectionRequest:
       $schema: https://json-schema.org/draft/2020-12/schema
@@ -555,6 +709,148 @@ components:
       description: Payload for POST /beta-2/movements/{movementId}/collection.
       type: object
       properties:
+        carrier:
+          $schema: https://json-schema.org/draft/2020-12/schema
+          title: Carrier
+          description: A single waste carrier. organisationName, meansOfTransport and contactDetails are required, and exactly one of registrationNumber or reasonForNoRegistrationNumber must be provided. vehicleRegistration is required for Road and otherMeansOfTransport for Other; each is forbidden otherwise. address is optional.
+          type: object
+          oneOf:
+            - required:
+                - registrationNumber
+              properties:
+                registrationNumber: {}
+                reasonForNoRegistrationNumber:
+                  not: {}
+                  description: Not allowed when registrationNumber is provided.
+            - required:
+                - reasonForNoRegistrationNumber
+              properties:
+                registrationNumber:
+                  not: {}
+                  description: Not allowed when reasonForNoRegistrationNumber is provided.
+                reasonForNoRegistrationNumber: {}
+          allOf:
+            - if:
+                properties:
+                  meansOfTransport:
+                    const: Road
+                required:
+                  - meansOfTransport
+              then:
+                properties:
+                  vehicleRegistration: {}
+                required:
+                  - vehicleRegistration
+              else:
+                properties:
+                  vehicleRegistration:
+                    not: {}
+                    description: Not allowed unless meansOfTransport is Road.
+            - if:
+                properties:
+                  meansOfTransport:
+                    const: Other
+                required:
+                  - meansOfTransport
+              then:
+                properties:
+                  otherMeansOfTransport: {}
+                required:
+                  - otherMeansOfTransport
+              else:
+                properties:
+                  otherMeansOfTransport:
+                    not: {}
+                    description: Not allowed unless meansOfTransport is Other.
+          properties:
+            organisationName:
+              type: string
+              minLength: 1
+              description: Name of the carrier organisation.
+            registrationNumber:
+              description: Waste carrier registration number, in a valid UK home-nation format (England and NRW CBDU/CBDL, SEPA WCR/SCO/SEA/SNO/SWE and PCT, NI ROC UT/LT). Mutually exclusive with reasonForNoRegistrationNumber — exactly one of the two is required.
+              $schema: https://json-schema.org/draft/2020-12/schema
+              title: Registration number
+              type: string
+              pattern: ^\s*(?:[Cc][Bb][Dd][LlUu]\d{3,}|[Ww][Cc][Rr]/[Rr]/\d{7}|(?:[Ss][Cc][Oo]|[Ss][Ee][Aa]|[Ss][Nn][Oo]|[Ss][Ww][Ee]|[Ww][Cc][Rr])/\d{6}|[Pp][Cc][Tt]-[A-Za-z]-\d{3,7}|[Rr][Oo][Cc]\W*[UuLl][Tt]\W*\d{1,5})\s*$
+            reasonForNoRegistrationNumber:
+              type: string
+              enum:
+                - ON_SITE
+                - HOUSEHOLD
+                - ONE_OFF
+                - MARINE
+              description: Why the carrier has no registration number. Mutually exclusive with registrationNumber — exactly one of the two is required.
+            meansOfTransport:
+              type: string
+              enum:
+                - Road
+                - Rail
+                - Air
+                - Sea
+                - Inland Waterway
+                - Piped
+                - Other
+              description: How the carrier will transport the waste.
+            vehicleRegistration:
+              type: string
+              minLength: 1
+              description: Registration of the vehicle carrying the waste. Required when meansOfTransport is Road; forbidden otherwise.
+            otherMeansOfTransport:
+              type: string
+              minLength: 1
+              description: Description of the means of transport. Required when meansOfTransport is Other; forbidden otherwise.
+            contactDetails:
+              $schema: https://json-schema.org/draft/2020-12/schema
+              title: Contact details
+              description: Contact details for a party. At least one of emailAddress or phoneNumber must be provided.
+              examples:
+                - emailAddress: producer@example.com
+                  phoneNumber: '01234567890'
+                - emailAddress: producer@example.com
+              type: object
+              properties:
+                emailAddress:
+                  type: string
+                  format: email
+                  description: Contact email address.
+                phoneNumber:
+                  type: string
+                  pattern: ^\s*(?=(?:\D*\d){7,15}\D*$)\+?[0-9()\-\s]+$
+                  description: Contact phone number, in a valid format.
+              anyOf:
+                - properties:
+                    emailAddress: {}
+                  required:
+                    - emailAddress
+                - properties:
+                    phoneNumber: {}
+                  required:
+                    - phoneNumber
+            address:
+              $schema: https://json-schema.org/draft/2020-12/schema
+              title: Address
+              description: A UK or Irish postal address. fullAddress is optional; postcode is required.
+              examples:
+                - fullAddress: 10 Industrial Way, Test City
+                  postcode: TE1 2PQ
+              type: object
+              properties:
+                fullAddress:
+                  type: string
+                  minLength: 1
+                  description: Full address line.
+                postcode:
+                  type: string
+                  pattern: ^\s*(?:(?:(([Gg][Ii][Rr] 0[Aa]{2})|((([A-Za-z]\d{1,2})|(([A-Za-z][A-Ha-hJ-Yj-y]\d{1,2})|(([A-Za-z]\d[A-Za-z])|([A-Za-z][A-Ha-hJ-Yj-y]\d?[A-Za-z])))) \d[A-Za-z]{2})))|(?:(?:[Dd]6[Ww]|[AaC-Fc-fHhKkNnPpRrTtV-Yv-y]\d{2}) ?[0-9AaC-Fc-fHhKkNnPpRrTtV-Yv-y]{4}))\s*$
+                  description: Accepts UK postcodes and Irish Eircodes.
+              required:
+                - postcode
+          required:
+            - organisationName
+            - meansOfTransport
+            - contactDetails
+          additionalProperties: false
         brokerOrDealer:
           $schema: https://json-schema.org/draft/2020-12/schema
           title: Broker or dealer involvement
@@ -736,6 +1032,8 @@ components:
           type: string
           minLength: 1
           maxLength: 500
+      required:
+        - carrier
       additionalProperties: false
     recordDeliveryRequest:
       $schema: https://json-schema.org/draft/2020-12/schema
@@ -746,9 +1044,157 @@ components:
         movementIds:
           type: array
           items:
+            $schema: https://json-schema.org/draft/2020-12/schema
+            title: Movement ID
+            description: 'Unique identifier for a waste movement, minted by the server on `POST /movements`. Format: a two-digit year prefix followed by six or seven characters from A–Z and 0–9, 8 or 9 characters in all. Movement IDs and Delivery IDs share this format. Treat it as opaque: don''t parse it.'
             type: string
+            pattern: ^[0-9]{2}[A-Z0-9]{6,7}$
+            examples:
+              - 25HRA0B2
           minItems: 1
           description: One or more Movement IDs delivered together at this delivery.
+        carrier:
+          $schema: https://json-schema.org/draft/2020-12/schema
+          title: Carrier
+          description: A single waste carrier. organisationName, meansOfTransport and contactDetails are required, and exactly one of registrationNumber or reasonForNoRegistrationNumber must be provided. vehicleRegistration is required for Road and otherMeansOfTransport for Other; each is forbidden otherwise. address is optional.
+          type: object
+          oneOf:
+            - required:
+                - registrationNumber
+              properties:
+                registrationNumber: {}
+                reasonForNoRegistrationNumber:
+                  not: {}
+                  description: Not allowed when registrationNumber is provided.
+            - required:
+                - reasonForNoRegistrationNumber
+              properties:
+                registrationNumber:
+                  not: {}
+                  description: Not allowed when reasonForNoRegistrationNumber is provided.
+                reasonForNoRegistrationNumber: {}
+          allOf:
+            - if:
+                properties:
+                  meansOfTransport:
+                    const: Road
+                required:
+                  - meansOfTransport
+              then:
+                properties:
+                  vehicleRegistration: {}
+                required:
+                  - vehicleRegistration
+              else:
+                properties:
+                  vehicleRegistration:
+                    not: {}
+                    description: Not allowed unless meansOfTransport is Road.
+            - if:
+                properties:
+                  meansOfTransport:
+                    const: Other
+                required:
+                  - meansOfTransport
+              then:
+                properties:
+                  otherMeansOfTransport: {}
+                required:
+                  - otherMeansOfTransport
+              else:
+                properties:
+                  otherMeansOfTransport:
+                    not: {}
+                    description: Not allowed unless meansOfTransport is Other.
+          properties:
+            organisationName:
+              type: string
+              minLength: 1
+              description: Name of the carrier organisation.
+            registrationNumber:
+              description: Waste carrier registration number, in a valid UK home-nation format (England and NRW CBDU/CBDL, SEPA WCR/SCO/SEA/SNO/SWE and PCT, NI ROC UT/LT). Mutually exclusive with reasonForNoRegistrationNumber — exactly one of the two is required.
+              $schema: https://json-schema.org/draft/2020-12/schema
+              title: Registration number
+              type: string
+              pattern: ^\s*(?:[Cc][Bb][Dd][LlUu]\d{3,}|[Ww][Cc][Rr]/[Rr]/\d{7}|(?:[Ss][Cc][Oo]|[Ss][Ee][Aa]|[Ss][Nn][Oo]|[Ss][Ww][Ee]|[Ww][Cc][Rr])/\d{6}|[Pp][Cc][Tt]-[A-Za-z]-\d{3,7}|[Rr][Oo][Cc]\W*[UuLl][Tt]\W*\d{1,5})\s*$
+            reasonForNoRegistrationNumber:
+              type: string
+              enum:
+                - ON_SITE
+                - HOUSEHOLD
+                - ONE_OFF
+                - MARINE
+              description: Why the carrier has no registration number. Mutually exclusive with registrationNumber — exactly one of the two is required.
+            meansOfTransport:
+              type: string
+              enum:
+                - Road
+                - Rail
+                - Air
+                - Sea
+                - Inland Waterway
+                - Piped
+                - Other
+              description: How the carrier will transport the waste.
+            vehicleRegistration:
+              type: string
+              minLength: 1
+              description: Registration of the vehicle carrying the waste. Required when meansOfTransport is Road; forbidden otherwise.
+            otherMeansOfTransport:
+              type: string
+              minLength: 1
+              description: Description of the means of transport. Required when meansOfTransport is Other; forbidden otherwise.
+            contactDetails:
+              $schema: https://json-schema.org/draft/2020-12/schema
+              title: Contact details
+              description: Contact details for a party. At least one of emailAddress or phoneNumber must be provided.
+              examples:
+                - emailAddress: producer@example.com
+                  phoneNumber: '01234567890'
+                - emailAddress: producer@example.com
+              type: object
+              properties:
+                emailAddress:
+                  type: string
+                  format: email
+                  description: Contact email address.
+                phoneNumber:
+                  type: string
+                  pattern: ^\s*(?=(?:\D*\d){7,15}\D*$)\+?[0-9()\-\s]+$
+                  description: Contact phone number, in a valid format.
+              anyOf:
+                - properties:
+                    emailAddress: {}
+                  required:
+                    - emailAddress
+                - properties:
+                    phoneNumber: {}
+                  required:
+                    - phoneNumber
+            address:
+              $schema: https://json-schema.org/draft/2020-12/schema
+              title: Address
+              description: A UK or Irish postal address. fullAddress is optional; postcode is required.
+              examples:
+                - fullAddress: 10 Industrial Way, Test City
+                  postcode: TE1 2PQ
+              type: object
+              properties:
+                fullAddress:
+                  type: string
+                  minLength: 1
+                  description: Full address line.
+                postcode:
+                  type: string
+                  pattern: ^\s*(?:(?:(([Gg][Ii][Rr] 0[Aa]{2})|((([A-Za-z]\d{1,2})|(([A-Za-z][A-Ha-hJ-Yj-y]\d{1,2})|(([A-Za-z]\d[A-Za-z])|([A-Za-z][A-Ha-hJ-Yj-y]\d?[A-Za-z])))) \d[A-Za-z]{2})))|(?:(?:[Dd]6[Ww]|[AaC-Fc-fHhKkNnPpRrTtV-Yv-y]\d{2}) ?[0-9AaC-Fc-fHhKkNnPpRrTtV-Yv-y]{4}))\s*$
+                  description: Accepts UK postcodes and Irish Eircodes.
+              required:
+                - postcode
+          required:
+            - organisationName
+            - meansOfTransport
+            - contactDetails
+          additionalProperties: false
         supportingReferences:
           $schema: https://json-schema.org/draft/2020-12/schema
           title: Supporting references
@@ -784,6 +1230,7 @@ components:
             additionalProperties: false
       required:
         - movementIds
+        - carrier
       additionalProperties: false
     recordReceiptRequest:
       $schema: https://json-schema.org/draft/2020-12/schema
@@ -791,6 +1238,148 @@ components:
       description: Payload for POST /beta-2/deliveries/{deliveryId}/receipt.
       type: object
       properties:
+        carrier:
+          $schema: https://json-schema.org/draft/2020-12/schema
+          title: Carrier
+          description: A single waste carrier. organisationName, meansOfTransport and contactDetails are required, and exactly one of registrationNumber or reasonForNoRegistrationNumber must be provided. vehicleRegistration is required for Road and otherMeansOfTransport for Other; each is forbidden otherwise. address is optional.
+          type: object
+          oneOf:
+            - required:
+                - registrationNumber
+              properties:
+                registrationNumber: {}
+                reasonForNoRegistrationNumber:
+                  not: {}
+                  description: Not allowed when registrationNumber is provided.
+            - required:
+                - reasonForNoRegistrationNumber
+              properties:
+                registrationNumber:
+                  not: {}
+                  description: Not allowed when reasonForNoRegistrationNumber is provided.
+                reasonForNoRegistrationNumber: {}
+          allOf:
+            - if:
+                properties:
+                  meansOfTransport:
+                    const: Road
+                required:
+                  - meansOfTransport
+              then:
+                properties:
+                  vehicleRegistration: {}
+                required:
+                  - vehicleRegistration
+              else:
+                properties:
+                  vehicleRegistration:
+                    not: {}
+                    description: Not allowed unless meansOfTransport is Road.
+            - if:
+                properties:
+                  meansOfTransport:
+                    const: Other
+                required:
+                  - meansOfTransport
+              then:
+                properties:
+                  otherMeansOfTransport: {}
+                required:
+                  - otherMeansOfTransport
+              else:
+                properties:
+                  otherMeansOfTransport:
+                    not: {}
+                    description: Not allowed unless meansOfTransport is Other.
+          properties:
+            organisationName:
+              type: string
+              minLength: 1
+              description: Name of the carrier organisation.
+            registrationNumber:
+              description: Waste carrier registration number, in a valid UK home-nation format (England and NRW CBDU/CBDL, SEPA WCR/SCO/SEA/SNO/SWE and PCT, NI ROC UT/LT). Mutually exclusive with reasonForNoRegistrationNumber — exactly one of the two is required.
+              $schema: https://json-schema.org/draft/2020-12/schema
+              title: Registration number
+              type: string
+              pattern: ^\s*(?:[Cc][Bb][Dd][LlUu]\d{3,}|[Ww][Cc][Rr]/[Rr]/\d{7}|(?:[Ss][Cc][Oo]|[Ss][Ee][Aa]|[Ss][Nn][Oo]|[Ss][Ww][Ee]|[Ww][Cc][Rr])/\d{6}|[Pp][Cc][Tt]-[A-Za-z]-\d{3,7}|[Rr][Oo][Cc]\W*[UuLl][Tt]\W*\d{1,5})\s*$
+            reasonForNoRegistrationNumber:
+              type: string
+              enum:
+                - ON_SITE
+                - HOUSEHOLD
+                - ONE_OFF
+                - MARINE
+              description: Why the carrier has no registration number. Mutually exclusive with registrationNumber — exactly one of the two is required.
+            meansOfTransport:
+              type: string
+              enum:
+                - Road
+                - Rail
+                - Air
+                - Sea
+                - Inland Waterway
+                - Piped
+                - Other
+              description: How the carrier will transport the waste.
+            vehicleRegistration:
+              type: string
+              minLength: 1
+              description: Registration of the vehicle carrying the waste. Required when meansOfTransport is Road; forbidden otherwise.
+            otherMeansOfTransport:
+              type: string
+              minLength: 1
+              description: Description of the means of transport. Required when meansOfTransport is Other; forbidden otherwise.
+            contactDetails:
+              $schema: https://json-schema.org/draft/2020-12/schema
+              title: Contact details
+              description: Contact details for a party. At least one of emailAddress or phoneNumber must be provided.
+              examples:
+                - emailAddress: producer@example.com
+                  phoneNumber: '01234567890'
+                - emailAddress: producer@example.com
+              type: object
+              properties:
+                emailAddress:
+                  type: string
+                  format: email
+                  description: Contact email address.
+                phoneNumber:
+                  type: string
+                  pattern: ^\s*(?=(?:\D*\d){7,15}\D*$)\+?[0-9()\-\s]+$
+                  description: Contact phone number, in a valid format.
+              anyOf:
+                - properties:
+                    emailAddress: {}
+                  required:
+                    - emailAddress
+                - properties:
+                    phoneNumber: {}
+                  required:
+                    - phoneNumber
+            address:
+              $schema: https://json-schema.org/draft/2020-12/schema
+              title: Address
+              description: A UK or Irish postal address. fullAddress is optional; postcode is required.
+              examples:
+                - fullAddress: 10 Industrial Way, Test City
+                  postcode: TE1 2PQ
+              type: object
+              properties:
+                fullAddress:
+                  type: string
+                  minLength: 1
+                  description: Full address line.
+                postcode:
+                  type: string
+                  pattern: ^\s*(?:(?:(([Gg][Ii][Rr] 0[Aa]{2})|((([A-Za-z]\d{1,2})|(([A-Za-z][A-Ha-hJ-Yj-y]\d{1,2})|(([A-Za-z]\d[A-Za-z])|([A-Za-z][A-Ha-hJ-Yj-y]\d?[A-Za-z])))) \d[A-Za-z]{2})))|(?:(?:[Dd]6[Ww]|[AaC-Fc-fHhKkNnPpRrTtV-Yv-y]\d{2}) ?[0-9AaC-Fc-fHhKkNnPpRrTtV-Yv-y]{4}))\s*$
+                  description: Accepts UK postcodes and Irish Eircodes.
+              required:
+                - postcode
+          required:
+            - organisationName
+            - meansOfTransport
+            - contactDetails
+          additionalProperties: false
         brokerOrDealer:
           $schema: https://json-schema.org/draft/2020-12/schema
           title: Broker or dealer involvement
@@ -963,6 +1552,8 @@ components:
               - reference
               - label
             additionalProperties: false
+      required:
+        - carrier
       additionalProperties: false
     recordReceiptWithoutDeliveryRequest:
       $schema: https://json-schema.org/draft/2020-12/schema
@@ -976,6 +1567,148 @@ components:
           description: Mandatory explanation for why this receipt is being recorded without a Delivery ID.
           examples:
             - No delivery was recorded prior to receipt; waste received directly from the producer.
+        carrier:
+          $schema: https://json-schema.org/draft/2020-12/schema
+          title: Carrier
+          description: A single waste carrier. organisationName, meansOfTransport and contactDetails are required, and exactly one of registrationNumber or reasonForNoRegistrationNumber must be provided. vehicleRegistration is required for Road and otherMeansOfTransport for Other; each is forbidden otherwise. address is optional.
+          type: object
+          oneOf:
+            - required:
+                - registrationNumber
+              properties:
+                registrationNumber: {}
+                reasonForNoRegistrationNumber:
+                  not: {}
+                  description: Not allowed when registrationNumber is provided.
+            - required:
+                - reasonForNoRegistrationNumber
+              properties:
+                registrationNumber:
+                  not: {}
+                  description: Not allowed when reasonForNoRegistrationNumber is provided.
+                reasonForNoRegistrationNumber: {}
+          allOf:
+            - if:
+                properties:
+                  meansOfTransport:
+                    const: Road
+                required:
+                  - meansOfTransport
+              then:
+                properties:
+                  vehicleRegistration: {}
+                required:
+                  - vehicleRegistration
+              else:
+                properties:
+                  vehicleRegistration:
+                    not: {}
+                    description: Not allowed unless meansOfTransport is Road.
+            - if:
+                properties:
+                  meansOfTransport:
+                    const: Other
+                required:
+                  - meansOfTransport
+              then:
+                properties:
+                  otherMeansOfTransport: {}
+                required:
+                  - otherMeansOfTransport
+              else:
+                properties:
+                  otherMeansOfTransport:
+                    not: {}
+                    description: Not allowed unless meansOfTransport is Other.
+          properties:
+            organisationName:
+              type: string
+              minLength: 1
+              description: Name of the carrier organisation.
+            registrationNumber:
+              description: Waste carrier registration number, in a valid UK home-nation format (England and NRW CBDU/CBDL, SEPA WCR/SCO/SEA/SNO/SWE and PCT, NI ROC UT/LT). Mutually exclusive with reasonForNoRegistrationNumber — exactly one of the two is required.
+              $schema: https://json-schema.org/draft/2020-12/schema
+              title: Registration number
+              type: string
+              pattern: ^\s*(?:[Cc][Bb][Dd][LlUu]\d{3,}|[Ww][Cc][Rr]/[Rr]/\d{7}|(?:[Ss][Cc][Oo]|[Ss][Ee][Aa]|[Ss][Nn][Oo]|[Ss][Ww][Ee]|[Ww][Cc][Rr])/\d{6}|[Pp][Cc][Tt]-[A-Za-z]-\d{3,7}|[Rr][Oo][Cc]\W*[UuLl][Tt]\W*\d{1,5})\s*$
+            reasonForNoRegistrationNumber:
+              type: string
+              enum:
+                - ON_SITE
+                - HOUSEHOLD
+                - ONE_OFF
+                - MARINE
+              description: Why the carrier has no registration number. Mutually exclusive with registrationNumber — exactly one of the two is required.
+            meansOfTransport:
+              type: string
+              enum:
+                - Road
+                - Rail
+                - Air
+                - Sea
+                - Inland Waterway
+                - Piped
+                - Other
+              description: How the carrier will transport the waste.
+            vehicleRegistration:
+              type: string
+              minLength: 1
+              description: Registration of the vehicle carrying the waste. Required when meansOfTransport is Road; forbidden otherwise.
+            otherMeansOfTransport:
+              type: string
+              minLength: 1
+              description: Description of the means of transport. Required when meansOfTransport is Other; forbidden otherwise.
+            contactDetails:
+              $schema: https://json-schema.org/draft/2020-12/schema
+              title: Contact details
+              description: Contact details for a party. At least one of emailAddress or phoneNumber must be provided.
+              examples:
+                - emailAddress: producer@example.com
+                  phoneNumber: '01234567890'
+                - emailAddress: producer@example.com
+              type: object
+              properties:
+                emailAddress:
+                  type: string
+                  format: email
+                  description: Contact email address.
+                phoneNumber:
+                  type: string
+                  pattern: ^\s*(?=(?:\D*\d){7,15}\D*$)\+?[0-9()\-\s]+$
+                  description: Contact phone number, in a valid format.
+              anyOf:
+                - properties:
+                    emailAddress: {}
+                  required:
+                    - emailAddress
+                - properties:
+                    phoneNumber: {}
+                  required:
+                    - phoneNumber
+            address:
+              $schema: https://json-schema.org/draft/2020-12/schema
+              title: Address
+              description: A UK or Irish postal address. fullAddress is optional; postcode is required.
+              examples:
+                - fullAddress: 10 Industrial Way, Test City
+                  postcode: TE1 2PQ
+              type: object
+              properties:
+                fullAddress:
+                  type: string
+                  minLength: 1
+                  description: Full address line.
+                postcode:
+                  type: string
+                  pattern: ^\s*(?:(?:(([Gg][Ii][Rr] 0[Aa]{2})|((([A-Za-z]\d{1,2})|(([A-Za-z][A-Ha-hJ-Yj-y]\d{1,2})|(([A-Za-z]\d[A-Za-z])|([A-Za-z][A-Ha-hJ-Yj-y]\d?[A-Za-z])))) \d[A-Za-z]{2})))|(?:(?:[Dd]6[Ww]|[AaC-Fc-fHhKkNnPpRrTtV-Yv-y]\d{2}) ?[0-9AaC-Fc-fHhKkNnPpRrTtV-Yv-y]{4}))\s*$
+                  description: Accepts UK postcodes and Irish Eircodes.
+              required:
+                - postcode
+          required:
+            - organisationName
+            - meansOfTransport
+            - contactDetails
+          additionalProperties: false
         brokerOrDealer:
           $schema: https://json-schema.org/draft/2020-12/schema
           title: Broker or dealer involvement
@@ -1150,6 +1883,7 @@ components:
             additionalProperties: false
       required:
         - reason
+        - carrier
       additionalProperties: false
     issue:
       $schema: https://json-schema.org/draft/2020-12/schema
@@ -1270,8 +2004,9 @@ components:
             movementId:
               $schema: https://json-schema.org/draft/2020-12/schema
               title: Movement ID
-              description: Unique identifier for a waste movement, minted by the server on `POST /movements`.
+              description: 'Unique identifier for a waste movement, minted by the server on `POST /movements`. Format: a two-digit year prefix followed by six or seven characters from A–Z and 0–9, 8 or 9 characters in all. Movement IDs and Delivery IDs share this format. Treat it as opaque: don''t parse it.'
               type: string
+              pattern: ^[0-9]{2}[A-Z0-9]{6,7}$
               examples:
                 - 25HRA0B2
         validation:
@@ -1420,8 +2155,9 @@ components:
                   deliveryId:
                     $schema: https://json-schema.org/draft/2020-12/schema
                     title: Delivery ID
-                    description: Unique identifier for a delivery, minted by the server on `POST /deliveries`.
+                    description: 'Unique identifier for a delivery, minted by the server on `POST /deliveries`. Format: a two-digit year prefix followed by six or seven characters from A–Z and 0–9, 8 or 9 characters in all. Movement IDs and Delivery IDs share this format. Treat it as opaque: don''t parse it.'
                     type: string
+                    pattern: ^[0-9]{2}[A-Z0-9]{6,7}$
                     examples:
                       - 25KMT4Z9
                   movementIds:
@@ -1430,8 +2166,9 @@ components:
                     items:
                       $schema: https://json-schema.org/draft/2020-12/schema
                       title: Movement ID
-                      description: Unique identifier for a waste movement, minted by the server on `POST /movements`.
+                      description: 'Unique identifier for a waste movement, minted by the server on `POST /movements`. Format: a two-digit year prefix followed by six or seven characters from A–Z and 0–9, 8 or 9 characters in all. Movement IDs and Delivery IDs share this format. Treat it as opaque: don''t parse it.'
                       type: string
+                      pattern: ^[0-9]{2}[A-Z0-9]{6,7}$
                       examples:
                         - 25HRA0B2
                     description: The subset of the submitted Movement IDs covered by this Delivery.
@@ -1511,8 +2248,9 @@ components:
             deliveryId:
               $schema: https://json-schema.org/draft/2020-12/schema
               title: Delivery ID
-              description: Unique identifier for a delivery, minted by the server on `POST /deliveries`.
+              description: 'Unique identifier for a delivery, minted by the server on `POST /deliveries`. Format: a two-digit year prefix followed by six or seven characters from A–Z and 0–9, 8 or 9 characters in all. Movement IDs and Delivery IDs share this format. Treat it as opaque: don''t parse it.'
               type: string
+              pattern: ^[0-9]{2}[A-Z0-9]{6,7}$
               examples:
                 - 25KMT4Z9
         validation:
@@ -1580,8 +2318,9 @@ components:
             deliveryId:
               $schema: https://json-schema.org/draft/2020-12/schema
               title: Delivery ID
-              description: Unique identifier for a delivery, minted by the server on `POST /deliveries`.
+              description: 'Unique identifier for a delivery, minted by the server on `POST /deliveries`. Format: a two-digit year prefix followed by six or seven characters from A–Z and 0–9, 8 or 9 characters in all. Movement IDs and Delivery IDs share this format. Treat it as opaque: don''t parse it.'
               type: string
+              pattern: ^[0-9]{2}[A-Z0-9]{6,7}$
               examples:
                 - 25KMT4Z9
         validation:
@@ -1637,6 +2376,7 @@ components:
       headers:
         x-request-id:
           description: Trace id for this request. Quote it to support if something goes wrong.
+          required: true
           schema:
             type: string
             example: 4c6f9e1a-8f2b-4e3d-9a1c-2b7d5e6f0a3c
@@ -1714,6 +2454,7 @@ components:
       headers:
         x-request-id:
           description: Trace id for this request. Quote it to support if something goes wrong.
+          required: true
           schema:
             type: string
             example: 4c6f9e1a-8f2b-4e3d-9a1c-2b7d5e6f0a3c
@@ -1791,6 +2532,7 @@ components:
       headers:
         x-request-id:
           description: Trace id for this request. Quote it to support if something goes wrong.
+          required: true
           schema:
             type: string
             example: 4c6f9e1a-8f2b-4e3d-9a1c-2b7d5e6f0a3c
@@ -2163,6 +2905,152 @@ paths:
                           - sicCode
                           - contactDetails
                           - address
+                intendedCarriers:
+                  type: array
+                  items:
+                    $schema: https://json-schema.org/draft/2020-12/schema
+                    title: Carrier
+                    description: A single waste carrier. organisationName, meansOfTransport and contactDetails are required, and exactly one of registrationNumber or reasonForNoRegistrationNumber must be provided. vehicleRegistration is required for Road and otherMeansOfTransport for Other; each is forbidden otherwise. address is optional.
+                    type: object
+                    oneOf:
+                      - required:
+                          - registrationNumber
+                        properties:
+                          registrationNumber: {}
+                          reasonForNoRegistrationNumber:
+                            not: {}
+                            description: Not allowed when registrationNumber is provided.
+                      - required:
+                          - reasonForNoRegistrationNumber
+                        properties:
+                          registrationNumber:
+                            not: {}
+                            description: Not allowed when reasonForNoRegistrationNumber is provided.
+                          reasonForNoRegistrationNumber: {}
+                    allOf:
+                      - if:
+                          properties:
+                            meansOfTransport:
+                              const: Road
+                          required:
+                            - meansOfTransport
+                        then:
+                          properties:
+                            vehicleRegistration: {}
+                          required:
+                            - vehicleRegistration
+                        else:
+                          properties:
+                            vehicleRegistration:
+                              not: {}
+                              description: Not allowed unless meansOfTransport is Road.
+                      - if:
+                          properties:
+                            meansOfTransport:
+                              const: Other
+                          required:
+                            - meansOfTransport
+                        then:
+                          properties:
+                            otherMeansOfTransport: {}
+                          required:
+                            - otherMeansOfTransport
+                        else:
+                          properties:
+                            otherMeansOfTransport:
+                              not: {}
+                              description: Not allowed unless meansOfTransport is Other.
+                    properties:
+                      organisationName:
+                        type: string
+                        minLength: 1
+                        description: Name of the carrier organisation.
+                      registrationNumber:
+                        description: Waste carrier registration number, in a valid UK home-nation format (England and NRW CBDU/CBDL, SEPA WCR/SCO/SEA/SNO/SWE and PCT, NI ROC UT/LT). Mutually exclusive with reasonForNoRegistrationNumber — exactly one of the two is required.
+                        $schema: https://json-schema.org/draft/2020-12/schema
+                        title: Registration number
+                        type: string
+                        pattern: ^\s*(?:[Cc][Bb][Dd][LlUu]\d{3,}|[Ww][Cc][Rr]/[Rr]/\d{7}|(?:[Ss][Cc][Oo]|[Ss][Ee][Aa]|[Ss][Nn][Oo]|[Ss][Ww][Ee]|[Ww][Cc][Rr])/\d{6}|[Pp][Cc][Tt]-[A-Za-z]-\d{3,7}|[Rr][Oo][Cc]\W*[UuLl][Tt]\W*\d{1,5})\s*$
+                      reasonForNoRegistrationNumber:
+                        type: string
+                        enum:
+                          - ON_SITE
+                          - HOUSEHOLD
+                          - ONE_OFF
+                          - MARINE
+                        description: Why the carrier has no registration number. Mutually exclusive with registrationNumber — exactly one of the two is required.
+                      meansOfTransport:
+                        type: string
+                        enum:
+                          - Road
+                          - Rail
+                          - Air
+                          - Sea
+                          - Inland Waterway
+                          - Piped
+                          - Other
+                        description: How the carrier will transport the waste.
+                      vehicleRegistration:
+                        type: string
+                        minLength: 1
+                        description: Registration of the vehicle carrying the waste. Required when meansOfTransport is Road; forbidden otherwise.
+                      otherMeansOfTransport:
+                        type: string
+                        minLength: 1
+                        description: Description of the means of transport. Required when meansOfTransport is Other; forbidden otherwise.
+                      contactDetails:
+                        $schema: https://json-schema.org/draft/2020-12/schema
+                        title: Contact details
+                        description: Contact details for a party. At least one of emailAddress or phoneNumber must be provided.
+                        examples:
+                          - emailAddress: producer@example.com
+                            phoneNumber: '01234567890'
+                          - emailAddress: producer@example.com
+                        type: object
+                        properties:
+                          emailAddress:
+                            type: string
+                            format: email
+                            description: Contact email address.
+                          phoneNumber:
+                            type: string
+                            pattern: ^\s*(?=(?:\D*\d){7,15}\D*$)\+?[0-9()\-\s]+$
+                            description: Contact phone number, in a valid format.
+                        anyOf:
+                          - properties:
+                              emailAddress: {}
+                            required:
+                              - emailAddress
+                          - properties:
+                              phoneNumber: {}
+                            required:
+                              - phoneNumber
+                      address:
+                        $schema: https://json-schema.org/draft/2020-12/schema
+                        title: Address
+                        description: A UK or Irish postal address. fullAddress is optional; postcode is required.
+                        examples:
+                          - fullAddress: 10 Industrial Way, Test City
+                            postcode: TE1 2PQ
+                        type: object
+                        properties:
+                          fullAddress:
+                            type: string
+                            minLength: 1
+                            description: Full address line.
+                          postcode:
+                            type: string
+                            pattern: ^\s*(?:(?:(([Gg][Ii][Rr] 0[Aa]{2})|((([A-Za-z]\d{1,2})|(([A-Za-z][A-Ha-hJ-Yj-y]\d{1,2})|(([A-Za-z]\d[A-Za-z])|([A-Za-z][A-Ha-hJ-Yj-y]\d?[A-Za-z])))) \d[A-Za-z]{2})))|(?:(?:[Dd]6[Ww]|[AaC-Fc-fHhKkNnPpRrTtV-Yv-y]\d{2}) ?[0-9AaC-Fc-fHhKkNnPpRrTtV-Yv-y]{4}))\s*$
+                            description: Accepts UK postcodes and Irish Eircodes.
+                        required:
+                          - postcode
+                    required:
+                      - organisationName
+                      - meansOfTransport
+                      - contactDetails
+                    additionalProperties: false
+                  minItems: 1
+                  description: The carriers intended to transport the waste. At least one is required.
                 brokerOrDealer:
                   $schema: https://json-schema.org/draft/2020-12/schema
                   title: Broker or dealer involvement
@@ -2346,6 +3234,7 @@ paths:
                   maxLength: 500
               required:
                 - producer
+                - intendedCarriers
               additionalProperties: false
             examples:
               commercial:
@@ -2379,17 +3268,40 @@ paths:
                     - label: Job Number
                       reference: CARRIER-JOB-001
                   specialHandlingRequirements: Handle with care and keep upright.
+                  intendedCarriers:
+                    - organisationName: Carrier Demo Ltd
+                      registrationNumber: CBDU123456
+                      meansOfTransport: Road
+                      vehicleRegistration: AB12 CDE
+                      contactDetails:
+                        emailAddress: carrier@example.com
+                        phoneNumber: '01234567890'
+                      address:
+                        fullAddress: 4 Carrier Lane, Test City
+                        postcode: TE1 4CR
               household:
                 summary: Household producer, minimal
                 value:
                   producer:
                     wasteSource: Household
+                  intendedCarriers:
+                    - organisationName: Carrier Demo Ltd
+                      registrationNumber: CBDU123456
+                      meansOfTransport: Road
+                      vehicleRegistration: AB12 CDE
+                      contactDetails:
+                        emailAddress: carrier@example.com
+                        phoneNumber: '01234567890'
+                      address:
+                        fullAddress: 4 Carrier Lane, Test City
+                        postcode: TE1 4CR
       responses:
         '201':
           description: Movement created. Body carries the new Movement ID and any validation warnings.
           headers:
             x-request-id:
               description: Trace id for this request. Quote it to support if something goes wrong.
+              required: true
               schema:
                 type: string
                 example: 4c6f9e1a-8f2b-4e3d-9a1c-2b7d5e6f0a3c
@@ -2413,8 +3325,9 @@ paths:
                       movementId:
                         $schema: https://json-schema.org/draft/2020-12/schema
                         title: Movement ID
-                        description: Unique identifier for a waste movement, minted by the server on `POST /movements`.
+                        description: 'Unique identifier for a waste movement, minted by the server on `POST /movements`. Format: a two-digit year prefix followed by six or seven characters from A–Z and 0–9, 8 or 9 characters in all. Movement IDs and Delivery IDs share this format. Treat it as opaque: don''t parse it.'
                         type: string
+                        pattern: ^[0-9]{2}[A-Z0-9]{6,7}$
                         examples:
                           - 25HRA0B2
                   validation:
@@ -2479,11 +3392,24 @@ paths:
                       movementId: 25HRA0B3
                     validation:
                       warnings: []
+          links:
+            RecordCollection:
+              operationId: recordCollection
+              description: The returned `movementId` identifies the movement whose collection is recorded.
+              parameters:
+                movementId: $response.body#/data/movementId
+            RecordDelivery:
+              operationId: recordDelivery
+              description: The returned `movementId` can be included in the `movementIds` of a delivery.
+              requestBody:
+                movementIds:
+                  - $response.body#/data/movementId
         '400':
           description: The request could not be stored (validation, format or state error).
           headers:
             x-request-id:
               description: Trace id for this request. Quote it to support if something goes wrong.
+              required: true
               schema:
                 type: string
                 example: 4c6f9e1a-8f2b-4e3d-9a1c-2b7d5e6f0a3c
@@ -2561,6 +3487,7 @@ paths:
           headers:
             x-request-id:
               description: Trace id for this request. Quote it to support if something goes wrong.
+              required: true
               schema:
                 type: string
                 example: 4c6f9e1a-8f2b-4e3d-9a1c-2b7d5e6f0a3c
@@ -2638,6 +3565,7 @@ paths:
           headers:
             x-request-id:
               description: Trace id for this request. Quote it to support if something goes wrong.
+              required: true
               schema:
                 type: string
                 example: 4c6f9e1a-8f2b-4e3d-9a1c-2b7d5e6f0a3c
@@ -2719,10 +3647,12 @@ paths:
         schema:
           $schema: https://json-schema.org/draft/2020-12/schema
           title: Movement ID
-          description: Unique identifier for a waste movement, minted by the server on `POST /movements`.
+          description: 'Unique identifier for a waste movement, minted by the server on `POST /movements`. Format: a two-digit year prefix followed by six or seven characters from A–Z and 0–9, 8 or 9 characters in all. Movement IDs and Delivery IDs share this format. Treat it as opaque: don''t parse it.'
           type: string
+          pattern: ^[0-9]{2}[A-Z0-9]{6,7}$
           examples:
             - 25HRA0B2
+        example: 25HRA0B2
     post:
       tags:
         - Collection
@@ -2739,6 +3669,148 @@ paths:
               description: Payload for POST /beta-2/movements/{movementId}/collection.
               type: object
               properties:
+                carrier:
+                  $schema: https://json-schema.org/draft/2020-12/schema
+                  title: Carrier
+                  description: A single waste carrier. organisationName, meansOfTransport and contactDetails are required, and exactly one of registrationNumber or reasonForNoRegistrationNumber must be provided. vehicleRegistration is required for Road and otherMeansOfTransport for Other; each is forbidden otherwise. address is optional.
+                  type: object
+                  oneOf:
+                    - required:
+                        - registrationNumber
+                      properties:
+                        registrationNumber: {}
+                        reasonForNoRegistrationNumber:
+                          not: {}
+                          description: Not allowed when registrationNumber is provided.
+                    - required:
+                        - reasonForNoRegistrationNumber
+                      properties:
+                        registrationNumber:
+                          not: {}
+                          description: Not allowed when reasonForNoRegistrationNumber is provided.
+                        reasonForNoRegistrationNumber: {}
+                  allOf:
+                    - if:
+                        properties:
+                          meansOfTransport:
+                            const: Road
+                        required:
+                          - meansOfTransport
+                      then:
+                        properties:
+                          vehicleRegistration: {}
+                        required:
+                          - vehicleRegistration
+                      else:
+                        properties:
+                          vehicleRegistration:
+                            not: {}
+                            description: Not allowed unless meansOfTransport is Road.
+                    - if:
+                        properties:
+                          meansOfTransport:
+                            const: Other
+                        required:
+                          - meansOfTransport
+                      then:
+                        properties:
+                          otherMeansOfTransport: {}
+                        required:
+                          - otherMeansOfTransport
+                      else:
+                        properties:
+                          otherMeansOfTransport:
+                            not: {}
+                            description: Not allowed unless meansOfTransport is Other.
+                  properties:
+                    organisationName:
+                      type: string
+                      minLength: 1
+                      description: Name of the carrier organisation.
+                    registrationNumber:
+                      description: Waste carrier registration number, in a valid UK home-nation format (England and NRW CBDU/CBDL, SEPA WCR/SCO/SEA/SNO/SWE and PCT, NI ROC UT/LT). Mutually exclusive with reasonForNoRegistrationNumber — exactly one of the two is required.
+                      $schema: https://json-schema.org/draft/2020-12/schema
+                      title: Registration number
+                      type: string
+                      pattern: ^\s*(?:[Cc][Bb][Dd][LlUu]\d{3,}|[Ww][Cc][Rr]/[Rr]/\d{7}|(?:[Ss][Cc][Oo]|[Ss][Ee][Aa]|[Ss][Nn][Oo]|[Ss][Ww][Ee]|[Ww][Cc][Rr])/\d{6}|[Pp][Cc][Tt]-[A-Za-z]-\d{3,7}|[Rr][Oo][Cc]\W*[UuLl][Tt]\W*\d{1,5})\s*$
+                    reasonForNoRegistrationNumber:
+                      type: string
+                      enum:
+                        - ON_SITE
+                        - HOUSEHOLD
+                        - ONE_OFF
+                        - MARINE
+                      description: Why the carrier has no registration number. Mutually exclusive with registrationNumber — exactly one of the two is required.
+                    meansOfTransport:
+                      type: string
+                      enum:
+                        - Road
+                        - Rail
+                        - Air
+                        - Sea
+                        - Inland Waterway
+                        - Piped
+                        - Other
+                      description: How the carrier will transport the waste.
+                    vehicleRegistration:
+                      type: string
+                      minLength: 1
+                      description: Registration of the vehicle carrying the waste. Required when meansOfTransport is Road; forbidden otherwise.
+                    otherMeansOfTransport:
+                      type: string
+                      minLength: 1
+                      description: Description of the means of transport. Required when meansOfTransport is Other; forbidden otherwise.
+                    contactDetails:
+                      $schema: https://json-schema.org/draft/2020-12/schema
+                      title: Contact details
+                      description: Contact details for a party. At least one of emailAddress or phoneNumber must be provided.
+                      examples:
+                        - emailAddress: producer@example.com
+                          phoneNumber: '01234567890'
+                        - emailAddress: producer@example.com
+                      type: object
+                      properties:
+                        emailAddress:
+                          type: string
+                          format: email
+                          description: Contact email address.
+                        phoneNumber:
+                          type: string
+                          pattern: ^\s*(?=(?:\D*\d){7,15}\D*$)\+?[0-9()\-\s]+$
+                          description: Contact phone number, in a valid format.
+                      anyOf:
+                        - properties:
+                            emailAddress: {}
+                          required:
+                            - emailAddress
+                        - properties:
+                            phoneNumber: {}
+                          required:
+                            - phoneNumber
+                    address:
+                      $schema: https://json-schema.org/draft/2020-12/schema
+                      title: Address
+                      description: A UK or Irish postal address. fullAddress is optional; postcode is required.
+                      examples:
+                        - fullAddress: 10 Industrial Way, Test City
+                          postcode: TE1 2PQ
+                      type: object
+                      properties:
+                        fullAddress:
+                          type: string
+                          minLength: 1
+                          description: Full address line.
+                        postcode:
+                          type: string
+                          pattern: ^\s*(?:(?:(([Gg][Ii][Rr] 0[Aa]{2})|((([A-Za-z]\d{1,2})|(([A-Za-z][A-Ha-hJ-Yj-y]\d{1,2})|(([A-Za-z]\d[A-Za-z])|([A-Za-z][A-Ha-hJ-Yj-y]\d?[A-Za-z])))) \d[A-Za-z]{2})))|(?:(?:[Dd]6[Ww]|[AaC-Fc-fHhKkNnPpRrTtV-Yv-y]\d{2}) ?[0-9AaC-Fc-fHhKkNnPpRrTtV-Yv-y]{4}))\s*$
+                          description: Accepts UK postcodes and Irish Eircodes.
+                      required:
+                        - postcode
+                  required:
+                    - organisationName
+                    - meansOfTransport
+                    - contactDetails
+                  additionalProperties: false
                 brokerOrDealer:
                   $schema: https://json-schema.org/draft/2020-12/schema
                   title: Broker or dealer involvement
@@ -2920,11 +3992,24 @@ paths:
                   type: string
                   minLength: 1
                   maxLength: 500
+              required:
+                - carrier
               additionalProperties: false
             examples:
               withBrokerAndReferences:
                 summary: With broker or dealer, supporting references and special handling
                 value:
+                  carrier:
+                    organisationName: Carrier Demo Ltd
+                    registrationNumber: CBDU123456
+                    meansOfTransport: Road
+                    vehicleRegistration: AB12 CDE
+                    contactDetails:
+                      emailAddress: carrier@example.com
+                      phoneNumber: '01234567890'
+                    address:
+                      fullAddress: 4 Carrier Lane, Test City
+                      postcode: TE1 4CR
                   brokerOrDealer:
                     isPresent: true
                     items:
@@ -2943,14 +4028,26 @@ paths:
                       reference: CARRIER-JOB-001
                   specialHandlingRequirements: Handle with care and keep upright.
               minimal:
-                summary: Empty body
-                value: {}
+                summary: carrier only
+                value:
+                  carrier:
+                    organisationName: Carrier Demo Ltd
+                    registrationNumber: CBDU123456
+                    meansOfTransport: Road
+                    vehicleRegistration: AB12 CDE
+                    contactDetails:
+                      emailAddress: carrier@example.com
+                      phoneNumber: '01234567890'
+                    address:
+                      fullAddress: 4 Carrier Lane, Test City
+                      postcode: TE1 4CR
       responses:
         '201':
           description: Collection recorded. Body carries any validation warnings.
           headers:
             x-request-id:
               description: Trace id for this request. Quote it to support if something goes wrong.
+              required: true
               schema:
                 type: string
                 example: 4c6f9e1a-8f2b-4e3d-9a1c-2b7d5e6f0a3c
@@ -3037,6 +4134,7 @@ paths:
           headers:
             x-request-id:
               description: Trace id for this request. Quote it to support if something goes wrong.
+              required: true
               schema:
                 type: string
                 example: 4c6f9e1a-8f2b-4e3d-9a1c-2b7d5e6f0a3c
@@ -3114,6 +4212,7 @@ paths:
           headers:
             x-request-id:
               description: Trace id for this request. Quote it to support if something goes wrong.
+              required: true
               schema:
                 type: string
                 example: 4c6f9e1a-8f2b-4e3d-9a1c-2b7d5e6f0a3c
@@ -3191,6 +4290,7 @@ paths:
           headers:
             x-request-id:
               description: Trace id for this request. Quote it to support if something goes wrong.
+              required: true
               schema:
                 type: string
                 example: 4c6f9e1a-8f2b-4e3d-9a1c-2b7d5e6f0a3c
@@ -3274,6 +4374,7 @@ paths:
           headers:
             x-request-id:
               description: Trace id for this request. Quote it to support if something goes wrong.
+              required: true
               schema:
                 type: string
                 example: 4c6f9e1a-8f2b-4e3d-9a1c-2b7d5e6f0a3c
@@ -3366,9 +4467,157 @@ paths:
                 movementIds:
                   type: array
                   items:
+                    $schema: https://json-schema.org/draft/2020-12/schema
+                    title: Movement ID
+                    description: 'Unique identifier for a waste movement, minted by the server on `POST /movements`. Format: a two-digit year prefix followed by six or seven characters from A–Z and 0–9, 8 or 9 characters in all. Movement IDs and Delivery IDs share this format. Treat it as opaque: don''t parse it.'
                     type: string
+                    pattern: ^[0-9]{2}[A-Z0-9]{6,7}$
+                    examples:
+                      - 25HRA0B2
                   minItems: 1
                   description: One or more Movement IDs delivered together at this delivery.
+                carrier:
+                  $schema: https://json-schema.org/draft/2020-12/schema
+                  title: Carrier
+                  description: A single waste carrier. organisationName, meansOfTransport and contactDetails are required, and exactly one of registrationNumber or reasonForNoRegistrationNumber must be provided. vehicleRegistration is required for Road and otherMeansOfTransport for Other; each is forbidden otherwise. address is optional.
+                  type: object
+                  oneOf:
+                    - required:
+                        - registrationNumber
+                      properties:
+                        registrationNumber: {}
+                        reasonForNoRegistrationNumber:
+                          not: {}
+                          description: Not allowed when registrationNumber is provided.
+                    - required:
+                        - reasonForNoRegistrationNumber
+                      properties:
+                        registrationNumber:
+                          not: {}
+                          description: Not allowed when reasonForNoRegistrationNumber is provided.
+                        reasonForNoRegistrationNumber: {}
+                  allOf:
+                    - if:
+                        properties:
+                          meansOfTransport:
+                            const: Road
+                        required:
+                          - meansOfTransport
+                      then:
+                        properties:
+                          vehicleRegistration: {}
+                        required:
+                          - vehicleRegistration
+                      else:
+                        properties:
+                          vehicleRegistration:
+                            not: {}
+                            description: Not allowed unless meansOfTransport is Road.
+                    - if:
+                        properties:
+                          meansOfTransport:
+                            const: Other
+                        required:
+                          - meansOfTransport
+                      then:
+                        properties:
+                          otherMeansOfTransport: {}
+                        required:
+                          - otherMeansOfTransport
+                      else:
+                        properties:
+                          otherMeansOfTransport:
+                            not: {}
+                            description: Not allowed unless meansOfTransport is Other.
+                  properties:
+                    organisationName:
+                      type: string
+                      minLength: 1
+                      description: Name of the carrier organisation.
+                    registrationNumber:
+                      description: Waste carrier registration number, in a valid UK home-nation format (England and NRW CBDU/CBDL, SEPA WCR/SCO/SEA/SNO/SWE and PCT, NI ROC UT/LT). Mutually exclusive with reasonForNoRegistrationNumber — exactly one of the two is required.
+                      $schema: https://json-schema.org/draft/2020-12/schema
+                      title: Registration number
+                      type: string
+                      pattern: ^\s*(?:[Cc][Bb][Dd][LlUu]\d{3,}|[Ww][Cc][Rr]/[Rr]/\d{7}|(?:[Ss][Cc][Oo]|[Ss][Ee][Aa]|[Ss][Nn][Oo]|[Ss][Ww][Ee]|[Ww][Cc][Rr])/\d{6}|[Pp][Cc][Tt]-[A-Za-z]-\d{3,7}|[Rr][Oo][Cc]\W*[UuLl][Tt]\W*\d{1,5})\s*$
+                    reasonForNoRegistrationNumber:
+                      type: string
+                      enum:
+                        - ON_SITE
+                        - HOUSEHOLD
+                        - ONE_OFF
+                        - MARINE
+                      description: Why the carrier has no registration number. Mutually exclusive with registrationNumber — exactly one of the two is required.
+                    meansOfTransport:
+                      type: string
+                      enum:
+                        - Road
+                        - Rail
+                        - Air
+                        - Sea
+                        - Inland Waterway
+                        - Piped
+                        - Other
+                      description: How the carrier will transport the waste.
+                    vehicleRegistration:
+                      type: string
+                      minLength: 1
+                      description: Registration of the vehicle carrying the waste. Required when meansOfTransport is Road; forbidden otherwise.
+                    otherMeansOfTransport:
+                      type: string
+                      minLength: 1
+                      description: Description of the means of transport. Required when meansOfTransport is Other; forbidden otherwise.
+                    contactDetails:
+                      $schema: https://json-schema.org/draft/2020-12/schema
+                      title: Contact details
+                      description: Contact details for a party. At least one of emailAddress or phoneNumber must be provided.
+                      examples:
+                        - emailAddress: producer@example.com
+                          phoneNumber: '01234567890'
+                        - emailAddress: producer@example.com
+                      type: object
+                      properties:
+                        emailAddress:
+                          type: string
+                          format: email
+                          description: Contact email address.
+                        phoneNumber:
+                          type: string
+                          pattern: ^\s*(?=(?:\D*\d){7,15}\D*$)\+?[0-9()\-\s]+$
+                          description: Contact phone number, in a valid format.
+                      anyOf:
+                        - properties:
+                            emailAddress: {}
+                          required:
+                            - emailAddress
+                        - properties:
+                            phoneNumber: {}
+                          required:
+                            - phoneNumber
+                    address:
+                      $schema: https://json-schema.org/draft/2020-12/schema
+                      title: Address
+                      description: A UK or Irish postal address. fullAddress is optional; postcode is required.
+                      examples:
+                        - fullAddress: 10 Industrial Way, Test City
+                          postcode: TE1 2PQ
+                      type: object
+                      properties:
+                        fullAddress:
+                          type: string
+                          minLength: 1
+                          description: Full address line.
+                        postcode:
+                          type: string
+                          pattern: ^\s*(?:(?:(([Gg][Ii][Rr] 0[Aa]{2})|((([A-Za-z]\d{1,2})|(([A-Za-z][A-Ha-hJ-Yj-y]\d{1,2})|(([A-Za-z]\d[A-Za-z])|([A-Za-z][A-Ha-hJ-Yj-y]\d?[A-Za-z])))) \d[A-Za-z]{2})))|(?:(?:[Dd]6[Ww]|[AaC-Fc-fHhKkNnPpRrTtV-Yv-y]\d{2}) ?[0-9AaC-Fc-fHhKkNnPpRrTtV-Yv-y]{4}))\s*$
+                          description: Accepts UK postcodes and Irish Eircodes.
+                      required:
+                        - postcode
+                  required:
+                    - organisationName
+                    - meansOfTransport
+                    - contactDetails
+                  additionalProperties: false
                 supportingReferences:
                   $schema: https://json-schema.org/draft/2020-12/schema
                   title: Supporting references
@@ -3404,6 +4653,7 @@ paths:
                     additionalProperties: false
               required:
                 - movementIds
+                - carrier
               additionalProperties: false
             examples:
               twoMovements:
@@ -3412,6 +4662,17 @@ paths:
                   movementIds:
                     - 25HRA0B2
                     - 25HRA0B3
+                  carrier:
+                    organisationName: Carrier Demo Ltd
+                    registrationNumber: CBDU123456
+                    meansOfTransport: Road
+                    vehicleRegistration: AB12 CDE
+                    contactDetails:
+                      emailAddress: carrier@example.com
+                      phoneNumber: '01234567890'
+                    address:
+                      fullAddress: 4 Carrier Lane, Test City
+                      postcode: TE1 4CR
                   supportingReferences:
                     - label: Waste Ticket Number
                       reference: WT-7781
@@ -3421,6 +4682,7 @@ paths:
           headers:
             x-request-id:
               description: Trace id for this request. Quote it to support if something goes wrong.
+              required: true
               schema:
                 type: string
                 example: 4c6f9e1a-8f2b-4e3d-9a1c-2b7d5e6f0a3c
@@ -3462,8 +4724,9 @@ paths:
                             deliveryId:
                               $schema: https://json-schema.org/draft/2020-12/schema
                               title: Delivery ID
-                              description: Unique identifier for a delivery, minted by the server on `POST /deliveries`.
+                              description: 'Unique identifier for a delivery, minted by the server on `POST /deliveries`. Format: a two-digit year prefix followed by six or seven characters from A–Z and 0–9, 8 or 9 characters in all. Movement IDs and Delivery IDs share this format. Treat it as opaque: don''t parse it.'
                               type: string
+                              pattern: ^[0-9]{2}[A-Z0-9]{6,7}$
                               examples:
                                 - 25KMT4Z9
                             movementIds:
@@ -3472,8 +4735,9 @@ paths:
                               items:
                                 $schema: https://json-schema.org/draft/2020-12/schema
                                 title: Movement ID
-                                description: Unique identifier for a waste movement, minted by the server on `POST /movements`.
+                                description: 'Unique identifier for a waste movement, minted by the server on `POST /movements`. Format: a two-digit year prefix followed by six or seven characters from A–Z and 0–9, 8 or 9 characters in all. Movement IDs and Delivery IDs share this format. Treat it as opaque: don''t parse it.'
                                 type: string
+                                pattern: ^[0-9]{2}[A-Z0-9]{6,7}$
                                 examples:
                                   - 25HRA0B2
                               description: The subset of the submitted Movement IDs covered by this Delivery.
@@ -3548,11 +4812,18 @@ paths:
                           wasteType: NON_HAZARDOUS
                     validation:
                       warnings: []
+          links:
+            RecordReceipt:
+              operationId: recordReceipt
+              description: Each returned `deliveryId` identifies a delivery whose receipt is recorded.
+              parameters:
+                deliveryId: $response.body#/data/deliveries/0/deliveryId
         '400':
           description: The request could not be stored (validation, format or state error).
           headers:
             x-request-id:
               description: Trace id for this request. Quote it to support if something goes wrong.
+              required: true
               schema:
                 type: string
                 example: 4c6f9e1a-8f2b-4e3d-9a1c-2b7d5e6f0a3c
@@ -3630,6 +4901,7 @@ paths:
           headers:
             x-request-id:
               description: Trace id for this request. Quote it to support if something goes wrong.
+              required: true
               schema:
                 type: string
                 example: 4c6f9e1a-8f2b-4e3d-9a1c-2b7d5e6f0a3c
@@ -3707,6 +4979,7 @@ paths:
           headers:
             x-request-id:
               description: Trace id for this request. Quote it to support if something goes wrong.
+              required: true
               schema:
                 type: string
                 example: 4c6f9e1a-8f2b-4e3d-9a1c-2b7d5e6f0a3c
@@ -3802,6 +5075,148 @@ paths:
                   description: Mandatory explanation for why this receipt is being recorded without a Delivery ID.
                   examples:
                     - No delivery was recorded prior to receipt; waste received directly from the producer.
+                carrier:
+                  $schema: https://json-schema.org/draft/2020-12/schema
+                  title: Carrier
+                  description: A single waste carrier. organisationName, meansOfTransport and contactDetails are required, and exactly one of registrationNumber or reasonForNoRegistrationNumber must be provided. vehicleRegistration is required for Road and otherMeansOfTransport for Other; each is forbidden otherwise. address is optional.
+                  type: object
+                  oneOf:
+                    - required:
+                        - registrationNumber
+                      properties:
+                        registrationNumber: {}
+                        reasonForNoRegistrationNumber:
+                          not: {}
+                          description: Not allowed when registrationNumber is provided.
+                    - required:
+                        - reasonForNoRegistrationNumber
+                      properties:
+                        registrationNumber:
+                          not: {}
+                          description: Not allowed when reasonForNoRegistrationNumber is provided.
+                        reasonForNoRegistrationNumber: {}
+                  allOf:
+                    - if:
+                        properties:
+                          meansOfTransport:
+                            const: Road
+                        required:
+                          - meansOfTransport
+                      then:
+                        properties:
+                          vehicleRegistration: {}
+                        required:
+                          - vehicleRegistration
+                      else:
+                        properties:
+                          vehicleRegistration:
+                            not: {}
+                            description: Not allowed unless meansOfTransport is Road.
+                    - if:
+                        properties:
+                          meansOfTransport:
+                            const: Other
+                        required:
+                          - meansOfTransport
+                      then:
+                        properties:
+                          otherMeansOfTransport: {}
+                        required:
+                          - otherMeansOfTransport
+                      else:
+                        properties:
+                          otherMeansOfTransport:
+                            not: {}
+                            description: Not allowed unless meansOfTransport is Other.
+                  properties:
+                    organisationName:
+                      type: string
+                      minLength: 1
+                      description: Name of the carrier organisation.
+                    registrationNumber:
+                      description: Waste carrier registration number, in a valid UK home-nation format (England and NRW CBDU/CBDL, SEPA WCR/SCO/SEA/SNO/SWE and PCT, NI ROC UT/LT). Mutually exclusive with reasonForNoRegistrationNumber — exactly one of the two is required.
+                      $schema: https://json-schema.org/draft/2020-12/schema
+                      title: Registration number
+                      type: string
+                      pattern: ^\s*(?:[Cc][Bb][Dd][LlUu]\d{3,}|[Ww][Cc][Rr]/[Rr]/\d{7}|(?:[Ss][Cc][Oo]|[Ss][Ee][Aa]|[Ss][Nn][Oo]|[Ss][Ww][Ee]|[Ww][Cc][Rr])/\d{6}|[Pp][Cc][Tt]-[A-Za-z]-\d{3,7}|[Rr][Oo][Cc]\W*[UuLl][Tt]\W*\d{1,5})\s*$
+                    reasonForNoRegistrationNumber:
+                      type: string
+                      enum:
+                        - ON_SITE
+                        - HOUSEHOLD
+                        - ONE_OFF
+                        - MARINE
+                      description: Why the carrier has no registration number. Mutually exclusive with registrationNumber — exactly one of the two is required.
+                    meansOfTransport:
+                      type: string
+                      enum:
+                        - Road
+                        - Rail
+                        - Air
+                        - Sea
+                        - Inland Waterway
+                        - Piped
+                        - Other
+                      description: How the carrier will transport the waste.
+                    vehicleRegistration:
+                      type: string
+                      minLength: 1
+                      description: Registration of the vehicle carrying the waste. Required when meansOfTransport is Road; forbidden otherwise.
+                    otherMeansOfTransport:
+                      type: string
+                      minLength: 1
+                      description: Description of the means of transport. Required when meansOfTransport is Other; forbidden otherwise.
+                    contactDetails:
+                      $schema: https://json-schema.org/draft/2020-12/schema
+                      title: Contact details
+                      description: Contact details for a party. At least one of emailAddress or phoneNumber must be provided.
+                      examples:
+                        - emailAddress: producer@example.com
+                          phoneNumber: '01234567890'
+                        - emailAddress: producer@example.com
+                      type: object
+                      properties:
+                        emailAddress:
+                          type: string
+                          format: email
+                          description: Contact email address.
+                        phoneNumber:
+                          type: string
+                          pattern: ^\s*(?=(?:\D*\d){7,15}\D*$)\+?[0-9()\-\s]+$
+                          description: Contact phone number, in a valid format.
+                      anyOf:
+                        - properties:
+                            emailAddress: {}
+                          required:
+                            - emailAddress
+                        - properties:
+                            phoneNumber: {}
+                          required:
+                            - phoneNumber
+                    address:
+                      $schema: https://json-schema.org/draft/2020-12/schema
+                      title: Address
+                      description: A UK or Irish postal address. fullAddress is optional; postcode is required.
+                      examples:
+                        - fullAddress: 10 Industrial Way, Test City
+                          postcode: TE1 2PQ
+                      type: object
+                      properties:
+                        fullAddress:
+                          type: string
+                          minLength: 1
+                          description: Full address line.
+                        postcode:
+                          type: string
+                          pattern: ^\s*(?:(?:(([Gg][Ii][Rr] 0[Aa]{2})|((([A-Za-z]\d{1,2})|(([A-Za-z][A-Ha-hJ-Yj-y]\d{1,2})|(([A-Za-z]\d[A-Za-z])|([A-Za-z][A-Ha-hJ-Yj-y]\d?[A-Za-z])))) \d[A-Za-z]{2})))|(?:(?:[Dd]6[Ww]|[AaC-Fc-fHhKkNnPpRrTtV-Yv-y]\d{2}) ?[0-9AaC-Fc-fHhKkNnPpRrTtV-Yv-y]{4}))\s*$
+                          description: Accepts UK postcodes and Irish Eircodes.
+                      required:
+                        - postcode
+                  required:
+                    - organisationName
+                    - meansOfTransport
+                    - contactDetails
+                  additionalProperties: false
                 brokerOrDealer:
                   $schema: https://json-schema.org/draft/2020-12/schema
                   title: Broker or dealer involvement
@@ -3976,12 +5391,24 @@ paths:
                     additionalProperties: false
               required:
                 - reason
+                - carrier
               additionalProperties: false
             examples:
               withReason:
                 summary: Receipt with no prior delivery, with the reason why
                 value:
                   reason: No delivery was recorded prior to receipt; waste received directly from the producer.
+                  carrier:
+                    organisationName: Carrier Demo Ltd
+                    registrationNumber: CBDU123456
+                    meansOfTransport: Road
+                    vehicleRegistration: AB12 CDE
+                    contactDetails:
+                      emailAddress: carrier@example.com
+                      phoneNumber: '01234567890'
+                    address:
+                      fullAddress: 4 Carrier Lane, Test City
+                      postcode: TE1 4CR
                   supportingReferences:
                     - label: Weighbridge Number
                       reference: WB-0042
@@ -3991,6 +5418,7 @@ paths:
           headers:
             x-request-id:
               description: Trace id for this request. Quote it to support if something goes wrong.
+              required: true
               schema:
                 type: string
                 example: 4c6f9e1a-8f2b-4e3d-9a1c-2b7d5e6f0a3c
@@ -4014,8 +5442,9 @@ paths:
                       deliveryId:
                         $schema: https://json-schema.org/draft/2020-12/schema
                         title: Delivery ID
-                        description: Unique identifier for a delivery, minted by the server on `POST /deliveries`.
+                        description: 'Unique identifier for a delivery, minted by the server on `POST /deliveries`. Format: a two-digit year prefix followed by six or seven characters from A–Z and 0–9, 8 or 9 characters in all. Movement IDs and Delivery IDs share this format. Treat it as opaque: don''t parse it.'
                         type: string
+                        pattern: ^[0-9]{2}[A-Z0-9]{6,7}$
                         examples:
                           - 25KMT4Z9
                   validation:
@@ -4078,6 +5507,7 @@ paths:
           headers:
             x-request-id:
               description: Trace id for this request. Quote it to support if something goes wrong.
+              required: true
               schema:
                 type: string
                 example: 4c6f9e1a-8f2b-4e3d-9a1c-2b7d5e6f0a3c
@@ -4155,6 +5585,7 @@ paths:
           headers:
             x-request-id:
               description: Trace id for this request. Quote it to support if something goes wrong.
+              required: true
               schema:
                 type: string
                 example: 4c6f9e1a-8f2b-4e3d-9a1c-2b7d5e6f0a3c
@@ -4232,6 +5663,7 @@ paths:
           headers:
             x-request-id:
               description: Trace id for this request. Quote it to support if something goes wrong.
+              required: true
               schema:
                 type: string
                 example: 4c6f9e1a-8f2b-4e3d-9a1c-2b7d5e6f0a3c
@@ -4313,10 +5745,12 @@ paths:
         schema:
           $schema: https://json-schema.org/draft/2020-12/schema
           title: Delivery ID
-          description: Unique identifier for a delivery, minted by the server on `POST /deliveries`.
+          description: 'Unique identifier for a delivery, minted by the server on `POST /deliveries`. Format: a two-digit year prefix followed by six or seven characters from A–Z and 0–9, 8 or 9 characters in all. Movement IDs and Delivery IDs share this format. Treat it as opaque: don''t parse it.'
           type: string
+          pattern: ^[0-9]{2}[A-Z0-9]{6,7}$
           examples:
             - 25KMT4Z9
+        example: 25KMT4Z9
     post:
       tags:
         - Receipt
@@ -4333,6 +5767,148 @@ paths:
               description: Payload for POST /beta-2/deliveries/{deliveryId}/receipt.
               type: object
               properties:
+                carrier:
+                  $schema: https://json-schema.org/draft/2020-12/schema
+                  title: Carrier
+                  description: A single waste carrier. organisationName, meansOfTransport and contactDetails are required, and exactly one of registrationNumber or reasonForNoRegistrationNumber must be provided. vehicleRegistration is required for Road and otherMeansOfTransport for Other; each is forbidden otherwise. address is optional.
+                  type: object
+                  oneOf:
+                    - required:
+                        - registrationNumber
+                      properties:
+                        registrationNumber: {}
+                        reasonForNoRegistrationNumber:
+                          not: {}
+                          description: Not allowed when registrationNumber is provided.
+                    - required:
+                        - reasonForNoRegistrationNumber
+                      properties:
+                        registrationNumber:
+                          not: {}
+                          description: Not allowed when reasonForNoRegistrationNumber is provided.
+                        reasonForNoRegistrationNumber: {}
+                  allOf:
+                    - if:
+                        properties:
+                          meansOfTransport:
+                            const: Road
+                        required:
+                          - meansOfTransport
+                      then:
+                        properties:
+                          vehicleRegistration: {}
+                        required:
+                          - vehicleRegistration
+                      else:
+                        properties:
+                          vehicleRegistration:
+                            not: {}
+                            description: Not allowed unless meansOfTransport is Road.
+                    - if:
+                        properties:
+                          meansOfTransport:
+                            const: Other
+                        required:
+                          - meansOfTransport
+                      then:
+                        properties:
+                          otherMeansOfTransport: {}
+                        required:
+                          - otherMeansOfTransport
+                      else:
+                        properties:
+                          otherMeansOfTransport:
+                            not: {}
+                            description: Not allowed unless meansOfTransport is Other.
+                  properties:
+                    organisationName:
+                      type: string
+                      minLength: 1
+                      description: Name of the carrier organisation.
+                    registrationNumber:
+                      description: Waste carrier registration number, in a valid UK home-nation format (England and NRW CBDU/CBDL, SEPA WCR/SCO/SEA/SNO/SWE and PCT, NI ROC UT/LT). Mutually exclusive with reasonForNoRegistrationNumber — exactly one of the two is required.
+                      $schema: https://json-schema.org/draft/2020-12/schema
+                      title: Registration number
+                      type: string
+                      pattern: ^\s*(?:[Cc][Bb][Dd][LlUu]\d{3,}|[Ww][Cc][Rr]/[Rr]/\d{7}|(?:[Ss][Cc][Oo]|[Ss][Ee][Aa]|[Ss][Nn][Oo]|[Ss][Ww][Ee]|[Ww][Cc][Rr])/\d{6}|[Pp][Cc][Tt]-[A-Za-z]-\d{3,7}|[Rr][Oo][Cc]\W*[UuLl][Tt]\W*\d{1,5})\s*$
+                    reasonForNoRegistrationNumber:
+                      type: string
+                      enum:
+                        - ON_SITE
+                        - HOUSEHOLD
+                        - ONE_OFF
+                        - MARINE
+                      description: Why the carrier has no registration number. Mutually exclusive with registrationNumber — exactly one of the two is required.
+                    meansOfTransport:
+                      type: string
+                      enum:
+                        - Road
+                        - Rail
+                        - Air
+                        - Sea
+                        - Inland Waterway
+                        - Piped
+                        - Other
+                      description: How the carrier will transport the waste.
+                    vehicleRegistration:
+                      type: string
+                      minLength: 1
+                      description: Registration of the vehicle carrying the waste. Required when meansOfTransport is Road; forbidden otherwise.
+                    otherMeansOfTransport:
+                      type: string
+                      minLength: 1
+                      description: Description of the means of transport. Required when meansOfTransport is Other; forbidden otherwise.
+                    contactDetails:
+                      $schema: https://json-schema.org/draft/2020-12/schema
+                      title: Contact details
+                      description: Contact details for a party. At least one of emailAddress or phoneNumber must be provided.
+                      examples:
+                        - emailAddress: producer@example.com
+                          phoneNumber: '01234567890'
+                        - emailAddress: producer@example.com
+                      type: object
+                      properties:
+                        emailAddress:
+                          type: string
+                          format: email
+                          description: Contact email address.
+                        phoneNumber:
+                          type: string
+                          pattern: ^\s*(?=(?:\D*\d){7,15}\D*$)\+?[0-9()\-\s]+$
+                          description: Contact phone number, in a valid format.
+                      anyOf:
+                        - properties:
+                            emailAddress: {}
+                          required:
+                            - emailAddress
+                        - properties:
+                            phoneNumber: {}
+                          required:
+                            - phoneNumber
+                    address:
+                      $schema: https://json-schema.org/draft/2020-12/schema
+                      title: Address
+                      description: A UK or Irish postal address. fullAddress is optional; postcode is required.
+                      examples:
+                        - fullAddress: 10 Industrial Way, Test City
+                          postcode: TE1 2PQ
+                      type: object
+                      properties:
+                        fullAddress:
+                          type: string
+                          minLength: 1
+                          description: Full address line.
+                        postcode:
+                          type: string
+                          pattern: ^\s*(?:(?:(([Gg][Ii][Rr] 0[Aa]{2})|((([A-Za-z]\d{1,2})|(([A-Za-z][A-Ha-hJ-Yj-y]\d{1,2})|(([A-Za-z]\d[A-Za-z])|([A-Za-z][A-Ha-hJ-Yj-y]\d?[A-Za-z])))) \d[A-Za-z]{2})))|(?:(?:[Dd]6[Ww]|[AaC-Fc-fHhKkNnPpRrTtV-Yv-y]\d{2}) ?[0-9AaC-Fc-fHhKkNnPpRrTtV-Yv-y]{4}))\s*$
+                          description: Accepts UK postcodes and Irish Eircodes.
+                      required:
+                        - postcode
+                  required:
+                    - organisationName
+                    - meansOfTransport
+                    - contactDetails
+                  additionalProperties: false
                 brokerOrDealer:
                   $schema: https://json-schema.org/draft/2020-12/schema
                   title: Broker or dealer involvement
@@ -4505,11 +6081,24 @@ paths:
                       - reference
                       - label
                     additionalProperties: false
+              required:
+                - carrier
               additionalProperties: false
             examples:
               withBrokerAndReferences:
                 summary: With broker or dealer and a weighbridge reference
                 value:
+                  carrier:
+                    organisationName: Carrier Demo Ltd
+                    registrationNumber: CBDU123456
+                    meansOfTransport: Road
+                    vehicleRegistration: AB12 CDE
+                    contactDetails:
+                      emailAddress: carrier@example.com
+                      phoneNumber: '01234567890'
+                    address:
+                      fullAddress: 4 Carrier Lane, Test City
+                      postcode: TE1 4CR
                   brokerOrDealer:
                     isPresent: true
                     items:
@@ -4530,6 +6119,7 @@ paths:
           headers:
             x-request-id:
               description: Trace id for this request. Quote it to support if something goes wrong.
+              required: true
               schema:
                 type: string
                 example: 4c6f9e1a-8f2b-4e3d-9a1c-2b7d5e6f0a3c
@@ -4553,8 +6143,9 @@ paths:
                       deliveryId:
                         $schema: https://json-schema.org/draft/2020-12/schema
                         title: Delivery ID
-                        description: Unique identifier for a delivery, minted by the server on `POST /deliveries`.
+                        description: 'Unique identifier for a delivery, minted by the server on `POST /deliveries`. Format: a two-digit year prefix followed by six or seven characters from A–Z and 0–9, 8 or 9 characters in all. Movement IDs and Delivery IDs share this format. Treat it as opaque: don''t parse it.'
                         type: string
+                        pattern: ^[0-9]{2}[A-Z0-9]{6,7}$
                         examples:
                           - 25KMT4Z9
                   validation:
@@ -4617,6 +6208,7 @@ paths:
           headers:
             x-request-id:
               description: Trace id for this request. Quote it to support if something goes wrong.
+              required: true
               schema:
                 type: string
                 example: 4c6f9e1a-8f2b-4e3d-9a1c-2b7d5e6f0a3c
@@ -4694,6 +6286,7 @@ paths:
           headers:
             x-request-id:
               description: Trace id for this request. Quote it to support if something goes wrong.
+              required: true
               schema:
                 type: string
                 example: 4c6f9e1a-8f2b-4e3d-9a1c-2b7d5e6f0a3c
@@ -4771,6 +6364,7 @@ paths:
           headers:
             x-request-id:
               description: Trace id for this request. Quote it to support if something goes wrong.
+              required: true
               schema:
                 type: string
                 example: 4c6f9e1a-8f2b-4e3d-9a1c-2b7d5e6f0a3c
@@ -4854,6 +6448,7 @@ paths:
           headers:
             x-request-id:
               description: Trace id for this request. Quote it to support if something goes wrong.
+              required: true
               schema:
                 type: string
                 example: 4c6f9e1a-8f2b-4e3d-9a1c-2b7d5e6f0a3c

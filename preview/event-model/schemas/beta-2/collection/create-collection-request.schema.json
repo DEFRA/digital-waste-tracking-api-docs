@@ -4,6 +4,9 @@
   "description": "Payload for POST /beta-2/movements/{movementId}/collection.",
   "type": "object",
   "properties": {
+    "carrier": {
+      "$ref": "../common/carrier.schema.json"
+    },
     "brokerOrDealer": {
       "$ref": "../common/broker-or-dealer/broker-or-dealer.schema.json"
     },
@@ -14,5 +17,6 @@
       "$ref": "../common/special-handling-requirements.schema.json"
     }
   },
+  "required": ["carrier"],
   "additionalProperties": false
 }
