@@ -518,6 +518,78 @@ components:
             additionalProperties: false
           minItems: 1
           description: The carriers intended to transport the waste. At least one is required.
+        intendedReceivers:
+          type: array
+          items:
+            $schema: https://json-schema.org/draft/2020-12/schema
+            title: Receiver
+            description: A single intended receiver. siteName, authorisationNumber, receiptAddress and contactDetails are all required.
+            type: object
+            properties:
+              siteName:
+                type: string
+                minLength: 1
+                description: Name of the receiving site.
+              authorisationNumber:
+                description: Receiver environmental permit or exemption number, in a valid UK format.
+                $schema: https://json-schema.org/draft/2020-12/schema
+                title: Authorisation number
+                type: string
+                pattern: ^\s*(?:(?:[A-Za-z]{2}\d{4}[A-Za-z]{2})|(?:[A-Za-z]{2}\d{4}[A-Za-z]{2}\/[Dd]\d{4,5})|(?:[Ee][Pp][Rr]\/[A-Za-z]{2}\d{4}[A-Za-z]{2})|(?:[Ee][Pp][Rr]\/[A-Za-z]{2}\d{4}[A-Za-z]{2}\/[Dd]\d{4,5})|(?:[Ee][Aa][Ww][Mm][Ll]\d{5,6})|(?:[Ww][Mm][Ll]\d{5,6})|(?:[Pp][Pp][Cc]\/[AaWwEeNn]\/\d{7})|(?:[Ww][Mm][Ll]\/[LlWwEeNn]\/\d{7})|(?:[Ww][Mm][Ll]\/[LlWwEeNn]\/\d{7}\/\d{2})|(?:[Pp][Pp][Cc]\/[Aa]\/[Ss][Ee][Pp][Aa]\d{4}-\d{4})|(?:[Ww][Mm][Ll]\/[Ll]\/[Ss][Ee][Pp][Aa]\d{4}-\d{4})|(?:[Ee][Aa][Ss]\/[Pp]\/\d{6})|(?:[Pp]\d{4}\/\d{2}[A-Za-z])|(?:[Pp]\d{4}\/\d{2}[A-Za-z]\/[Vv]\d+)|(?:[Ww][Pp][Pp][Cc] \d{2}\/\d{2})|(?:[Ww][Pp][Pp][Cc] \d{2}\/\d{2}\/[Vv]\d+)|(?:[Ww][Mm][Ll] \d{2}\/\d+(\/[Tt])? [Ll][Nn]\/\d{2}\/\d+(\/([MmTtCcNn]|[Vv]\d+))*)|(?:[Ww][Mm][Ll] \d{2}\/\d+ [Pp][Aa][Cc]\/\d{4}\/[Ww][Cc][Ll]\d{3}))\s*$
+              receiptAddress:
+                description: Address the waste will be received at. postcode is required; fullAddress is optional.
+                $schema: https://json-schema.org/draft/2020-12/schema
+                title: Address
+                examples:
+                  - fullAddress: 10 Industrial Way, Test City
+                    postcode: TE1 2PQ
+                type: object
+                properties:
+                  fullAddress:
+                    type: string
+                    minLength: 1
+                    description: Full address line.
+                  postcode:
+                    type: string
+                    pattern: ^\s*(?:(?:(([Gg][Ii][Rr] 0[Aa]{2})|((([A-Za-z]\d{1,2})|(([A-Za-z][A-Ha-hJ-Yj-y]\d{1,2})|(([A-Za-z]\d[A-Za-z])|([A-Za-z][A-Ha-hJ-Yj-y]\d?[A-Za-z])))) \d[A-Za-z]{2})))|(?:(?:[Dd]6[Ww]|[AaC-Fc-fHhKkNnPpRrTtV-Yv-y]\d{2}) ?[0-9AaC-Fc-fHhKkNnPpRrTtV-Yv-y]{4}))\s*$
+                    description: Accepts UK postcodes and Irish Eircodes.
+                required:
+                  - postcode
+              contactDetails:
+                description: How to contact the receiving site. At least one of emailAddress or phoneNumber is required.
+                $schema: https://json-schema.org/draft/2020-12/schema
+                title: Contact details
+                examples:
+                  - emailAddress: producer@example.com
+                    phoneNumber: '01234567890'
+                  - emailAddress: producer@example.com
+                type: object
+                properties:
+                  emailAddress:
+                    type: string
+                    format: email
+                    description: Contact email address.
+                  phoneNumber:
+                    type: string
+                    pattern: ^\s*(?=(?:\D*\d){7,15}\D*$)\+?[0-9()\-\s]+$
+                    description: Contact phone number, in a valid format.
+                anyOf:
+                  - properties:
+                      emailAddress: {}
+                    required:
+                      - emailAddress
+                  - properties:
+                      phoneNumber: {}
+                    required:
+                      - phoneNumber
+            required:
+              - siteName
+              - authorisationNumber
+              - receiptAddress
+              - contactDetails
+            additionalProperties: false
+          minItems: 1
+          description: The intended receivers of the waste. At least one is required.
         brokerOrDealer:
           $schema: https://json-schema.org/draft/2020-12/schema
           title: Broker or dealer involvement
@@ -702,6 +774,7 @@ components:
       required:
         - producer
         - intendedCarriers
+        - intendedReceivers
       additionalProperties: false
     recordCollectionRequest:
       $schema: https://json-schema.org/draft/2020-12/schema
@@ -990,6 +1063,9 @@ components:
                 additionalProperties: false
               description: The brokers or dealers involved. Required with at least one entry when isPresent is true, and must not be provided otherwise. More than one may be declared.
           additionalProperties: false
+        dutyOfCareConfirmed:
+          type: boolean
+          description: Carrier confirms they have inspected the waste, that it is as described, and that they are content to transport it.
         supportingReferences:
           $schema: https://json-schema.org/draft/2020-12/schema
           title: Supporting references
@@ -1034,6 +1110,7 @@ components:
           maxLength: 500
       required:
         - carrier
+        - dutyOfCareConfirmed
       additionalProperties: false
     recordDeliveryRequest:
       $schema: https://json-schema.org/draft/2020-12/schema
@@ -1380,6 +1457,74 @@ components:
             - meansOfTransport
             - contactDetails
           additionalProperties: false
+        receiver:
+          $schema: https://json-schema.org/draft/2020-12/schema
+          title: Receiver
+          description: A single intended receiver. siteName, authorisationNumber, receiptAddress and contactDetails are all required.
+          type: object
+          properties:
+            siteName:
+              type: string
+              minLength: 1
+              description: Name of the receiving site.
+            authorisationNumber:
+              description: Receiver environmental permit or exemption number, in a valid UK format.
+              $schema: https://json-schema.org/draft/2020-12/schema
+              title: Authorisation number
+              type: string
+              pattern: ^\s*(?:(?:[A-Za-z]{2}\d{4}[A-Za-z]{2})|(?:[A-Za-z]{2}\d{4}[A-Za-z]{2}\/[Dd]\d{4,5})|(?:[Ee][Pp][Rr]\/[A-Za-z]{2}\d{4}[A-Za-z]{2})|(?:[Ee][Pp][Rr]\/[A-Za-z]{2}\d{4}[A-Za-z]{2}\/[Dd]\d{4,5})|(?:[Ee][Aa][Ww][Mm][Ll]\d{5,6})|(?:[Ww][Mm][Ll]\d{5,6})|(?:[Pp][Pp][Cc]\/[AaWwEeNn]\/\d{7})|(?:[Ww][Mm][Ll]\/[LlWwEeNn]\/\d{7})|(?:[Ww][Mm][Ll]\/[LlWwEeNn]\/\d{7}\/\d{2})|(?:[Pp][Pp][Cc]\/[Aa]\/[Ss][Ee][Pp][Aa]\d{4}-\d{4})|(?:[Ww][Mm][Ll]\/[Ll]\/[Ss][Ee][Pp][Aa]\d{4}-\d{4})|(?:[Ee][Aa][Ss]\/[Pp]\/\d{6})|(?:[Pp]\d{4}\/\d{2}[A-Za-z])|(?:[Pp]\d{4}\/\d{2}[A-Za-z]\/[Vv]\d+)|(?:[Ww][Pp][Pp][Cc] \d{2}\/\d{2})|(?:[Ww][Pp][Pp][Cc] \d{2}\/\d{2}\/[Vv]\d+)|(?:[Ww][Mm][Ll] \d{2}\/\d+(\/[Tt])? [Ll][Nn]\/\d{2}\/\d+(\/([MmTtCcNn]|[Vv]\d+))*)|(?:[Ww][Mm][Ll] \d{2}\/\d+ [Pp][Aa][Cc]\/\d{4}\/[Ww][Cc][Ll]\d{3}))\s*$
+            receiptAddress:
+              description: Address the waste will be received at. postcode is required; fullAddress is optional.
+              $schema: https://json-schema.org/draft/2020-12/schema
+              title: Address
+              examples:
+                - fullAddress: 10 Industrial Way, Test City
+                  postcode: TE1 2PQ
+              type: object
+              properties:
+                fullAddress:
+                  type: string
+                  minLength: 1
+                  description: Full address line.
+                postcode:
+                  type: string
+                  pattern: ^\s*(?:(?:(([Gg][Ii][Rr] 0[Aa]{2})|((([A-Za-z]\d{1,2})|(([A-Za-z][A-Ha-hJ-Yj-y]\d{1,2})|(([A-Za-z]\d[A-Za-z])|([A-Za-z][A-Ha-hJ-Yj-y]\d?[A-Za-z])))) \d[A-Za-z]{2})))|(?:(?:[Dd]6[Ww]|[AaC-Fc-fHhKkNnPpRrTtV-Yv-y]\d{2}) ?[0-9AaC-Fc-fHhKkNnPpRrTtV-Yv-y]{4}))\s*$
+                  description: Accepts UK postcodes and Irish Eircodes.
+              required:
+                - postcode
+            contactDetails:
+              description: How to contact the receiving site. At least one of emailAddress or phoneNumber is required.
+              $schema: https://json-schema.org/draft/2020-12/schema
+              title: Contact details
+              examples:
+                - emailAddress: producer@example.com
+                  phoneNumber: '01234567890'
+                - emailAddress: producer@example.com
+              type: object
+              properties:
+                emailAddress:
+                  type: string
+                  format: email
+                  description: Contact email address.
+                phoneNumber:
+                  type: string
+                  pattern: ^\s*(?=(?:\D*\d){7,15}\D*$)\+?[0-9()\-\s]+$
+                  description: Contact phone number, in a valid format.
+              anyOf:
+                - properties:
+                    emailAddress: {}
+                  required:
+                    - emailAddress
+                - properties:
+                    phoneNumber: {}
+                  required:
+                    - phoneNumber
+          required:
+            - siteName
+            - authorisationNumber
+            - receiptAddress
+            - contactDetails
+          additionalProperties: false
         brokerOrDealer:
           $schema: https://json-schema.org/draft/2020-12/schema
           title: Broker or dealer involvement
@@ -1554,6 +1699,7 @@ components:
             additionalProperties: false
       required:
         - carrier
+        - receiver
       additionalProperties: false
     recordReceiptWithoutDeliveryRequest:
       $schema: https://json-schema.org/draft/2020-12/schema
@@ -1707,6 +1853,74 @@ components:
           required:
             - organisationName
             - meansOfTransport
+            - contactDetails
+          additionalProperties: false
+        receiver:
+          $schema: https://json-schema.org/draft/2020-12/schema
+          title: Receiver
+          description: A single intended receiver. siteName, authorisationNumber, receiptAddress and contactDetails are all required.
+          type: object
+          properties:
+            siteName:
+              type: string
+              minLength: 1
+              description: Name of the receiving site.
+            authorisationNumber:
+              description: Receiver environmental permit or exemption number, in a valid UK format.
+              $schema: https://json-schema.org/draft/2020-12/schema
+              title: Authorisation number
+              type: string
+              pattern: ^\s*(?:(?:[A-Za-z]{2}\d{4}[A-Za-z]{2})|(?:[A-Za-z]{2}\d{4}[A-Za-z]{2}\/[Dd]\d{4,5})|(?:[Ee][Pp][Rr]\/[A-Za-z]{2}\d{4}[A-Za-z]{2})|(?:[Ee][Pp][Rr]\/[A-Za-z]{2}\d{4}[A-Za-z]{2}\/[Dd]\d{4,5})|(?:[Ee][Aa][Ww][Mm][Ll]\d{5,6})|(?:[Ww][Mm][Ll]\d{5,6})|(?:[Pp][Pp][Cc]\/[AaWwEeNn]\/\d{7})|(?:[Ww][Mm][Ll]\/[LlWwEeNn]\/\d{7})|(?:[Ww][Mm][Ll]\/[LlWwEeNn]\/\d{7}\/\d{2})|(?:[Pp][Pp][Cc]\/[Aa]\/[Ss][Ee][Pp][Aa]\d{4}-\d{4})|(?:[Ww][Mm][Ll]\/[Ll]\/[Ss][Ee][Pp][Aa]\d{4}-\d{4})|(?:[Ee][Aa][Ss]\/[Pp]\/\d{6})|(?:[Pp]\d{4}\/\d{2}[A-Za-z])|(?:[Pp]\d{4}\/\d{2}[A-Za-z]\/[Vv]\d+)|(?:[Ww][Pp][Pp][Cc] \d{2}\/\d{2})|(?:[Ww][Pp][Pp][Cc] \d{2}\/\d{2}\/[Vv]\d+)|(?:[Ww][Mm][Ll] \d{2}\/\d+(\/[Tt])? [Ll][Nn]\/\d{2}\/\d+(\/([MmTtCcNn]|[Vv]\d+))*)|(?:[Ww][Mm][Ll] \d{2}\/\d+ [Pp][Aa][Cc]\/\d{4}\/[Ww][Cc][Ll]\d{3}))\s*$
+            receiptAddress:
+              description: Address the waste will be received at. postcode is required; fullAddress is optional.
+              $schema: https://json-schema.org/draft/2020-12/schema
+              title: Address
+              examples:
+                - fullAddress: 10 Industrial Way, Test City
+                  postcode: TE1 2PQ
+              type: object
+              properties:
+                fullAddress:
+                  type: string
+                  minLength: 1
+                  description: Full address line.
+                postcode:
+                  type: string
+                  pattern: ^\s*(?:(?:(([Gg][Ii][Rr] 0[Aa]{2})|((([A-Za-z]\d{1,2})|(([A-Za-z][A-Ha-hJ-Yj-y]\d{1,2})|(([A-Za-z]\d[A-Za-z])|([A-Za-z][A-Ha-hJ-Yj-y]\d?[A-Za-z])))) \d[A-Za-z]{2})))|(?:(?:[Dd]6[Ww]|[AaC-Fc-fHhKkNnPpRrTtV-Yv-y]\d{2}) ?[0-9AaC-Fc-fHhKkNnPpRrTtV-Yv-y]{4}))\s*$
+                  description: Accepts UK postcodes and Irish Eircodes.
+              required:
+                - postcode
+            contactDetails:
+              description: How to contact the receiving site. At least one of emailAddress or phoneNumber is required.
+              $schema: https://json-schema.org/draft/2020-12/schema
+              title: Contact details
+              examples:
+                - emailAddress: producer@example.com
+                  phoneNumber: '01234567890'
+                - emailAddress: producer@example.com
+              type: object
+              properties:
+                emailAddress:
+                  type: string
+                  format: email
+                  description: Contact email address.
+                phoneNumber:
+                  type: string
+                  pattern: ^\s*(?=(?:\D*\d){7,15}\D*$)\+?[0-9()\-\s]+$
+                  description: Contact phone number, in a valid format.
+              anyOf:
+                - properties:
+                    emailAddress: {}
+                  required:
+                    - emailAddress
+                - properties:
+                    phoneNumber: {}
+                  required:
+                    - phoneNumber
+          required:
+            - siteName
+            - authorisationNumber
+            - receiptAddress
             - contactDetails
           additionalProperties: false
         brokerOrDealer:
@@ -1884,6 +2098,7 @@ components:
       required:
         - reason
         - carrier
+        - receiver
       additionalProperties: false
     issue:
       $schema: https://json-schema.org/draft/2020-12/schema
@@ -3051,6 +3266,78 @@ paths:
                     additionalProperties: false
                   minItems: 1
                   description: The carriers intended to transport the waste. At least one is required.
+                intendedReceivers:
+                  type: array
+                  items:
+                    $schema: https://json-schema.org/draft/2020-12/schema
+                    title: Receiver
+                    description: A single intended receiver. siteName, authorisationNumber, receiptAddress and contactDetails are all required.
+                    type: object
+                    properties:
+                      siteName:
+                        type: string
+                        minLength: 1
+                        description: Name of the receiving site.
+                      authorisationNumber:
+                        description: Receiver environmental permit or exemption number, in a valid UK format.
+                        $schema: https://json-schema.org/draft/2020-12/schema
+                        title: Authorisation number
+                        type: string
+                        pattern: ^\s*(?:(?:[A-Za-z]{2}\d{4}[A-Za-z]{2})|(?:[A-Za-z]{2}\d{4}[A-Za-z]{2}\/[Dd]\d{4,5})|(?:[Ee][Pp][Rr]\/[A-Za-z]{2}\d{4}[A-Za-z]{2})|(?:[Ee][Pp][Rr]\/[A-Za-z]{2}\d{4}[A-Za-z]{2}\/[Dd]\d{4,5})|(?:[Ee][Aa][Ww][Mm][Ll]\d{5,6})|(?:[Ww][Mm][Ll]\d{5,6})|(?:[Pp][Pp][Cc]\/[AaWwEeNn]\/\d{7})|(?:[Ww][Mm][Ll]\/[LlWwEeNn]\/\d{7})|(?:[Ww][Mm][Ll]\/[LlWwEeNn]\/\d{7}\/\d{2})|(?:[Pp][Pp][Cc]\/[Aa]\/[Ss][Ee][Pp][Aa]\d{4}-\d{4})|(?:[Ww][Mm][Ll]\/[Ll]\/[Ss][Ee][Pp][Aa]\d{4}-\d{4})|(?:[Ee][Aa][Ss]\/[Pp]\/\d{6})|(?:[Pp]\d{4}\/\d{2}[A-Za-z])|(?:[Pp]\d{4}\/\d{2}[A-Za-z]\/[Vv]\d+)|(?:[Ww][Pp][Pp][Cc] \d{2}\/\d{2})|(?:[Ww][Pp][Pp][Cc] \d{2}\/\d{2}\/[Vv]\d+)|(?:[Ww][Mm][Ll] \d{2}\/\d+(\/[Tt])? [Ll][Nn]\/\d{2}\/\d+(\/([MmTtCcNn]|[Vv]\d+))*)|(?:[Ww][Mm][Ll] \d{2}\/\d+ [Pp][Aa][Cc]\/\d{4}\/[Ww][Cc][Ll]\d{3}))\s*$
+                      receiptAddress:
+                        description: Address the waste will be received at. postcode is required; fullAddress is optional.
+                        $schema: https://json-schema.org/draft/2020-12/schema
+                        title: Address
+                        examples:
+                          - fullAddress: 10 Industrial Way, Test City
+                            postcode: TE1 2PQ
+                        type: object
+                        properties:
+                          fullAddress:
+                            type: string
+                            minLength: 1
+                            description: Full address line.
+                          postcode:
+                            type: string
+                            pattern: ^\s*(?:(?:(([Gg][Ii][Rr] 0[Aa]{2})|((([A-Za-z]\d{1,2})|(([A-Za-z][A-Ha-hJ-Yj-y]\d{1,2})|(([A-Za-z]\d[A-Za-z])|([A-Za-z][A-Ha-hJ-Yj-y]\d?[A-Za-z])))) \d[A-Za-z]{2})))|(?:(?:[Dd]6[Ww]|[AaC-Fc-fHhKkNnPpRrTtV-Yv-y]\d{2}) ?[0-9AaC-Fc-fHhKkNnPpRrTtV-Yv-y]{4}))\s*$
+                            description: Accepts UK postcodes and Irish Eircodes.
+                        required:
+                          - postcode
+                      contactDetails:
+                        description: How to contact the receiving site. At least one of emailAddress or phoneNumber is required.
+                        $schema: https://json-schema.org/draft/2020-12/schema
+                        title: Contact details
+                        examples:
+                          - emailAddress: producer@example.com
+                            phoneNumber: '01234567890'
+                          - emailAddress: producer@example.com
+                        type: object
+                        properties:
+                          emailAddress:
+                            type: string
+                            format: email
+                            description: Contact email address.
+                          phoneNumber:
+                            type: string
+                            pattern: ^\s*(?=(?:\D*\d){7,15}\D*$)\+?[0-9()\-\s]+$
+                            description: Contact phone number, in a valid format.
+                        anyOf:
+                          - properties:
+                              emailAddress: {}
+                            required:
+                              - emailAddress
+                          - properties:
+                              phoneNumber: {}
+                            required:
+                              - phoneNumber
+                    required:
+                      - siteName
+                      - authorisationNumber
+                      - receiptAddress
+                      - contactDetails
+                    additionalProperties: false
+                  minItems: 1
+                  description: The intended receivers of the waste. At least one is required.
                 brokerOrDealer:
                   $schema: https://json-schema.org/draft/2020-12/schema
                   title: Broker or dealer involvement
@@ -3235,6 +3522,7 @@ paths:
               required:
                 - producer
                 - intendedCarriers
+                - intendedReceivers
               additionalProperties: false
             examples:
               commercial:
@@ -3251,6 +3539,15 @@ paths:
                     contactDetails:
                       emailAddress: producer@example.com
                       phoneNumber: '01234567890'
+                  intendedReceivers:
+                    - siteName: Receiver Site Ltd
+                      authorisationNumber: EAS/P/123456
+                      receiptAddress:
+                        fullAddress: 3 Receiver Road, Test City
+                        postcode: TE1 3RC
+                      contactDetails:
+                        emailAddress: receiver@example.com
+                        phoneNumber: '01234567890'
                   brokerOrDealer:
                     isPresent: true
                     items:
@@ -3295,6 +3592,15 @@ paths:
                       address:
                         fullAddress: 4 Carrier Lane, Test City
                         postcode: TE1 4CR
+                  intendedReceivers:
+                    - siteName: Receiver Site Ltd
+                      authorisationNumber: EAS/P/123456
+                      receiptAddress:
+                        fullAddress: 3 Receiver Road, Test City
+                        postcode: TE1 3RC
+                      contactDetails:
+                        emailAddress: receiver@example.com
+                        phoneNumber: '01234567890'
       responses:
         '201':
           description: Movement created. Body carries the new Movement ID and any validation warnings.
@@ -3950,6 +4256,9 @@ paths:
                         additionalProperties: false
                       description: The brokers or dealers involved. Required with at least one entry when isPresent is true, and must not be provided otherwise. More than one may be declared.
                   additionalProperties: false
+                dutyOfCareConfirmed:
+                  type: boolean
+                  description: Carrier confirms they have inspected the waste, that it is as described, and that they are content to transport it.
                 supportingReferences:
                   $schema: https://json-schema.org/draft/2020-12/schema
                   title: Supporting references
@@ -3994,6 +4303,7 @@ paths:
                   maxLength: 500
               required:
                 - carrier
+                - dutyOfCareConfirmed
               additionalProperties: false
             examples:
               withBrokerAndReferences:
@@ -4010,6 +4320,7 @@ paths:
                     address:
                       fullAddress: 4 Carrier Lane, Test City
                       postcode: TE1 4CR
+                  dutyOfCareConfirmed: true
                   brokerOrDealer:
                     isPresent: true
                     items:
@@ -4041,6 +4352,7 @@ paths:
                     address:
                       fullAddress: 4 Carrier Lane, Test City
                       postcode: TE1 4CR
+                  dutyOfCareConfirmed: true
       responses:
         '201':
           description: Collection recorded. Body carries any validation warnings.
@@ -5217,6 +5529,74 @@ paths:
                     - meansOfTransport
                     - contactDetails
                   additionalProperties: false
+                receiver:
+                  $schema: https://json-schema.org/draft/2020-12/schema
+                  title: Receiver
+                  description: A single intended receiver. siteName, authorisationNumber, receiptAddress and contactDetails are all required.
+                  type: object
+                  properties:
+                    siteName:
+                      type: string
+                      minLength: 1
+                      description: Name of the receiving site.
+                    authorisationNumber:
+                      description: Receiver environmental permit or exemption number, in a valid UK format.
+                      $schema: https://json-schema.org/draft/2020-12/schema
+                      title: Authorisation number
+                      type: string
+                      pattern: ^\s*(?:(?:[A-Za-z]{2}\d{4}[A-Za-z]{2})|(?:[A-Za-z]{2}\d{4}[A-Za-z]{2}\/[Dd]\d{4,5})|(?:[Ee][Pp][Rr]\/[A-Za-z]{2}\d{4}[A-Za-z]{2})|(?:[Ee][Pp][Rr]\/[A-Za-z]{2}\d{4}[A-Za-z]{2}\/[Dd]\d{4,5})|(?:[Ee][Aa][Ww][Mm][Ll]\d{5,6})|(?:[Ww][Mm][Ll]\d{5,6})|(?:[Pp][Pp][Cc]\/[AaWwEeNn]\/\d{7})|(?:[Ww][Mm][Ll]\/[LlWwEeNn]\/\d{7})|(?:[Ww][Mm][Ll]\/[LlWwEeNn]\/\d{7}\/\d{2})|(?:[Pp][Pp][Cc]\/[Aa]\/[Ss][Ee][Pp][Aa]\d{4}-\d{4})|(?:[Ww][Mm][Ll]\/[Ll]\/[Ss][Ee][Pp][Aa]\d{4}-\d{4})|(?:[Ee][Aa][Ss]\/[Pp]\/\d{6})|(?:[Pp]\d{4}\/\d{2}[A-Za-z])|(?:[Pp]\d{4}\/\d{2}[A-Za-z]\/[Vv]\d+)|(?:[Ww][Pp][Pp][Cc] \d{2}\/\d{2})|(?:[Ww][Pp][Pp][Cc] \d{2}\/\d{2}\/[Vv]\d+)|(?:[Ww][Mm][Ll] \d{2}\/\d+(\/[Tt])? [Ll][Nn]\/\d{2}\/\d+(\/([MmTtCcNn]|[Vv]\d+))*)|(?:[Ww][Mm][Ll] \d{2}\/\d+ [Pp][Aa][Cc]\/\d{4}\/[Ww][Cc][Ll]\d{3}))\s*$
+                    receiptAddress:
+                      description: Address the waste will be received at. postcode is required; fullAddress is optional.
+                      $schema: https://json-schema.org/draft/2020-12/schema
+                      title: Address
+                      examples:
+                        - fullAddress: 10 Industrial Way, Test City
+                          postcode: TE1 2PQ
+                      type: object
+                      properties:
+                        fullAddress:
+                          type: string
+                          minLength: 1
+                          description: Full address line.
+                        postcode:
+                          type: string
+                          pattern: ^\s*(?:(?:(([Gg][Ii][Rr] 0[Aa]{2})|((([A-Za-z]\d{1,2})|(([A-Za-z][A-Ha-hJ-Yj-y]\d{1,2})|(([A-Za-z]\d[A-Za-z])|([A-Za-z][A-Ha-hJ-Yj-y]\d?[A-Za-z])))) \d[A-Za-z]{2})))|(?:(?:[Dd]6[Ww]|[AaC-Fc-fHhKkNnPpRrTtV-Yv-y]\d{2}) ?[0-9AaC-Fc-fHhKkNnPpRrTtV-Yv-y]{4}))\s*$
+                          description: Accepts UK postcodes and Irish Eircodes.
+                      required:
+                        - postcode
+                    contactDetails:
+                      description: How to contact the receiving site. At least one of emailAddress or phoneNumber is required.
+                      $schema: https://json-schema.org/draft/2020-12/schema
+                      title: Contact details
+                      examples:
+                        - emailAddress: producer@example.com
+                          phoneNumber: '01234567890'
+                        - emailAddress: producer@example.com
+                      type: object
+                      properties:
+                        emailAddress:
+                          type: string
+                          format: email
+                          description: Contact email address.
+                        phoneNumber:
+                          type: string
+                          pattern: ^\s*(?=(?:\D*\d){7,15}\D*$)\+?[0-9()\-\s]+$
+                          description: Contact phone number, in a valid format.
+                      anyOf:
+                        - properties:
+                            emailAddress: {}
+                          required:
+                            - emailAddress
+                        - properties:
+                            phoneNumber: {}
+                          required:
+                            - phoneNumber
+                  required:
+                    - siteName
+                    - authorisationNumber
+                    - receiptAddress
+                    - contactDetails
+                  additionalProperties: false
                 brokerOrDealer:
                   $schema: https://json-schema.org/draft/2020-12/schema
                   title: Broker or dealer involvement
@@ -5392,6 +5772,7 @@ paths:
               required:
                 - reason
                 - carrier
+                - receiver
               additionalProperties: false
             examples:
               withReason:
@@ -5409,6 +5790,15 @@ paths:
                     address:
                       fullAddress: 4 Carrier Lane, Test City
                       postcode: TE1 4CR
+                  receiver:
+                    siteName: Receiver Site Ltd
+                    authorisationNumber: EAS/P/123456
+                    receiptAddress:
+                      fullAddress: 3 Receiver Road, Test City
+                      postcode: TE1 3RC
+                    contactDetails:
+                      emailAddress: receiver@example.com
+                      phoneNumber: '01234567890'
                   supportingReferences:
                     - label: Weighbridge Number
                       reference: WB-0042
@@ -5909,6 +6299,74 @@ paths:
                     - meansOfTransport
                     - contactDetails
                   additionalProperties: false
+                receiver:
+                  $schema: https://json-schema.org/draft/2020-12/schema
+                  title: Receiver
+                  description: A single intended receiver. siteName, authorisationNumber, receiptAddress and contactDetails are all required.
+                  type: object
+                  properties:
+                    siteName:
+                      type: string
+                      minLength: 1
+                      description: Name of the receiving site.
+                    authorisationNumber:
+                      description: Receiver environmental permit or exemption number, in a valid UK format.
+                      $schema: https://json-schema.org/draft/2020-12/schema
+                      title: Authorisation number
+                      type: string
+                      pattern: ^\s*(?:(?:[A-Za-z]{2}\d{4}[A-Za-z]{2})|(?:[A-Za-z]{2}\d{4}[A-Za-z]{2}\/[Dd]\d{4,5})|(?:[Ee][Pp][Rr]\/[A-Za-z]{2}\d{4}[A-Za-z]{2})|(?:[Ee][Pp][Rr]\/[A-Za-z]{2}\d{4}[A-Za-z]{2}\/[Dd]\d{4,5})|(?:[Ee][Aa][Ww][Mm][Ll]\d{5,6})|(?:[Ww][Mm][Ll]\d{5,6})|(?:[Pp][Pp][Cc]\/[AaWwEeNn]\/\d{7})|(?:[Ww][Mm][Ll]\/[LlWwEeNn]\/\d{7})|(?:[Ww][Mm][Ll]\/[LlWwEeNn]\/\d{7}\/\d{2})|(?:[Pp][Pp][Cc]\/[Aa]\/[Ss][Ee][Pp][Aa]\d{4}-\d{4})|(?:[Ww][Mm][Ll]\/[Ll]\/[Ss][Ee][Pp][Aa]\d{4}-\d{4})|(?:[Ee][Aa][Ss]\/[Pp]\/\d{6})|(?:[Pp]\d{4}\/\d{2}[A-Za-z])|(?:[Pp]\d{4}\/\d{2}[A-Za-z]\/[Vv]\d+)|(?:[Ww][Pp][Pp][Cc] \d{2}\/\d{2})|(?:[Ww][Pp][Pp][Cc] \d{2}\/\d{2}\/[Vv]\d+)|(?:[Ww][Mm][Ll] \d{2}\/\d+(\/[Tt])? [Ll][Nn]\/\d{2}\/\d+(\/([MmTtCcNn]|[Vv]\d+))*)|(?:[Ww][Mm][Ll] \d{2}\/\d+ [Pp][Aa][Cc]\/\d{4}\/[Ww][Cc][Ll]\d{3}))\s*$
+                    receiptAddress:
+                      description: Address the waste will be received at. postcode is required; fullAddress is optional.
+                      $schema: https://json-schema.org/draft/2020-12/schema
+                      title: Address
+                      examples:
+                        - fullAddress: 10 Industrial Way, Test City
+                          postcode: TE1 2PQ
+                      type: object
+                      properties:
+                        fullAddress:
+                          type: string
+                          minLength: 1
+                          description: Full address line.
+                        postcode:
+                          type: string
+                          pattern: ^\s*(?:(?:(([Gg][Ii][Rr] 0[Aa]{2})|((([A-Za-z]\d{1,2})|(([A-Za-z][A-Ha-hJ-Yj-y]\d{1,2})|(([A-Za-z]\d[A-Za-z])|([A-Za-z][A-Ha-hJ-Yj-y]\d?[A-Za-z])))) \d[A-Za-z]{2})))|(?:(?:[Dd]6[Ww]|[AaC-Fc-fHhKkNnPpRrTtV-Yv-y]\d{2}) ?[0-9AaC-Fc-fHhKkNnPpRrTtV-Yv-y]{4}))\s*$
+                          description: Accepts UK postcodes and Irish Eircodes.
+                      required:
+                        - postcode
+                    contactDetails:
+                      description: How to contact the receiving site. At least one of emailAddress or phoneNumber is required.
+                      $schema: https://json-schema.org/draft/2020-12/schema
+                      title: Contact details
+                      examples:
+                        - emailAddress: producer@example.com
+                          phoneNumber: '01234567890'
+                        - emailAddress: producer@example.com
+                      type: object
+                      properties:
+                        emailAddress:
+                          type: string
+                          format: email
+                          description: Contact email address.
+                        phoneNumber:
+                          type: string
+                          pattern: ^\s*(?=(?:\D*\d){7,15}\D*$)\+?[0-9()\-\s]+$
+                          description: Contact phone number, in a valid format.
+                      anyOf:
+                        - properties:
+                            emailAddress: {}
+                          required:
+                            - emailAddress
+                        - properties:
+                            phoneNumber: {}
+                          required:
+                            - phoneNumber
+                  required:
+                    - siteName
+                    - authorisationNumber
+                    - receiptAddress
+                    - contactDetails
+                  additionalProperties: false
                 brokerOrDealer:
                   $schema: https://json-schema.org/draft/2020-12/schema
                   title: Broker or dealer involvement
@@ -6083,6 +6541,7 @@ paths:
                     additionalProperties: false
               required:
                 - carrier
+                - receiver
               additionalProperties: false
             examples:
               withBrokerAndReferences:
@@ -6099,6 +6558,15 @@ paths:
                     address:
                       fullAddress: 4 Carrier Lane, Test City
                       postcode: TE1 4CR
+                  receiver:
+                    siteName: Receiver Site Ltd
+                    authorisationNumber: EAS/P/123456
+                    receiptAddress:
+                      fullAddress: 3 Receiver Road, Test City
+                      postcode: TE1 3RC
+                    contactDetails:
+                      emailAddress: receiver@example.com
+                      phoneNumber: '01234567890'
                   brokerOrDealer:
                     isPresent: true
                     items:

@@ -456,7 +456,7 @@
 <h1 id="glossary">Glossary</h1>
 <p>A reference for terms used across this section. Identifier vocabulary in particular is worth establishing up front, because several IDs look similar and refer to different things. Decision IDs (D-nnn) link to the <a href="../decisions/">decisions register</a>.</p>
 <h2 id="identifiers">Identifiers</h2>
-<p>All public identifiers share one format and one sequence (<a href="../decisions/#d-013">D-013</a>): a two-digit year followed by a sqids code (sqids.org), for example <code>25HRA0B2</code>. The length is not fixed — it grows as the yearly counter grows — so treat every ID as opaque: never parse it or validate a pattern. Because they come from one sequence, two different IDs are never the same string, except where a hazardous Delivery reuses its Movement ID by design.</p>
+<p>All public identifiers share one format and one pool (<a href="../decisions/#d-013">D-013</a>): a two-digit year followed by a sqids code (sqids.org), for example <code>25HRA0B2</code>. IDs are eight characters today; the format allows nine if the yearly counter needs it, so accept both. Treat every ID as opaque: never parse it for meaning. Because they come from one sequence, two different IDs are never the same string, except where a hazardous Delivery reuses its Movement ID by design.</p>
 <h3 id="movement-id">Movement ID</h3>
 <p>The identifier of a waste movement, minted by <code>POST /movements</code>. It is the handle for the whole journey — creation, every collection event, delivery, receipt and fate-of-waste — so software providers store it and pass it between organisations (<a href="../decisions/#d-012">D-012</a>).</p>
 <h3 id="delivery-id">Delivery ID</h3>
@@ -501,7 +501,7 @@
 <h3 id="driver">Driver</h3>
 <p>The person operating the vehicle for a carrier. Treated as part of the carrier, not as a separate party; the API records no driver details.</p>
 <h3 id="receiver">Receiver</h3>
-<p>The party operating the site where waste is received. Holds an environmental permit or equivalent authorisation that determines which waste it may accept. Records the receipt and the actual treatment. At creation, a movement carrying hazardous waste declares its intended <strong>receivers</strong> (<a href="../decisions/#d-043">D-043</a>); the site that actually received the waste is recorded on the receipt.</p>
+<p>The party operating the site where waste is received. Holds an environmental permit or equivalent authorisation that determines which waste it may accept. Records the receipt and the actual treatment. At creation, every movement declares its <strong>intended receivers</strong> (<a href="../decisions/#d-043">D-043</a>); the site that actually received the waste is recorded on the receipt as <code>receiver</code>.</p>
 <h3 id="submitting-organisation">Submitting organisation</h3>
 <p>The organisation a request is made for, identified by its <code>apiCode</code> — sent in the <code>x-api-code</code> header from beta-2, in the body on beta-1 and the Phase 1 receipt (<a href="../decisions/#d-053">D-053</a>). Every record is attributed to it, whatever role it is playing (<a href="../decisions/#d-027">D-027</a>); only the organisation that recorded an event may change it (<a href="../decisions/#d-036">D-036</a>).</p>
 <h2 id="journey-terms">Journey terms</h2>
@@ -524,7 +524,7 @@
 <h3 id="contact-details">Contact details</h3>
 <p>Every party except a household producer carries a <code>contactDetails</code> object with an email address, a phone number, or both (<a href="../decisions/#d-008">D-008</a>).</p>
 <h3 id="soft-delete">Soft-delete</h3>
-<p>Withdrawing an event recorded in error by setting <code>isDeleted: true</code> through its <code>PUT</code>. Nothing is ever hard-deleted, and a receipt cannot be deleted (<a href="../decisions/#d-009">D-009</a>).</p>
+<p>Withdrawing an event recorded in error by setting <code>isDeleted: true</code> through its <code>PUT</code>. Nothing is ever hard-deleted; movements, collections, deliveries and receipts can all be soft-deleted (<a href="../decisions/#d-009">D-009</a>).</p>
 
 
 

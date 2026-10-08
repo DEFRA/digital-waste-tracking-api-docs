@@ -503,27 +503,27 @@
 <tr>
 <td><code>waste-movement-external-api</code></td>
 <td>Public beta routes: authentication, <code>apiCode</code> → organisation lookup, forwarding to the backend. No payload validation of its own.</td>
-<td><strong>Team C</strong></td>
+<td><strong>Team A/C</strong></td>
 </tr>
 <tr>
 <td><code>waste-movement-backend</code></td>
 <td>JSON Schemas for every request and response (<a href="../decisions/#d-052">D-052</a>), validation, business rules, persistence</td>
-<td><strong>Team C</strong></td>
+<td><strong>Team A/C</strong></td>
 </tr>
 <tr>
 <td><code>waste-tracking-id-backend</code></td>
 <td>Movement and Delivery IDs, from the same sequence as the Phase 1 <code>wasteTrackingId</code> (<a href="../decisions/#d-013">D-013</a>)</td>
-<td><strong>Team C</strong></td>
+<td><strong>Team A/C</strong></td>
 </tr>
 <tr>
 <td><code>waste-organisation-backend</code></td>
 <td><code>apiCode</code> issuance and lookup for every actor type (<a href="../decisions/#d-027">D-027</a>)</td>
-<td><strong>Team A/B</strong></td>
+<td><strong>Team B</strong></td>
 </tr>
 <tr>
 <td><code>waste-organisation-frontend</code></td>
 <td>Self-service API code management, already open to every actor type</td>
-<td><strong>Team A/B</strong></td>
+<td><strong>Team B</strong></td>
 </tr>
 <tr>
 <td><code>digital-waste-tracking-api-docs</code></td>
@@ -553,9 +553,9 @@
 </tr>
 <tr>
 <td>beta-2</td>
-<td>Fields and full validation, a resource at a time, plus rejection</td>
-<td>In progress: producer, broker or dealer, references and handling requirements built</td>
-<td>Hazardous split (<a href="../decisions/#d-010">D-010</a>); rejection model (<a href="../decisions/#d-025">D-025</a>); warnings vs confirmation (<a href="../decisions/#d-046">D-046</a>); cross-check rules (<a href="../decisions/#d-021">D-021</a>)</td>
+<td>Fields and full validation on every endpoint, a resource at a time: waste items, receivers, collection and delivery sites, treatments, plus rejection and reclassification</td>
+<td>In progress: producer, carriers on every event, intended receivers and the receipt's receiver, duty of care at collection, broker or dealer, references, handling requirements and the <code>x-api-code</code> header built</td>
+<td>Waste items at creation, which the hazardous split needs (<a href="../decisions/#d-010">D-010</a>); rejection and reclassification model (<a href="../decisions/#d-025">D-025</a>); warnings vs confirmation (<a href="../decisions/#d-046">D-046</a>); cross-check rules (<a href="../decisions/#d-021">D-021</a>)</td>
 </tr>
 <tr>
 <td>beta-3</td>
@@ -599,7 +599,7 @@
 </tr>
 <tr>
 <td><a href="../decisions/#d-013">D-013</a></td>
-<td>IDs are a two-digit year plus a sqids code, with no fixed length, from one shared sequence.</td>
+<td>IDs are a two-digit year plus a sqids code — eight characters, extendable to nine — from the same pool as the Phase 1 <code>wasteTrackingId</code>.</td>
 </tr>
 <tr>
 <td><a href="../decisions/#d-016">D-016</a></td>
@@ -617,6 +617,22 @@
 <td><a href="../decisions/#d-052">D-052</a></td>
 <td>JSON Schemas in <code>waste-movement-backend</code> are the source of truth for every shape.</td>
 </tr>
+<tr>
+<td><a href="../decisions/#d-053">D-053</a></td>
+<td>From beta-2, the <code>apiCode</code> is sent in an <code>x-api-code</code> header, not the body.</td>
+</tr>
+<tr>
+<td><a href="../decisions/#d-008">D-008</a>, <a href="../decisions/#d-045">D-045</a></td>
+<td>A carrier on every event — <code>intendedCarriers</code> at creation — and an optional broker or dealer.</td>
+</tr>
+<tr>
+<td><a href="../decisions/#d-047">D-047</a>, <a href="../decisions/#d-048">D-048</a></td>
+<td>Producer by waste source; supporting references and special handling requirements.</td>
+</tr>
+<tr>
+<td><a href="../decisions/#d-043">D-043</a></td>
+<td><code>intendedReceivers</code> on every movement; the receipt records the actual <code>receiver</code>.</td>
+</tr>
 </tbody>
 </table>
 <h3 id="settled-not-yet-built">Settled, not yet built</h3>
@@ -631,12 +647,22 @@
 <tbody>
 <tr>
 <td><a href="../decisions/#d-010">D-010</a></td>
-<td>Hazardous Movements split into their own Delivery by the server.</td>
+<td>Hazardous Movements split into their own Delivery by the server, with Delivery ID = Movement ID. Needs waste items at creation first.</td>
+<td>beta-2</td>
+</tr>
+<tr>
+<td><a href="../decisions/#d-042">D-042</a>, <a href="../decisions/#d-031">D-031</a>, <a href="../decisions/#d-044">D-044</a></td>
+<td>Waste items: classification, logistics, treatments, POP and hazardous components.</td>
+<td>beta-2</td>
+</tr>
+<tr>
+<td><a href="../decisions/#d-018">D-018</a></td>
+<td>The delivery site and address.</td>
 <td>beta-2</td>
 </tr>
 <tr>
 <td><a href="../decisions/#d-009">D-009</a></td>
-<td>Soft-delete with <code>isDeleted</code>, set only through <code>PUT</code>; a Receipt cannot be deleted.</td>
+<td>Soft-delete with <code>isDeleted</code>, set only through <code>PUT</code>, for movements, collections, deliveries and receipts.</td>
 <td>beta-3</td>
 </tr>
 <tr>
@@ -647,6 +673,11 @@
 <tr>
 <td><a href="../decisions/#d-034">D-034</a></td>
 <td>Every update keeps the previous version and guards against concurrent changes.</td>
+<td>beta-3</td>
+</tr>
+<tr>
+<td><a href="../decisions/#d-050">D-050</a></td>
+<td>An event can be soft-deleted only while no later event has ever been recorded against it.</td>
 <td>beta-3</td>
 </tr>
 </tbody>
@@ -670,6 +701,16 @@
 <td><a href="../decisions/#d-022">D-022</a></td>
 <td>Phase 1 migration: measure the impact of new endpoints vs extending the live receipt, from a provider's point of view.</td>
 <td>Tech lead + BA</td>
+</tr>
+<tr>
+<td><a href="../decisions/#d-023">D-023</a></td>
+<td>Phase 1 migration: whether, when and how the live receipt endpoints are retired.</td>
+<td>BA + policy</td>
+</tr>
+<tr>
+<td><a href="../decisions/#d-024">D-024</a></td>
+<td>Phase 1 migration: how existing <code>wasteTrackingId</code> records relate to Phase 2 Movements.</td>
+<td>Team C + BA</td>
 </tr>
 <tr>
 <td><a href="../decisions/#d-046">D-046</a></td>
@@ -696,6 +737,16 @@
 <td>Fate-of-waste response and who may read it.</td>
 <td>BA + policy</td>
 </tr>
+<tr>
+<td><a href="../decisions/#d-051">D-051</a></td>
+<td>Whether a recorded delivery can ever be corrected — to settle for beta-3.</td>
+<td>BA + policy</td>
+</tr>
+<tr>
+<td><a href="../decisions/#d-049">D-049</a></td>
+<td>Whether a movement is flagged as a council movement — awaiting the regulators.</td>
+<td>BA + regulators</td>
+</tr>
 </tbody>
 </table>
 <p>The full list, including smaller open questions, is in the <a href="../decisions/#index">decisions register index</a>.</p>
@@ -721,8 +772,8 @@
 </tr>
 <tr>
 <td>2</td>
-<td>Implement the hazardous split in beta-2 (<a href="../decisions/#d-010">D-010</a>)</td>
-<td>Team C</td>
+<td>Implement the hazardous split in beta-2 (<a href="../decisions/#d-010">D-010</a>), once waste items are captured at creation; BAs to confirm a ticket or ACs</td>
+<td>BA + Team C</td>
 </tr>
 <tr>
 <td>3</td>
@@ -754,14 +805,8 @@
 <td>Build the <code>Deprecation</code> header (<a href="../decisions/#d-038">D-038</a>) before the first beta version is retired</td>
 <td>Team C</td>
 </tr>
-<tr>
-<td>9</td>
-<td>Remove the gateway's beta-2 fallback to a body <code>apiCode</code>, which can no longer succeed (<a href="../decisions/#d-053">D-053</a>)</td>
-<td>Team C</td>
-</tr>
 </tbody>
 </table>
-<p>Done: <code>apiCode</code> issuance confirmed role-agnostic (<a href="../registration/">registration.md</a>); Movement and Delivery IDs confirmed to share one sequence (<a href="../decisions/#d-013">D-013</a>); <code>POST /movements</code> and the other four journey endpoints built in beta-1 and beta-2.</p>
 
 
 

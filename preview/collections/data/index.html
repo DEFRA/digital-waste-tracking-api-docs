@@ -505,8 +505,8 @@
 <td><code>brokerOrDealer: { isPresent, items[] }</code> (<a href="../decisions/#d-008">D-008</a>)</td>
 </tr>
 <tr>
-<td><code>intendedReceivers</code>, each with an <code>address</code></td>
-<td><code>receivers</code>, each with a <code>receiptAddress</code> (<a href="../decisions/#d-043">D-043</a>)</td>
+<td><code>intendedReceivers</code> required only for hazardous waste, each with an <code>address</code></td>
+<td><code>intendedReceivers</code> always required, each with a <code>receiptAddress</code> (<a href="../decisions/#d-043">D-043</a>)</td>
 </tr>
 <tr>
 <td>Intended carriers with only <code>meansOfTransport</code>, <code>organisationName</code> and contact details required</td>
@@ -523,10 +523,6 @@
 <tr>
 <td>Transit collection editing and soft-delete rules (tail only)</td>
 <td>Still open (<a href="../decisions/#d-035">D-035</a>)</td>
-</tr>
-<tr>
-<td>"8-character" identifiers</td>
-<td>No fixed length (<a href="../decisions/#d-013">D-013</a>)</td>
 </tr>
 </tbody>
 </table>

@@ -789,7 +789,7 @@
 <p>Notes:</p>
 <ul>
 <li><code>_id</code> is the <code>deliveryId</code> — a Delivery has at most one receipt (<a href="../../decisions/#d-015">D-015</a>), so the <code>deliveryId</code> is a valid unique key. A second <code>POST</code> to the same <code>deliveryId</code> gets a duplicate-key error (natural idempotency guard).</li>
-<li>Receipt has no <code>isDeleted</code>. Once recorded, a receipt cannot be deleted (<a href="../../decisions/#d-009">D-009</a>). The receipt <code>PUT</code> amends in place and snapshots to history; there is no soft-delete toggle.</li>
+<li>Receipt has no <code>isDeleted</code>. Once recorded, a receipt cannot be deleted. <em>(Since superseded: a receipt can now be soft-deleted — <a href="../../decisions/#d-009">D-009</a>.)</em> The receipt <code>PUT</code> amends in place and snapshots to history; there is no soft-delete toggle.</li>
 <li><code>revision</code> guards <code>PUT /deliveries/{deliveryId}/receipt</code> amendments — same pattern as Phase 1 <code>waste-inputs</code> revision guard (<a href="../../decisions/#d-034">D-034</a>).</li>
 </ul>
 <h3 id="receipt-events-history"><code>receipt-events-history</code></h3>
