@@ -10,15 +10,16 @@ robots: noindex, nofollow
 
 # API
 
-Three OpenAPI 3.1 specifications describe the Digital Waste Tracking API. They answer different questions:
+The Digital Waste Tracking API is being built in steps. Each beta release is a stage on the way to the target design, and each has its own OpenAPI 3.1 specification:
 
-| Spec | Answers | Viewer |
-| --- | --- | --- |
-| `beta-1/openapi.json` | What beta-1 serves today: the five journey endpoints, no data validation. Synced from the backend. | [beta-1](openapi-beta-1.md) |
-| `beta-2/openapi.json` | What beta-2 serves today: the same endpoints, with fields and validation being added a resource at a time. Synced from the backend. | [beta-2](openapi-beta-2.md) |
-| `openapi.yaml` | The target design at general availability, without a version prefix. Subject to change. | [target](openapi.md) |
+| Step | Spec | What it covers | Viewer |
+| --- | --- | --- | --- |
+| beta-1 | `beta-1/openapi.json` | The first step: the five journey endpoints, with no data validation, so integrators can test identifiers and structure. Synced from the backend. | [beta-1](openapi-beta-1.md) |
+| beta-2 | `beta-2/openapi.json` | The current step: the same endpoints, with fields and validation added a resource at a time. Synced from the backend. | [beta-2](openapi-beta-2.md) |
+| beta-3 onwards | — | Updates, then reads, then final iterations, as set out in the [versioning schedule](versioning-schedule.md). | — |
+| Target | `openapi.yaml` | Where the steps lead: the design at general availability, without a version prefix. Subject to change as the betas teach us more. | [target](openapi.md) |
 
-The [decisions register](../collections/decisions.md) explains why the contract is shaped the way it is, and what is still open. The [versioning schedule](versioning-schedule.md) says what each beta release adds.
+The beta specs describe what is served today; the target spec describes where it is going. The [decisions register](../collections/decisions.md) explains why the contract is shaped the way it is, and what is still open.
 
 ## Where the shapes come from
 

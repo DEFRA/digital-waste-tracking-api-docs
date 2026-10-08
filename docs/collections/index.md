@@ -29,7 +29,7 @@ A separate read-only query will let a producer see what happened to their waste 
 
 [**Decisions.**](decisions.md) The register of design decisions, open questions and parked items, grouped into waste business rules and technical design. The fastest way in for anyone joining.
 
-[**API.**](../api/index.md) The three OpenAPI specs — beta-1 and beta-2 as served today, and the target design — and how they relate.
+[**API.**](../api/index.md) The API built in steps: the beta-1 and beta-2 specs as served today, and the target design they lead towards.
 
 [**Glossary.**](glossary.md) The vocabulary for identifiers and actors: Movement ID, Delivery ID, `wasteTrackingId`, what counts as a broker, and so on.
 

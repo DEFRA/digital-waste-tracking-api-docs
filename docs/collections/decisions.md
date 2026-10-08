@@ -26,12 +26,12 @@ Each entry has a short context, the decision, and its consequences. The line und
 - **Impact** — structural dependency: how much of the contract or how many other decisions rest on this one. Not urgency.
 - **Built in** — where the decision is implemented today: `beta-1`, `beta-2`, `Not yet` (with the target release from the [versioning schedule](../api/versioning-schedule.md) where known), or `n/a` for decisions about documentation or process.
 
-Three documents describe the API, and they answer different questions:
+The API is built in steps — beta-1, then beta-2, and on through the later betas towards the target design. The documents describe the steps and where they lead:
 
 | Document | Answers |
 | --- | --- |
-| [beta-1](../api/openapi-beta-1.md) and [beta-2](../api/openapi-beta-2.md) specs (`beta-N/openapi.json`) | What is served today. Defined in `waste-movement-backend` and synced here with the JSON Schemas they refer to. |
-| [`openapi.yaml`](../api/openapi.md) | The target design for general availability. Subject to change. |
+| [beta-1](../api/openapi-beta-1.md) and [beta-2](../api/openapi-beta-2.md) specs (`beta-N/openapi.json`) | What each step serves today. Defined in `waste-movement-backend` and synced here with the JSON Schemas they refer to. |
+| [`openapi.yaml`](../api/openapi.md) | Where the steps lead: the target design for general availability. Subject to change. |
 | This register | Why the contract is shaped the way it is, and what is still undecided. |
 
 ## Index
