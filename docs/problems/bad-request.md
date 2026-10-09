@@ -8,6 +8,8 @@
 
 The request was rejected and nothing was stored. Correct the request before you send it again. Sending the same request again will fail in the same way.
 
+If the request has no errors but has warnings that you can confirm, you get [confirmation-required](confirmation-required.md) (`422`) instead.
+
 ## When this happens
 
 | Cause | Example `detail` | `errors` present |
@@ -39,6 +41,10 @@ If the request body fails schema validation, the response includes an `errors` a
 | `OutOfRange` | A value, string length or number of items is above the maximum or below the minimum. |
 | `BusinessRuleViolation` | A value breaks a business rule. |
 | `UnexpectedError` | Any other validation problem. |
+
+## Warnings
+
+If the request also has data-quality warnings, the response includes a `warnings` array, with the same members as `errors`. It lists warnings that do not stop the request being stored. Correct the errors first. You can deal with the warnings at the same time, or confirm them later: once the request has no errors, any warnings left are returned as [confirmation-required](confirmation-required.md) with a token. Like `errors`, `warnings` is left out when there is nothing to report.
 
 ## Example
 
