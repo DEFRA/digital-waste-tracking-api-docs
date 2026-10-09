@@ -1,0 +1,992 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+        <link rel="canonical" href="https://defra.github.io/digital-waste-tracking-api-docs/preview/collections/phase2/receipt-migration/">
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../../favicons/moj.ico">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>Receipt migration - Digital Waste Tracking - API Docs</title>
+      
+    
+    
+  
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+  
+  
+    
+      
+      
+    
+  
+  
+  <style>:root{--md-admonition-icon--quote:url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2016%2016%22%3E%3Cpath%20d%3D%22M1.75%202.5h10.5a.75.75%200%200%201%200%201.5H1.75a.75.75%200%200%201%200-1.5m4%205h8.5a.75.75%200%200%201%200%201.5h-8.5a.75.75%200%200%201%200-1.5m0%205h8.5a.75.75%200%200%201%200%201.5h-8.5a.75.75%200%200%201%200-1.5M2.5%207.75v6a.75.75%200%200%201-1.5%200v-6a.75.75%200%200%201%201.5%200%22/%3E%3C/svg%3E');}</style>
+
+
+
+  
+  
+    
+      
+      
+        
+      
+      
+    
+  
+    
+      
+      
+        
+      
+      
+    
+  
+    
+      
+      
+        
+      
+      
+    
+  
+    
+      
+      
+        
+      
+      
+    
+  
+    
+      
+      
+        
+      
+      
+    
+  
+    
+      
+      
+        
+      
+      
+    
+  
+  
+  <style>:root{.md-tag.md-tag--draft{--md-tag-icon:url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cpath%20d%3D%22M5.5%202C3.6%202%202%203.6%202%205.5v13C2%2020.4%203.6%2022%205.5%2022H16l6-6V5.5C22%203.6%2020.4%202%2018.5%202zm.3%202h12.5c1%200%201.8.8%201.8%201.8V15h-1.5c-1.9%200-3.5%201.6-3.5%203.5V20H5.8c-1%200-1.8-.8-1.8-1.8V5.8C4%204.8%204.8%204%205.8%204%22/%3E%3C/svg%3E');}.md-tag.md-tag--accepted{--md-tag-icon:url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cpath%20d%3D%22M18.5%202h-13C3.6%202%202%203.6%202%205.5v13C2%2020.4%203.6%2022%205.5%2022H16l6-6V5.5C22%203.6%2020.4%202%2018.5%202M20%2015h-1.5c-1.9%200-3.5%201.6-3.5%203.5V20H5.8c-1%200-1.8-.8-1.8-1.8V5.8C4%204.8%204.8%204%205.8%204h12.5c1%200%201.8.8%201.8%201.8V15m-4.9-6.8%201.5%201.5-6%206-3.5-3.5%201.5-1.5%202%202z%22/%3E%3C/svg%3E');}.md-tag.md-tag--proposed{--md-tag-icon:url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cpath%20d%3D%22M13%2011h3v2h-3v3h-2v-3H8v-2h3V8h2zm9-5.5V16l-6%206H5.5C3.6%2022%202%2020.4%202%2018.5v-13C2%203.6%203.6%202%205.5%202h13C20.4%202%2022%203.6%2022%205.5m-2%20.3c0-1-.8-1.8-1.8-1.8H5.8C4.8%204%204%204.8%204%205.8v12.5c0%201%20.8%201.8%201.8%201.8H15v-1.5c0-1.9%201.6-3.5%203.5-3.5H20z%22/%3E%3C/svg%3E');}.md-tag.md-tag--deprecated{--md-tag-icon:url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cpath%20d%3D%22M8%2011h8v2H8zm14-5.5V16l-6%206H5.5C3.6%2022%202%2020.4%202%2018.5v-13C2%203.6%203.6%202%205.5%202h13C20.4%202%2022%203.6%2022%205.5m-2%20.3c0-1-.8-1.8-1.8-1.8H5.8C4.8%204%204%204.8%204%205.8v12.5c0%201%20.8%201.8%201.8%201.8H15v-1.5c0-1.9%201.6-3.5%203.5-3.5H20z%22/%3E%3C/svg%3E');}.md-tag.md-tag--superseded{--md-tag-icon:url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cpath%20d%3D%22M11%2015h2v2h-2zm0-2h2V7h-2zm11-7.5V16l-6%206H5.5C3.6%2022%202%2020.4%202%2018.5v-13C2%203.6%203.6%202%205.5%202h13C20.4%202%2022%203.6%2022%205.5m-2%20.3c0-1-.8-1.8-1.8-1.8H5.8C4.8%204%204%204.8%204%205.8v12.5c0%201%20.8%201.8%201.8%201.8H15v-1.5c0-1.9%201.6-3.5%203.5-3.5H20z%22/%3E%3C/svg%3E');}.md-tag.md-tag--rejected{--md-tag-icon:url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cpath%20d%3D%22M16%209.4%2013.4%2012l2.6%202.6-1.4%201.4-2.6-2.6L9.4%2016%208%2014.6l2.6-2.6L8%209.4%209.4%208l2.6%202.6L14.6%208zm6-3.9V16l-6%206H5.5C3.6%2022%202%2020.4%202%2018.5v-13C2%203.6%203.6%202%205.5%202h13C20.4%202%2022%203.6%2022%205.5m-2%20.3c0-1-.8-1.8-1.8-1.8H5.8C4.8%204%204%204.8%204%205.8v12.5c0%201%20.8%201.8%201.8%201.8H15v-1.5c0-1.9%201.6-3.5%203.5-3.5H20z%22/%3E%3C/svg%3E');}}</style>
+
+    
+<link rel="stylesheet" href="../../../assets/stylesheets/extra.css" />
+
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  
+  
+    <meta name="robots" content="noindex, nofollow">
+  
+
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#receipt-migration-phase-1-to-phase-2" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <div data-md-color-scheme="default" data-md-component="outdated" hidden>
+        
+      </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../.." title="Digital Waste Tracking - API Docs" class="md-header__button md-logo" aria-label="Digital Waste Tracking - API Docs" data-md-component="logo">
+      
+  <img src="../../../logos/moj.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Digital Waste Tracking - API Docs
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Receipt migration
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Share" aria-label="Share" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/DEFRA/digital-waste-tracking-api-docs" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+    
+      
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../.." class="md-tabs__link">
+          
+  
+  
+    
+  
+  Digital Waste Tracking
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+    
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+  
+    
+    <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation">
+      <div class="md-sidebar__scrollwrap">
+        <div class="md-sidebar__inner">
+          <nav class="md-nav md-nav--primary" aria-label="Collections navigation" data-md-level="0">
+            <label class="md-nav__title" for="__drawer">
+              <span class="md-nav__icon md-icon"></span>
+              Collections
+            </label>
+            <ul class="md-nav__list" data-md-scrollfix>
+              
+              
+                
+                <li class="md-nav__item">
+                  <a href="../../" class="md-nav__link">Overview</a>
+                </li>
+              
+                
+                <li class="md-nav__item">
+                  <a href="../../decisions/" class="md-nav__link">Decisions</a>
+                </li>
+              
+                
+                <li class="md-nav__item">
+                  <a href="../../glossary/" class="md-nav__link">Glossary</a>
+                </li>
+              
+                
+                <li class="md-nav__item">
+                  <a href="../../plan/" class="md-nav__link">Plan</a>
+                </li>
+              
+                
+                <li class="md-nav__item">
+                  <a href="../../registration/" class="md-nav__link">Registration</a>
+                </li>
+              
+                
+                <li class="md-nav__item">
+                  <a href="../../docs/" class="md-nav__link">Notes</a>
+                </li>
+              
+                
+                  
+                    <li class="md-nav__item"><span class="md-nav__link md-nav__link--group-title">API</span></li>
+                  
+                  
+                
+                <li class="md-nav__item collections-nav__item--grouped">
+                  <a href="../../../api/" class="md-nav__link">Overview</a>
+                </li>
+              
+                
+                <li class="md-nav__item collections-nav__item--grouped">
+                  <a href="../../../api/openapi/" class="md-nav__link">OpenAPI viewer</a>
+                </li>
+              
+                
+                  
+                    <li class="md-nav__item"><span class="md-nav__link md-nav__link--group-title">Data model</span></li>
+                  
+                  
+                
+                <li class="md-nav__item collections-nav__item--grouped">
+                  <a href="../../model/" class="md-nav__link">Overview</a>
+                </li>
+              
+                
+                <li class="md-nav__item collections-nav__item--grouped">
+                  <a href="../../model/phase1-waste-inputs/" class="md-nav__link">Phase 1: current waste-inputs model</a>
+                </li>
+              
+                
+                <li class="md-nav__item collections-nav__item--grouped">
+                  <a href="../../model/mongo-schema-proposal/" class="md-nav__link">Mongo schema proposal (Option A)</a>
+                </li>
+              
+                
+                <li class="md-nav__item collections-nav__item--grouped">
+                  <a href="../../model/mongo-schema-proposal-per-event/" class="md-nav__link">Mongo schema proposal — per event (Option B)</a>
+                </li>
+              
+                
+                <li class="md-nav__item collections-nav__item--grouped">
+                  <a href="../../model/mongo-schema-proposal-CQRS/" class="md-nav__link">Mongo schema proposal — CQRS (Option C)</a>
+                </li>
+              
+                
+                  
+                    <li class="md-nav__item"><span class="md-nav__link md-nav__link--group-title">Phase 1 reference</span></li>
+                  
+                  
+                
+                <li class="md-nav__item collections-nav__item--grouped">
+                  <a href="../../phase1/receipt-api-implemented-data-model/" class="md-nav__link">Receipt API implemented data model</a>
+                </li>
+              
+                
+                <li class="md-nav__item collections-nav__item--grouped">
+                  <a href="../../phase1/receipt-data-definitions/" class="md-nav__link">Receipt data definitions</a>
+                </li>
+              
+                
+                  
+                    <li class="md-nav__item"><span class="md-nav__link md-nav__link--group-title">Phase 2</span></li>
+                  
+                  
+                
+                <li class="md-nav__item collections-nav__item--grouped">
+                  <a href="../assessment-feedback/" class="md-nav__link">GDS Alpha assessment feedback</a>
+                </li>
+              
+                
+                  
+                    <li class="md-nav__item"><span class="md-nav__link md-nav__link--group-title">Scenarios</span></li>
+                  
+                  
+                
+                <li class="md-nav__item collections-nav__item--grouped">
+                  <a href="../../scenarios/beta-1/" class="md-nav__link">beta-1</a>
+                </li>
+              
+            </ul>
+          </nav>
+        </div>
+      </div>
+    </div>
+  
+  
+
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+    
+      
+    
+    <a href="https://github.com/DEFRA/digital-waste-tracking-api-docs/raw/main/docs/collections/phase2/receipt-migration.md" title="View source of this page" class="md-content__button md-icon">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17 18c.56 0 1 .44 1 1s-.44 1-1 1-1-.44-1-1 .44-1 1-1m0-3c-2.73 0-5.06 1.66-6 4 .94 2.34 3.27 4 6 4s5.06-1.66 6-4c-.94-2.34-3.27-4-6-4m0 6.5a2.5 2.5 0 0 1-2.5-2.5 2.5 2.5 0 0 1 2.5-2.5 2.5 2.5 0 0 1 2.5 2.5 2.5 2.5 0 0 1-2.5 2.5M9.27 20H6V4h7v5h5v4.07c.7.08 1.36.25 2 .49V8l-6-6H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h4.5a8.2 8.2 0 0 1-1.23-2"/></svg>
+    </a>
+  
+
+
+<!-- prettier-ignore -->
+<div class="admonition warning">
+<p class="admonition-title">Internal documentation</p>
+<p>This page is internal design/planning material for the delivery team, not published guidance for Software Providers integrating with the Digital Waste Tracking API. Content here may be incomplete, in-progress, or superseded.</p>
+</div>
+<!-- prettier-ignore -->
+<div class="admonition info">
+<p class="admonition-title">Draft — in progress</p>
+<p>Item 1 of 7 is written. The rest follow the same shape.</p>
+</div>
+<h1 id="receipt-migration-phase-1-to-phase-2">Receipt migration: Phase 1 to Phase 2</h1>
+<p>What a software provider integrated with the live Receipt of Waste (RoW) API would have to change to record receipts in Phase 2 — and who asked for each change, why, and who it affects. It is the evidence for three open decisions: how receipts are linked to Deliveries (<a href="../../decisions/#d-022">D-022</a>), whether and how the Phase 1 receipt is retired (<a href="../../decisions/#d-023">D-023</a>), and how Phase 1 records relate to Phase 2 Movements (<a href="../../decisions/#d-024">D-024</a>).</p>
+<h2 id="scope">Scope</h2>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Phase 1 — live RoW</th>
+<th>Phase 2 — beta-2 today, and the target</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Record a receipt</td>
+<td><code>POST /movements/receive</code></td>
+<td><code>POST /deliveries/{deliveryId}/receipt</code>, or <code>POST /receipts</code> when there is no Delivery ID</td>
+</tr>
+<tr>
+<td>Update a receipt</td>
+<td><code>PUT /movements/{wasteTrackingId}/receive</code></td>
+<td><code>PUT /deliveries/{deliveryId}/receipt</code> (planned for beta-3)</td>
+</tr>
+<tr>
+<td>Definition</td>
+<td><a href="https://defra.github.io/waste-tracking-service/production/apiSpecifications/">Receipt of Waste API reference</a></td>
+<td><a href="../../../api/openapi-beta-2/">beta-2 spec</a>, <a href="../../../api/openapi/">target spec</a></td>
+</tr>
+</tbody>
+</table>
+<p>RoW also accepts receipts in bulk through an Excel spreadsheet upload in the Waste Tracking Service. It records the same receipt as <code>POST /movements/receive</code>, so each option affects it too.</p>
+<h2 id="the-options">The options</h2>
+<p>In every option, the four-event journey records a receipt with <code>POST /deliveries/{deliveryId}/receipt</code>, against the Delivery the waste arrived on. The options differ only in what happens to the RoW-style receipt — today's <code>POST /movements/receive</code> (<a href="../../decisions/#d-022">D-022</a>). None is anyone's proposal yet: they are ideas on the table, to be weighed.</p>
+<ul>
+<li><strong>Option A — extend RoW.</strong> <code>POST /movements/receive</code> gains a <code>deliveryId</code> and a <code>reasonForNoDeliveryId</code>. With no Delivery ID, an empty Delivery is generated so the receipt still has one.</li>
+<li><strong>Option B — new endpoint.</strong> What beta-2 builds today: <code>POST /receipts</code> records a receipt with no Delivery ID, alongside a reason, as the Phase 2 counterpart of <code>POST /movements/receive</code>. RoW stays as it is until it is retired (<a href="../../decisions/#d-023">D-023</a>).</li>
+<li><strong>Option C — keep RoW.</strong> <code>POST /movements/receive</code> is unchanged, with no Delivery ID and no reason, and there is no <code>POST /receipts</code>. From October 2027 only the four-event journey is compliant — which needs Defra to agree that receipt-only recording is no longer a compliant route.</li>
+</ul>
+<h2 id="how-to-read-each-item">How to read each item</h2>
+<table>
+<thead>
+<tr>
+<th>Heading</th>
+<th>Answers</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>The problem</strong></td>
+<td>Why the item matters for the move to Phase 2.</td>
+</tr>
+<tr>
+<td><strong>Phase 1 today</strong></td>
+<td>What a live RoW integration does now, and how the data is kept.</td>
+</tr>
+<tr>
+<td><strong>Phase 2</strong></td>
+<td>What Phase 2 does, whichever option is chosen.</td>
+</tr>
+<tr>
+<td><strong>Requested by</strong></td>
+<td>Who asked for the change — Software Providers, DWT Team C, DWT Architect, or Defra (and regulators) — and its business value.</td>
+</tr>
+<tr>
+<td><strong>Options A, B and C</strong></td>
+<td>How each option works, its value, and what it means for Software Providers and their users, the Excel upload, and data and reporting.</td>
+</tr>
+<tr>
+<td><strong>Comparison</strong></td>
+<td>The options side by side, in a few words each.</td>
+</tr>
+<tr>
+<td><strong>Open points</strong></td>
+<td>Anything undecided that the item depends on.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="summary">Summary</h2>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Item</th>
+<th>What it decides</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><a href="#1-linking-a-receipt-to-its-journey">Linking a receipt to its journey</a></td>
+<td>How RoW receipts become linkable to the four-event journey, to stay compliant from October 2027</td>
+<td>Draft — under review</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Identity and authentication</td>
+<td></td>
+<td><em>to come</em></td>
+</tr>
+<tr>
+<td>3</td>
+<td>Identifiers</td>
+<td></td>
+<td><em>to come</em></td>
+</tr>
+<tr>
+<td>4</td>
+<td>Request fields</td>
+<td></td>
+<td><em>to come</em></td>
+</tr>
+<tr>
+<td>5</td>
+<td>Responses and errors</td>
+<td></td>
+<td><em>to come</em></td>
+</tr>
+<tr>
+<td>6</td>
+<td>Validation and warnings</td>
+<td></td>
+<td><em>to come</em></td>
+</tr>
+<tr>
+<td>7</td>
+<td>Overall effort per option</td>
+<td></td>
+<td><em>to come</em></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="1-linking-a-receipt-to-its-journey">1. Linking a receipt to its journey</h2>
+<h3 id="the-problem">The problem</h3>
+<p>RoW was designed before the events that now come before a receipt — creation, collection and delivery — existed. A RoW receipt is the first and only record of a movement: nothing exists beforehand, and nothing links it to anything else.</p>
+<p>Phase 2 tracks the whole journey, so a receipt has to be correlated with the events before it, through the Delivery the waste arrived on. RoW, as it is, cannot be connected.</p>
+<p>That changes what counts as compliant. A RoW receipt <strong>is compliant under the October 2026 policy</strong> (Phase 1), but <strong>not under the October 2027 policy</strong> (Phase 2), which expects a receipt to be linked to the journey before it. Defra has asked that, from October 2027, a receipt is compliant when it gives either a Delivery ID or, when there is none, a reason; adding one of the two is the minimum change that keeps a RoW receipt compliant (Options A and B). Defra could instead agree that only the four-event journey is compliant from October 2027 (Option C).</p>
+<h3 id="phase-1-today">Phase 1 today</h3>
+<p>A receiver records what arrived with <code>POST /movements/receive</code>. The service mints a <code>wasteTrackingId</code> and returns it; the receiver stores it and corrects the receipt later with <code>PUT /movements/{wasteTrackingId}/receive</code>.</p>
+<p>Receivers who don't use a software provider's system can upload the same receipts in bulk as an Excel spreadsheet, signed in to the Waste Tracking Service. The service reads one receipt per row, validates each against the same receipt schema as <code>POST /movements/receive</code>, records it, and emails the spreadsheet back with a <code>wasteTrackingId</code> on each row — or with the failing cells marked. An upload in update mode corrects receipts by their <code>wasteTrackingId</code>. The spreadsheet has no column for a Delivery ID or a reason.</p>
+<p>Every RoW receipt, from the API or the Excel upload, is one document in the <code>waste-inputs</code> MongoDB collection, keyed by its <code>wasteTrackingId</code>. It holds the request as sent (<code>receipt.movement</code>), the submitting organisation, the client, the trace ID, the Excel upload's <code>bulkId</code>, and a <code>revision</code> number. Each correction first copies the previous version into <code>waste-inputs-history</code>. After every create or update, the stored record is pushed through CDP Audit to an S3 bucket, from which the GIO Data Platform loads it for regulators (Assurance ADR 3).</p>
+<h3 id="phase-2">Phase 2</h3>
+<p><strong><code>POST /deliveries/{deliveryId}/receipt</code></strong> records a receipt against the Delivery the waste arrived on: linked by construction, so compliant, and cross-checked against what was declared earlier (<a href="../../decisions/#d-006">D-006</a>). The receipt is then addressed by its Delivery ID; corrections use <code>PUT /deliveries/{deliveryId}/receipt</code> (beta-3). It is the receipt step of the four-event journey, whichever option is chosen for the RoW-style receipt. Built in beta-2 today, as <code>POST</code>.</p>
+<p>A compliant receipt from October 2027 is recorded with <code>POST /deliveries/{deliveryId}/receipt</code> and stored in a new <code>receipts</code> collection, next to the <code>movements</code> and <code>deliveries</code> collections beta already uses.</p>
+<h3 id="requested-by">Requested by</h3>
+<table>
+<thead>
+<tr>
+<th>Change</th>
+<th>Requested by</th>
+<th>Business value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Every receipt correlated with the journey before it</td>
+<td><strong>Defra (and regulators)</strong> — the October 2027 policy: tracking waste from creation to receipt</td>
+<td>The regulator sees each load from producer to receiving site, and can spot waste that was collected but never received. Receipts stay compliant after October 2027.</td>
+</tr>
+<tr>
+<td>A reason when there is no Delivery ID</td>
+<td><strong>Defra (and regulators)</strong> — confirmed for the October 2027 policy</td>
+<td>Waste without a digital trail can still be recorded compliantly, and the reason shows why the trail is missing.</td>
+</tr>
+</tbody>
+</table>
+<p>The options below are ways to deliver that, not requests in themselves; none has an owner yet.</p>
+<h3 id="option-a-extend-row">Option A — extend RoW</h3>
+<p><strong>How it works.</strong> <code>POST /movements/receive</code> accepts two more fields:</p>
+<ul>
+<li><strong><code>deliveryId</code></strong> — the receipt is linked to that Delivery, and through it to its movements, and can be cross-checked (<a href="../../decisions/#d-006">D-006</a>).</li>
+<li><strong><code>reasonForNoDeliveryId</code></strong> — when there is no Delivery ID. An empty Delivery is generated so the receipt still has a Delivery ID to be found by.</li>
+</ul>
+<p>A receipt that sends neither is still accepted, as today: compliant under the October 2026 policy, but not from October 2027. The endpoint, the <code>wasteTrackingId</code> and the rest of the RoW contract stay as they are.</p>
+<p><strong>Value.</strong> The smallest change for providers already live, and the minimum needed to stay compliant from October 2027: one receipt endpoint, no migration of stored IDs.</p>
+<p><strong>What it means for:</strong></p>
+<ul>
+<li><strong>Software Providers and their users</strong> — add two fields to an existing integration.</li>
+<li><strong>The Excel upload</strong> — two new columns: Delivery ID, and a reason when there is none. The upload checks rows against the same receipt schema as RoW, so the new fields reach it with the schema change; the template, its column mapping and its guidance need updating. Corrections keep using the <code>wasteTrackingId</code>.</li>
+<li><strong>Data and reporting</strong> — RoW receipts either stay in <code>waste-inputs</code>, now with a Delivery ID or reason (<strong>A1</strong>), or are written straight into <code>receipts</code> (<strong>A2</strong>). With A1, <code>waste-inputs</code> keeps growing and reporting combines two stores; with A2 it is frozen from the switch-over and every new receipt is in one collection. A Delivery has exactly one receipt (<a href="../../decisions/#d-015">D-015</a>); with A1 a RoW receipt and a journey receipt could both name the same Delivery, a rule far easier to enforce in one collection — which favours A2.</li>
+</ul>
+<h3 id="option-b-new-endpoint">Option B — new endpoint</h3>
+<p><strong>How it works.</strong> <strong><code>POST /receipts</code></strong> records a receipt with no Delivery ID, with a mandatory reason; an empty Delivery is created to hold it, and its Delivery ID is returned (<a href="../../decisions/#d-041">D-041</a>). It is the Phase 2 counterpart of <code>POST /movements/receive</code>, following the Phase 2 conventions. A receipt that has a Delivery ID uses the journey route. <code>POST /movements/receive</code> stays live and unchanged until it is retired (<a href="../../decisions/#d-023">D-023</a>). Built in beta-2 today, as <code>POST</code>; the reason is still called <code>reason</code>.</p>
+<p><strong>Value.</strong> Every receipt is recorded on Phase 2 endpoints with the Phase 2 conventions (envelopes, errors, <code>x-api-code</code>) and addressed by a Delivery ID; RoW is left untouched until a planned retirement.</p>
+<p><strong>What it means for:</strong></p>
+<ul>
+<li><strong>Software Providers and their users</strong> — move from <code>POST /movements/receive</code> to <code>POST /receipts</code>, and store a new key; keep RoW running until it is retired.</li>
+<li><strong>The Excel upload</strong> — it records RoW receipts, so it stays on RoW until RoW is retired, and its receipts stop being compliant from October 2027. Keeping it compliant means a new bulk route on the Phase 2 endpoints, with the Phase 2 receipt fields — effectively a new spreadsheet.</li>
+<li><strong>Data and reporting</strong> — every new receipt goes to <code>receipts</code> (from <code>POST /receipts</code>, with an empty Delivery in <code>deliveries</code>, or from the journey route). <code>waste-inputs</code> is frozen once RoW is retired; until then reporting also sees unlinked RoW receipts.</li>
+</ul>
+<h3 id="option-c-keep-row">Option C — keep RoW</h3>
+<p><strong>How it works.</strong> <code>POST /movements/receive</code> stays exactly as it is live: no Delivery ID, no reason. There is no <code>POST /receipts</code>. A RoW receipt stays compliant under the October 2026 policy only; from October 2027 a receipt is compliant only on the journey route, which needs a Delivery ID. This depends on Defra agreeing that receipt-only recording — with or without a reason — is no longer a compliant route from October 2027.</p>
+<p><strong>Value.</strong> No change to the live service or to existing integrations, and no new receipt endpoint to build; one simple rule for compliance from October 2027 — the four-event journey.</p>
+<p><strong>What it means for:</strong></p>
+<ul>
+<li><strong>Software Providers and their users</strong> — no change to RoW; to stay compliant from October 2027, adopt the journey route. A load that arrives without a Delivery ID can still be recorded on RoW, but not compliantly.</li>
+<li><strong>The Excel upload</strong> — unchanged, and its receipts stop being compliant from October 2027. A compliant spreadsheet would need a bulk version of the journey route, with a Delivery ID on every row.</li>
+<li><strong>Data and reporting</strong> — two stores with no end date: linked receipts in <code>receipts</code>, unlinked ones in <code>waste-inputs</code>, which keeps growing for as long as RoW runs.</li>
+</ul>
+<h3 id="comparison">Comparison</h3>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>A — extend RoW</th>
+<th>B — new endpoint</th>
+<th>C — keep RoW</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Change to the live RoW API</td>
+<td>Small — two fields</td>
+<td>None until retired</td>
+<td>None</td>
+</tr>
+<tr>
+<td>Effort for providers already live</td>
+<td>Low</td>
+<td>High</td>
+<td>Low on RoW; high to stay compliant</td>
+</tr>
+<tr>
+<td>Compliant route for receipts with no trail, from Oct 2027</td>
+<td>✅ reason on RoW</td>
+<td>✅ <code>POST /receipts</code></td>
+<td>❌ none</td>
+</tr>
+<tr>
+<td>Excel upload stays compliant</td>
+<td>✅ two new columns</td>
+<td>❌ needs a new bulk route</td>
+<td>❌ needs a new bulk route</td>
+</tr>
+<tr>
+<td>Receipt stores to report on</td>
+<td>One (A2) or two (A1)</td>
+<td>One, plus RoW history</td>
+<td>Two, no end date</td>
+</tr>
+<tr>
+<td>Needs Defra to change its request</td>
+<td>No</td>
+<td>No</td>
+<td>Yes</td>
+</tr>
+</tbody>
+</table>
+<h3 id="data-what-can-be-done-internally">Data: what can be done internally</h3>
+<p><strong>In every option, the reporting feed.</strong> Beta writes are not pushed to CDP Audit today, so Phase 2 records — movements, deliveries and receipts — do not reach the GIO Data Platform. The same push has to be added for them, and GIO has to take a second record shape alongside <code>waste-inputs</code>.</p>
+<p>These internal choices are independent of the contract providers see, and can be combined:</p>
+<ol>
+<li><strong>Write RoW receipts into <code>receipts</code> (Option A2).</strong> The RoW endpoints and the Excel upload keep their contract, but the service stores each receipt in the Phase 2 shape, keeping its <code>wasteTrackingId</code> as an indexed legacy key so <code>PUT /movements/{wasteTrackingId}/receive</code> still finds it. From the switch-over, every receipt lives in one collection.</li>
+<li><strong>Leave <code>waste-inputs</code> as a read-only archive.</strong> No data moves; reporting keeps reading both shapes for the history. Lowest risk, but the two shapes stay forever.</li>
+<li><strong>Backfill the history into <code>receipts</code>.</strong> Each historic receipt needs a Delivery to hang from: an empty Delivery is created for it, as <code>POST /receipts</code> does. Because Movement IDs, Delivery IDs and <code>wasteTrackingId</code>s come from one pool (<a href="../../decisions/#d-013">D-013</a>), that Delivery could reuse the receipt's <code>wasteTrackingId</code> as its Delivery ID — no new ID, no clash, and the old receipt becomes addressable as <code>/deliveries/{wasteTrackingId}/receipt</code>. This is one possible answer to <a href="../../decisions/#d-024">D-024</a>. The <code>waste-inputs-history</code> versions move with it, in whatever form <a href="../../decisions/#d-037">D-037</a> chooses.</li>
+</ol>
+<p>Each needs the Phase 1 receipt mapped onto the Phase 2 receipt fields — the subject of item 4.</p>
+<h3 id="open-points">Open points</h3>
+<ul>
+<li><a href="../../decisions/#d-022">D-022</a> — which option.</li>
+<li><a href="../../decisions/#d-023">D-023</a> — under Option B, whether, when and how <code>POST /movements/receive</code> is retired; under Options A and C it stays.</li>
+<li><a href="../../decisions/#d-028">D-028</a> — how a driver without signal gets a Delivery ID to hand over.</li>
+</ul>
+
+
+
+
+
+
+
+  
+  
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+  <footer class="md-footer">
+    <div class="md-footer-meta__inner md-grid">
+       <div class="md-copyright">
+       
+<div class="md-social">
+  
+    
+    
+    
+    
+    <a href="mailto:wasteuserresearch@defra.gov.uk" target="_blank" rel="noopener" title="Contact us here" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M536.4-26.3c9.8-3.5 20.6-1 28 6.3s9.8 18.2 6.3 28l-178 496.9c-5 13.9-18.1 23.1-32.8 23.1-14.2 0-27-8.6-32.3-21.7l-64.2-158c-4.5-11-2.5-23.6 5.2-32.6l94.5-112.4c5.1-6.1 4.7-15-.9-20.6s-14.6-6-20.6-.9l-112.4 94.3c-9.1 7.6-21.6 9.6-32.6 5.2L38.1 216.8c-13.1-5.3-21.7-18.1-21.7-32.3 0-14.7 9.2-27.8 23.1-32.8z"/></svg>
+    </a>
+  
+    
+    
+    
+    
+    <a href="https://github.com/defra/waste-tracking-service" target="_blank" rel="noopener" title="Our DWT service is available here" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+</div>  Made with
+      <a
+        href="https://squidfunk.github.io/mkdocs-material/"
+        target="_blank"
+        rel="noopener"
+      >
+        Material for MkDocs
+      </a>
+      <br /><br />
+      <img
+        src="../../../assets/images/ogl.png"
+        alt="Open Government Licence logo"
+      />
+      All content is available under the
+      <a
+        href="https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/"
+        target="_blank"
+        rel="noopener"
+      >
+        Open Government Licence v3.0</a
+      >
+      , except where otherwise stated <br><br><br>
+      <a href="/waste-tracking-service/api-accessibility-statement" target="_blank" rel="noopener">Accessibility Statement</a>
+    </div>
+
+    <div class="md-copyright">
+      <a
+        href="https://www.nationalarchives.gov.uk/information-management/re-using-public-sector-information/uk-government-licensing-framework/crown-copyright/"
+        target="_blank"
+        rel="noopener"
+      >
+        <img
+          src="../../../assets/images/govuk-crest-2x.png"
+          width="125"
+          height="102"
+          alt="Gov UK Crest"
+        />
+        <br />
+        © Crown copyright
+      </a>
+    </div>
+  </div>
+</footer>
+
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["announce.dismiss", "navigation.tabs", "navigation.tabs.sticky", "navigation.indexes", "content.code.copy", "search.suggest", "search.share", "content.action.view", "toc.integrate"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": {"Accepted": "accepted", "Deprecated": "deprecated", "Draft": "draft", "Proposed": "proposed", "Rejected": "rejected", "Superseded": "superseded"}, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": "production", "provider": "mike"}}</script>
+    
+    
+  
+      <script src="../../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  <script>
+    (function () {
+      function fixAccessibility() {
+        // 1. Search dialog accessible name (AXE fix)
+        var dlg = document.querySelector('.md-search[role="dialog"]');
+        if (dlg) {
+          var hasName = dlg.hasAttribute('aria-label') || dlg.hasAttribute('aria-labelledby');
+          if (!hasName) {
+            dlg.setAttribute('aria-label', 'Search this site');
+          }
+        }
+
+        // 2. Empty form labels — add visually-hidden text to icon-only labels
+        function addLabelText(selector, text) {
+          document.querySelectorAll(selector).forEach(function (label) {
+            if (label.querySelector('.visually-hidden')) return;
+            var span = document.createElement('span');
+            span.className = 'visually-hidden';
+            span.textContent = text;
+            label.appendChild(span);
+          });
+        }
+
+        addLabelText('label[for="__drawer"]', 'Toggle navigation');
+        // Not label[for="__search"]: Material's search icon label holds two
+        // <svg> children (magnifier / back-arrow) and toggles which one is
+        // visible via svg:first-child/:last-child CSS depending on
+        // viewport. Appending a span here would become the new last child
+        // and break that selector, leaving both icons visible at once.
+
+        // Palette toggle labels
+        document.querySelectorAll('label[for^="__palette"]').forEach(function (label) {
+          if (label.querySelector('.visually-hidden')) return;
+          var title = label.getAttribute('title') || 'Toggle colour scheme';
+          var span = document.createElement('span');
+          span.className = 'visually-hidden';
+          span.textContent = title;
+          label.appendChild(span);
+        });
+
+        // Navigation section toggle labels
+        document.querySelectorAll('label[for^="__nav"], label[for^="nav-"]').forEach(function (label) {
+          if (label.querySelector('.visually-hidden')) return;
+          var nav = label.closest('.md-nav__item');
+          var link = nav ? nav.querySelector('.md-nav__link') : null;
+          var text = link ? 'Toggle ' + link.textContent.trim() : 'Toggle section';
+          var span = document.createElement('span');
+          span.className = 'visually-hidden';
+          span.textContent = text;
+          label.appendChild(span);
+        });
+
+        // Catch any remaining labels that only contain SVG/icons
+        document.querySelectorAll('label[for]').forEach(function (label) {
+          if (label.getAttribute('for') === '__search') return;
+          if (label.querySelector('.visually-hidden')) return;
+          var clone = label.cloneNode(true);
+          var els = clone.querySelectorAll('svg, img, .md-icon');
+          for (var i = 0; i < els.length; i++) { els[i].parentNode.removeChild(els[i]); }
+          if (!clone.textContent.trim()) {
+            var span = document.createElement('span');
+            span.className = 'visually-hidden';
+            span.textContent = label.getAttribute('title') || 'Toggle';
+            label.appendChild(span);
+          }
+        });
+
+        // Catch any inputs/selects without any label (missing form label)
+        document.querySelectorAll('input, select, textarea').forEach(function (input) {
+          if (input.type === 'hidden') return;
+          if (input.getAttribute('aria-label') || input.getAttribute('aria-labelledby')) return;
+          var id = input.id;
+          if (id && document.querySelector('label[for="' + id + '"]')) return;
+          // No label found — add aria-label
+          var name = input.getAttribute('name') || input.getAttribute('placeholder') || input.type || 'input';
+          input.setAttribute('aria-label', name.charAt(0).toUpperCase() + name.slice(1));
+        });
+
+        // 3. Multiple form labels — replace duplicate labels with spans
+        // Material intentionally ships three <label for="__search"> elements
+        // (mobile toggle button, search overlay, and the input icon) and
+        // shows only one at a time via CSS depending on viewport — that's
+        // not a duplicate-label bug, so leave those alone.
+        var labelsByFor = {};
+        document.querySelectorAll('label[for]').forEach(function (label) {
+          var forId = label.getAttribute('for');
+          if (forId === '__search') return;
+          if (!labelsByFor[forId]) labelsByFor[forId] = [];
+          labelsByFor[forId].push(label);
+        });
+        Object.keys(labelsByFor).forEach(function (forId) {
+          var labels = labelsByFor[forId];
+          if (labels.length > 1) {
+            for (var i = 1; i < labels.length; i++) {
+              var span = document.createElement('span');
+              span.innerHTML = labels[i].innerHTML;
+              span.className = labels[i].className;
+              span.setAttribute('aria-hidden', 'true');
+              labels[i].parentNode.replaceChild(span, labels[i]);
+            }
+          }
+        });
+
+        // 6. Empty links — add aria-label to social icon links
+        document.querySelectorAll('.md-social__link').forEach(function (link) {
+          if (!link.textContent.trim() && !link.getAttribute('aria-label')) {
+            var href = link.getAttribute('href') || '';
+            if (href.indexOf('mailto:') !== -1) {
+              link.setAttribute('aria-label', 'Send email');
+            } else if (href.indexOf('github') !== -1) {
+              link.setAttribute('aria-label', 'GitHub repository');
+            } else {
+              link.setAttribute('aria-label', 'External link');
+            }
+          }
+        });
+
+        // 7. Missing fieldset — wrap palette toggles in a fieldset
+        var palette = document.querySelector('.md-header__option');
+        if (palette && palette.tagName !== 'FIELDSET' && !palette.querySelector('fieldset')) {
+          var fieldset = document.createElement('fieldset');
+          fieldset.className = palette.className;
+          fieldset.style.border = 'none';
+          fieldset.style.padding = '0';
+          fieldset.style.margin = '0';
+          var legend = document.createElement('legend');
+          legend.className = 'visually-hidden';
+          legend.textContent = 'Colour scheme';
+          fieldset.appendChild(legend);
+          while (palette.firstChild) {
+            fieldset.appendChild(palette.firstChild);
+          }
+          palette.parentNode.replaceChild(fieldset, palette);
+        }
+
+        // 8. Palette toggle labels — remove title to avoid redundant title text
+        document.querySelectorAll('.md-header__option label, fieldset label').forEach(function (el) {
+          if (el.getAttribute('title') && el.querySelector('.visually-hidden')) {
+            el.removeAttribute('title');
+          }
+        });
+
+        // 9. Suspicious alt text — fix theme logo if generic
+        document.querySelectorAll('.md-header__button img, .md-logo img').forEach(function (img) {
+          var alt = img.getAttribute('alt') || '';
+          if (!alt || /^(logo|image|img|icon|picture)$/i.test(alt.trim())) {
+            img.setAttribute('alt', 'Defra Digital Waste Tracking home');
+          }
+        });
+      }
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', fixAccessibility);
+      } else {
+        fixAccessibility();
+      }
+      document.addEventListener('navigationend', fixAccessibility);
+    })();
+  </script>
+
+  </body>
+</html>
