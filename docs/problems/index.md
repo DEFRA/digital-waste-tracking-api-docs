@@ -11,6 +11,7 @@ Each problem has a `type` URI. The `type` URI identifies the kind of problem and
 | 404 | [`not-found`](not-found.md) | Not Found |
 | 413 | [`request-entity-too-large`](request-entity-too-large.md) | Request Entity Too Large |
 | 415 | [`unsupported-media-type`](unsupported-media-type.md) | Unsupported Media Type |
+| 422 | [`confirmation-required`](confirmation-required.md) | Confirmation Required |
 | 500 | [`internal-server-error`](internal-server-error.md) | Internal Server Error |
 
 ## Response members
@@ -23,6 +24,8 @@ Each problem has a `type` URI. The `type` URI identifies the kind of problem and
 | `instance` | Yes | Path of the request that failed, for example `/beta-1/movements`. |
 | `requestId` | Yes | Trace ID for the request. It matches the `x-request-id` response header. Include it when you contact support. |
 | `errors` | No | Field-level validation errors. Only present on `400` responses caused by an invalid request body. See [bad-request](bad-request.md#validation-errors). |
+| `warnings` | No | Data-quality warnings that you can correct or confirm. Only present when the request has warnings: always on `422`, and on `400` when the request has warnings as well as errors. See [confirmation-required](confirmation-required.md). |
+| `confirmationToken` | No | Only present on [confirmation-required](confirmation-required.md). Send it back in the `X-Confirm-Warnings` header to confirm the warnings. |
 
 ## Example
 

@@ -53,10 +53,10 @@ The API is built in steps — beta-1, then beta-2, and on through the later beta
 | D-032 | [Waste is described at Creation and weighed at Receipt; Collection and Delivery carry no waste details](#d-032) | A3 | ✅ Decided | 🟠 Medium | beta-1 |
 | D-042 | [A waste item is its classification plus logistics; the ordinary receipt carries logistics only](#d-042) | A3 | ✅ Decided | 🟠 Medium | Not yet (beta-2) |
 | D-044 | [POP and hazardous components: a measured concentration, or how it compares with the WM3 threshold](#d-044) | A3 | ✅ Decided | 🟢 Low | Not yet (beta-2) |
+| D-046 | [Data-quality warnings are rejected with `422` and accepted on confirmation](#d-046) | A4 | ✅ Decided | 🔴 High | Not yet (beta-2) |
 | D-006 | [The receipt is cross-checked against what was declared earlier; mismatches do not block it](#d-006) | A4 | ✅ Decided | 🟠 Medium | Not yet (beta-2) |
 | D-018 | [The delivery address is required when recording a delivery](#d-018) | A4 | ✅ Decided | 🟠 Medium | Not yet (beta-2) |
 | D-025 | [How a receipt records acceptance, rejection or partial acceptance](#d-025) | A4 | ⏳ Open | 🔴 High | Not yet (beta-2) |
-| D-046 | [Soft data-quality issues: accept with warnings, or reject and confirm](#d-046) | A4 | ⏳ Open | 🔴 High | n/a |
 | D-021 | [What counts as a mismatch in the receipt cross-check](#d-021) | A4 | ⏳ Open | 🟠 Medium | n/a |
 | D-009 | [Soft-delete with `isDeleted`; no hard delete and no `DELETE` endpoint](#d-009) | A5 | ✅ Decided | 🟠 Medium | Not yet (beta-3) |
 | D-017 | [A recorded delivery cannot be edited, only soft-deleted](#d-017) | A5 | ✅ Decided | 🟠 Medium | Not yet (beta-3) |
@@ -385,14 +385,14 @@ In the target spec the ordinary receipt has its own request body, separate from 
 
 #### Treatment codes: intended at Creation, actual at Receipt
 
-**D-031** · ✅ Decided · Impact: 🟠 Medium · Group: **A3** · Built in: **Not yet (beta-2)** · Related: [D-006](#d-006), [D-019](#d-019), [D-042](#d-042)
+**D-031** · ✅ Decided · Impact: 🟠 Medium · Group: **A3** · Built in: **Not yet (beta-2)** · Related: [D-006](#d-006), [D-019](#d-019), [D-042](#d-042), [D-046](#d-046)
 
 **Context.** A disposal or recovery code (an R-code or D-code) says what is done with the waste. At Creation it is the plan; at Receipt it is what the receiving site confirms. One field, `disposalOrRecoveryCodes`, used to serve both.
 
 **Decision.** Each waste item carries a list of treatments. Each treatment is a `disposalOrRecoveryCode` with the `weight` treated under it, so one waste item can be split across codes — for example part recovered under R3 and part disposed of under D1.
 
 - **Creation:** `intendedTreatments`, required, at least one. Each entry needs both the code and the weight.
-- **Receipt** (both endpoints): `actualTreatments`, optional. Within an entry the code is optional, because a site may need to inspect or weigh the waste before confirming it; the weight is required when a code is given. A missing code returns a warning, not a rejection.
+- **Receipt** (both endpoints): `actualTreatments`, optional. Within an entry the code is optional, because a site may need to inspect or weigh the waste before confirming it; the weight is required when a code is given. A missing code returns a warning, which the caller can confirm ([D-046](#d-046)).
 
 **Consequences.** `disposalOrRecoveryCodes` no longer exists in the Phase 2 contract. The intended treatment at Creation is not the final treatment the producer sees in fate-of-waste ([D-019](#d-019)).
 
@@ -428,7 +428,7 @@ In the target spec the ordinary receipt has its own request body, separate from 
 
 A receipt recorded with `POST /receipts` has nothing earlier to compare with, so it is not cross-checked. If the live Phase 1 receipt is extended instead ([D-022](#d-022), Option 2), the check can only run when a Delivery ID is sent.
 
-**Consequences.** Mismatches are reported back to the caller, not used to reject the receipt. A weight difference against Creation is expected — Creation holds estimates and the receipt holds actuals — so it is a signal, not necessarily an error. Still open: exactly what counts as a mismatch, and which earlier carrier is compared ([D-021](#d-021)); and whether mismatches are returned as warnings on a `201` or need confirming ([D-046](#d-046)).
+**Consequences.** Mismatches are reported back to the caller, not used to reject the receipt. A weight difference against Creation is expected — Creation holds estimates and the receipt holds actuals — so it is a signal, not necessarily an error. Still open: exactly what counts as a mismatch, and which earlier carrier is compared ([D-021](#d-021)); Mismatches are warnings, so a receipt with one is rejected with `422` until the caller confirms it ([D-046](#d-046)).
 
 <a id="d-018"></a>
 
@@ -454,7 +454,7 @@ A receipt recorded with `POST /receipts` has nothing earlier to compare with, so
 2. **Weight.** What tolerance between the Creation estimate and the actual weight counts as a mismatch, given that some difference is expected?
 3. **Carrier.** Which earlier carrier the receipt is compared with — the Delivery's carrier is the obvious candidate — and which carrier fields must match: the registration number alone, or the name and address too?
 
-If [D-046](#d-046) is adopted, every mismatch is handled the same way, so this narrows to which checks run at all.
+Every mismatch is handled the same way, as a warning the caller confirms ([D-046](#d-046)), so this is only about which checks run.
 
 <a id="d-025"></a>
 
@@ -476,15 +476,24 @@ Whatever is chosen is recorded on the single Receipt; the Movement is not split 
 
 <a id="d-046"></a>
 
-#### Soft data-quality issues: accept with warnings, or reject and confirm
+#### Data-quality warnings are rejected with `422` and accepted on confirmation
 
-**D-046** · ⏳ Open · Impact: 🔴 High · Group: **A4** · Built in: **n/a** · Related: [D-006](#d-006), [D-021](#d-021), [D-031](#d-031), [D-039](#d-039)
+**D-046** · ✅ Decided · Impact: 🔴 High · Group: **A4** · Built in: **Not yet (beta-2)** · Related: [D-006](#d-006), [D-021](#d-021), [D-031](#d-031), [D-036](#d-036), [D-039](#d-039)
 
-**Context.** Phase 1 stores a record that has soft data-quality issues and returns them as `validation.warnings` on the success response. The beta endpoints carry the same `validation.warnings` block, but it is always empty: no soft check has been built on them yet. No decision in this register sets accept-with-warnings as the general rule — only individual cases do ([D-006](#d-006), [D-031](#d-031)).
+**Context.** Some checks find problems that should not stop a record being stored, such as a missing treatment code when the waste has not been inspected yet ([D-031](#d-031)), or a mismatch with an earlier event ([D-006](#d-006)). Phase 1 stores such a record and returns the problems as warnings on a `2xx`, where they can be ignored at no cost. The new endpoints needed one rule for these warnings before any were built.
 
-**Proposal.** [Validation confirmation](../api/validation-confirmation.md) (draft, not agreed) replaces accept-with-warnings on the new endpoints with reject-and-confirm. A request with soft issues is rejected with `400` and a server-issued confirmation token; sending the same request again with the token stores it. A `2xx` would then mean accepted with nothing outstanding, and the `validation` block would leave the success response.
+**Decision.** Adopt [Confirming warnings](../api/confirming-warnings.md), which is the source of truth for the detail. In brief:
 
-**Open.** Adopt the proposal, or keep accept-with-warnings. Deciding before any soft check is built on a beta endpoint costs nothing; afterwards it is a breaking change for integrators.
+- A `2xx` means the request was accepted with nothing outstanding. Success responses never carry warnings.
+- A write request with warnings and no errors is rejected with `422 Unprocessable Content` and the problem type [`confirmation-required`](../problems/confirmation-required.md). The body lists the issues in `warnings[]` and carries a `confirmationToken`.
+- The caller either fixes the request, or sends the same request again with the token in the `X-Confirm-Warnings` header, and the record is stored.
+- A request with errors gets `400` [`bad-request`](../problems/bad-request.md) and no token. It also lists any warnings in `warnings[]`, so everything can be fixed in one go.
+- The token is a plain, unsigned hash of the payload, the endpoint and the fields with warnings. It does not expire. A token that does not match is ignored, and the request gets its normal outcome.
+- Nothing extra is stored: warnings are worked out from the record.
+
+**Consequences.** Every rejection offers a way forward: errors must be fixed, warnings can be fixed or confirmed. A confirmed submission takes two calls. The token is not a security control: a provider could script the retry or compute the hash, so confirmation is backed by attribution and monitoring per field, not prevention ([D-036](#d-036)). `422` is used only for `confirmation-required`; every other validation failure stays `400` ([D-039](#d-039)). The live Phase 1 receipt endpoints are unchanged.
+
+Still to settle: the canonical payload form the hash is calculated over, and an `errorType` for mismatch warnings once the [D-021](#d-021) cross-checks are specified.
 
 ### A5 Corrections and lifecycle
 
@@ -789,9 +798,9 @@ Open: can providers reserve a pool of Delivery IDs in advance, which a driver's 
 
 **Decision.** Adopt [API standards](../api/standards.md), which is the source of truth for the detail and the reasoning. In brief:
 
-- **Status codes.** `201` for a `POST` that records an event, `200` for a `PUT`. Every operation documents `400`, `401` and `500`; `404` where the path holds an ID; `402` where the service charge applies. `204`, `409` and `422` are not used for now.
-- **Success.** One envelope, `{ data, meta?, validation }`. `data` holds the result — the new ID as an object on create ([D-012](#d-012)); `meta` is reserved for paging; `validation.warnings` is always present on writes, empty when there is nothing to report. Whether warnings stay at all is open ([D-046](#d-046)).
-- **Errors.** [RFC 9457 Problem Details](https://www.rfc-editor.org/rfc/rfc9457) (`application/problem+json`) for every `4xx` and `5xx`: `type`, `title`, `detail`, `instance`, `requestId`, and on `400` an `errors[]` list of `{ pointer, errorType, message }`, where `pointer` is a JSON Pointer to the field. Each `type` has a page under [Problem types](../problems/index.md).
+- **Status codes.** `201` for a `POST` that records an event, `200` for a `PUT`. Every operation documents `400`, `401` and `500`; `404` where the path holds an ID; `402` where the service charge applies. `422` is used only for warnings that need confirming ([D-046](#d-046)). `204` and `409` are not used for now.
+- **Success.** One envelope, `{ data, meta? }`. `data` holds the result — the new ID as an object on create ([D-012](#d-012)); `meta` is reserved for paging. Success responses never carry warnings ([D-046](#d-046)).
+- **Errors.** [RFC 9457 Problem Details](https://www.rfc-editor.org/rfc/rfc9457) (`application/problem+json`) for every `4xx` and `5xx`: `type`, `title`, `detail`, `instance`, `requestId`, and, when there are any, `errors[]` and `warnings[]` lists of `{ pointer, errorType, message }`, where `pointer` is a JSON Pointer to the field. Each `type` has a page under [Problem types](../problems/index.md).
 - **Tracing.** Every response carries an `x-request-id` header; error bodies repeat it as `requestId`.
 - **Paging.** Not needed yet — there are no list endpoints. `meta` leaves room to add it without breaking anything.
 
@@ -906,7 +915,7 @@ Built today: on every beta request the gateway looks the `apiCode` up in the org
 
 #### Anyone may record an event; only its author may change it
 
-**D-036** · ✅ Decided · Impact: 🔴 High · Group: **B6** · Built in: **Partly (beta-1)** · Related: [D-009](#d-009), [D-012](#d-012), [D-017](#d-017), [D-027](#d-027), [D-029](#d-029), [D-034](#d-034)
+**D-036** · ✅ Decided · Impact: 🔴 High · Group: **B6** · Built in: **Partly (beta-1)** · Related: [D-009](#d-009), [D-012](#d-012), [D-017](#d-017), [D-027](#d-027), [D-029](#d-029), [D-034](#d-034), [D-046](#d-046)
 
 **Context.** One Movement passes through several organisations: a broker may create it, one carrier collect it, another take it on ([D-029](#d-029)), and a receiver record the receipt. After creation no single organisation owns it. Authentication says who is calling, but not whether they may write to a given Movement. Movement and Delivery IDs are shared between organisations by design ([D-012](#d-012)), so holding an ID cannot be what grants the right to write. Phase 1 already lets only the organisation that recorded a receipt update it.
 
