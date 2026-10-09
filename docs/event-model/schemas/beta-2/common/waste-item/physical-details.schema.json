@@ -1,0 +1,75 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Physical details",
+  "description": "The physical form of a waste item, how it is contained, and its total weight. All four are required. Loose waste (containerType LOO) has a containerCount of 0; any other container type needs at least one container.",
+  "type": "object",
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "containerType": {
+            "const": "LOO"
+          }
+        },
+        "required": ["containerType"]
+      },
+      "then": {
+        "properties": {
+          "containerCount": {
+            "const": 0,
+            "description": "Must be 0 when the waste is loose (containerType LOO)."
+          }
+        }
+      },
+      "else": {
+        "properties": {
+          "containerCount": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Must be at least 1 unless the waste is loose (containerType LOO)."
+          }
+        }
+      }
+    }
+  ],
+  "properties": {
+    "form": {
+      "type": "string",
+      "enum": ["GAS", "LIQUID", "SOLID", "POWDER", "SLUDGE", "MIXED"],
+      "description": "The physical form of the waste. Case-sensitive."
+    },
+    "containerType": {
+      "type": "string",
+      "enum": [
+        "BAG",
+        "BAL",
+        "BOX",
+        "CAN",
+        "CAR",
+        "CAS",
+        "CON",
+        "DRU",
+        "FIB",
+        "IBC",
+        "LOO",
+        "PAL",
+        "ROR",
+        "SKI",
+        "TAN",
+        "WBI"
+      ],
+      "description": "Code for how the waste is contained. LOO means the waste is loose, with no containers. Case-sensitive."
+    },
+    "containerCount": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "The number of containers: a whole number of 0 or more. Must be 0 when containerType is LOO, and at least 1 for any other container type."
+    },
+    "totalWeight": {
+      "$ref": "weight.schema.json",
+      "description": "The total weight of the waste item."
+    }
+  },
+  "required": ["form", "containerType", "containerCount", "totalWeight"],
+  "additionalProperties": false
+}

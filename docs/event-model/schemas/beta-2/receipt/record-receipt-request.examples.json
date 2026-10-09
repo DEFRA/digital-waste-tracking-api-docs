@@ -28,6 +28,16 @@
           "phoneNumber": "01234567890"
         }
       },
+      "physicalDetails": {
+        "form": "SOLID",
+        "containerType": "DRU",
+        "containerCount": 4,
+        "totalWeight": {
+          "amount": 248.2,
+          "unit": "KILOGRAMS",
+          "isEstimate": false
+        }
+      },
       "brokerOrDealer": {
         "isPresent": true,
         "items": [
