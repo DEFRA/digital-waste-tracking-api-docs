@@ -201,7 +201,7 @@ Built today: nothing. Collection is a stub in beta-1 and beta-2; `collectionType
 
 **Context.** A receipt is recorded against a Delivery ([D-022](#d-022)) and has no ID of its own ([D-012](#d-012)). Sometimes waste arrives with no earlier Movement, collection or delivery recorded digitally. A receipt with no Delivery behind it would have no handle at all: it could not be looked up, corrected, or given an outcome ([D-025](#d-025)).
 
-**Decision.** A dedicated endpoint, `POST /receipts`:
+**Decision.** A dedicated endpoint, `POST /receipts`, for what the business calls an **undocumented receipt**:
 
 - The request is a receipt plus a mandatory `reasonForNoDeliveryId` — free text (at least one character), with no fixed list for the MVP — saying why there is no Delivery ID. Its waste items carry the full classification, because there is no Creation to take it from ([D-042](#d-042)).
 - The server creates an empty Delivery (no Movement IDs) and records the receipt against it, in the same request.

@@ -106,6 +106,10 @@ The record of waste handed over at a site, under `POST /deliveries`. It names th
 
 The record of waste arriving at a receiving site, under `POST /deliveries/{deliveryId}/receipt` — or `POST /receipts` when there is no prior delivery, in which case a `reasonForNoDeliveryId` is required ([D-041](decisions.md#d-041)). The receipt records actual weights and treatments. Whether the live Phase 1 receipt is extended instead of these endpoints is open ([D-022](decisions.md#d-022)).
 
+### Undocumented receipt
+
+A receipt with no Delivery ID, so no recorded journey behind it — the business name for a receipt made with `POST /receipts`, which requires a reason ([D-041](decisions.md#d-041)). Once the four-event model is in place, a Phase 1 Receipt of Waste receipt is one too.
+
 ### Cross-check
 
 The comparison of a receipt with what was declared earlier: its waste against the movements' creation records, and its carrier against the carrier recorded earlier in the journey ([D-006](decisions.md#d-006)). A mismatch does not stop the receipt being recorded. What counts as a mismatch ([D-021](decisions.md#d-021)), and whether mismatches are returned as warnings or must be confirmed ([D-046](decisions.md#d-046)), is open.
