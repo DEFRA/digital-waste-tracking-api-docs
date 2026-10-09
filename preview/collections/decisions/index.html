@@ -990,7 +990,7 @@
 <h4 id="receipt-with-no-prior-delivery-post-receipts-the-server-creates-an-empty-delivery">Receipt with no prior Delivery: <code>POST /receipts</code>, the server creates an empty Delivery</h4>
 <p><strong>D-041</strong> · ✅ Decided · Impact: 🔴 High · Group: <strong>A1</strong> · Built in: <strong>beta-1 (gap: field name)</strong> · Related: <a href="#d-007">D-007</a>, <a href="#d-012">D-012</a>, <a href="#d-017">D-017</a>, <a href="#d-018">D-018</a>, <a href="#d-022">D-022</a>, <a href="#d-025">D-025</a>, <a href="#d-042">D-042</a></p>
 <p><strong>Context.</strong> A receipt is recorded against a Delivery (<a href="#d-022">D-022</a>) and has no ID of its own (<a href="#d-012">D-012</a>). Sometimes waste arrives with no earlier Movement, collection or delivery recorded digitally. A receipt with no Delivery behind it would have no handle at all: it could not be looked up, corrected, or given an outcome (<a href="#d-025">D-025</a>).</p>
-<p><strong>Decision.</strong> A dedicated endpoint, <code>POST /receipts</code>:</p>
+<p><strong>Decision.</strong> A dedicated endpoint, <code>POST /receipts</code>, for what the business calls an <strong>undocumented receipt</strong>:</p>
 <ul>
 <li>The request is a receipt plus a mandatory <code>reasonForNoDeliveryId</code> — free text (at least one character), with no fixed list for the MVP — saying why there is no Delivery ID. Its waste items carry the full classification, because there is no Creation to take it from (<a href="#d-042">D-042</a>).</li>
 <li>The server creates an empty Delivery (no Movement IDs) and records the receipt against it, in the same request.</li>

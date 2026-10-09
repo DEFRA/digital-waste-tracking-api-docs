@@ -511,6 +511,8 @@
 <p>The record of waste handed over at a site, under <code>POST /deliveries</code>. It names the Movements delivered, the carrier, when, and the site with its address (<a href="../decisions/#d-018">D-018</a>).</p>
 <h3 id="receipt">Receipt</h3>
 <p>The record of waste arriving at a receiving site, under <code>POST /deliveries/{deliveryId}/receipt</code> — or <code>POST /receipts</code> when there is no prior delivery, in which case a <code>reasonForNoDeliveryId</code> is required (<a href="../decisions/#d-041">D-041</a>). The receipt records actual weights and treatments. Whether the live Phase 1 receipt is extended instead of these endpoints is open (<a href="../decisions/#d-022">D-022</a>).</p>
+<h3 id="undocumented-receipt">Undocumented receipt</h3>
+<p>A receipt with no Delivery ID, so no recorded journey behind it — the business name for a receipt made with <code>POST /receipts</code>, which requires a reason (<a href="../decisions/#d-041">D-041</a>). Once the four-event model is in place, a Phase 1 Receipt of Waste receipt is one too.</p>
 <h3 id="cross-check">Cross-check</h3>
 <p>The comparison of a receipt with what was declared earlier: its waste against the movements' creation records, and its carrier against the carrier recorded earlier in the journey (<a href="../decisions/#d-006">D-006</a>). A mismatch does not stop the receipt being recorded. What counts as a mismatch (<a href="../decisions/#d-021">D-021</a>), and whether mismatches are returned as warnings or must be confirmed (<a href="../decisions/#d-046">D-046</a>), is open.</p>
 <h3 id="fate-of-waste">Fate of waste</h3>
