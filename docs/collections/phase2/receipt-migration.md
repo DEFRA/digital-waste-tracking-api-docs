@@ -31,7 +31,7 @@ RoW also accepts receipts in bulk through an Excel spreadsheet upload in the Was
 In every option, the four-event journey records a receipt with `POST /deliveries/{deliveryId}/receipt`, against the Delivery the waste arrived on. The options differ only in what happens to the RoW-style receipt — today's `POST /movements/receive` ([D-022](../decisions.md#d-022)). None is anyone's proposal yet: they are ideas on the table, to be weighed.
 
 - **Option A — extend RoW.** `POST /movements/receive` gains a `deliveryId` and a `reasonForNoDeliveryId`. With no Delivery ID, an empty Delivery is generated so the receipt still has one.
-- **Option B — new endpoint.** What beta-2 builds today: `POST /receipts` records a receipt with no Delivery ID, alongside a reason, as the Phase 2 counterpart of `POST /movements/receive`. RoW stays as it is until it is retired ([D-023](../decisions.md#d-023)).
+- **Option B — new endpoint.** What beta-2 builds today: `POST /receipts` records an undocumented receipt — no Delivery ID, alongside a reason — as the Phase 2 counterpart of `POST /movements/receive`. RoW stays as it is until it is retired ([D-023](../decisions.md#d-023)).
 - **Option C — keep RoW.** `POST /movements/receive` is unchanged, with no Delivery ID and no reason, and there is no `POST /receipts`. From October 2027 only the four-event journey is compliant — which needs Defra to agree that receipt-only recording is no longer a compliant route.
 
 ## How to read each item
@@ -53,7 +53,7 @@ In every option, the four-event journey records a receipt with `POST /deliveries
 | 1 | [Linking a receipt to its journey](#1-linking-a-receipt-to-its-journey) | How RoW receipts become linkable to the four-event journey, to stay compliant from October 2027 | Draft — under review |
 | 2 | Identity and authentication |  | _to come_ |
 | 3 | Identifiers |  | _to come_ |
-| 4 | Request fields |  | _to come_ |
+| 4 | Request fields | How the RoW and Phase 2 receipt payloads differ, and where aligning them costs — providers, the service, or reporting | _to come_ |
 | 5 | Responses and errors |  | _to come_ |
 | 6 | Validation and warnings |  | _to come_ |
 | 7 | Overall effort per option |  | _to come_ |
@@ -69,6 +69,8 @@ RoW was designed before the events that now come before a receipt — creation, 
 Phase 2 tracks the whole journey, so a receipt has to be correlated with the events before it, through the Delivery the waste arrived on. RoW, as it is, cannot be connected.
 
 That changes what counts as compliant. A RoW receipt **is compliant under the October 2026 policy** (Phase 1), but **not under the October 2027 policy** (Phase 2), which expects a receipt to be linked to the journey before it. Defra has asked that, from October 2027, a receipt is compliant when it gives either a Delivery ID or, when there is none, a reason; adding one of the two is the minimum change that keeps a RoW receipt compliant (Options A and B). Defra could instead agree that only the four-event journey is compliant from October 2027 (Option C).
+
+A receipt with no Delivery ID — no recorded journey behind it — is known across the business as an **undocumented receipt**. Once the four-event model is in place, a RoW receipt is one too.
 
 ### Phase 1 today
 
@@ -112,7 +114,7 @@ A receipt that sends neither is still accepted, as today: compliant under the Oc
 
 ### Option B — new endpoint
 
-**How it works.** **`POST /receipts`** records a receipt with no Delivery ID, with a mandatory reason; an empty Delivery is created to hold it, and its Delivery ID is returned ([D-041](../decisions.md#d-041)). It is the Phase 2 counterpart of `POST /movements/receive`, following the Phase 2 conventions. A receipt that has a Delivery ID uses the journey route. `POST /movements/receive` stays live and unchanged until it is retired ([D-023](../decisions.md#d-023)). Built in beta-2 today, as `POST`; the reason is still called `reason`.
+**How it works.** **`POST /receipts`** records an **undocumented receipt**: no Delivery ID, with a mandatory reason; an empty Delivery is created to hold it, and its Delivery ID is returned ([D-041](../decisions.md#d-041)). It is the Phase 2 counterpart of `POST /movements/receive`, following the Phase 2 conventions. A receipt that has a Delivery ID uses the journey route. `POST /movements/receive` stays live and unchanged until it is retired ([D-023](../decisions.md#d-023)). Built in beta-2 today, as `POST`; the reason is still called `reason`.
 
 **Value.** Every receipt is recorded on Phase 2 endpoints with the Phase 2 conventions (envelopes, errors, `x-api-code`) and addressed by a Delivery ID; RoW is left untouched until a planned retirement.
 
@@ -140,7 +142,7 @@ A receipt that sends neither is still accepted, as today: compliant under the Oc
 | --- | --- | --- | --- |
 | Change to the live RoW API | Small — two fields | None until retired | None |
 | Effort for providers already live | Low | High | Low on RoW; high to stay compliant |
-| Compliant route for receipts with no trail, from Oct 2027 | ✅ reason on RoW | ✅ `POST /receipts` | ❌ none |
+| Compliant route for undocumented receipts, from Oct 2027 | ✅ reason on RoW | ✅ `POST /receipts` | ❌ none |
 | Excel upload stays compliant | ✅ two new columns | ❌ needs a new bulk route | ❌ needs a new bulk route |
 | Receipt stores to report on | One (A2) or two (A1) | One, plus RoW history | Two, no end date |
 | Needs Defra to change its request | No | No | Yes |
