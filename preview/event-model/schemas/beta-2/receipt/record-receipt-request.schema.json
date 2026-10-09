@@ -10,6 +10,10 @@
     "receiver": {
       "$ref": "../common/receiver/receiver.schema.json"
     },
+    "physicalDetails": {
+      "$ref": "../common/waste-item/physical-details.schema.json",
+      "description": "The physical form, containers and total weight of the waste received."
+    },
     "brokerOrDealer": {
       "$ref": "../common/broker-or-dealer/broker-or-dealer.schema.json"
     },
@@ -17,6 +21,6 @@
       "$ref": "../common/supporting-references.schema.json"
     }
   },
-  "required": ["carrier", "receiver"],
+  "required": ["carrier", "receiver", "physicalDetails"],
   "additionalProperties": false
 }

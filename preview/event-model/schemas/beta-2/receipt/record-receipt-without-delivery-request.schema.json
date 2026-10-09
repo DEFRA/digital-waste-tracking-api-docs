@@ -18,6 +18,9 @@
     "receiver": {
       "$ref": "../common/receiver/receiver.schema.json"
     },
+    "wasteItems": {
+      "$ref": "../common/waste-item/waste-items.schema.json"
+    },
     "brokerOrDealer": {
       "$ref": "../common/broker-or-dealer/broker-or-dealer.schema.json"
     },
@@ -25,6 +28,6 @@
       "$ref": "../common/supporting-references.schema.json"
     }
   },
-  "required": ["reason", "carrier", "receiver"],
+  "required": ["reason", "carrier", "receiver", "wasteItems"],
   "additionalProperties": false
 }

@@ -590,6 +590,127 @@ components:
             additionalProperties: false
           minItems: 1
           description: The intended receivers of the waste. At least one is required.
+        wasteItems:
+          $schema: https://json-schema.org/draft/2020-12/schema
+          title: Waste items
+          description: The items of waste in a movement. At least one is required.
+          type: array
+          minItems: 1
+          items:
+            $schema: https://json-schema.org/draft/2020-12/schema
+            title: Waste item
+            description: A single item of waste in a movement. physicalDetails is required.
+            examples:
+              - physicalDetails:
+                  form: SOLID
+                  containerType: DRU
+                  containerCount: 4
+                  totalWeight:
+                    amount: 250.5
+                    unit: KILOGRAMS
+                    isEstimate: false
+              - physicalDetails:
+                  form: MIXED
+                  containerType: LOO
+                  containerCount: 0
+                  totalWeight:
+                    amount: 2
+                    unit: TONNES
+                    isEstimate: true
+            type: object
+            properties:
+              physicalDetails:
+                description: The physical form, containers and total weight of the waste item.
+                $schema: https://json-schema.org/draft/2020-12/schema
+                title: Physical details
+                type: object
+                allOf:
+                  - if:
+                      properties:
+                        containerType:
+                          const: LOO
+                      required:
+                        - containerType
+                    then:
+                      properties:
+                        containerCount:
+                          const: 0
+                          description: Must be 0 when the waste is loose (containerType LOO).
+                    else:
+                      properties:
+                        containerCount:
+                          type: integer
+                          minimum: 1
+                          description: Must be at least 1 unless the waste is loose (containerType LOO).
+                properties:
+                  form:
+                    type: string
+                    enum:
+                      - GAS
+                      - LIQUID
+                      - SOLID
+                      - POWDER
+                      - SLUDGE
+                      - MIXED
+                    description: The physical form of the waste. Case-sensitive.
+                  containerType:
+                    type: string
+                    enum:
+                      - BAG
+                      - BAL
+                      - BOX
+                      - CAN
+                      - CAR
+                      - CAS
+                      - CON
+                      - DRU
+                      - FIB
+                      - IBC
+                      - LOO
+                      - PAL
+                      - ROR
+                      - SKI
+                      - TAN
+                      - WBI
+                    description: Code for how the waste is contained. LOO means the waste is loose, with no containers. Case-sensitive.
+                  containerCount:
+                    type: integer
+                    minimum: 0
+                    description: 'The number of containers: a whole number of 0 or more. Must be 0 when containerType is LOO, and at least 1 for any other container type.'
+                  totalWeight:
+                    description: The total weight of the waste item.
+                    $schema: https://json-schema.org/draft/2020-12/schema
+                    title: Weight
+                    type: object
+                    properties:
+                      amount:
+                        type: number
+                        exclusiveMinimum: 0
+                        description: The weight, in the given unit. Must be greater than 0.
+                      unit:
+                        type: string
+                        enum:
+                          - GRAMS
+                          - KILOGRAMS
+                          - TONNES
+                        description: The unit the amount is measured in. Case-sensitive.
+                      isEstimate:
+                        type: boolean
+                        description: Whether the weight is estimated (true) or actual (false).
+                    required:
+                      - amount
+                      - unit
+                      - isEstimate
+                    additionalProperties: false
+                required:
+                  - form
+                  - containerType
+                  - containerCount
+                  - totalWeight
+                additionalProperties: false
+            required:
+              - physicalDetails
+            additionalProperties: false
         brokerOrDealer:
           $schema: https://json-schema.org/draft/2020-12/schema
           title: Broker or dealer involvement
@@ -775,6 +896,7 @@ components:
         - producer
         - intendedCarriers
         - intendedReceivers
+        - wasteItems
       additionalProperties: false
     recordCollectionRequest:
       $schema: https://json-schema.org/draft/2020-12/schema
@@ -1525,6 +1647,95 @@ components:
             - receiptAddress
             - contactDetails
           additionalProperties: false
+        physicalDetails:
+          description: The physical form, containers and total weight of the waste received.
+          $schema: https://json-schema.org/draft/2020-12/schema
+          title: Physical details
+          type: object
+          allOf:
+            - if:
+                properties:
+                  containerType:
+                    const: LOO
+                required:
+                  - containerType
+              then:
+                properties:
+                  containerCount:
+                    const: 0
+                    description: Must be 0 when the waste is loose (containerType LOO).
+              else:
+                properties:
+                  containerCount:
+                    type: integer
+                    minimum: 1
+                    description: Must be at least 1 unless the waste is loose (containerType LOO).
+          properties:
+            form:
+              type: string
+              enum:
+                - GAS
+                - LIQUID
+                - SOLID
+                - POWDER
+                - SLUDGE
+                - MIXED
+              description: The physical form of the waste. Case-sensitive.
+            containerType:
+              type: string
+              enum:
+                - BAG
+                - BAL
+                - BOX
+                - CAN
+                - CAR
+                - CAS
+                - CON
+                - DRU
+                - FIB
+                - IBC
+                - LOO
+                - PAL
+                - ROR
+                - SKI
+                - TAN
+                - WBI
+              description: Code for how the waste is contained. LOO means the waste is loose, with no containers. Case-sensitive.
+            containerCount:
+              type: integer
+              minimum: 0
+              description: 'The number of containers: a whole number of 0 or more. Must be 0 when containerType is LOO, and at least 1 for any other container type.'
+            totalWeight:
+              description: The total weight of the waste item.
+              $schema: https://json-schema.org/draft/2020-12/schema
+              title: Weight
+              type: object
+              properties:
+                amount:
+                  type: number
+                  exclusiveMinimum: 0
+                  description: The weight, in the given unit. Must be greater than 0.
+                unit:
+                  type: string
+                  enum:
+                    - GRAMS
+                    - KILOGRAMS
+                    - TONNES
+                  description: The unit the amount is measured in. Case-sensitive.
+                isEstimate:
+                  type: boolean
+                  description: Whether the weight is estimated (true) or actual (false).
+              required:
+                - amount
+                - unit
+                - isEstimate
+              additionalProperties: false
+          required:
+            - form
+            - containerType
+            - containerCount
+            - totalWeight
+          additionalProperties: false
         brokerOrDealer:
           $schema: https://json-schema.org/draft/2020-12/schema
           title: Broker or dealer involvement
@@ -1700,6 +1911,7 @@ components:
       required:
         - carrier
         - receiver
+        - physicalDetails
       additionalProperties: false
     recordReceiptWithoutDeliveryRequest:
       $schema: https://json-schema.org/draft/2020-12/schema
@@ -1923,6 +2135,127 @@ components:
             - receiptAddress
             - contactDetails
           additionalProperties: false
+        wasteItems:
+          $schema: https://json-schema.org/draft/2020-12/schema
+          title: Waste items
+          description: The items of waste in a movement. At least one is required.
+          type: array
+          minItems: 1
+          items:
+            $schema: https://json-schema.org/draft/2020-12/schema
+            title: Waste item
+            description: A single item of waste in a movement. physicalDetails is required.
+            examples:
+              - physicalDetails:
+                  form: SOLID
+                  containerType: DRU
+                  containerCount: 4
+                  totalWeight:
+                    amount: 250.5
+                    unit: KILOGRAMS
+                    isEstimate: false
+              - physicalDetails:
+                  form: MIXED
+                  containerType: LOO
+                  containerCount: 0
+                  totalWeight:
+                    amount: 2
+                    unit: TONNES
+                    isEstimate: true
+            type: object
+            properties:
+              physicalDetails:
+                description: The physical form, containers and total weight of the waste item.
+                $schema: https://json-schema.org/draft/2020-12/schema
+                title: Physical details
+                type: object
+                allOf:
+                  - if:
+                      properties:
+                        containerType:
+                          const: LOO
+                      required:
+                        - containerType
+                    then:
+                      properties:
+                        containerCount:
+                          const: 0
+                          description: Must be 0 when the waste is loose (containerType LOO).
+                    else:
+                      properties:
+                        containerCount:
+                          type: integer
+                          minimum: 1
+                          description: Must be at least 1 unless the waste is loose (containerType LOO).
+                properties:
+                  form:
+                    type: string
+                    enum:
+                      - GAS
+                      - LIQUID
+                      - SOLID
+                      - POWDER
+                      - SLUDGE
+                      - MIXED
+                    description: The physical form of the waste. Case-sensitive.
+                  containerType:
+                    type: string
+                    enum:
+                      - BAG
+                      - BAL
+                      - BOX
+                      - CAN
+                      - CAR
+                      - CAS
+                      - CON
+                      - DRU
+                      - FIB
+                      - IBC
+                      - LOO
+                      - PAL
+                      - ROR
+                      - SKI
+                      - TAN
+                      - WBI
+                    description: Code for how the waste is contained. LOO means the waste is loose, with no containers. Case-sensitive.
+                  containerCount:
+                    type: integer
+                    minimum: 0
+                    description: 'The number of containers: a whole number of 0 or more. Must be 0 when containerType is LOO, and at least 1 for any other container type.'
+                  totalWeight:
+                    description: The total weight of the waste item.
+                    $schema: https://json-schema.org/draft/2020-12/schema
+                    title: Weight
+                    type: object
+                    properties:
+                      amount:
+                        type: number
+                        exclusiveMinimum: 0
+                        description: The weight, in the given unit. Must be greater than 0.
+                      unit:
+                        type: string
+                        enum:
+                          - GRAMS
+                          - KILOGRAMS
+                          - TONNES
+                        description: The unit the amount is measured in. Case-sensitive.
+                      isEstimate:
+                        type: boolean
+                        description: Whether the weight is estimated (true) or actual (false).
+                    required:
+                      - amount
+                      - unit
+                      - isEstimate
+                    additionalProperties: false
+                required:
+                  - form
+                  - containerType
+                  - containerCount
+                  - totalWeight
+                additionalProperties: false
+            required:
+              - physicalDetails
+            additionalProperties: false
         brokerOrDealer:
           $schema: https://json-schema.org/draft/2020-12/schema
           title: Broker or dealer involvement
@@ -2099,6 +2432,7 @@ components:
         - reason
         - carrier
         - receiver
+        - wasteItems
       additionalProperties: false
     issue:
       $schema: https://json-schema.org/draft/2020-12/schema
@@ -3338,6 +3672,127 @@ paths:
                     additionalProperties: false
                   minItems: 1
                   description: The intended receivers of the waste. At least one is required.
+                wasteItems:
+                  $schema: https://json-schema.org/draft/2020-12/schema
+                  title: Waste items
+                  description: The items of waste in a movement. At least one is required.
+                  type: array
+                  minItems: 1
+                  items:
+                    $schema: https://json-schema.org/draft/2020-12/schema
+                    title: Waste item
+                    description: A single item of waste in a movement. physicalDetails is required.
+                    examples:
+                      - physicalDetails:
+                          form: SOLID
+                          containerType: DRU
+                          containerCount: 4
+                          totalWeight:
+                            amount: 250.5
+                            unit: KILOGRAMS
+                            isEstimate: false
+                      - physicalDetails:
+                          form: MIXED
+                          containerType: LOO
+                          containerCount: 0
+                          totalWeight:
+                            amount: 2
+                            unit: TONNES
+                            isEstimate: true
+                    type: object
+                    properties:
+                      physicalDetails:
+                        description: The physical form, containers and total weight of the waste item.
+                        $schema: https://json-schema.org/draft/2020-12/schema
+                        title: Physical details
+                        type: object
+                        allOf:
+                          - if:
+                              properties:
+                                containerType:
+                                  const: LOO
+                              required:
+                                - containerType
+                            then:
+                              properties:
+                                containerCount:
+                                  const: 0
+                                  description: Must be 0 when the waste is loose (containerType LOO).
+                            else:
+                              properties:
+                                containerCount:
+                                  type: integer
+                                  minimum: 1
+                                  description: Must be at least 1 unless the waste is loose (containerType LOO).
+                        properties:
+                          form:
+                            type: string
+                            enum:
+                              - GAS
+                              - LIQUID
+                              - SOLID
+                              - POWDER
+                              - SLUDGE
+                              - MIXED
+                            description: The physical form of the waste. Case-sensitive.
+                          containerType:
+                            type: string
+                            enum:
+                              - BAG
+                              - BAL
+                              - BOX
+                              - CAN
+                              - CAR
+                              - CAS
+                              - CON
+                              - DRU
+                              - FIB
+                              - IBC
+                              - LOO
+                              - PAL
+                              - ROR
+                              - SKI
+                              - TAN
+                              - WBI
+                            description: Code for how the waste is contained. LOO means the waste is loose, with no containers. Case-sensitive.
+                          containerCount:
+                            type: integer
+                            minimum: 0
+                            description: 'The number of containers: a whole number of 0 or more. Must be 0 when containerType is LOO, and at least 1 for any other container type.'
+                          totalWeight:
+                            description: The total weight of the waste item.
+                            $schema: https://json-schema.org/draft/2020-12/schema
+                            title: Weight
+                            type: object
+                            properties:
+                              amount:
+                                type: number
+                                exclusiveMinimum: 0
+                                description: The weight, in the given unit. Must be greater than 0.
+                              unit:
+                                type: string
+                                enum:
+                                  - GRAMS
+                                  - KILOGRAMS
+                                  - TONNES
+                                description: The unit the amount is measured in. Case-sensitive.
+                              isEstimate:
+                                type: boolean
+                                description: Whether the weight is estimated (true) or actual (false).
+                            required:
+                              - amount
+                              - unit
+                              - isEstimate
+                            additionalProperties: false
+                        required:
+                          - form
+                          - containerType
+                          - containerCount
+                          - totalWeight
+                        additionalProperties: false
+                    required:
+                      - physicalDetails
+                    additionalProperties: false
                 brokerOrDealer:
                   $schema: https://json-schema.org/draft/2020-12/schema
                   title: Broker or dealer involvement
@@ -3523,6 +3978,7 @@ paths:
                 - producer
                 - intendedCarriers
                 - intendedReceivers
+                - wasteItems
               additionalProperties: false
             examples:
               commercial:
@@ -3548,6 +4004,15 @@ paths:
                       contactDetails:
                         emailAddress: receiver@example.com
                         phoneNumber: '01234567890'
+                  wasteItems:
+                    - physicalDetails:
+                        form: SOLID
+                        containerType: DRU
+                        containerCount: 4
+                        totalWeight:
+                          amount: 250.5
+                          unit: KILOGRAMS
+                          isEstimate: false
                   brokerOrDealer:
                     isPresent: true
                     items:
@@ -3601,6 +4066,15 @@ paths:
                       contactDetails:
                         emailAddress: receiver@example.com
                         phoneNumber: '01234567890'
+                  wasteItems:
+                    - physicalDetails:
+                        form: MIXED
+                        containerType: LOO
+                        containerCount: 0
+                        totalWeight:
+                          amount: 2
+                          unit: TONNES
+                          isEstimate: true
       responses:
         '201':
           description: Movement created. Body carries the new Movement ID and any validation warnings.
@@ -5597,6 +6071,127 @@ paths:
                     - receiptAddress
                     - contactDetails
                   additionalProperties: false
+                wasteItems:
+                  $schema: https://json-schema.org/draft/2020-12/schema
+                  title: Waste items
+                  description: The items of waste in a movement. At least one is required.
+                  type: array
+                  minItems: 1
+                  items:
+                    $schema: https://json-schema.org/draft/2020-12/schema
+                    title: Waste item
+                    description: A single item of waste in a movement. physicalDetails is required.
+                    examples:
+                      - physicalDetails:
+                          form: SOLID
+                          containerType: DRU
+                          containerCount: 4
+                          totalWeight:
+                            amount: 250.5
+                            unit: KILOGRAMS
+                            isEstimate: false
+                      - physicalDetails:
+                          form: MIXED
+                          containerType: LOO
+                          containerCount: 0
+                          totalWeight:
+                            amount: 2
+                            unit: TONNES
+                            isEstimate: true
+                    type: object
+                    properties:
+                      physicalDetails:
+                        description: The physical form, containers and total weight of the waste item.
+                        $schema: https://json-schema.org/draft/2020-12/schema
+                        title: Physical details
+                        type: object
+                        allOf:
+                          - if:
+                              properties:
+                                containerType:
+                                  const: LOO
+                              required:
+                                - containerType
+                            then:
+                              properties:
+                                containerCount:
+                                  const: 0
+                                  description: Must be 0 when the waste is loose (containerType LOO).
+                            else:
+                              properties:
+                                containerCount:
+                                  type: integer
+                                  minimum: 1
+                                  description: Must be at least 1 unless the waste is loose (containerType LOO).
+                        properties:
+                          form:
+                            type: string
+                            enum:
+                              - GAS
+                              - LIQUID
+                              - SOLID
+                              - POWDER
+                              - SLUDGE
+                              - MIXED
+                            description: The physical form of the waste. Case-sensitive.
+                          containerType:
+                            type: string
+                            enum:
+                              - BAG
+                              - BAL
+                              - BOX
+                              - CAN
+                              - CAR
+                              - CAS
+                              - CON
+                              - DRU
+                              - FIB
+                              - IBC
+                              - LOO
+                              - PAL
+                              - ROR
+                              - SKI
+                              - TAN
+                              - WBI
+                            description: Code for how the waste is contained. LOO means the waste is loose, with no containers. Case-sensitive.
+                          containerCount:
+                            type: integer
+                            minimum: 0
+                            description: 'The number of containers: a whole number of 0 or more. Must be 0 when containerType is LOO, and at least 1 for any other container type.'
+                          totalWeight:
+                            description: The total weight of the waste item.
+                            $schema: https://json-schema.org/draft/2020-12/schema
+                            title: Weight
+                            type: object
+                            properties:
+                              amount:
+                                type: number
+                                exclusiveMinimum: 0
+                                description: The weight, in the given unit. Must be greater than 0.
+                              unit:
+                                type: string
+                                enum:
+                                  - GRAMS
+                                  - KILOGRAMS
+                                  - TONNES
+                                description: The unit the amount is measured in. Case-sensitive.
+                              isEstimate:
+                                type: boolean
+                                description: Whether the weight is estimated (true) or actual (false).
+                            required:
+                              - amount
+                              - unit
+                              - isEstimate
+                            additionalProperties: false
+                        required:
+                          - form
+                          - containerType
+                          - containerCount
+                          - totalWeight
+                        additionalProperties: false
+                    required:
+                      - physicalDetails
+                    additionalProperties: false
                 brokerOrDealer:
                   $schema: https://json-schema.org/draft/2020-12/schema
                   title: Broker or dealer involvement
@@ -5773,6 +6368,7 @@ paths:
                 - reason
                 - carrier
                 - receiver
+                - wasteItems
               additionalProperties: false
             examples:
               withReason:
@@ -5799,6 +6395,15 @@ paths:
                     contactDetails:
                       emailAddress: receiver@example.com
                       phoneNumber: '01234567890'
+                  wasteItems:
+                    - physicalDetails:
+                        form: SOLID
+                        containerType: DRU
+                        containerCount: 4
+                        totalWeight:
+                          amount: 248.2
+                          unit: KILOGRAMS
+                          isEstimate: false
                   supportingReferences:
                     - label: Weighbridge Number
                       reference: WB-0042
@@ -6367,6 +6972,95 @@ paths:
                     - receiptAddress
                     - contactDetails
                   additionalProperties: false
+                physicalDetails:
+                  description: The physical form, containers and total weight of the waste received.
+                  $schema: https://json-schema.org/draft/2020-12/schema
+                  title: Physical details
+                  type: object
+                  allOf:
+                    - if:
+                        properties:
+                          containerType:
+                            const: LOO
+                        required:
+                          - containerType
+                      then:
+                        properties:
+                          containerCount:
+                            const: 0
+                            description: Must be 0 when the waste is loose (containerType LOO).
+                      else:
+                        properties:
+                          containerCount:
+                            type: integer
+                            minimum: 1
+                            description: Must be at least 1 unless the waste is loose (containerType LOO).
+                  properties:
+                    form:
+                      type: string
+                      enum:
+                        - GAS
+                        - LIQUID
+                        - SOLID
+                        - POWDER
+                        - SLUDGE
+                        - MIXED
+                      description: The physical form of the waste. Case-sensitive.
+                    containerType:
+                      type: string
+                      enum:
+                        - BAG
+                        - BAL
+                        - BOX
+                        - CAN
+                        - CAR
+                        - CAS
+                        - CON
+                        - DRU
+                        - FIB
+                        - IBC
+                        - LOO
+                        - PAL
+                        - ROR
+                        - SKI
+                        - TAN
+                        - WBI
+                      description: Code for how the waste is contained. LOO means the waste is loose, with no containers. Case-sensitive.
+                    containerCount:
+                      type: integer
+                      minimum: 0
+                      description: 'The number of containers: a whole number of 0 or more. Must be 0 when containerType is LOO, and at least 1 for any other container type.'
+                    totalWeight:
+                      description: The total weight of the waste item.
+                      $schema: https://json-schema.org/draft/2020-12/schema
+                      title: Weight
+                      type: object
+                      properties:
+                        amount:
+                          type: number
+                          exclusiveMinimum: 0
+                          description: The weight, in the given unit. Must be greater than 0.
+                        unit:
+                          type: string
+                          enum:
+                            - GRAMS
+                            - KILOGRAMS
+                            - TONNES
+                          description: The unit the amount is measured in. Case-sensitive.
+                        isEstimate:
+                          type: boolean
+                          description: Whether the weight is estimated (true) or actual (false).
+                      required:
+                        - amount
+                        - unit
+                        - isEstimate
+                      additionalProperties: false
+                  required:
+                    - form
+                    - containerType
+                    - containerCount
+                    - totalWeight
+                  additionalProperties: false
                 brokerOrDealer:
                   $schema: https://json-schema.org/draft/2020-12/schema
                   title: Broker or dealer involvement
@@ -6542,6 +7236,7 @@ paths:
               required:
                 - carrier
                 - receiver
+                - physicalDetails
               additionalProperties: false
             examples:
               withBrokerAndReferences:
@@ -6567,6 +7262,14 @@ paths:
                     contactDetails:
                       emailAddress: receiver@example.com
                       phoneNumber: '01234567890'
+                  physicalDetails:
+                    form: SOLID
+                    containerType: DRU
+                    containerCount: 4
+                    totalWeight:
+                      amount: 248.2
+                      unit: KILOGRAMS
+                      isEstimate: false
                   brokerOrDealer:
                     isPresent: true
                     items:

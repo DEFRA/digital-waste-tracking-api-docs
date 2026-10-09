@@ -1,0 +1,10 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Waste items",
+  "description": "The items of waste in a movement. At least one is required.",
+  "type": "array",
+  "minItems": 1,
+  "items": {
+    "$ref": "waste-item.schema.json"
+  }
+}

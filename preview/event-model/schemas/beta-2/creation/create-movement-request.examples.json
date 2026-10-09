@@ -30,6 +30,20 @@
           }
         }
       ],
+      "wasteItems": [
+        {
+          "physicalDetails": {
+            "form": "SOLID",
+            "containerType": "DRU",
+            "containerCount": 4,
+            "totalWeight": {
+              "amount": 250.5,
+              "unit": "KILOGRAMS",
+              "isEstimate": false
+            }
+          }
+        }
+      ],
       "brokerOrDealer": {
         "isPresent": true,
         "items": [
@@ -109,6 +123,20 @@
           "contactDetails": {
             "emailAddress": "receiver@example.com",
             "phoneNumber": "01234567890"
+          }
+        }
+      ],
+      "wasteItems": [
+        {
+          "physicalDetails": {
+            "form": "MIXED",
+            "containerType": "LOO",
+            "containerCount": 0,
+            "totalWeight": {
+              "amount": 2,
+              "unit": "TONNES",
+              "isEstimate": true
+            }
           }
         }
       ]
