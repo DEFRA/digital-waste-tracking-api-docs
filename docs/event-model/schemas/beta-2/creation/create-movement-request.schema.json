@@ -23,6 +23,9 @@
       "minItems": 1,
       "description": "The intended receivers of the waste. At least one is required."
     },
+    "wasteItems": {
+      "$ref": "../common/waste-item/waste-items.schema.json"
+    },
     "brokerOrDealer": {
       "$ref": "../common/broker-or-dealer/broker-or-dealer.schema.json"
     },
@@ -33,6 +36,11 @@
       "$ref": "../common/special-handling-requirements.schema.json"
     }
   },
-  "required": ["producer", "intendedCarriers", "intendedReceivers"],
+  "required": [
+    "producer",
+    "intendedCarriers",
+    "intendedReceivers",
+    "wasteItems"
+  ],
   "additionalProperties": false
 }

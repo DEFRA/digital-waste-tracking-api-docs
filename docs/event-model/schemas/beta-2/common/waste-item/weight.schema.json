@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Weight",
+  "description": "A weight of waste: the amount, its unit, and whether it is estimated or actual. All three are required.",
+  "type": "object",
+  "properties": {
+    "amount": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "description": "The weight, in the given unit. Must be greater than 0."
+    },
+    "unit": {
+      "type": "string",
+      "enum": ["GRAMS", "KILOGRAMS", "TONNES"],
+      "description": "The unit the amount is measured in. Case-sensitive."
+    },
+    "isEstimate": {
+      "type": "boolean",
+      "description": "Whether the weight is estimated (true) or actual (false)."
+    }
+  },
+  "required": ["amount", "unit", "isEstimate"],
+  "additionalProperties": false
+}
